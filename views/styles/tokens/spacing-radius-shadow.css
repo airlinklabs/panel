@@ -1,0 +1,81 @@
+:root {
+  /* Border radii */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 50%;
+
+  /* Box shadows */
+  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --shadow-dialog-dark: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.18);
+  --shadow-card-dark: 0 1px 4px rgba(255, 255, 255, 0.18);
+  --shadow-sheet: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  /* Overlay / scrim backgrounds */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+  --overlay-bg-heavy: rgba(0, 0, 0, 0.5);
+  --skeleton-shine: rgba(255, 255, 255, 0.08);
+  --scrim-light: rgba(255, 255, 255, 0.55);
+  --scrim-dark: rgba(0, 0, 0, 0.55);
+
+  /* Input sizing */
+  --input-padding-x: 12px;
+  --input-padding-y: 10px;
+  --input-font-size: 14px;
+  --input-min-height: 44px;
+
+  /* Select sizing */
+  --select-font-size: 13px;
+  --select-min-height: 40px;
+  --select-icon-size: 14px;
+  --select-max-dropdown-height: 200px;
+
+  /* Badge */
+  --badge-font-size: 11px;
+
+  /* Sheet */
+  --sheet-radius: 0 12px 12px 0;
+  --sheet-padding-x: 0 12px;
+
+  /* Sidebar */
+  --sidebar-collapsed-width: 72px;
+
+  /* Density scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+
+  /* Icon sizes */
+  --icon-xs: 14px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+
+  /* Compact font scale */
+  --text-dense-xs: 0.6875rem;
+  --text-dense-sm: 0.75rem;
+  --text-dense-base: 0.8125rem;
+  --text-dense-lg: 0.875rem;
+
+  /* Component density */
+  --pad-card: 0.75rem;
+  --pad-card-header: 0.625rem 0.75rem;
+
+  /* Motion tokens */
+  --dur-quick: 150ms;
+  --dur-default: 200ms;
+  --dur-enter: 320ms;
+  --dur-exit: 180ms;
+  --dur-stagger: 40ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 120ms;
+  --motion-default: 180ms;
+  --motion-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+}

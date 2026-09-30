@@ -1,519 +1,416 @@
-<%- include('../../components/header', { title: t('adminCreateNodeTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminCreateNodeTitle') }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeCreate()">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('navNodes'), href: '/admin/nodes' },
-        { label: t('create') }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
+<%- include('../../partials/flash-messages') %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbNodes'), url: '/admin/nodes' },
+    { label: t('createNode') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminCreateNodeTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminCreateNodeText') %></p>
+  </div>
+  <div>
+    <button type="button" onclick="createNode()" class="al-btn-primary" id="createNodeBtn">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('createNode') %>
+    </button>
+    <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
+  </div>
+</div>
+
+<div id="nodeForm" class="al-page-body space-y-5">
+  <form class="space-y-5" onsubmit="event.preventDefault(); createNode();">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('general') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="md:col-span-2">
+          <label for="nodeName" class="al-label flex items-center gap-1.5">
+            <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('name') %>
+          </label>
+          <input id="nodeName" class="al-input" placeholder="<%= t('nodeNamePlaceholder') %>" required>
+        </div>
         <div>
-          <h1 class="al-page-title"><%= t('adminCreateNodeTitle') %></h1>
-          <p class="al-page-desc"><%= t('adminCreateNodeText') %></p>
+          <label for="nodeAddress" class="al-label flex items-center gap-1.5">
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('nodeAddressLabel') %>
+          </label>
+          <input id="nodeAddress" class="al-input" placeholder="<%= t('nodeAddressPlaceholder') %>" required>
         </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <%- include('../../components/ui/save-button', { onclick: 'createNode()', label: t('createNode'), iconName: 'plus' }) %>
-          <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
-        </div>
-      </div>
-
-      <div id="nodeForm" class="al-page-body space-y-5">
-        <form class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('general') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div class="md:col-span-2">
-                <label for="nodeName" class="al-label flex items-center gap-1.5">
-                  <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('name') %>
-                </label>
-                <input id="nodeName" class="al-input" placeholder="My node">
-              </div>
-
-              <div>
-                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
-                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('addressIP') %>
-                </label>
-                <input id="nodeAddress" class="al-input" placeholder="localhost">
-              </div>
-
-              <div>
-                <label for="nodePort" class="al-label flex items-center gap-1.5">
-                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('daemonPort') %>
-                </label>
-                <input id="nodePort" class="al-input" placeholder="3002">
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <label for="nodeRam" class="al-label flex items-center gap-1.5">
-                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('ram') %>
-                </label>
-                <input type="hidden" id="nodeRamValue" value="">
-                <div class="flex gap-2 items-center">
-                  <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeRam" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                    <button type="button" class="al-format-switcher" data-format-switcher
-                      data-display="nodeRam" data-hidden="nodeRamValue"
-                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
-                  </div>
-                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeRamAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label for="nodeDisk" class="al-label flex items-center gap-1.5">
-                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('disk') %>
-                </label>
-                <input type="hidden" id="nodeDiskValue" value="">
-                <div class="flex gap-2 items-center">
-                  <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeDisk" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                    <button type="button" class="al-format-switcher" data-format-switcher
-                      data-display="nodeDisk" data-hidden="nodeDiskValue"
-                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
-                  </div>
-                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeDiskAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
-                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('cpu') %>
-                </label>
-                <input type="hidden" id="nodeCpuValue" value="">
-                <div class="flex gap-2 items-center">
-                  <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeProcessor" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                    <button type="button" class="al-format-switcher" data-format-switcher
-                      data-display="nodeProcessor" data-hidden="nodeCpuValue"
-                      data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
-                  </div>
-                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeProcessorAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
-                  </label>
-                </div>
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('overallocation') %></h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('overallocationDesc') %></p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
-                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('memory') %> %
-                </label>
-                <input id="nodeOverallocateMemory" type="number" min="0" value="<%= settings.defaultOverallocateMemory ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
-              </div>
-              <div>
-                <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
-                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('disk') %> %
-                </label>
-                <input id="nodeOverallocateDisk" type="number" min="0" value="<%= settings.defaultOverallocateDisk ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
-              </div>
-              <div>
-                <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
-                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('cpu') %> %
-                </label>
-                <input id="nodeOverallocateCpu" type="number" min="0" value="<%= settings.defaultOverallocateCpu ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
-              </div>
-            </div>
-            <div class="mt-4">
-              <label for="nodeLocation" class="al-label flex items-center gap-1.5">
-                <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                <%= t('location') %>
-              </label>
-              <select id="nodeLocation" class="al-input">
-                <option value=""><%= t('noLocation') %></option>
-                <% (locations || []).forEach(loc => { %>
-                  <option value="<%= loc.id %>"><%= loc.name %> (<%= loc.shortCode %>)</option>
-                <% }); %>
-              </select>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('daemonConfiguration') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div class="md:col-span-2">
-                <label for="daemonKey" class="al-label"><%= t('daemonKey') %></label>
-                <input id="daemonKey" class="al-input" placeholder="<%= t('leaveBlankToAutoGenerate') %>">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('daemonKeyOptionalDesc') %></p>
-              </div>
-
-              <div class="md:col-span-2">
-                <label for="allocatedPorts" class="al-label"><%= t('allocatedPorts') %></label>
-                <div class="space-y-2">
-                  <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                    <!-- Port tags will be inserted here -->
-                  </div>
-                  <div class="flex gap-2">
-                    <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1" @keypress.enter.prevent="addPortFromInput()">
-                    <button id="addPortBtn" type="button" class="al-btn-primary" @click="addPortFromInput()">
-                      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                      <%= t('addPort') %>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div id="nodeSetupPanel" class="hidden">
-        <div class="max-w-xl mx-auto">
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:color-mix(in srgb, var(--theme-success) 12%, transparent); color:var(--theme-success);">
-              <%- icon('check-circle', { class: 'size-8', strokeWidth: 1.5 }) %>
-            </div>
-            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong);"><%= t('nodeCreatedOneStepLeft') %></h2>
-            <p class="text-sm mt-2 max-w-md mx-auto" style="color:var(--theme-text-muted);"><%= t('nodeCreatedRunCommand') %></p>
-          </div>
-
-          <div class="rounded-2xl border p-5" style="border-color:var(--theme-border); background:var(--theme-bg-secondary);">
-            <p class="text-xs font-medium mb-3 flex items-center gap-1.5" style="color:var(--theme-text-muted);">
-              <%- icon('terminal', { width: 13, height: 13, class: 'shrink-0' }) %>
-              <%= t('runOnDaemonMachine') %>
-            </p>
-            <div class="relative">
-              <div id="daemonCliCommand" class="rounded-xl border p-4 pr-12 text-[13px] font-mono whitespace-nowrap overflow-x-auto cursor-text select-all" style="background:var(--theme-bg-input); border-color:var(--theme-border); color:var(--theme-text-strong);" tabindex="0" aria-label="Daemon connect command"></div>
-              <button id="copyDaemonCli" type="button" class="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-colors hover:scale-105" style="color:var(--theme-text-muted);" aria-label="Copy command" @click="copyCliCommand()"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %></button>
-            </div>
-            <p id="copyDaemonCliHint" class="mt-2 text-xs" style="color:var(--theme-text-muted);"></p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 mt-6">
-            <button id="verifyDaemonBtn" type="button" class="al-btn-primary flex-1 justify-center" @click="verifyDaemon()">
-              <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('iveDoneThisVerify') %>
-            </button>
-            <a href="/admin/nodes" class="al-btn-secondary flex-1 justify-center"><%= t('backToNodes') %></a>
-          </div>
-          <p id="daemonVerifyResult" class="hidden mt-4 text-sm font-medium text-center"></p>
+        <div>
+          <label for="nodePort" class="al-label flex items-center gap-1.5">
+            <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('daemonPort') %>
+          </label>
+          <input id="nodePort" class="al-input" placeholder="3001" type="number" min="1" max="65535" required>
         </div>
       </div>
     </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div>
+          <label for="nodeRam" class="al-label flex items-center gap-1.5">
+            <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %>
+          </label>
+          <input type="hidden" id="nodeRamValue" value="">
+          <div class="flex gap-2 items-center">
+            <div class="flex items-stretch flex-1 gap-0">
+              <input id="nodeRam" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+              <button type="button" class="al-format-switcher" data-format-switcher
+                data-display="nodeRam" data-hidden="nodeRamValue"
+                data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+            </div>
+            <label class="al-form-check-label flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0">
+              <input type="checkbox" id="nodeRamAll" class="al-form-checkbox"> <%= t('all') %>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label for="nodeDisk" class="al-label flex items-center gap-1.5">
+            <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %>
+          </label>
+          <input type="hidden" id="nodeDiskValue" value="">
+          <div class="flex gap-2 items-center">
+            <div class="flex items-stretch flex-1 gap-0">
+              <input id="nodeDisk" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+              <button type="button" class="al-format-switcher" data-format-switcher
+                data-display="nodeDisk" data-hidden="nodeDiskValue"
+                data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+            </div>
+            <label class="al-form-check-label flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0">
+              <input type="checkbox" id="nodeDiskAll" class="al-form-checkbox"> <%= t('all') %>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
+            <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %>
+          </label>
+          <input type="hidden" id="nodeCpuValue" value="">
+          <div class="flex gap-2 items-center">
+            <div class="flex items-stretch flex-1 gap-0">
+              <input id="nodeProcessor" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+              <button type="button" class="al-format-switcher" data-format-switcher
+                data-display="nodeProcessor" data-hidden="nodeCpuValue"
+                data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
+            </div>
+            <label class="al-form-check-label flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0">
+              <input type="checkbox" id="nodeProcessorAll" class="al-form-checkbox"> <%= t('all') %>
+            </label>
+          </div>
+          <p class="al-form-help"><%= t('coreHint') %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('overallocation') %></h2>
+      <div class="al-card-body">
+        <p class="al-form-help"><%= t('nodeOverallocationDesc') %></p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
+          <div>
+            <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
+              <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %> %
+            </label>
+            <input id="nodeOverallocateMemory" type="number" min="0" value="<%= settings.defaultOverallocateMemory || 0 %>" class="al-input">
+            <p class="al-form-help"><%= t('defaultFromGlobalSettings') %></p>
+          </div>
+          <div>
+            <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
+              <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %> %
+            </label>
+            <input id="nodeOverallocateDisk" type="number" min="0" value="<%= settings.defaultOverallocateDisk || 0 %>" class="al-input">
+            <p class="al-form-help"><%= t('defaultFromGlobalSettings') %></p>
+          </div>
+          <div>
+            <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
+              <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %> %
+            </label>
+            <input id="nodeOverallocateCpu" type="number" min="0" value="<%= settings.defaultOverallocateCpu || 0 %>" class="al-input">
+            <p class="al-form-help"><%= t('defaultFromGlobalSettings') %></p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label for="nodeLocation" class="al-label flex items-center gap-1.5">
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('location') %>
+          </label>
+          <select id="nodeLocation" class="al-input">
+            <option value=""><%= t('noLocation') %></option>
+            <% (locations || []).forEach(function(loc) { %>
+            <option value="<%= loc.id %>"><%= loc.name %> (<%= loc.shortCode %>)</option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('daemonConfiguration') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="md:col-span-2">
+          <label for="daemonKey" class="al-label"><%= t('daemonKey') %></label>
+          <input id="daemonKey" class="al-input" placeholder="<%= t('leaveBlankToAutoGenerate') %>">
+          <p class="al-form-help"><%= t('daemonKeyOptionalDesc') %></p>
+        </div>
+        <div class="md:col-span-2">
+          <label for="allocatedPorts" class="al-label"><%= t('allocatedPorts') %></label>
+          <div class="space-y-2">
+            <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2"></div>
+            <div class="flex gap-2">
+              <input id="newPortInput" type="text" placeholder="<%= t('portRangeHint') %>" class="al-input flex-1">
+              <button id="addPortBtn" type="button" class="al-btn-primary">
+                <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('addPort') %>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Post-creation setup panel -->
+<div id="nodeSetupPanel" class="hidden">
+  <div class="max-w-xl mx-auto">
+    <div class="text-center mb-8">
+      <span class="al-icon-tile al-icon-tile-lg al-icon-tile-round al-icon-tile-success mx-auto mb-4"><%- icon('check-circle', { class: 'size-8', strokeWidth: 1.5 }) %></span>
+      <h2 class="text-xl font-semibold al-text-strong"><%= t('nodeCreatedOneStepLeft') %></h2>
+      <p class="text-sm mt-2 max-w-md mx-auto al-text-muted"><%= t('nodeCreatedRunCommand') %></p>
+    </div>
+
+    <div class="al-panel">
+      <p class="text-xs font-medium mb-3 flex items-center gap-1.5 al-text-muted">
+        <%- icon('terminal', { width: 13, height: 13, class: 'shrink-0' }) %> <%= t('runOnDaemonMachine') %>
+      </p>
+      <div class="relative">
+        <div id="daemonCliCommand" class="al-code pr-12 cursor-text select-all" tabindex="0" aria-label="<%= t('daemonConnectCommandAria') %>"></div>
+        <button id="copyDaemonCli" type="button" class="al-btn-ghost al-btn-icon-only absolute top-1/2 -translate-y-1/2 right-1" aria-label="<%= t('copyCommandAria') %>">
+          <%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %>
+        </button>
+      </div>
+      <p id="copyDaemonCliHint" class="al-form-help"></p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+      <button id="verifyDaemonBtn" type="button" class="al-btn-primary flex-1 justify-center" onclick="verifyDaemon()">
+        <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('iveDoneThisVerify') %>
+      </button>
+      <a href="/admin/nodes" class="al-btn-secondary flex-1 justify-center"><%= t('backToNodes') %></a>
+    </div>
+    <p id="daemonVerifyResult" class="hidden mt-4 text-sm font-medium text-center"></p>
   </div>
-</main>
-
-<%- include('../../components/loading-popup') %>
-
-<style>
-#nodeForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
+</div>
 
 <script nonce="<%- nonce %>">
-function nodeCreate() {
-  return {
-    allocatedPorts: [],
-    _portEase: getComputedStyle(document.documentElement).getPropertyValue('--ease-standard').trim() || 'ease',
-    PORT_MIN: 1024,
-    PORT_MAX: 65535,
-    ANIMATION_DURATION_MS: 200,
-    PORT_STAGGER_MS: 30,
-    PORT_OUT_DURATION_MS: 160,
-    COPY_RESET_DELAY_MS: 1500,
-    VERIFY_DELAY_MS: 1800,
+var csrfToken = '<%= csrfToken %>';
+var _currentNode = null;
+var _currentCli = '';
+var allocatedPorts = [];
 
-    init() {
-      this.renderAllocatedPorts();
-      this.checkHashRoute();
-      window.addEventListener('hashchange', () => this.checkHashRoute());
-      ['nodeRam', 'nodeDisk', 'nodeProcessor'].forEach((id) => {
-        const checkbox = document.getElementById(id + 'All');
-        const input = document.getElementById(id);
-        if (checkbox && input) {
-          checkbox.addEventListener('change', function() {
-            input.disabled = this.checked;
-            if (this.checked) {
-              input.value = '';
-              input.dispatchEvent(new Event('input'));
-            }
-          });
-        }
-      });
-    },
-
-    renderAllocatedPorts() {
-      const portsList = document.getElementById('allocatedPortsList');
-      portsList.innerHTML = '';
-      if (this.allocatedPorts.length === 0) {
-        const emptyMessage = document.createElement('div');
-        emptyMessage.className = 'col-span-4 text-sm italic';
-        emptyMessage.style.color = 'var(--theme-text-muted)';
-        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
-        portsList.appendChild(emptyMessage);
-        return;
-      }
-      this.allocatedPorts.forEach(port => {
-        portsList.appendChild(this.buildPortTag(port));
-      });
-    },
-
-    buildPortTag(port) {
-      const portTag = document.createElement('div');
-      portTag.dataset.port = port;
-      portTag.className = 'flex items-center justify-between rounded-lg bg-neutral-800/10 dark:bg-neutral-700/20 px-3 py-1.5 text-sm';
-      portTag.style.opacity = '0';
-      portTag.style.transform = 'translateY(4px)';
-
-      const portText = document.createElement('span');
-      portText.className = 'text-neutral-800 dark:text-neutral-300';
-      portText.textContent = port;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
-      deleteBtn.innerHTML = alIcon('x', 'w-4 h-4', { strokeWidth: 1.5 });
-      deleteBtn.onclick = (e) => {
-        e.preventDefault();
-        this.animatePortOut(portTag, () => this.removePort(port));
-      };
-
-      portTag.appendChild(portText);
-      portTag.appendChild(deleteBtn);
-      return portTag;
-    },
-
-    animatePortIn(el) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.transition = 'opacity 0.18s ' + this._portEase + ', transform 0.18s ' + this._portEase;
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-          setTimeout(() => { el.style.transition = ''; }, this.ANIMATION_DURATION_MS);
-        });
-      });
-    },
-
-    animatePortOut(el, cb) {
-      el.style.transition = 'opacity 0.15s ' + this._portEase + ', transform 0.15s ' + this._portEase;
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(-4px)';
-      setTimeout(cb, this.PORT_OUT_DURATION_MS);
-    },
-
-    addPort(input) {
-      if (input.includes('-')) {
-        const [start, end] = input.split('-').map(p => parseInt(p.trim()));
-        if (isNaN(start) || isNaN(end) || start >= end || start < this.PORT_MIN || end > this.PORT_MAX) {
-          showToast((req.translations.invalidPortRange || 'Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
-          return;
-        }
-        for (let port = start; port <= end; port++) {
-          if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
-        }
-      } else {
-        const port = parseInt(input.trim());
-        if (isNaN(port) || port < this.PORT_MIN || port > this.PORT_MAX) {
-          showToast((req.translations.invalidPort || 'Invalid port. Port must be between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
-          return;
-        }
-        if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
-      }
-
-      this.allocatedPorts.sort((a, b) => a - b);
-      this.renderAllocatedPorts();
-
-      const tags = document.querySelectorAll('#allocatedPortsList > div[data-port]');
-      tags.forEach((tag, i) => setTimeout(() => this.animatePortIn(tag), i * this.PORT_STAGGER_MS));
-    },
-
-    removePort(port) {
-      this.allocatedPorts = this.allocatedPorts.filter(p => p !== port);
-      this.renderAllocatedPorts();
-      document.querySelectorAll('#allocatedPortsList > div[data-port]').forEach(tag => { tag.style.opacity = '1'; tag.style.transform = ''; });
-    },
-
-    addPortFromInput() {
-      const input = document.getElementById('newPortInput').value.trim();
-      if (input) {
-        this.addPort(input);
-        document.getElementById('newPortInput').value = '';
-      }
-    },
-
-    gbValue(hiddenId) {
-      const hidden = document.getElementById(hiddenId);
-      if (hidden) {
-        const v = parseFloat(hidden.value);
-        if (!hidden.value || isNaN(v)) return '';
-        return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
-      }
-      return '';
-    },
-
-    async createNode() {
-      const ramAll = document.getElementById('nodeRamAll').checked;
-      const diskAll = document.getElementById('nodeDiskAll').checked;
-      const cpuAll = document.getElementById('nodeProcessorAll').checked;
-
-      const nodeData = {
-        name: document.getElementById('nodeName').value,
-        ram: ramAll ? 'all' : this.gbValue('nodeRamValue'),
-        cpu: cpuAll ? 'all' : document.getElementById('nodeCpuValue').value,
-        disk: diskAll ? 'all' : this.gbValue('nodeDiskValue'),
-        address: document.getElementById('nodeAddress').value,
-        port: document.getElementById('nodePort').value,
-        key: document.getElementById('daemonKey').value.trim(),
-        allocatedPorts: JSON.stringify(this.allocatedPorts),
-        overallocateMemory: document.getElementById('nodeOverallocateMemory').value,
-        overallocateDisk: document.getElementById('nodeOverallocateDisk').value,
-        overallocateCpu: document.getElementById('nodeOverallocateCpu').value,
-        locationId: document.getElementById('nodeLocation').value
-      };
-
-      if (!nodeData.name || !nodeData.address || !nodeData.port) {
-        showToast(req.translations.pleaseFillAllRequired || 'Please fill in all required fields.', 'error');
-        return;
-      }
-
-      if (!ramAll && !nodeData.ram) { showToast(req.translations.ramRequired || 'RAM is required when not unlimited.', 'error'); return; }
-      if (!diskAll && !nodeData.disk) { showToast(req.translations.diskRequired || 'Disk is required when not unlimited.', 'error'); return; }
-      if (!cpuAll && !nodeData.cpu) { showToast(req.translations.cpuRequired || 'CPU is required when not unlimited.', 'error'); return; }
-
-      const loader = showLoadingPopup(req.translations.creatingNode || 'Creating Node', req.translations.initializingNodeCreation || 'Initializing node creation...');
-      loader.updateProgress(20, req.translations.sendingNodeConfig || 'Sending node configuration...');
-
-      try {
-        const response = await fetch('/api/v2/admin/nodes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(nodeData)
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          loader.updateProgress(100, req.translations.nodeCreated || 'Node created!');
-          setTimeout(() => {
-            loader.close();
-            sessionStorage.setItem('airlink:newNode', JSON.stringify(data.node));
-            window.location.hash = '#created';
-          }, 500);
-        } else {
-          loader.close();
-          const data = await response.json().catch(() => ({}));
-          showToast(data.error || data.message || (req.translations.failedToCreateNode || 'Failed to create node.'), 'error');
-        }
-      } catch (error) {
-        loader.close();
-        console.error('Error creating node:', error);
-        showToast(req.translations.errorCreatingNode || 'Error creating node. Try again.', 'error');
-      }
-    },
-
-    showSetupPanel(node) {
-      const form = document.getElementById('nodeForm');
-      const panel = document.getElementById('nodeSetupPanel');
-      form.classList.add('hidden');
-      panel.classList.remove('hidden');
-
-      const panelUrl = window.location.origin;
-      const cli = 'configure --panel "' + panelUrl + '" --key "' + node.key + '"';
-      document.getElementById('daemonCliCommand').textContent = cli;
-
-      const copyHint = document.getElementById('copyDaemonCliHint');
-      copyHint.textContent = req.translations.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.';
-
-      this._currentNode = node;
-      this._currentCli = cli;
-    },
-
-    async copyCliCommand() {
-      const copyCli = document.getElementById('copyDaemonCli');
-      const copyHint = document.getElementById('copyDaemonCliHint');
-      const cli = this._currentCli;
-      const label = copyCli.innerHTML;
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(cli);
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = cli;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          ta.remove();
-        }
-        copyCli.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        copyHint.textContent = req.translations.copied || 'Copied!';
-      } catch {
-        copyHint.textContent = req.translations.couldNotCopySelect || 'Could not copy. Select the command above and copy it manually.';
-      }
-      setTimeout(() => { copyCli.innerHTML = label; copyHint.textContent = req.translations.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.'; }, this.COPY_RESET_DELAY_MS);
-    },
-
-    async verifyDaemon() {
-      const node = this._currentNode;
-      const btn = document.getElementById('verifyDaemonBtn');
-      const result = document.getElementById('daemonVerifyResult');
-      btn.disabled = true;
-      btn.textContent = req.translations.checking || 'Checking...';
-      result.classList.add('hidden');
-
-      try {
-        const res = await fetch('/api/v2/admin/nodes/' + node.id + '/verify', { method: 'POST' });
-        const d = await res.json().catch(() => ({}));
-        result.classList.remove('hidden');
-        if (d.connected) {
-          result.style.color = 'var(--theme-success)';
-          result.textContent = (req.translations.daemonIsLive || 'Daemon is live') + (d.version ? ' (' + d.version + ')' : '') + '. ' + (req.translations.keyChecksOut || 'Key checks out \u2014 servers can now run on this node.');
-          showToast(req.translations.daemonVerified || 'Daemon verified!', 'success');
-          setTimeout(() => { Turbo.visit('/admin/nodes?verified=' + node.id); }, this.VERIFY_DELAY_MS);
-        } else {
-          result.style.color = 'var(--theme-danger)';
-          result.textContent = d.error || (req.translations.couldNotReachDaemon || 'Could not reach the daemon. Check the address, port, and key.');
-        }
-      } catch {
-        result.classList.remove('hidden');
-        result.style.color = 'var(--theme-danger)';
-        result.textContent = req.translations.verificationFailed || 'Verification failed. Check the address, port, and key, then try again.';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = req.translations.verifyConnection || 'I\'ve done this — verify connection';
-      }
-    },
-
-    checkHashRoute() {
-      if (window.location.hash === '#created') {
-        const stored = sessionStorage.getItem('airlink:newNode');
-        if (stored) {
-          sessionStorage.removeItem('airlink:newNode');
-          try {
-            this.showSetupPanel(JSON.parse(stored));
-          } catch {}
-        }
-      }
-    }
-  };
+function renderAllocatedPorts() {
+  var portsList = document.getElementById('allocatedPortsList');
+  portsList.innerHTML = '';
+  if (allocatedPorts.length === 0) {
+    var emptyMessage = document.createElement('div');
+    emptyMessage.className = 'col-span-4 al-form-help mt-0';
+    emptyMessage.textContent = window.__i18n.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
+    portsList.appendChild(emptyMessage);
+    return;
+  }
+  allocatedPorts.forEach(function(port) {
+    var portTag = document.createElement('div');
+    portTag.className = 'al-chip al-chip-mono justify-between w-full';
+    portTag.dataset.port = port;
+    var portText = document.createElement('span');
+    portText.textContent = port;
+    var deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'al-chip-remove';
+    deleteBtn.setAttribute('aria-label', (window.__i18n.removePort || 'Remove port') + ' ' + port);
+    deleteBtn.innerHTML = '<%- icon("x", { class: "w-3.5 h-3.5", strokeWidth: 1.5 }) %>';
+    deleteBtn.onclick = function(e) {
+      e.preventDefault();
+      allocatedPorts = allocatedPorts.filter(function(p) { return p !== port; });
+      renderAllocatedPorts();
+    };
+    portTag.appendChild(portText);
+    portTag.appendChild(deleteBtn);
+    portsList.appendChild(portTag);
+  });
 }
+
+function addPort(input) {
+  if (input.indexOf('-') !== -1) {
+    var parts = input.split('-').map(function(p) { return parseInt(p.trim()); });
+    var start = parts[0], end = parts[1];
+    if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
+      showToast(window.__i18n.invalidPortRange || 'Invalid port range. Use format: 25565-25570 (1024-65535).', 'error');
+      return;
+    }
+    for (var port = start; port <= end; port++) {
+      if (allocatedPorts.indexOf(port) === -1) allocatedPorts.push(port);
+    }
+  } else {
+    var port = parseInt(input.trim());
+    if (isNaN(port) || port < 1024 || port > 65535) {
+      showToast(window.__i18n.invalidPortValue || 'Invalid port. Must be between 1024 and 65535.', 'error');
+      return;
+    }
+    if (allocatedPorts.indexOf(port) === -1) allocatedPorts.push(port);
+  }
+  allocatedPorts.sort(function(a, b) { return a - b; });
+  renderAllocatedPorts();
+}
+
+document.getElementById('addPortBtn').addEventListener('click', function() {
+  var input = document.getElementById('newPortInput').value.trim();
+  if (input) { addPort(input); document.getElementById('newPortInput').value = ''; }
+});
+document.getElementById('newPortInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); var input = this.value.trim(); if (input) { addPort(input); this.value = ''; } }
+});
+
+function gbValue(hiddenId) {
+  var hidden = document.getElementById(hiddenId);
+  if (hidden) {
+    var v = parseFloat(hidden.value);
+    if (!hidden.value || isNaN(v)) return '';
+    return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+  }
+  return '';
+}
+
+function createNode() {
+  var ramAll = document.getElementById('nodeRamAll').checked;
+  var diskAll = document.getElementById('nodeDiskAll').checked;
+  var cpuAll = document.getElementById('nodeProcessorAll').checked;
+
+  var nodeData = {
+    name: document.getElementById('nodeName').value,
+    ram: ramAll ? 0 : (parseInt(document.getElementById('nodeRamValue').value) || 0),
+    cpu: cpuAll ? 0 : (parseInt(document.getElementById('nodeCpuValue').value) || 0),
+    disk: diskAll ? 0 : (parseInt(document.getElementById('nodeDiskValue').value) || 0),
+    address: document.getElementById('nodeAddress').value,
+    port: parseInt(document.getElementById('nodePort').value) || 3001,
+    key: document.getElementById('daemonKey').value.trim() || 'auto',
+    allocatedPorts: JSON.stringify(allocatedPorts),
+    overallocateMemory: parseInt(document.getElementById('nodeOverallocateMemory').value) || 0,
+    overallocateDisk: parseInt(document.getElementById('nodeOverallocateDisk').value) || 0,
+    overallocateCpu: parseInt(document.getElementById('nodeOverallocateCpu').value) || 0,
+    locationId: document.getElementById('nodeLocation').value ? parseInt(document.getElementById('nodeLocation').value) : null
+  };
+
+  if (!nodeData.name || !nodeData.address) {
+    showToast(window.__i18n.fillRequiredFields || 'Please fill in all required fields.', 'error');
+    return;
+  }
+
+  var loader = showProgressToast(window.__i18n.initializingNodeCreation || 'Initializing node creation...');
+  loader.setStage(window.__i18n.sendingNodeConfig || 'Sending node configuration...');
+
+  fetch('/admin/nodes/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+    body: JSON.stringify(nodeData)
+  })
+  .then(function(response) {
+    if (response.ok) return response.json();
+    return response.json().then(function(d) { throw new Error(d.error || d.message || (window.__i18n.failedToCreateNode || 'Failed to create node.')); });
+  })
+  .then(function(data) {
+    loader.complete(true, window.__i18n.nodeCreatedSuccess || 'Node created!');
+    _currentNode = data.node;
+    var panelUrl = window.location.origin;
+    _currentCli = 'configure --panel "' + panelUrl + '" --key "' + data.node.key + '"';
+    document.getElementById('nodeForm').classList.add('hidden');
+    document.getElementById('nodeSetupPanel').classList.remove('hidden');
+    document.getElementById('daemonCliCommand').textContent = _currentCli;
+    document.getElementById('copyDaemonCliHint').textContent = window.__i18n.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.';
+  })
+  .catch(function(error) {
+    loader.close();
+    showToast(error.message || (window.__i18n.errorCreatingNode || 'Error creating node. Try again.'), 'error');
+  });
+}
+
+document.getElementById('copyDaemonCli').addEventListener('click', function() {
+  var hint = document.getElementById('copyDaemonCliHint');
+  var pasteHint = window.__i18n.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.';
+  function onCopied() {
+    hint.textContent = window.__i18n.copied || 'Copied!';
+    setTimeout(function() { hint.textContent = pasteHint; }, 2000);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(_currentCli).then(onCopied);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = _currentCli;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    onCopied();
+  }
+});
+
+function verifyDaemon() {
+  var node = _currentNode;
+  if (!node) return;
+  var btn = document.getElementById('verifyDaemonBtn');
+  var result = document.getElementById('daemonVerifyResult');
+  btn.disabled = true;
+  btn.textContent = window.__i18n.checking || 'Checking...';
+  result.classList.add('hidden');
+
+  fetch('/admin/node/' + node.id + '/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(d) {
+    result.classList.remove('hidden');
+    if (d.verified) {
+      result.style.color = 'var(--theme-success)';
+      result.textContent = (window.__i18n.daemonIsLiveResult || 'Daemon is live{version}. Key checks out — servers can now run on this node.')
+        .replace('{version}', d.version ? ' (' + d.version + ')' : '');
+      showToast(window.__i18n.daemonVerified || 'Daemon verified!', 'success');
+      setTimeout(function() { window.location.href = '/admin/nodes?verified=' + node.id; }, 1800);
+    } else {
+      result.style.color = 'var(--theme-danger)';
+      result.textContent = d.error || (window.__i18n.couldNotReachDaemon || 'Could not reach the daemon. Check the address, port, and key.');
+    }
+  })
+  .catch(function() {
+    result.classList.remove('hidden');
+    result.style.color = 'var(--theme-danger)';
+    result.textContent = window.__i18n.verificationFailed || 'Verification failed. Check the address, port, and key, then try again.';
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = window.__i18n.iveDoneThisVerify || "I've done this — verify connection";
+  });
+}
+
+// Initialize
+renderAllocatedPorts();
+
+// Resource "All" checkboxes
+['nodeRam', 'nodeDisk', 'nodeProcessor'].forEach(function(id) {
+  var checkbox = document.getElementById(id + 'All');
+  var input = document.getElementById(id);
+  if (checkbox && input) {
+    checkbox.addEventListener('change', function() {
+      input.disabled = this.checked;
+      if (this.checked) { input.value = ''; input.dispatchEvent(new Event('input')); }
+    });
+  }
+});
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/admin-footer') %>

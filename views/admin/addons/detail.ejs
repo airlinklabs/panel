@@ -1,0 +1,206 @@
+<%- include('../../layouts/admin', { title: addon.name || 'Addon' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<%- include('../../partials/ui/breadcrumb', { items: [
+  { label: t('admin'), url: '/admin' },
+  { label: t('addonsTitle'), href: '/admin/addons' },
+  { label: addon.name || 'Addon' }
+] }) %>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title"><%= addon.name || 'Addon' %></h1>
+    <p class="al-page-desc"><%= addon.description || '' %></p>
+    <div class="flex items-center gap-3 mt-2">
+      <% if (addon.version) { %><span class="text-xs" style="color:var(--theme-text-muted)">v<%= addon.version %></span><% } %>
+      <% if (addon.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= addon.author %></span><% } %>
+      <% if (addon.enabled) { %>
+      <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">Enabled</span>
+      <% } else { %>
+      <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);box-shadow:inset 0 0 0 1px var(--theme-border)">Disabled</span>
+      <% } %>
+    </div>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <a href="/admin/addons" class="al-btn-secondary inline-flex items-center gap-1.5">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+    </a>
+    <button type="button" id="addonToggleBtn" class="al-btn-secondary inline-flex items-center gap-1.5" data-slug="<%= addon.slug %>" data-enabled="<%= addon.enabled %>">
+      <%- icon(addon.enabled ? 'pause' : 'play', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= addon.enabled ? 'Disable' : 'Enable' %>
+    </button>
+    <button type="button" id="addonUninstallBtn" class="al-btn-danger inline-flex items-center gap-1.5" data-slug="<%= addon.slug %>" data-name="<%= addon.name %>">
+      <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %> Uninstall
+    </button>
+  </div>
+</div>
+
+<div class="al-page-body space-y-5">
+
+  <% if (addon.settings && Object.keys(addon.settings).length > 0) { %>
+  <!-- Settings -->
+  <div class="al-card">
+    <h2 class="al-card-header">Settings</h2>
+    <div class="p-4 space-y-4">
+      <form id="addonSettingsForm" class="space-y-4">
+        <% Object.entries(addon.settings).forEach(function([key, value]) { %>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= key %></label>
+          <% if (typeof value === 'boolean') { %>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" name="<%= key %>" class="sr-only peer" <%= value ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+          <% } else { %>
+          <input type="text" name="<%= key %>" value="<%= value %>" class="al-input max-w-md">
+          <% } %>
+        </div>
+        <% }); %>
+        <button type="submit" class="al-btn-primary inline-flex items-center gap-1.5">
+          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Settings
+        </button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (addon.capabilities && addon.capabilities.length > 0) { %>
+  <!-- Capabilities -->
+  <div class="al-card">
+    <h2 class="al-card-header">Capabilities</h2>
+    <div class="p-4 space-y-3">
+      <% addon.capabilities.forEach(function(cap) { %>
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= cap.name || cap %></p>
+          <% if (cap.description) { %><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= cap.description %></p><% } %>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" class="sr-only peer capability-toggle" data-slug="<%= addon.slug %>" data-capability="<%= cap.name || cap %>" <%= cap.enabled ? 'checked' : '' %>>
+          <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+        </label>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (addon.commands && addon.commands.length > 0) { %>
+  <!-- Commands -->
+  <div class="al-card">
+    <h2 class="al-card-header">Commands</h2>
+    <div class="p-4">
+      <div class="flex flex-wrap gap-2">
+        <% addon.commands.forEach(function(cmd) { %>
+        <button type="button" class="al-btn-secondary addon-command-btn" data-slug="<%= addon.slug %>" data-command="<%= cmd.name || cmd %>">
+          <%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= cmd.name || cmd %>
+        </button>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+
+  // Toggle
+  var toggleBtn = document.getElementById('addonToggleBtn');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      var slug = this.dataset.slug;
+      var enabled = this.dataset.enabled === 'true';
+      showProgressToast('Applying changes...');
+      fetch('/admin/addons/toggle/' + slug, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ enabled: (!enabled).toString() }),
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) { showToast('Addon updated', 'success'); window.location.reload(); }
+        else showToast(data.message || 'Failed', 'error');
+      }).catch(function() { showToast('Something went wrong.', 'error'); });
+    });
+  }
+
+  // Uninstall
+  var uninstallBtn = document.getElementById('addonUninstallBtn');
+  if (uninstallBtn) {
+    uninstallBtn.addEventListener('click', function() {
+      var slug = this.dataset.slug;
+      var name = this.dataset.name;
+      window.modal && window.modal.confirm
+        ? window.modal.confirm({
+            title: 'Uninstall Addon',
+            body: 'Uninstall "' + name + '"? This cannot be undone.',
+            danger: true, confirmLabel: 'Uninstall',
+            onConfirm: function() {
+              showProgressToast('Removing files...');
+              fetch('/admin/addons/uninstall/' + slug, { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } })
+                .then(function(r) { return r.json(); }).then(function(data) {
+                  if (data.success) { showToast('Uninstalled', 'success'); window.location.href = '/admin/addons'; }
+                  else showToast(data.message || 'Failed', 'error');
+                }).catch(function() { showToast('Something went wrong.', 'error'); });
+            }
+          })
+        : null;
+    });
+  }
+
+  // Settings form
+  var settingsForm = document.getElementById('addonSettingsForm');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+      var data = {};
+      formData.forEach(function(val, key) { data[key] = val; });
+      document.querySelectorAll('#addonSettingsForm input[type="checkbox"]').forEach(function(cb) {
+        data[cb.name] = cb.checked;
+      });
+      var slug = toggleBtn ? toggleBtn.dataset.slug : '';
+      fetch('/admin/addons/settings/' + slug, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify(data),
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) { showToast('Settings saved.', 'success'); }
+        else { showToast(res.message || 'Failed to save.', 'error'); }
+      }).catch(function() { showToast('Failed to save.', 'error'); });
+    });
+  }
+
+  // Capability toggles
+  document.querySelectorAll('.capability-toggle').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var slug = this.dataset.slug;
+      var capability = this.dataset.capability;
+      fetch('/admin/addons/capability/' + slug, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ capability: capability, enabled: this.checked }),
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) { showToast('Capability updated.', 'success'); }
+        else { showToast(res.message || 'Failed.', 'error'); }
+      }).catch(function() { showToast('Failed.', 'error'); });
+    });
+  });
+
+  // Command buttons
+  document.querySelectorAll('.addon-command-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var slug = this.dataset.slug;
+      var command = this.dataset.command;
+      showProgressToast('Running ' + command + '...');
+      fetch('/admin/addons/command/' + slug + '/' + command, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) { showToast(command + ' completed.', 'success'); }
+        else { showToast(data.message || command + ' failed.', 'error'); }
+      }).catch(function() { showToast(command + ' failed.', 'error'); });
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

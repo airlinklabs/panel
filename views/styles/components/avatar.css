@@ -1,0 +1,32 @@
+/* Avatar — circular initials disc for node/server owners. */
+@layer components {
+  .al-avatar {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full font-semibold uppercase;
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    background: var(--theme-bg-secondary);
+    color: var(--theme-text-muted);
+    border: 1px solid var(--theme-border);
+    user-select: none;
+  }
+
+  .al-avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+
+  .al-avatar-lg {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+  }
+
+  .al-avatar-accent {
+    background: color-mix(in srgb, var(--theme-accent) 16%, transparent);
+    color: var(--theme-accent);
+    border-color: color-mix(in srgb, var(--theme-accent) 30%, transparent);
+  }
+}

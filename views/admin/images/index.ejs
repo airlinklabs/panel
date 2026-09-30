@@ -1,0 +1,793 @@
+<%- include('../../layouts/admin', { title: t('adminImagesTitle') }) %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbImages') }
+  ] }) %>
+
+  <div class="flex items-start justify-between gap-4 mt-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('images') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('adminImagesText') %></p>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <button onclick="imageManagerState.openUploadImageModal()" type="button" class="al-btn-secondary">
+        <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('uploadJson') %>
+      </button>
+      <button onclick="imageManagerState.openCreate()" type="button" class="al-btn-secondary">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('newImage') %>
+      </button>
+      <a href="/admin/images#store" class="al-btn-secondary"><%= t('browseStore') %></a>
+    </div>
+  </div>
+
+  <% if (typeof req !== 'undefined' && req.query && req.query.success) { %>
+    <div class="mt-4 px-4 py-3 rounded-xl text-sm" style="background:var(--theme-success-bg);border:1px solid color-mix(in srgb, var(--theme-success) 25%, transparent);color:var(--theme-success)">
+      <%= t('changesSaved') %>
+    </div>
+  <% } %>
+
+  <div class="mt-5" data-al-tabs data-tabs-default="installed" data-tabs-hash>
+    <div role="tablist" class="flex gap-1 mb-6">
+      <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+        <%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('installed') %>
+        <span id="tabCountInstalled" class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= images ? images.length : 0 %></span>
+      </button>
+      <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+        <%- icon('clock', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('approvals') %>
+        <% if (pending && pending.length > 0) { %>
+          <span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning)"><%= pending.length %></span>
+        <% } %>
+      </button>
+      <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+        <%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('storeTab') %>
+      </button>
+    </div>
+
+    <!-- Installed tab -->
+    <div id="tab-panel-installed" role="tabpanel" aria-labelledby="tab-btn-installed" data-tab-panel="installed">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="text-sm" style="color:var(--theme-text-muted)">
+          <span id="installedImagesCount"><%= images ? images.length : 0 %></span> <%= t('imagesInstalled') %>
+        </div>
+      </div>
+
+      <div id="installedEmptyState" class="<%= images && images.length > 0 ? 'hidden' : '' %>">
+        <%- include('../../partials/empty-state', {
+          iconName: 'box',
+          title: t('noImagesInstalled'),
+          description: '',
+          action: '<a href="/admin/images#store" class="al-btn-secondary inline-flex items-center gap-1.5">' + icon('store', { class: 'size-4', strokeWidth: 1.5 }) + ' ' + t('browseStore') + '</a>'
+        }) %>
+      </div>
+
+      <div id="installedTableSection" class="<%= images && images.length === 0 ? 'hidden' : '' %> overflow-x-auto shadow-sm rounded-xl border mt-4" style="border-color:var(--theme-border)">
+        <table class="al-table" style="table-layout:auto">
+          <colgroup>
+            <col style="min-width:200px">
+            <col style="min-width:120px">
+            <col style="min-width:120px">
+            <col style="min-width:200px">
+          </colgroup>
+          <thead class="al-table-head">
+            <tr>
+              <th class="al-table-th sm:pl-6"><%= t('name') %></th>
+              <th class="al-table-th px-3"><%= t('author') %></th>
+              <th class="al-table-th px-3"><%= t('createdAt') %></th>
+              <th class="al-table-th px-3"><%= t('actions') %></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <% if (images) { images.forEach(function(image, idx) { %>
+              <tr style="--i:<%= idx %>" class="al-table-tr transition-colors cursor-pointer img-row" data-search="<%= (image.name + ' ' + (image.author || '')).toLowerCase() %>"
+                onclick="imageManagerState.handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+                <td class="al-table-td sm:pl-6 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
+                <td class="al-table-td px-3"><%= image.author || '—' %></td>
+                <td class="al-table-td px-3"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+                <td class="al-table-td px-3">
+                  <div class="flex gap-2">
+                    <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">
+                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('edit') %>
+                    </a>
+                    <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">
+                      <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('export') %>
+                    </a>
+                    <button onclick="event.stopPropagation(); imageManagerState.openDelete('<%= image.id %>', '<%= (image.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>')" type="button" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);" aria-label="<%= t('deleteImage') %> <%= image.name %>">
+                      <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); } %>
+          </tbody>
+        </table>
+      </div>
+      <div id="noResults" class="hidden text-center py-8">
+        <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noResults') %></p>
+      </div>
+    </div>
+
+    <!-- Approvals tab -->
+    <div id="tab-panel-approvals" role="tabpanel" aria-labelledby="tab-btn-approvals" data-tab-panel="approvals" hidden>
+      <% if (!pending || pending.length === 0) { %>
+        <%- include('../../partials/empty-state', {
+          iconName: 'check',
+          title: t('noImagesWaiting'),
+          description: t('userSubmissionsAppear')
+        }) %>
+      <% } else { %>
+        <div id="pendingApprovalsList" class="space-y-3">
+          <% pending.forEach(function(image) { %>
+          <div class="pending-card rounded-xl border p-4" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-pending-image="<%= image.id %>">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <h3 class="text-[13px] font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
+                  <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning)">
+                    <%= t('pending') %>
+                  </span>
+                </div>
+                <% if (image.description) { %><p class="text-[13px] mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
+                <% if (image.creator) { %>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">
+                  Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
+                  &middot; <%= new Date(image.createdAt).toLocaleString() %>
+                </p>
+                <% } %>
+                <div class="flex flex-wrap gap-3 mt-2 text-[11px]" style="color:var(--theme-text-muted)">
+                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
+                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
+                </div>
+              </div>
+              <div class="flex gap-1.5 shrink-0">
+                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-[11px]">
+                  <%- icon('external-link', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('view') %>
+                </a>
+                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-approve-image="<%= image.id %>">
+                  <%- icon('check', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('approve') %>
+                </button>
+                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-reject-image="<%= image.id %>" data-reject-name="<%= image.name %>">
+                  <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('reject') %>
+                </button>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Store tab -->
+    <div id="tab-panel-store" role="tabpanel" aria-labelledby="tab-btn-store" data-tab-panel="store" hidden>
+      <%- include('./store-panel') %>
+    </div>
+  </div>
+</div>
+
+<!-- Reject modal -->
+<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rejectImage') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectName"></p>
+      </div>
+      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" onclick="imageManagerState.closeRejectModal()" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="px-6 py-4">
+      <label class="al-label" for="rejectReasonInput"><%= t('reason') %> <span class="font-normal" style="color:var(--theme-text-muted)"><%= t('reasonHint') %></span></label>
+      <textarea id="rejectReasonInput" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" onclick="imageManagerState.closeRejectModal()"><%= t('cancel') %></button>
+      <button type="button" id="rejectConfirmBtn" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><span id="rejectConfirmLabel"><%= t('reject') %></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload modal -->
+<div id="uploadImageModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div id="uploadImageModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('uploadImage') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('uploadImageDesc') %></p>
+      </div>
+      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+      <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
+        <button type="button" id="uploadModeFile" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-strong); background:var(--theme-bg-card);"><%= t('uploadFile') %></button>
+        <button type="button" id="uploadModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-muted);"><%= t('importFromUrl') %></button>
+      </div>
+      <div id="uploadFileSection">
+        <div class="mb-4">
+          <label for="imageFileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" id="imageDropZone" style="border-color:var(--theme-border); color:var(--theme-text-strong);">
+            <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2', fill: 'currentColor', strokeWidth: 1 }) %>
+            <p style="color:var(--theme-text-muted)"><%= t('dragDropJson') %></p>
+          </label>
+          <input type="file" id="imageFileInput" class="hidden" accept=".json">
+        </div>
+        <div id="imageFilePreview" class="hidden">
+          <div class="flex items-center p-3 rounded-xl" style="background:var(--theme-bg-secondary);">
+            <%- icon('file-json', { class: 'w-6 h-6 mr-3', style: 'color:var(--theme-text-muted)' }) %>
+            <div class="flex-1 truncate">
+              <p id="imageSelectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
+              <p id="imageSelectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
+            </div>
+            <button type="button" onclick="imageManagerState.removeSelectedImageFile()" class="ml-2" aria-label="Remove file" style="color:var(--theme-text-muted)">
+              <%- icon('x', { class: 'w-5 h-5' }) %>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="importUrlSection" class="hidden">
+        <label class="al-label" for="importUrlInput"><%= t('imageUrl') %></label>
+        <input id="importUrlInput" type="url" placeholder="https://raw.githubusercontent.com/…/egg.json" class="al-input w-full">
+        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= t('importUrlDesc') %></p>
+      </div>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('cancel') %>
+      </button>
+      <button type="button" id="imageUploadButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
+        <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('upload') %>
+      </button>
+      <button type="button" id="importUrlSubmit" class="al-btn-primary hidden px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+        <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('fetchAndImport') %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Create modal content -->
+<div id="createContent" style="display:none;">
+  <form onsubmit="imageManagerState.submitCreateImage(event); return false;" class="flex flex-col gap-4">
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2">
+        <label class="al-label"><%= t('name') %> <span style="color:var(--theme-danger)">*</span></label>
+        <input class="al-input" type="text" name="name" required placeholder="e.g. Minecraft Java">
+      </div>
+      <div>
+        <label class="al-label"><%= t('author') %></label>
+        <input class="al-input" type="text" name="author" placeholder="e.g. github.com/you">
+      </div>
+      <div>
+        <label class="al-label"><%= t('authorName') %></label>
+        <input class="al-input" type="text" name="authorName" placeholder="Your Name">
+      </div>
+      <div class="col-span-2">
+        <label class="al-label"><%= t('startupCommand') %> <span style="color:var(--theme-danger)">*</span></label>
+        <input class="al-input font-mono" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar">
+      </div>
+      <div class="col-span-2">
+        <label class="al-label"><%= t('description') %></label>
+        <textarea class="al-input" name="description" rows="2" placeholder="<%= t('imageDescriptionPlaceholder') %>" style="resize:none;"></textarea>
+      </div>
+    </div>
+    <div class="flex gap-2 pt-1">
+      <button type="button" onclick="imageManagerState.closeCreate()" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %>
+      </button>
+      <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createAndEdit') %>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script nonce="<%- nonce %>">
+var imageRejectState = { rejectId: null };
+
+function openRejectModal(id, name) {
+  imageRejectState.rejectId = id;
+  document.getElementById('rejectName').textContent = name;
+  document.getElementById('rejectReasonInput').value = '';
+  document.getElementById('rejectModal').classList.remove('opacity-0', 'pointer-events-none');
+}
+
+function closeRejectModal() {
+  document.getElementById('rejectModal').classList.add('opacity-0', 'pointer-events-none');
+  imageRejectState.rejectId = null;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('rejectModal').classList.contains('pointer-events-none')) {
+      closeRejectModal();
+    }
+  });
+  document.getElementById('rejectConfirmBtn').addEventListener('click', async function() {
+    if (imageRejectState.rejectId == null) return;
+    var id = imageRejectState.rejectId;
+    var reason = document.getElementById('rejectReasonInput').value;
+    var btn = this;
+    btn.disabled = true;
+    document.getElementById('rejectConfirmLabel').textContent = '<%= t('rejecting') %>';
+    try {
+      var res = await fetch('/api/v2/admin/images/' + id + '/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ reason: reason }),
+      });
+      var data = await res.json();
+      closeRejectModal();
+      if (data.error) { showToast(data.error, 'error'); }
+      else { showToast(data.message || 'Image rejected.', 'success'); window.location.reload(); }
+    } catch (e) { closeRejectModal(); showToast('Something went wrong.', 'error'); }
+    finally { btn.disabled = false; document.getElementById('rejectConfirmLabel').textContent = '<%= t('reject') %>'; }
+  });
+});
+</script>
+
+<div id="page-data" style="display:none"
+  data-approve-confirm="Approve this image? It will become available to all users."
+  data-approved="Image approved."
+  data-rejected="Image rejected."
+  data-error="Something went wrong."
+></div>
+
+<script nonce="<%- nonce %>">
+function imageManager() {
+  var _deleteId = null;
+
+  function esc(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function formatImageFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function setUploadMode(mode) {
+    var isUrl = mode === 'url';
+    var fileBtn = document.getElementById('uploadModeFile');
+    var urlBtn = document.getElementById('uploadModeUrl');
+    var fileSection = document.getElementById('uploadFileSection');
+    var urlSection = document.getElementById('importUrlSection');
+    var uploadBtn = document.getElementById('imageUploadButton');
+    var submitBtn = document.getElementById('importUrlSubmit');
+    var active = 'color:var(--theme-text-strong); background:var(--theme-bg-card);';
+    var idle = 'color:var(--theme-text-muted);';
+    if (fileBtn) fileBtn.setAttribute('style', isUrl ? idle : active);
+    if (urlBtn) urlBtn.setAttribute('style', isUrl ? active : idle);
+    if (fileSection) fileSection.classList.toggle('hidden', isUrl);
+    if (urlSection) urlSection.classList.toggle('hidden', !isUrl);
+    if (uploadBtn) uploadBtn.classList.toggle('hidden', isUrl);
+    if (submitBtn) submitBtn.classList.toggle('hidden', !isUrl);
+  }
+
+  return {
+    init: function() {
+      var self = this;
+      setUploadMode('file');
+      var dropZone = document.getElementById('imageDropZone');
+      var fileInput = document.getElementById('imageFileInput');
+      var uploadButton = document.getElementById('imageUploadButton');
+      if (dropZone) {
+        dropZone.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          dropZone.style.background = 'var(--theme-bg-hover)';
+          dropZone.style.borderColor = 'var(--theme-accent)';
+        });
+        dropZone.addEventListener('dragleave', function (e) {
+          e.preventDefault();
+          dropZone.style.background = '';
+          dropZone.style.borderColor = 'var(--theme-border)';
+        });
+        dropZone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          dropZone.style.background = '';
+          dropZone.style.borderColor = 'var(--theme-border)';
+          if (e.dataTransfer.files.length > 0) self.handleImageFileSelection(e.dataTransfer.files[0]);
+        });
+      }
+      if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+          if (e.target.files.length > 0) self.handleImageFileSelection(e.target.files[0]);
+        });
+      }
+      if (uploadButton) {
+        uploadButton.addEventListener('click', function() { self.confirmImageUpload(); });
+      }
+      var importUrlSubmit = document.getElementById('importUrlSubmit');
+      if (importUrlSubmit) {
+        importUrlSubmit.addEventListener('click', async function() {
+          var url = document.getElementById('importUrlInput').value.trim();
+          if (!url) { showToast('Enter a URL.', 'error'); return; }
+          var btn = importUrlSubmit;
+          btn.disabled = true; btn.classList.add('opacity-60');
+          try {
+            var r = await fetch('/api/v2/admin/images/import-url', {
+              method: 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify({ url: url }),
+            });
+            var d = await r.json();
+            if (r.ok && d.success) {
+              showToast(d.message || 'Image imported.', 'success');
+              window.location.reload();
+            } else { showToast((d.error && d.error.message) || 'Import failed.', 'error'); }
+          } catch (err) { showToast('Import failed.', 'error'); }
+          finally { btn.disabled = false; btn.classList.remove('opacity-60'); }
+        });
+      }
+      document.getElementById('uploadModeFile').addEventListener('click', function() { setUploadMode('file'); });
+      document.getElementById('uploadModeUrl').addEventListener('click', function() {
+        setUploadMode('url');
+        document.getElementById('importUrlInput').focus();
+      });
+    },
+    handleRowClick: function(e, url) {
+      if (!e.target.closest('button,a')) window.location.href = url;
+    },
+    openCreate: function() {
+      window.modal.show({
+        title: '<%= t('newImage') %>',
+        bodyNode: document.getElementById('createContent'),
+        panelClass: 'max-w-xl',
+      });
+    },
+    closeCreate: function() { window.modal.close(); },
+    openDelete: function(id, name) {
+      _deleteId = id;
+      window.modal.confirm({
+        title: '<%= t('deleteImageConfirm') %>',
+        body: '"' + name + '" <%= t('willBePermanentlyRemoved') %>',
+        danger: true, confirmLabel: '<%= t('delete') %>',
+        onConfirm: function() { imageManagerState.deleteImage(); },
+      });
+    },
+    deleteImage: async function() {
+      if (!_deleteId) return;
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var res = await fetch('/admin/images/delete/' + _deleteId, {
+        method: 'DELETE',
+        headers: { 'x-csrf-token': csrfToken }
+      });
+      if (res.ok) { showToast('Image deleted.', 'success'); window.location.reload(); }
+      else { showToast('Failed.', 'error'); }
+    },
+    openUploadImageModal: function() {
+      setUploadMode('file');
+      var modal = document.getElementById('uploadImageModal');
+      if (!modal) return;
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      this.removeSelectedImageFile();
+      var fileInput = document.getElementById('imageFileInput');
+      if (fileInput) fileInput.value = '';
+    },
+    closeUploadImageModal: function() {
+      var modal = document.getElementById('uploadImageModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    },
+    removeSelectedImageFile: function() {
+      window.selectedImageFile = null;
+      var preview = document.getElementById('imageFilePreview');
+      var dropZone = document.getElementById('imageDropZone');
+      var btn = document.getElementById('imageUploadButton');
+      if (preview) preview.classList.add('hidden');
+      if (dropZone) dropZone.classList.remove('hidden');
+      if (btn) btn.disabled = true;
+    },
+    handleImageFileSelection: function(file) {
+      if (!file) return;
+      window.selectedImageFile = file;
+      document.getElementById('imageSelectedFileName').textContent = file.name;
+      document.getElementById('imageSelectedFileSize').textContent = formatImageFileSize(file.size);
+      document.getElementById('imageFilePreview').classList.remove('hidden');
+      document.getElementById('imageDropZone').classList.add('hidden');
+      document.getElementById('imageUploadButton').disabled = false;
+    },
+    confirmImageUpload: function() {
+      if (!window.selectedImageFile) { showToast('Select a JSON file to upload.', 'error'); return; }
+      var file = window.selectedImageFile;
+      this.closeUploadImageModal();
+      var r = new FileReader();
+      r.onload = function(e) {
+        try { JSON.parse(e.target.result); } catch (err) { showToast('Invalid JSON.', 'error'); return; }
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/admin/images/upload', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('x-csrf-token', csrfToken);
+        xhr.onload = function() {
+          if (xhr.status === 200) { showToast('Image uploaded.', 'success'); window.location.reload(); }
+          else { showToast('Upload failed.', 'error'); }
+        };
+        xhr.onerror = function() { showToast('Upload failed.', 'error'); };
+        xhr.send(e.target.result);
+      };
+      r.readAsText(file);
+    },
+    submitCreateImage: function(e) {
+      var form = e.target;
+      var data = Object.fromEntries(new FormData(form));
+      if (!data.name || !data.startup) { showToast('Name and startup command are required.', 'error'); return; }
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      fetch('/admin/images/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify(data),
+      }).then(function(r) { return r.json(); }).then(function(result) {
+        if (result.success !== false) {
+          showToast('Image created.', 'success');
+          imageManagerState.closeCreate();
+          window.location.reload();
+        } else { showToast(result.error || result.message || 'Failed to create image.', 'error'); }
+      }).catch(function() { showToast('Network error.', 'error'); });
+    }
+  };
+}
+
+var imageManagerState = imageManager();
+document.addEventListener('DOMContentLoaded', function() { imageManagerState.init(); });
+</script>
+
+<script nonce="<%- nonce %>">
+function imageStore() {
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var CAT_CLS = { game: 'cat-game', application: 'cat-application', generic: 'cat-generic' };
+  var CAT_LABEL = { game: window.__i18n.categoryGame || 'Game', application: window.__i18n.categoryApp || 'App', generic: window.__i18n.categoryGeneric || 'Generic' };
+  var CAT_COLOR = {
+    game: _rootStyle.getPropertyValue('--theme-accent-purple').trim() || '#7c3aed',
+    application: _rootStyle.getPropertyValue('--theme-accent-blue').trim() || '#0284c7',
+    generic: _rootStyle.getPropertyValue('--theme-success').trim() || '#16a34a',
+  };
+
+  var allImages = [], pendingEgg = null, mdParse = null;
+  var searchQuery = '', sortBy = 'app', sortDir = 'asc';
+  var mountedRoot = null, inited = false;
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function cap(s) { return s.replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+  function show(id,d) { var e=document.getElementById(id); if(e)e.style.display=d||'block'; }
+  function hide(id) { var e=document.getElementById(id); if(e)e.style.display='none'; }
+  function catDot(cat,size) { var c=CAT_COLOR[cat]||'#999'; return '<span style="display:inline-block;width:'+(size||8)+'px;height:'+(size||8)+'px;border-radius:50%;background:'+c+';flex-shrink:0"></span>'; }
+  function catBadge(cat) { return '<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset '+(CAT_CLS[cat]||'')+'">'+catDot(cat,6)+(CAT_LABEL[cat]||cat)+'</span>'; }
+
+  function groupData() {
+    var map = {};
+    allImages.forEach(function(img) {
+      if (!map[img.group]) map[img.group] = { imgs: [], desc: img.description||'', readme: img.groupReadme||'' };
+      map[img.group].imgs.push(img);
+      if (img.description && !map[img.group].desc) map[img.group].desc = img.description;
+    });
+    var q = searchQuery.toLowerCase().trim();
+    var out = [];
+    Object.keys(map).forEach(function(g) {
+      var entry = { group: g, imgs: map[g].imgs, desc: map[g].desc, readme: map[g].readme };
+      if (q && !g.toLowerCase().includes(q)) return;
+      var counts = {};
+      entry.imgs.forEach(function(i) { counts[i.category] = (counts[i.category]||0)+1; });
+      entry.domCat = Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];})[0]||'game';
+      out.push(entry);
+    });
+    out.sort(function(a,b) {
+      var va, vb;
+      if (sortBy==='type') { va=CAT_LABEL[a.domCat]||''; vb=CAT_LABEL[b.domCat]||''; }
+      else if (sortBy==='author') { va=a.imgs.length; vb=b.imgs.length; }
+      else if (sortBy==='desc') { va=a.desc||''; vb=b.desc||''; }
+      else { va=a.group; vb=b.group; }
+      if (va<vb) return sortDir==='asc'?-1:1;
+      if (va>vb) return sortDir==='asc'?1:-1;
+      return 0;
+    });
+    return out;
+  }
+
+  function sortKey(col) {
+    if (col===sortBy) sortDir=sortDir==='asc'?'desc':'asc';
+    else { sortBy=col; sortDir='asc'; }
+    updateSortArrows();
+    render();
+  }
+
+  function updateSortArrows() {
+    var cols = { app:'sortApp', type:'sortType', author:'sortAuthor', desc:'sortDesc' };
+    Object.keys(cols).forEach(function(k) {
+      var el=document.getElementById(cols[k]);
+      if(el) el.textContent = k===sortBy ? (sortDir==='asc'?'\u25B2':'\u25BC') : '';
+    });
+    document.querySelectorAll('#listEl th').forEach(function(th) {
+      var btn=th.querySelector('[data-sort]');
+      var col=btn&&btn.getAttribute('data-sort');
+      if(!col)return;
+      th.setAttribute('aria-sort',col===sortBy?(sortDir==='asc'?'ascending':'descending'):'none');
+    });
+  }
+
+  async function loadCatalogue() {
+    show('loadingEl'); hide('listEl'); hide('errorEl'); hide('emptyEl');
+    var st=document.getElementById('statusText'); if(st)st.textContent='';
+    try {
+      var res=await fetch('/api/v2/admin/images/store/catalogue');
+      if(!res.ok) throw new Error(res.status);
+      var data=await res.json();
+      allImages=data.images||[];
+      hide('loadingEl');
+      var age=data.builtAt?Math.round((Date.now()-data.builtAt)/60000):0;
+      if(st) st.textContent=allImages.length+' images \u00B7 '+(age<1?'fresh':age+'m old');
+      updateCount(); render();
+    } catch(e) { console.error('Failed to load catalogue:',e); hide('loadingEl'); show('errorEl'); }
+  }
+
+  async function doRefresh() {
+    document.getElementById('refreshBtnLoad').disabled=true;
+    var st=document.getElementById('statusText'); if(st)st.textContent='Refreshing\u2026';
+    var before=0;
+    try { before=(await(await fetch('/api/v2/admin/images/store/catalogue')).json()).builtAt||0; } catch(e) {}
+    try {
+      var refreshRes=await fetch('/api/v2/admin/images/store/refresh',{method:'POST'});
+      if(!refreshRes.ok) throw new Error('Refresh failed');
+    } catch(e) {
+      document.getElementById('refreshBtnLoad').disabled=false;
+      if(st)st.textContent='';
+      if(typeof showToast==='function') showToast('Could not refresh the catalogue','error');
+      return;
+    }
+    var REFRESH_POLL_INTERVAL_MS = 1000;
+    for(var i=0;i<60;i++) {
+      await new Promise(function(r){setTimeout(r,REFRESH_POLL_INTERVAL_MS);});
+      try { var cur=(await(await fetch('/api/v2/admin/images/store/catalogue')).json()).builtAt||0; if(cur!==before)break; } catch(e) {}
+    }
+    allImages=[]; show('loadingEl'); hide('listEl'); hide('emptyEl');
+    await loadCatalogue();
+    document.getElementById('refreshBtnLoad').disabled=false;
+  }
+
+  function updateCount() {
+    var groups=groupData();
+    var el=document.getElementById('countLabel');
+    if(el) el.textContent=groups.length+' / '+Object.keys(allImages.reduce(function(m,i){m[i.group]=1;return m;},{})).length;
+  }
+
+  function render() {
+    var groups=groupData();
+    hide('listEl'); hide('emptyEl'); updateCount();
+    if(!groups.length) {
+      document.getElementById('emptyTxt').textContent=allImages.length?'No apps match your search.':'The image catalogue is empty.';
+      show('emptyEl'); return;
+    }
+    var body=document.getElementById('listBody'); body.innerHTML='';
+    groups.forEach(function(g){body.appendChild(makeGroupRow(g));});
+    show('listEl');
+  }
+
+  function makeGroupRow(g) {
+    var tr=document.createElement('tr');
+    tr.className='al-table-tr transition-colors cursor-pointer group-hdr-tr';
+    tr.innerHTML='<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap px-3 py-4">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+' image'+(g.imgs.length!==1?'s':'')+'</td><td class="al-table-td px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,'')):esc(g.desc||''))+'</td>';
+    tr.addEventListener('click',function(){openGroup(g.group,g.imgs);});
+    return tr;
+  }
+
+  function stageBody(templateId,title,panelClass) {
+    var content=document.getElementById('globalModalContent');
+    if(content){content.innerHTML='';var tpl=document.getElementById(templateId);if(tpl)content.appendChild(tpl.content.cloneNode(true));}
+    window.modal.show({title:title||'',panelClass:panelClass});
+  }
+
+  function openGroup(group,imgs) {
+    var s=imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+    stageBody('groupTpl',cap(group),'max-w-3xl');
+    document.getElementById('grpCount').textContent=s.length+' image'+(s.length!==1?'s':'');
+    var list=document.getElementById('grpSubList'); list.innerHTML='';
+    s.forEach(function(img,i){
+      var row=document.createElement('div'); row.className='grp-img-row';
+      var subLabel=img.subGroup&&img.subGroup!==img.group?img.subGroup.replace(img.group+'/',''):'';
+      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+'</p>'+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+'</p>':'')+'</div></div>'+'<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">Install</button>';
+      row.style.animationDelay=Math.min(i*20,300)+'ms';
+      row.addEventListener('click',function(){openEgg(img);});
+      row.querySelector('button').addEventListener('click',function(e){e.stopPropagation();openEgg(img);});
+      list.appendChild(row);
+    });
+    renderMd(imgs[0]&&imgs[0].groupReadme||'',document.getElementById('grpReadme'));
+  }
+
+  async function getMd() {
+    if(mdParse) return mdParse;
+    try { var mod=await import('/vendor/marked/lib/marked.esm.js'); mdParse=mod.marked; mdParse.setOptions({gfm:true,breaks:true}); }
+    catch(e) { mdParse={parse:function(s){return esc(s).replace(/\n/g,'<br>');}}; }
+    return mdParse;
+  }
+
+  async function renderMd(md,el) {
+    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">Rendering\u2026</p>';
+    try { var m=await getMd(); el.innerHTML='<div class="md-body">'+(md?m.parse(md):'<p style="font-style:italic;color:#a3a3a3;font-size:12px;">No readme available.</p>')+'</div>'; }
+    catch(e) { el.innerHTML='<div class="md-body">'+esc(md||'')+'</div>'; }
+  }
+
+  function openEgg(img) {
+    pendingEgg=img;
+    stageBody('eggTpl',img.name,'max-w-lg');
+    var catEl=document.getElementById('eggCat');
+    catEl.className='text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset '+(CAT_CLS[img.category]||'');
+    catEl.innerHTML=catDot(img.category,6)+(CAT_LABEL[img.category]||img.category);
+    document.getElementById('eggDesc').textContent=img.description||'';
+    document.getElementById('eggAuthor').textContent=img.author?'by '+img.author:'';
+    renderMd(img.fullReadme||img.readme||'',document.getElementById('eggReadme'));
+    hide('eggErr');
+    var btn=document.getElementById('eggInstallBtn');
+    btn.innerHTML='Install'; btn.disabled=false; btn.style.background=''; btn.style.borderColor=''; btn.style.pointerEvents='';
+  }
+
+  async function confirmInstall() {
+    if(!pendingEgg) return;
+    var btn=document.getElementById('eggInstallBtn');
+    btn.disabled=true; btn.textContent='Installing\u2026'; hide('eggErr');
+    try {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var res=await fetch('/api/v2/admin/images/store/install',{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},body:JSON.stringify(pendingEgg.egg)});
+      var body=await res.json();
+      if(!res.ok){document.getElementById('eggErrTxt').textContent=body.error||'Installation failed.';show('eggErr');btn.disabled=false;btn.innerHTML='Install';return;}
+      var installedName=pendingEgg.name;
+      btn.innerHTML='<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Installed';
+      btn.style.background='var(--theme-success, #16a34a)'; btn.style.borderColor='var(--theme-success, #16a34a)'; btn.style.pointerEvents='none';
+      if(typeof showToast==='function') showToast('"'+installedName+'" installed successfully.', 'success');
+      setTimeout(function(){window.modal.close();pendingEgg=null;},1500);
+    } catch(err) {
+      console.error('Image install error:',err);
+      document.getElementById('eggErrTxt').textContent='Installation failed. Try again.';
+      show('eggErr'); btn.disabled=false; btn.innerHTML='Install';
+    }
+  }
+
+  function doSearch(val) { searchQuery=val; render(); }
+
+  function mount(root) {
+    if(inited) return; inited=true;
+    mountedRoot=root||document;
+    var input=mountedRoot.querySelector?mountedRoot.querySelector('#image-store-search-input'):null;
+    if(input&&!input._alStoreBound){input._alStoreBound=true;input.addEventListener('input',function(){doSearch(this.value);});}
+    if(mountedRoot&&mountedRoot.addEventListener&&!mountedRoot._alStoreSortBound){
+      mountedRoot._alStoreSortBound=true;
+      mountedRoot.addEventListener('click',function(e){
+        var btn=e.target&&e.target.closest?e.target.closest('[data-sort]'):null;
+        if(btn&&mountedRoot.contains(btn)){e.preventDefault();sortKey(btn.getAttribute('data-sort'));}
+      });
+    }
+    loadCatalogue();
+  }
+
+  return {
+    init: function() {
+      window.AdminImageStore = { mount: mount, destroy: function() { inited=false; }, VERSION: 2 };
+      window.doSearch = doSearch;
+      window.doRefresh = doRefresh;
+      window.loadCatalogue = loadCatalogue;
+      window.sortKey = sortKey;
+      window.confirmInstall = confirmInstall;
+      document.addEventListener('al:tabs-change', function(e) {
+        var detail = e.detail;
+        if (detail && detail.name === 'store') {
+          mount(document);
+        }
+      });
+      if (document.getElementById('image-store-search-input')) mount(document);
+    }
+  };
+}
+
+var imageStoreState = imageStore();
+document.addEventListener('DOMContentLoaded', function() { imageStoreState.init(); });
+</script>
+
+<%- include('../../layouts/admin-footer') %>

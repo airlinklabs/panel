@@ -1,0 +1,258 @@
+<%- include('../../layouts/admin', { title: t('apiDocs') }) %>
+
+<style>
+.response-container { display: none; }
+.response-container.visible { display: block; }
+.category-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s cubic-bezier(0.16,1,0.3,1);
+}
+.category-panel.open {
+  grid-template-rows: 1fr;
+}
+.category-panel > div { overflow: hidden; min-height: 0; }
+</style>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbApiKeys'), url: '/admin/apikeys' },
+    { label: t('apiDocs') }
+  ] }) %>
+
+  <div class="flex items-start justify-between gap-4 mt-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('apiDocs') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('apiDocsDescription') %></p>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <a href="/admin/apikeys" class="al-btn-secondary">
+        <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span><%= t('manageApiKeys') %></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- API Key Selection for Testing -->
+  <div class="mt-4">
+    <div class="al-card p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div class="flex-grow">
+        <label for="apiKeySelect" class="block text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= t('selectApiKeyForTesting') %></label>
+        <select id="apiKeySelect" class="al-form-select">
+          <option value=""><%= t('selectApiKey') %></option>
+          <% apiKeys.forEach(function(key) { %>
+            <% if (key.active) { %>
+              <option value="<%= key.key %>" data-permissions="<%= key.permissions %>"><%= key.name %></option>
+            <% } %>
+          <% }); %>
+        </select>
+      </div>
+      <div class="flex-shrink-0 self-end sm:self-center">
+        <button type="button" id="saveApiKeyBtn" class="al-btn-primary" disabled>
+          <%- icon('play', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <span><%= t('useForTesting') %></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Getting Started & Response Format -->
+  <div class="mt-5">
+    <div class="al-card p-6">
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= t('gettingStarted') %></h2>
+        <p class="mt-2 text-sm" style="color:var(--theme-text)"><%= t('gettingStartedDesc') %></p>
+        <p class="mt-2 text-sm" style="color:var(--theme-text)"><%= t('authHeaderDesc') %></p>
+        <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= t('responseFormat') %></h2>
+        <p class="mt-2 text-sm" style="color:var(--theme-text)"><%= t('responseFormatDesc') %></p>
+        <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code>{
+  "data": {
+    // Response data here
+  }
+}</code></pre>
+        <p class="mt-4 text-sm" style="color:var(--theme-text)"><%= t('errorFormatDesc') %></p>
+        <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text)"><code>{
+  "error": "Error message"
+}</code></pre>
+      </div>
+
+      <!-- API Endpoints -->
+      <div>
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= t('apiEndpoints') %></h2>
+        <div class="space-y-8">
+          <% apiEndpoints.forEach(function(category) { %>
+            <div>
+              <h3 class="text-md font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)">
+                <%= category.category %> Endpoints
+              </h3>
+              <div class="space-y-6">
+                <% category.endpoints.forEach(function(endpoint) { %>
+                  <div class="border rounded-xl overflow-hidden" style="border-color:var(--theme-border)">
+                    <div class="px-4 py-3 flex items-center flex-wrap gap-2" style="background:var(--theme-bg-secondary)">
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
+                        <% if (endpoint.method === 'GET') { %>
+                          " style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:var(--theme-success)
+                        <% } else if (endpoint.method === 'POST') { %>
+                          " style="background:var(--theme-accent-subtle);color:var(--theme-accent);--tw-ring-color:var(--theme-accent)
+                        <% } else if (endpoint.method === 'PUT') { %>
+                          " style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:var(--theme-warning)
+                        <% } else if (endpoint.method === 'DELETE') { %>
+                          " style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:var(--theme-danger)
+                        <% } %>
+                        ">
+                        <%= endpoint.method %>
+                      </span>
+                      <code class="text-sm font-mono"><%= endpoint.path %></code>
+                      <span class="ml-auto text-xs" style="color:var(--theme-text-muted)"><%= t('permission') %>: <%= endpoint.permission %></span>
+                    </div>
+
+                    <div class="px-4 py-3">
+                      <p class="text-sm" style="color:var(--theme-text)"><%= endpoint.description %></p>
+
+                      <% if (endpoint.requestExample) { %>
+                        <div class="mt-3">
+                          <h4 class="text-xs font-medium mb-1" style="color:var(--theme-text)"><%= t('requestBody') %>:</h4>
+                          <pre class="p-3 rounded-md overflow-x-auto text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text)"><code><%= endpoint.requestExample %></code></pre>
+                        </div>
+                      <% } %>
+
+                      <div class="mt-3">
+                        <h4 class="text-xs font-medium mb-1" style="color:var(--theme-text)"><%= t('response') %>:</h4>
+                        <pre class="p-3 rounded-md overflow-x-auto text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text)"><code><%= endpoint.responseExample %></code></pre>
+                      </div>
+
+                      <!-- Test Endpoint Section -->
+                      <div class="mt-4 pt-3 border-t" style="border-color:var(--theme-border)">
+                        <div class="flex justify-between items-center mb-2">
+                          <h4 class="text-sm font-medium" style="color:var(--theme-text)"><%= t('testEndpoint') %></h4>
+                          <% var dynamicParams = endpoint.path.match(/:([a-zA-Z0-9_]+)/g); %>
+                          <div class="flex items-center gap-2">
+                            <% if (dynamicParams) { %>
+                              <% dynamicParams.forEach(function(param) {
+                                var paramName = param.replace(':', '');
+                              %>
+                                <input
+                                  type="text"
+                                  data-param-name="<%= paramName %>"
+                                  class="inline-block w-16 rounded-md border text-xs px-2 py-1"
+                                  style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)"
+                                  placeholder="<%= paramName %>"
+                                />
+                              <% }); %>
+                            <% } %>
+                            <button type="button"
+                              class="test-endpoint-btn text-xs rounded-xl px-3 py-1 font-medium shadow-sm transition inline-flex items-center gap-1.5"
+                              data-method="<%= endpoint.method %>"
+                              data-path="<%= endpoint.path %>"
+                              data-permission="<%= endpoint.permission %>"
+                              data-request="<%= endpoint.requestExample ? endpoint.requestExample.trim() : '' %>"
+                              disabled
+                              style="background:var(--theme-primary);color:var(--theme-accent-text)">
+                              <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %>
+                              <%= t('testBtn') %>
+                            </button>
+                          </div>
+                        </div>
+
+                        <% if (endpoint.method !== 'GET') { %>
+                          <div class="mb-2">
+                            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text)"><%= t('requestBody') %>:</label>
+                            <textarea
+                              class="request-body block w-full rounded-md shadow-sm text-xs h-24"
+                              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)"
+                              placeholder="<%= t('enterJsonBody') %>"
+                              data-endpoint-path="<%= endpoint.path %>"><%= endpoint.requestExample ? endpoint.requestExample.trim() : '' %></textarea>
+                          </div>
+                        <% } %>
+
+                        <div class="response-container">
+                          <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-medium" style="color:var(--theme-text)"><%= t('response') %>:</label>
+                            <span class="response-status text-xs font-medium"></span>
+                          </div>
+                          <pre class="response-output p-3 rounded-md overflow-x-auto text-xs h-32 overflow-y-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text)"><code><%= t('noResponseYet') %></code></pre>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var selectedApiKey = null;
+  var btn = document.getElementById('saveApiKeyBtn');
+  var sel = document.getElementById('apiKeySelect');
+
+  btn.addEventListener('click', function() {
+    selectedApiKey = sel.value;
+    btn.classList.add('opacity-50');
+    btn.disabled = true;
+    document.querySelectorAll('.test-endpoint-btn').forEach(function(b) { b.disabled = false; });
+    showToast('<%= t('apiKeySelected') || 'API key ready for testing' %>', 'success');
+  });
+
+  sel.addEventListener('change', function() {
+    btn.disabled = !this.value;
+    btn.classList.remove('opacity-50');
+  });
+
+  document.querySelectorAll('.test-endpoint-btn').forEach(function(b) {
+    b.addEventListener('click', async function() {
+      var method = this.dataset.method;
+      var path = this.dataset.path;
+      var testBtn = this;
+      if (!selectedApiKey) { showToast('<%= t('selectApiKeyFirst') || 'Select an API key first' %>', 'error'); return; }
+
+      var params = document.querySelectorAll('[data-param-name]');
+      params.forEach(function(p) { path = path.replace(':' + p.dataset.paramName, p.value); });
+
+      var body = null;
+      if (method !== 'GET') {
+        var textarea = testBtn.closest('.space-y-6').querySelector('.request-body[data-endpoint-path="' + this.dataset.path + '"]');
+        if (textarea) body = textarea.value;
+      }
+
+      testBtn.classList.add('opacity-50');
+      testBtn.disabled = true;
+
+      var container = testBtn.closest('.space-y-6').querySelector('.response-container');
+      var output = container.querySelector('.response-output code');
+      var status = container.querySelector('.response-status');
+      container.classList.add('visible');
+      output.textContent = '<%= t('sendingRequest') || 'Sending request...' %>';
+
+      try {
+        var fetchOpts = { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + selectedApiKey } };
+        if (body) fetchOpts.body = body;
+        var res = await fetch(path, fetchOpts);
+        var json = await res.json();
+        status.textContent = res.status + ' ' + res.statusText;
+        status.style.color = res.ok ? 'var(--theme-success)' : 'var(--theme-danger)';
+        output.textContent = JSON.stringify(json, null, 2);
+      } catch (e) {
+        status.textContent = 'Error';
+        status.style.color = 'var(--theme-danger)';
+        output.textContent = '<%= t('requestFailed') || 'Request failed' %>';
+      } finally {
+        testBtn.classList.remove('opacity-50');
+        testBtn.disabled = false;
+      }
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

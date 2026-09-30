@@ -1,21 +1,21 @@
-export type UserRole = "owner" | "admin" | "privileged" | "user";
+export type UserRole = 'owner' | 'admin' | 'privileged' | 'user';
 
-const VALID_ROLES = new Set<string>(["owner", "admin", "privileged", "user"]);
+const VALID_ROLES = new Set<string>(['owner', 'admin', 'privileged', 'user']);
 
 export function isRoleInput(value: unknown): value is UserRole {
-  return typeof value === "string" && VALID_ROLES.has(value);
+  return typeof value === 'string' && VALID_ROLES.has(value);
 }
 
 // Prisma data assigned whenever a user's role changes. isAdmin is derived so
 // the existing `user.isAdmin` checks continue to gate protected routes.
 export function roleFields(role: UserRole): { role: string; isAdmin: boolean } {
-  const isAdmin = role === "owner" || role === "admin";
+  const isAdmin = role === 'owner' || role === 'admin';
   return { role, isAdmin };
 }
 
 /** Check whether a role is considered administrative. */
 export function isRoleAdmin(role: string | undefined): boolean {
-  return role === "owner" || role === "admin";
+  return role === 'owner' || role === 'admin';
 }
 
 /**
@@ -29,8 +29,8 @@ export async function getUserPermissions(
   user: { role?: string | null; isAdmin?: boolean | null; id: number },
   opts?: { rolePermissions?: string[] },
 ): Promise<string[]> {
-  if (user.role === "owner" || user.role === "admin" || user.isAdmin) {
-    return ["*"];
+  if (user.role === 'owner' || user.role === 'admin' || user.isAdmin) {
+    return ['*'];
   }
 
   // If caller already resolved role permissions, skip the DB hit.
@@ -39,9 +39,9 @@ export async function getUserPermissions(
   }
 
   // Lazy import to avoid circular dependency (authorization → prisma → ...).
-  const { default: prisma } = await import("../../../db");
+  const { default: prisma } = await import('../../../db');
   const role = await prisma.role.findUnique({
-    where: { name: user.role ?? "" },
+    where: { name: user.role ?? '' },
   });
   if (!role) {
     return [];
@@ -51,7 +51,7 @@ export async function getUserPermissions(
     return [];
   }
   return Array.isArray(raw)
-    ? raw.filter((p: unknown): p is string => typeof p === "string")
+    ? raw.filter((p: unknown): p is string => typeof p === 'string')
     : [];
 }
 
@@ -67,19 +67,19 @@ export function hasPermission(
   userPermissions: string[],
   requiredPermission: string,
 ): boolean {
-  const parent = requiredPermission.includes(".")
-    ? requiredPermission.slice(0, requiredPermission.lastIndexOf("."))
+  const parent = requiredPermission.includes('.')
+    ? requiredPermission.slice(0, requiredPermission.lastIndexOf('.'))
     : null;
 
   for (const p of userPermissions) {
-    if (p === "*") {
+    if (p === '*') {
       return true;
     }
     if (p === requiredPermission) {
       return true;
     }
     if (
-      p.endsWith(".*") &&
+      p.endsWith('.*') &&
       (requiredPermission === p.slice(0, -2) ||
         requiredPermission.startsWith(p.slice(0, -1)))
     ) {

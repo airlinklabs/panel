@@ -1,0 +1,11 @@
+<%- include('base', { title: typeof title !== 'undefined' ? title : 'Admin' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="hidden lg:block w-60 h-full">
+      <%- include('../partials/admin-sidebar') %>
+    </div>
+    <%- include('../partials/search-overlay') %>
+    <div class="flex min-w-0 flex-1 flex-col">
+      <%- include('../partials/topbar') %>
+      <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">

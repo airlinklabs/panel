@@ -1,4 +1,4 @@
-import type { ApiKey, SubUser, Users } from "../generated/prisma/client";
+import type { ApiKey, SubUser, Users } from '../generated/prisma/client';
 
 export interface PanelSessionUser {
   id: number;
@@ -9,12 +9,16 @@ export interface PanelSessionUser {
   role?: string;
 }
 
-declare module "express-session" {
+declare module 'express-session' {
   interface SessionData {
     user: PanelSessionUser;
     pendingUserId?: number;
     pendingTotpSecret?: string;
     pendingWebAuthnChallenge?: string;
+    flash?: {
+      type: 'success' | 'error' | 'warning' | 'info';
+      message: string;
+    } | null;
   }
 }
 

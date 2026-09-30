@@ -1,20 +1,32 @@
 (function () {
-  const searchButton = document.getElementById("searchButton");
-  const searchOverlay = document.getElementById("searchOverlay");
-  const searchPanel = document.getElementById("searchPanel");
-  const searchInput = document.getElementById("searchInput");
-  const searchResults = document.getElementById("searchResults");
-  const navLinks = document.querySelectorAll(".nav-link");
+  // Two entry points open this overlay: the desktop topbar pill and the phone
+  // top bar. Both are marked data-search-trigger, so state (aria-expanded) is
+  // kept in sync across every one of them.
+  const searchButtons = Array.prototype.slice.call(
+    document.querySelectorAll('[data-search-trigger]'),
+  );
+  const searchButton = searchButtons[0] || null;
+  let lastTrigger = null;
+  const setSearchExpanded = function (value) {
+    searchButtons.forEach(function (btn) {
+      btn.setAttribute('aria-expanded', value);
+    });
+  };
+  const searchOverlay = document.getElementById('searchOverlay');
+  const searchPanel = document.getElementById('searchPanel');
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+  const navLinks = document.querySelectorAll('.nav-link');
 
   if (!searchOverlay || !searchInput || !searchResults) {
     // Search UI not present on this page
   } else {
     let activeIndex = -1;
     let searchTimeout = null;
-    let lastQuery = "";
+    let lastQuery = '';
     let panelClosing = false;
     let recentSearches = JSON.parse(
-      localStorage.getItem("recentSearches") || "[]",
+      localStorage.getItem('recentSearches') || '[]',
     );
 
     const SEARCH_DEBOUNCE_MS = 150;
@@ -33,14 +45,26 @@
 
     const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
 
+    // Copy is pulled from the live catalog, injected as window.__i18n by
+    // layouts/base.ejs. Every string that reaches the user goes through tx();
+    // the English literal is only the last-resort fallback.
+    function tx(key, fallback) {
+      return (window.__i18n && window.__i18n[key]) || fallback;
+    }
+    // Admin pages are listed with an "Admin" prefix so they stay distinct
+    // from their user-facing twins in the same result list.
+    function txAdmin(key, fallback) {
+      return `${tx('admin', 'Admin')} ${tx(key, fallback)}`;
+    }
+
     const typeIcon = {
-      server: alIcon("server", "w-4 h-4 shrink-0 text-neutral-400"),
-      user: alIcon("user", "w-4 h-4 shrink-0 text-neutral-400"),
-      node: alIcon("hard-drive", "w-4 h-4 shrink-0 text-neutral-400"),
-      nav: alIcon("search", "w-4 h-4 shrink-0 text-neutral-400"),
-      clock: alIcon("clock", "w-4 h-4 shrink-0 text-neutral-400"),
-      arrow: alIcon("arrow-up-right", "w-4 h-4 shrink-0 text-neutral-400"),
-      feature: alIcon("sparkles", "w-4 h-4 shrink-0 text-neutral-400"),
+      server: alIcon('server', 'w-4 h-4 shrink-0 text-neutral-400'),
+      user: alIcon('user', 'w-4 h-4 shrink-0 text-neutral-400'),
+      node: alIcon('hard-drive', 'w-4 h-4 shrink-0 text-neutral-400'),
+      nav: alIcon('search', 'w-4 h-4 shrink-0 text-neutral-400'),
+      clock: alIcon('clock', 'w-4 h-4 shrink-0 text-neutral-400'),
+      arrow: alIcon('arrow-up-right', 'w-4 h-4 shrink-0 text-neutral-400'),
+      feature: alIcon('sparkles', 'w-4 h-4 shrink-0 text-neutral-400'),
     };
 
     function escHtml(t) {
@@ -48,9 +72,9 @@
     }
 
     function highlightMatch(text, term) {
-      if (!term) return escHtml(text);
-      const safe = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp("(" + safe + ")", "gi");
+      if (!term) {return escHtml(text);}
+      const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${  safe  })`, 'gi');
       return escHtml(text).replace(
         regex,
         '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded px-0.5">$1</mark>',
@@ -58,24 +82,24 @@
     }
 
     function saveRecentSearch(term) {
-      if (!term || term.length < MIN_RECENT_LENGTH) return;
+      if (!term || term.length < MIN_RECENT_LENGTH) {return;}
       recentSearches = recentSearches.filter(function (s) {
         return s !== term;
       });
       recentSearches.unshift(term);
       if (recentSearches.length > MAX_RECENT_SEARCHES)
-        recentSearches = recentSearches.slice(0, MAX_RECENT_SEARCHES);
-      localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
+      {recentSearches = recentSearches.slice(0, MAX_RECENT_SEARCHES);}
+      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
     }
 
     function levenshtein(a, b) {
       const m = a.length,
         n = b.length;
-      if (!m) return n;
-      if (!n) return m;
+      if (!m) {return n;}
+      if (!n) {return m;}
       let prev = new Array(n + 1);
       let curr = new Array(n + 1);
-      for (let j = 0; j <= n; j++) prev[j] = j;
+      for (let j = 0; j <= n; j++) {prev[j] = j;}
       for (let i = 1; i <= m; i++) {
         curr[0] = i;
         for (let j = 1; j <= n; j++) {
@@ -93,180 +117,187 @@
     }
 
     function normalize(s) {
-      return (s || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+      return (s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/[^a-z0-9]+/g, ' ')
         .trim();
     }
 
     function fuzzyIncludes(token, haystack) {
-      if (token.length < FUZZY_MIN_TOKEN_LENGTH) return false;
+      if (token.length < FUZZY_MIN_TOKEN_LENGTH) {return false;}
       const words = haystack.split(/\s+/);
       for (const w of words) {
-        if (Math.abs(w.length - token.length) > FUZZY_MAX_LENGTH_DIFF) continue;
-        if (levenshtein(w, token) <= 1) return true;
+        if (Math.abs(w.length - token.length) > FUZZY_MAX_LENGTH_DIFF) {continue;}
+        if (levenshtein(w, token) <= 1) {return true;}
       }
       return false;
     }
 
     function scoreTerm(term, hay) {
-      if (hay === term) return SCORE_EXACT;
-      if (hay.startsWith(term)) return SCORE_PREFIX;
-      if (hay.includes(term)) return SCORE_CONTAINS;
-      const tokens = term.split(" ");
+      if (hay === term) {return SCORE_EXACT;}
+      if (hay.startsWith(term)) {return SCORE_PREFIX;}
+      if (hay.includes(term)) {return SCORE_CONTAINS;}
+      const tokens = term.split(' ');
       if (tokens.length > 1 && tokens.every((t) => hay.includes(t)))
-        return SCORE_ALL_TOKENS;
-      if (tokens.some((t) => hay.includes(t))) return SCORE_ANY_TOKEN;
-      if (tokens.some((t) => fuzzyIncludes(t, hay))) return SCORE_FUZZY;
+      {return SCORE_ALL_TOKENS;}
+      if (tokens.some((t) => hay.includes(t))) {return SCORE_ANY_TOKEN;}
+      if (tokens.some((t) => fuzzyIncludes(t, hay))) {return SCORE_FUZZY;}
       return 0;
     }
 
     const navAliases = {
-      servers: "instances instances container containers game server",
-      overview: "dashboard home control panel main",
-      settings: "settings configuration config preferences options",
-      users: "users members people accounts memberships",
-      nodes: "nodes machines daemons daemon hosts",
-      images: "images docker eggs templates boxes",
-      addons: "addons plugins extensions mods",
-      "airlink cloud": "cloud backup updates airlinkcloud",
-      "api keys": "apikeys api keys tokens access auth",
-      account: "account profile me my",
-      logout: "logout signout sign out exit",
+      servers: 'instances instances container containers game server',
+      overview: 'dashboard home control panel main',
+      settings: 'settings configuration config preferences options',
+      users: 'users members people accounts memberships',
+      nodes: 'nodes machines daemons daemon hosts',
+      images: 'images docker eggs templates boxes',
+      addons: 'addons plugins extensions mods',
+      'airlink cloud': 'cloud backup updates airlinkcloud',
+      'api keys': 'apikeys api keys tokens access auth',
+      account: 'account profile me my',
+      logout: 'logout signout sign out exit',
     };
 
+    // `label` is a catalog key resolved through tx()/txAdmin() so the result
+    // list is translated; `kw` stays English because it is a hidden search
+    // index, never rendered.
     const pageCatalog = (function () {
       const pages = [
         {
-          label: "Servers",
-          url: "/server",
-          kw: "instances containers game list dashboard",
-        },
-        { label: "Dashboard", url: "/", kw: "home dashboard start main" },
-        {
-          label: "Create Server",
-          url: "/create-server",
-          kw: "new server instance deploy create",
+          label: tx('navServers', 'Servers'),
+          url: '/server',
+          kw: 'instances containers game list dashboard',
         },
         {
-          label: "Account",
-          url: "/account",
-          kw: "profile me my settings password avatar email",
+          label: tx('navDashboard', 'Dashboard'),
+          url: '/',
+          kw: 'home dashboard start main',
+        },
+        {
+          label: tx('createServer', 'Create server'),
+          url: '/create-server',
+          kw: 'new server instance deploy create',
+        },
+        {
+          label: tx('navAccount', 'Account'),
+          url: '/account',
+          kw: 'profile me my settings password avatar email',
         },
       ];
       if (isAdmin) {
         pages.push(
           {
-            label: "Admin Overview",
-            url: "/admin/overview",
-            kw: "dashboard home stats system status",
+            label: txAdmin('adminOverviewTitle', 'Overview'),
+            url: '/admin/overview',
+            kw: 'dashboard home stats system status',
           },
           {
-            label: "Admin Settings",
-            url: "/admin/settings",
-            kw: "configuration preferences panel options site",
+            label: txAdmin('adminSettingsTitle', 'Settings'),
+            url: '/admin/settings',
+            kw: 'configuration preferences panel options site',
           },
           {
-            label: "Admin Servers",
-            url: "/admin/servers",
-            kw: "manage servers list instances delete",
+            label: txAdmin('adminServersTitle', 'Servers'),
+            url: '/admin/servers',
+            kw: 'manage servers list instances delete',
           },
           {
-            label: "Admin Users",
-            url: "/admin/users",
-            kw: "members accounts people manage delete",
+            label: txAdmin('adminUsersTitle', 'Users'),
+            url: '/admin/users',
+            kw: 'members accounts people manage delete',
           },
           {
-            label: "Admin Nodes",
-            url: "/admin/nodes",
-            kw: "machines daemons hosts workers allocate",
+            label: txAdmin('adminNodesTitle', 'Nodes'),
+            url: '/admin/nodes',
+            kw: 'machines daemons hosts workers allocate',
           },
           {
-            label: "Admin Images",
-            url: "/admin/images",
-            kw: "docker eggs templates boxes images",
+            label: txAdmin('adminImagesTitlePage', 'Images'),
+            url: '/admin/images',
+            kw: 'docker eggs templates boxes images',
           },
           {
-            label: "Admin Addons",
-            url: "/admin/addons",
-            kw: "plugins extensions mods installed",
+            label: txAdmin('adminAddonsTitle', 'Addons'),
+            url: '/admin/addons',
+            kw: 'plugins extensions mods installed',
           },
           {
-            label: "Airlink Cloud",
-            url: "/airlink-cloud/settings",
-            kw: "cloud backup updates airlink",
+            label: tx('navAirlinkCloud', 'Airlink Cloud'),
+            url: '/airlink-cloud/settings',
+            kw: 'cloud backup updates airlink',
           },
           {
-            label: "API Keys",
-            url: "/admin/apikeys",
-            kw: "tokens access auth api keys",
+            label: tx('navApiKeys', 'API Keys'),
+            url: '/admin/apikeys',
+            kw: 'tokens access auth api keys',
           },
           {
-            label: "Security",
-            url: "/admin/settings",
-            kw: "ban bans ips rate limit moderation",
+            label: tx('security', 'Security'),
+            url: '/admin/settings',
+            kw: 'ban bans ips rate limit moderation',
           },
           {
-            label: "Player Stats",
-            url: "/admin/playerstats",
-            kw: "players analytics stats leaderboard top",
+            label: tx('adminPlayerStatsTitle', 'Player Stats'),
+            url: '/admin/playerstats',
+            kw: 'players analytics stats leaderboard top',
           },
           {
-            label: "Analytics",
-            url: "/admin/analytics",
-            kw: "charts stats metrics graphs",
+            label: tx('adminAnalyticsTitle', 'Analytics'),
+            url: '/admin/analytics',
+            kw: 'charts stats metrics graphs',
           },
           {
-            label: "Addon Store",
-            url: "/admin/addons/store",
-            kw: "plugins store marketplace extensions install",
+            label: tx('addonStoreTitle', 'Addon Store'),
+            url: '/admin/addons/store',
+            kw: 'plugins store marketplace extensions install',
           },
           {
-            label: "Image Store",
-            url: "/admin/images#store",
-            kw: "images store marketplace eggs templates install",
+            label: tx('imageStoreTitle', 'Image Store'),
+            url: '/admin/images#store',
+            kw: 'images store marketplace eggs templates install',
           },
           {
-            label: "API Documentation",
-            url: "/admin/api/docs",
-            kw: "documentation api reference endpoints docs",
+            label: tx('apiDocs', 'API Documentation'),
+            url: '/admin/api/docs',
+            kw: 'documentation api reference endpoints docs',
           },
           {
-            label: "Create Server",
-            url: "/admin/servers/create",
-            kw: "new server deploy create admin",
+            label: tx('adminCreateServerTitle', 'Create Server'),
+            url: '/admin/servers/create',
+            kw: 'new server deploy create admin',
           },
           {
-            label: "Create User",
-            url: "/admin/users/create",
-            kw: "new user account add admin",
+            label: tx('adminCreateUserTitle', 'Create User'),
+            url: '/admin/users/create',
+            kw: 'new user account add admin',
           },
           {
-            label: "Create Node",
-            url: "/admin/nodes/create",
-            kw: "new node machine add admin",
+            label: tx('adminCreateNodeTitle', 'Create Node'),
+            url: '/admin/nodes/create',
+            kw: 'new node machine add admin',
           },
           {
-            label: "Create Image",
-            url: "/admin/images/create",
-            kw: "new image docker egg add admin",
+            label: tx('adminCreateImageTitle', 'Create Image'),
+            url: '/admin/images/create',
+            kw: 'new image docker egg add admin',
           },
           {
-            label: "Upload Image",
-            url: "/admin/images/upload",
-            kw: "upload image docker egg json",
+            label: tx('uploadImage', 'Upload Image'),
+            url: '/admin/images/upload',
+            kw: 'upload image docker egg json',
           },
           {
-            label: "Radar",
-            url: "/admin/radar/scripts",
-            kw: "radar scan scripts virustotal virus total",
+            label: tx('adminRadarTitle', 'Radar'),
+            url: '/admin/radar/scripts',
+            kw: 'radar scan scripts virustotal virus total',
           },
           {
-            label: "Menu",
-            url: "/admin/menu",
-            kw: "menu navigation sidebar items",
+            label: tx('navMenu', 'Menu'),
+            url: '/admin/menu',
+            kw: 'menu navigation sidebar items',
           },
         );
       }
@@ -280,15 +311,15 @@
       const tNorm = normalize(term);
       const scored = [];
       pageCatalog.forEach(function (page) {
-        const hay = normalize(page.label + " " + page.kw);
+        const hay = normalize(`${page.label  } ${  page.kw}`);
         const score = scoreTerm(tNorm, hay);
         if (score > 0) {
           scored.push({
-            type: "nav",
+            type: 'nav',
             label: page.label,
-            sub: "",
+            sub: '',
             url: page.url,
-            score: score,
+            score,
           });
         }
       });
@@ -300,29 +331,29 @@
 
     function getNavResults(term) {
       const scopedLinks = Array.from(navLinks).filter(function (link) {
-        if (isAdmin) return true;
-        return !(link.getAttribute("href") || "").startsWith("/admin");
+        if (isAdmin) {return true;}
+        return !(link.getAttribute('href') || '').startsWith('/admin');
       });
 
       const tNorm = normalize(term);
       const scored = [];
       scopedLinks.forEach(function (link) {
-        const label = (link.textContent || "").trim();
+        const label = (link.textContent || '').trim();
         const extra = (
-          link.getAttribute("searchdata") ||
-          link.getAttribute("data-search") ||
-          ""
+          link.getAttribute('searchdata') ||
+          link.getAttribute('data-search') ||
+          ''
         ).toLowerCase();
-        const alias = navAliases[label.toLowerCase()] || "";
-        const hay = normalize(label + " " + extra + " " + alias);
+        const alias = navAliases[label.toLowerCase()] || '';
+        const hay = normalize(`${label  } ${  extra  } ${  alias}`);
         const score = scoreTerm(tNorm, hay);
         if (score > 0) {
           scored.push({
-            type: "nav",
-            label: label,
-            sub: "",
+            type: 'nav',
+            label,
+            sub: '',
             url: link.href,
-            score: score,
+            score,
           });
         }
       });
@@ -333,50 +364,50 @@
     }
 
     function showRecommendations() {
-      searchResults.innerHTML = "";
+      searchResults.innerHTML = '';
       activeIndex = -1;
 
       const quickLinks = [
-        { label: "Servers", url: "/server", icon: "server" },
-        { label: "Account", url: "/account", icon: "user" },
+        { label: tx('navServers', 'Servers'), url: '/server', icon: 'server' },
+        { label: tx('navAccount', 'Account'), url: '/account', icon: 'user' },
       ];
       if (isAdmin) {
         quickLinks.push({
-          label: "Admin Overview",
-          url: "/admin/overview",
-          icon: "nav",
+          label: txAdmin('adminOverviewTitle', 'Overview'),
+          url: '/admin/overview',
+          icon: 'nav',
         });
         quickLinks.push({
-          label: "Admin Servers",
-          url: "/admin/servers",
-          icon: "server",
+          label: txAdmin('adminServersTitle', 'Servers'),
+          url: '/admin/servers',
+          icon: 'server',
         });
         quickLinks.push({
-          label: "Admin Users",
-          url: "/admin/users",
-          icon: "user",
+          label: txAdmin('adminUsersTitle', 'Users'),
+          url: '/admin/users',
+          icon: 'user',
         });
       }
 
       if (quickLinks.length) {
-        const hdr = document.createElement("p");
+        const hdr = document.createElement('p');
         hdr.className =
-          "text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1";
-        hdr.textContent = "Quick Links";
+          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+        hdr.textContent = tx('searchQuickLinks', 'Quick Links');
         searchResults.appendChild(hdr);
 
         quickLinks.forEach(function (item) {
-          const row = document.createElement("a");
+          const row = document.createElement('a');
           row.href = item.url;
           row.className =
-            "search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer";
+            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
           row.innerHTML =
-            (typeIcon[item.icon] || typeIcon.nav) +
-            '<span class="flex-1 min-w-0"><span class="block truncate">' +
-            escHtml(item.label) +
-            "</span></span>" +
-            typeIcon.arrow;
-          row.addEventListener("click", function (e) {
+            `${typeIcon[item.icon] || typeIcon.nav 
+            }<span class="flex-1 min-w-0"><span class="block truncate">${ 
+              escHtml(item.label) 
+            }</span></span>${ 
+              typeIcon.arrow}`;
+          row.addEventListener('click', function (e) {
             e.preventDefault();
             closeSearch();
             location.href = item.url;
@@ -386,35 +417,37 @@
       }
 
       if (recentSearches.length) {
-        const hdr = document.createElement("p");
+        const hdr = document.createElement('p');
         hdr.className =
-          "text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1";
-        hdr.textContent = "Recent";
+          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+        hdr.textContent = tx('searchRecent', 'Recent');
         searchResults.appendChild(hdr);
 
         recentSearches.forEach(function (term) {
-          const row = document.createElement("div");
+          const row = document.createElement('div');
           row.className =
-            "search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer";
+            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
           row.innerHTML =
-            typeIcon.clock +
-            '<span class="flex-1 min-w-0"><span class="block truncate">' +
-            escHtml(term) +
-            "</span></span>" +
-            '<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="' +
-            escHtml(term) +
-            '" aria-label="Remove">' +
-            alIcon("x", "w-3 h-3") +
-            "</button>";
+            `${typeIcon.clock 
+            }<span class="flex-1 min-w-0"><span class="block truncate">${ 
+              escHtml(term) 
+            }</span></span>` +
+            `<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="${ 
+              escHtml(term) 
+            }" aria-label="${ 
+              escHtml(tx('remove', 'Remove')) 
+            }">${ 
+              alIcon('x', 'w-3 h-3') 
+            }</button>`;
 
-          row.addEventListener("click", function (e) {
-            if (e.target.closest("[data-remove]")) {
+          row.addEventListener('click', function (e) {
+            if (e.target.closest('[data-remove]')) {
               e.stopPropagation();
               recentSearches = recentSearches.filter(function (s) {
                 return s !== term;
               });
               localStorage.setItem(
-                "recentSearches",
+                'recentSearches',
                 JSON.stringify(recentSearches),
               );
               showRecommendations();
@@ -428,103 +461,107 @@
         });
       }
 
-      searchInput.setAttribute("aria-expanded", "true");
+      searchInput.setAttribute('aria-expanded', 'true');
     }
 
     function renderResults(items, term) {
-      searchResults.innerHTML = "";
+      searchResults.innerHTML = '';
       activeIndex = -1;
-      searchInput.setAttribute("aria-activedescendant", "");
+      searchInput.setAttribute('aria-activedescendant', '');
 
       if (!items.length) {
-        const wrap = document.createElement("div");
+        const wrap = document.createElement('div');
         wrap.className =
-          "flex flex-col items-center gap-2 px-4 py-8 text-center";
+          'flex flex-col items-center gap-2 px-4 py-8 text-center';
 
-        const iconContainer = document.createElement("div");
-        iconContainer.innerHTML = alIcon("search-x", "w-8 h-8 mx-auto mb-1", {
+        const iconContainer = document.createElement('div');
+        iconContainer.innerHTML = alIcon('search-x', 'w-8 h-8 mx-auto mb-1', {
           strokeWidth: 1.5,
-          style: "color:var(--theme-text-faint);",
+          style: 'color:var(--theme-text-faint);',
         });
         wrap.appendChild(iconContainer);
 
-        const msg = document.createElement("p");
+        const msg = document.createElement('p');
         msg.className =
-          "text-sm font-medium text-neutral-600 dark:text-neutral-300";
+          'text-sm font-medium text-neutral-600 dark:text-neutral-300';
         msg.textContent =
-          (searchOverlay.dataset.emptyTitle || "No results for") +
-          ' "' +
-          term +
-          '"';
+          `${searchOverlay.dataset.emptyTitle ||
+          tx('searchEmptyTitle', 'No results for') 
+          } "${ 
+            term 
+          }"`;
         wrap.appendChild(msg);
 
-        const hint = document.createElement("p");
+        const hint = document.createElement('p');
         hint.className =
-          "text-xs text-neutral-500 dark:text-neutral-400 max-w-xs";
+          'text-xs text-neutral-500 dark:text-neutral-400 max-w-xs';
         hint.textContent =
           searchOverlay.dataset.emptyHint ||
-          "Try a different term, or search for a server, user, node, or page.";
+          tx(
+            'searchEmptyHint',
+            'Try a different term, or search for a server, user, node, or page.',
+          );
         wrap.appendChild(hint);
 
         searchResults.appendChild(wrap);
-        searchInput.setAttribute("aria-expanded", "true");
+        searchInput.setAttribute('aria-expanded', 'true');
         return;
       }
 
       const groups = {};
       items.forEach(function (item) {
-        if (!groups[item.type]) groups[item.type] = [];
+        if (!groups[item.type]) {groups[item.type] = [];}
         groups[item.type].push(item);
       });
 
-      const order = ["server", "user", "node", "feature", "nav"];
+      const order = ['server', 'user', 'node', 'feature', 'nav'];
       const labels = {
-        server: "Servers",
-        user: "Users",
-        node: "Nodes",
-        feature: "Features",
-        nav: "Pages",
+        server: tx('servers', 'Servers'),
+        user: tx('users', 'Users'),
+        node: tx('nodes', 'Nodes'),
+        feature: tx('features', 'Features'),
+        nav: tx('navPages', 'Pages'),
       };
 
       order.forEach(function (type) {
-        if (!groups[type]) return;
+        if (!groups[type]) {return;}
 
         (groups[type] || []).sort(function (a, b) {
           return (b.score || 0) - (a.score || 0);
         });
 
-        const hdr = document.createElement("p");
+        const hdr = document.createElement('p');
         hdr.className =
-          "text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1";
+          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
         hdr.textContent = labels[type];
         searchResults.appendChild(hdr);
 
         groups[type].forEach(function (item) {
-          const row = document.createElement("a");
+          const row = document.createElement('a');
           row.href = item.url;
           row.id =
-            "search-result-" +
-            type +
-            "-" +
-            searchResults.querySelectorAll(".search-result").length;
-          row.setAttribute("role", "option");
-          row.setAttribute("aria-selected", "false");
+            `search-result-${ 
+              type 
+            }-${ 
+              searchResults.querySelectorAll('.search-result').length}`;
+          row.setAttribute('role', 'option');
+          row.setAttribute('aria-selected', 'false');
           row.className =
-            "search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer";
+            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
           row.innerHTML =
-            (typeIcon[item.type] || typeIcon.nav) +
-            '<span class="flex-1 min-w-0">' +
-            '<span class="block truncate">' +
-            highlightMatch(item.label, term) +
-            "</span>" +
-            (item.sub
-              ? '<span class="block text-[11px] text-neutral-400 truncate">' +
-                escHtml(item.sub) +
-                "</span>"
-              : "") +
-            "</span>";
+            `${typeIcon[item.type] || typeIcon.nav 
+            }<span class="flex-1 min-w-0">` +
+            `<span class="block truncate">${ 
+              highlightMatch(item.label, term) 
+            }</span>${ 
+              item.sub
+                ? `<span class="block text-[11px] text-neutral-400 truncate">${ 
+                  escHtml(item.sub) 
+                }</span>`
+                : '' 
+            }</span>`;
 
-          row.addEventListener("click", function (e) {
+          row.addEventListener('click', function (e) {
             e.preventDefault();
             saveRecentSearch(term);
             closeSearch();
@@ -534,7 +571,7 @@
           searchResults.appendChild(row);
         });
       });
-      searchInput.setAttribute("aria-expanded", "true");
+      searchInput.setAttribute('aria-expanded', 'true');
     }
 
     async function doSearch(term) {
@@ -542,12 +579,17 @@
         showRecommendations();
         return;
       }
-      searchInput.setAttribute("aria-expanded", "true");
+      searchInput.setAttribute('aria-expanded', 'true');
 
       const navItems = getNavResults(term);
       const catalogItems = getCatalogResults(term);
       try {
-        const data = await Api.system.search({ q: term });
+        const res = await fetch(
+          `/api/v2/system/search?q=${  encodeURIComponent(term)}`,
+          { headers: { Accept: 'application/json' } },
+        );
+        const body = res.ok ? await res.json() : null;
+        const data = body && body.success !== false ? body.data : null;
         renderResults(
           ((data && data.results) || []).concat(navItems, catalogItems),
           term,
@@ -558,80 +600,82 @@
     }
 
     function updateActiveResult() {
-      const rows = searchResults.querySelectorAll(".search-result");
+      const rows = searchResults.querySelectorAll('.search-result');
       rows.forEach(function (row, i) {
         const active = i === activeIndex;
-        row.classList.toggle("bg-neutral-100", active);
-        row.classList.toggle("dark:bg-neutral-700/50", active);
-        row.setAttribute("aria-selected", active ? "true" : "false");
+        row.classList.toggle('bg-neutral-100', active);
+        row.classList.toggle('dark:bg-neutral-700/50', active);
+        row.setAttribute('aria-selected', active ? 'true' : 'false');
       });
       const activeRow = rows[activeIndex];
       searchInput.setAttribute(
-        "aria-activedescendant",
-        activeRow ? activeRow.id : "",
+        'aria-activedescendant',
+        activeRow ? activeRow.id : '',
       );
     }
 
     function openSearch(fromKeyboard) {
-      if (panelClosing) return;
-      searchOverlay.classList.remove("hidden");
-      searchOverlay.classList.add("flex");
+      if (panelClosing) {return;}
+      searchOverlay.classList.remove('hidden');
+      searchOverlay.classList.add('flex');
 
+      const origin = !fromKeyboard && (lastTrigger || searchButton);
       const panel = searchPanel.getBoundingClientRect();
       let ox = panel.width / 2;
       let oy = panel.height / 2;
-      if (!fromKeyboard && searchButton) {
-        const btn = searchButton.getBoundingClientRect();
+      if (origin) {
+        const btn = origin.getBoundingClientRect();
         ox = btn.left + btn.width / 2 - panel.left;
         oy = btn.top + btn.height / 2 - panel.top;
       }
-      searchPanel.style.transformOrigin = ox + "px " + oy + "px";
+      searchPanel.style.transformOrigin = `${ox  }px ${  oy  }px`;
 
-      searchPanel.classList.add("al-dropdown");
+      searchPanel.classList.add('al-dropdown');
       requestAnimationFrame(function () {
-        searchPanel.classList.add("open");
+        searchPanel.classList.add('open');
       });
-      if (searchButton) searchButton.setAttribute("aria-expanded", "true");
+      setSearchExpanded('true');
 
-      if (!searchInput.value.trim()) showRecommendations();
+      if (!searchInput.value.trim()) {showRecommendations();}
       requestAnimationFrame(function () {
         searchInput.focus();
       });
     }
 
     function closeSearch() {
-      if (searchOverlay.classList.contains("hidden") || panelClosing) return;
+      if (searchOverlay.classList.contains('hidden') || panelClosing) {return;}
       panelClosing = true;
-      if (searchButton) searchButton.setAttribute("aria-expanded", "false");
-      searchInput.setAttribute("aria-expanded", "false");
-      searchInput.setAttribute("aria-activedescendant", "");
+      setSearchExpanded('false');
+      searchInput.setAttribute('aria-expanded', 'false');
+      searchInput.setAttribute('aria-activedescendant', '');
       const done = function () {
-        searchOverlay.classList.add("hidden");
-        searchOverlay.classList.remove("flex");
-        searchPanel.classList.remove("open");
+        searchOverlay.classList.add('hidden');
+        searchOverlay.classList.remove('flex');
+        searchPanel.classList.remove('open');
         panelClosing = false;
       };
       const reduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
+        '(prefers-reduced-motion: reduce)',
       ).matches;
-      searchPanel.classList.remove("open");
-      if (reduced) done();
-      else setTimeout(done, CLOSE_ANIMATION_MS);
+      searchPanel.classList.remove('open');
+      if (reduced) {done();}
+      else {setTimeout(done, CLOSE_ANIMATION_MS);}
     }
 
-    if (searchButton) {
-      searchButton.addEventListener("click", function () {
+    searchButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        lastTrigger = btn;
         openSearch(false);
       });
-    }
-
-    searchOverlay.addEventListener("click", function (e) {
-      if (e.target === searchOverlay) closeSearch();
     });
 
-    searchInput.addEventListener("input", function () {
+    searchOverlay.addEventListener('click', function (e) {
+      if (e.target === searchOverlay) {closeSearch();}
+    });
+
+    searchInput.addEventListener('input', function () {
       const term = searchInput.value.trim().toLowerCase();
-      if (term === lastQuery) return;
+      if (term === lastQuery) {return;}
       lastQuery = term;
       clearTimeout(searchTimeout);
       if (!term) {
@@ -643,42 +687,42 @@
       }, SEARCH_DEBOUNCE_MS);
     });
 
-    searchInput.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
         e.preventDefault();
         closeSearch();
         searchInput.blur();
         return;
       }
-      const rows = searchResults.querySelectorAll(".search-result");
-      if (!rows.length) return;
-      if (e.key === "ArrowDown") {
+      const rows = searchResults.querySelectorAll('.search-result');
+      if (!rows.length) {return;}
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         activeIndex = (activeIndex + 1) % rows.length;
         updateActiveResult();
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         activeIndex = (activeIndex - 1 + rows.length) % rows.length;
         updateActiveResult();
-      } else if (e.key === "Enter") {
+      } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (activeIndex >= 0 && rows[activeIndex]) rows[activeIndex].click();
-        else if (rows.length === 1) rows[0].click();
+        if (activeIndex >= 0 && rows[activeIndex]) {rows[activeIndex].click();}
+        else if (rows.length === 1) {rows[0].click();}
       }
     });
 
-    document.addEventListener("keydown", function (e) {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
-        if (searchOverlay.classList.contains("hidden")) {
+        if (searchOverlay.classList.contains('hidden')) {
           openSearch(true);
         } else {
           searchInput.focus();
           searchInput.select();
         }
       } else if (
-        e.key === "Escape" &&
-        !searchOverlay.classList.contains("hidden")
+        e.key === 'Escape' &&
+        !searchOverlay.classList.contains('hidden')
       ) {
         closeSearch();
       }

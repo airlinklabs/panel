@@ -12,9 +12,9 @@
  *   assetUrl('styles/tw.css')             → '/styles/tw.css'
  */
 
-const ASSET_URL = (process.env.ASSET_URL || "").replace(/\/+$/, "");
+const ASSET_URL = (process.env.ASSET_URL || '').replace(/\/+$/, '');
 
 export function assetUrl(relativePath: string): string {
-  const clean = relativePath.replace(/^\/+/, "");
-  return ASSET_URL ? ASSET_URL + "/" + clean : "/" + clean;
+  const clean = relativePath.replace(/^\/+/, '');
+  return ASSET_URL ? `${ASSET_URL  }/${  clean}` : `/${  clean}`;
 }

@@ -1,0 +1,44 @@
+<% /* server-card — the old panel's card anatomy:
+     header row (name + status chip) · RAM / CPU stat rows · footer strip
+     with the live status on the left and the manage affordance on the right.
+     The whole card is the link to the server, so the inner affordance is a
+     span (a nested <a> would be invalid) and is hidden from the accessible
+     name — the anchor already reads name first, then the stats. */ %>
+<%
+  const running = server.status === 'running';
+  const pct = function (v) {
+    return typeof v !== 'undefined' && v !== null && v !== '' ? v + '%' : '--';
+  };
+%>
+<a href="/server/<%= server.UUID %>" class="al-card">
+  <div class="flex items-start justify-between gap-3">
+    <p class="min-w-0 flex-1 text-lg font-semibold truncate" style="color:var(--theme-text-strong)"><%= server.name %></p>
+    <% if (running) { %>
+    <span class="al-badge-online shrink-0">
+      <span class="al-dot-online al-dot-ping"></span><%= t('running') %>
+    </span>
+    <% } else { %>
+    <span class="al-badge-offline shrink-0">
+      <span class="al-dot-offline"></span><%= t('stopped') %>
+    </span>
+    <% } %>
+  </div>
+
+  <dl class="mt-4 flex flex-col gap-3">
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-sm" style="color:var(--theme-text-muted)"><%= t('ramUsage') %></dt>
+      <dd class="al-badge al-badge-neutral font-mono tabular-nums"><%= pct(server.ramUsage) %></dd>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-sm" style="color:var(--theme-text-muted)"><%= t('cpuUsage') %></dt>
+      <dd class="al-badge al-badge-neutral font-mono tabular-nums"><%= pct(server.cpuUsage) %></dd>
+    </div>
+  </dl>
+
+  <div class="al-card-footer justify-between mt-5">
+    <span class="flex items-center gap-2" style="color:var(--theme-text-muted)">
+      <span class="al-dot-<%= running ? 'online al-dot-ping' : 'offline' %>"></span><%= running ? t('online') : t('offline') %>
+    </span>
+    <span aria-hidden="true" class="al-btn-link"><%= t('manage') %> →</span>
+  </div>
+</a>

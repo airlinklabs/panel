@@ -1,257 +1,201 @@
-<%- include('../../components/header', { title: t('players') }) %>
+<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Players' }) %>
 
-<main class="h-screen m-auto" style="color:var(--theme-text)">
-  <div class="flex h-full">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/sidebar') %>
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);"><%= t('players') %></span>
+    </li>
+  </ol>
+</nav>
+
+<div class="px-6 sm:px-8 pb-12" data-server-uuid="<%= server.UUID %>">
+
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold" style="color:var(--theme-text);"><%= t('players') %></h1>
+    <button id="refreshPlayersBtn" type="button" class="al-btn-secondary px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1.5">
+      <%- icon('refresh-cw', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> <%= t('refresh') %>
+    </button>
+  </div>
+
+  <!-- Online Players -->
+  <div class="al-card p-4 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Online</h2>
+      <span id="online-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-success-bg);color:var(--theme-success);">0</span>
     </div>
-<%- include('../../components/template') %>
+    <div id="online-players">
+      <p class="text-xs" style="color:var(--theme-text-muted);">No players online</p>
+    </div>
+  </div>
 
-    <!-- Main Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('dashboard'), href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: t('players') }
-      ] }) %>
-      <!-- Page Header: title + meta left -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/server-header') %>
-            <!-- Server meta: image · node · id -->
-            <%- include('../../components/server-meta') %>
+  <!-- Banned Players -->
+  <div class="al-card p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Banned</h2>
+      <span id="banned-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-danger-bg);color:var(--theme-danger);">0</span>
+    </div>
+    <div id="banned-players">
+      <p class="text-xs" style="color:var(--theme-text-muted);">No banned players</p>
+    </div>
+  </div>
+
+  <!-- Whitelist (if enabled) -->
+  <div class="al-card p-4 mt-6 hidden" id="whitelist-card">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Whitelisted</h2>
+      <span id="whitelist-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-info-bg, var(--theme-bg-secondary));color:var(--theme-info, var(--theme-text-muted));">0</span>
+    </div>
+    <div id="whitelisted-players">
+      <p class="text-xs" style="color:var(--theme-text-muted);">No whitelisted players</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Player Action Modal -->
+<div id="player-modal" class="fixed inset-0 z-50 hidden" style="background:rgba(0,0,0,0.5);display:none;">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="al-card p-6 w-full max-w-md" style="background:var(--theme-bg);border:1px solid var(--theme-border);">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="modal-title" class="text-sm font-semibold" style="color:var(--theme-text-strong);"></h3>
+        <button id="modal-close" type="button" class="text-xs" style="color:var(--theme-text-muted);">✕</button>
+      </div>
+      <p id="modal-desc" class="text-xs mb-4" style="color:var(--theme-text-muted);"></p>
+      <div class="flex justify-end gap-2">
+        <button id="modal-cancel" type="button" class="al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium">Cancel</button>
+        <button id="modal-confirm" type="button" class="al-btn-danger px-3 py-1.5 rounded-lg text-xs font-medium">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" nonce="<%- nonce %>">
+  const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
+  const modal = document.getElementById('player-modal');
+  let currentPlayer = null;
+  let currentAction = null;
+
+  function renderPlayerCard(player, actions) {
+    return `
+      <div class="flex items-center justify-between py-2 border-b" style="border-color:var(--theme-border);">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-bg-secondary);">
+            <img src="https://mc-heads.net/avatar/${player.uuid || player.name}/24" alt="" class="w-6 h-6 rounded" onerror="this.parentElement.innerHTML='<span class=text-xs>${(player.name||'?')[0]}</span>'">
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);">${player.name || '—'}</p>
+            <p class="text-[10px] truncate" style="color:var(--theme-text-muted);">${player.uuid || ''}</p>
           </div>
         </div>
-      </div>
-
-      <%- include('../../components/installHeader') %>
-            <!-- Error Message -->
-      <% if (errorMessage && errorMessage.message) { %>
-          <div id="players-error-banner" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
-          <%- icon('triangle-alert', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-danger)' }) %>
-      <div>
-        <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('connectionError') %></p>
-        <p class="text-sm" style="color:var(--theme-text-muted)"><%= errorMessage.message %></p>
-      </div>
-    </div>
-      <% } %>
-
-      <!-- Daemon down message removed as requested -->
-
-      <!-- Server Template -->
-      <%- include('../../components/server-template', { features: ['players', 'worlds'] }) %>
-
-      <div id="server-page-body">
-
-      <!-- Players Section -->
-      <div class="px-6 mt-8" id="players-section">
-        <!-- Server Info Card -->
-        <div class="al-card p-6 mb-6 shadow-lg">
-          <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-            <div>
-              <h2 class="text-xl font-semibold mb-1" style="color:var(--theme-text-strong)"><%= t('players') %></h2>
-              <p class="text-sm" style="color:var(--theme-text-muted)">
-                <% if (typeof serverInfo !== 'undefined') { %>
-                  <span class="font-medium" id="onlineCount"><%= serverInfo.onlinePlayers || 0 %></span> / <span id="maxCount"><%= serverInfo.maxPlayers || 0 %></span> <%= t('playersOnlineLabel') %>
-                  <% if (serverInfo.version) { %>
-                    • <span style="color:var(--theme-text-muted)" id="versionLabel"><%= t('versionLabel') %> <%= serverInfo.version %></span>
-                  <% } %>
-                <% } else { %>
-                  <%= t('managePlayerList') %>
-                <% } %>
-              </p>
-            </div>
-          </div>
-
-          <!-- Auto-refresh notice -->
-          <div class="text-xs mb-4 flex items-center" style="color:var(--theme-text-muted)">
-            <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1', strokeWidth: 2 }) %>
-            <span>
-              <%= t('refreshingIn') %> <span id="refresh-countdown">30</span> <%= t('secondsUnit') %>
-                <button type="button" @click="refreshPlayers()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
-                  <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1' }) %>
-                <%= t('refreshNow') %>
-              </button>
-            </span>
-          </div>
+        <div class="flex items-center gap-1 shrink-0">
+          ${actions.map(a => `
+            <button type="button" class="player-action-btn al-btn-secondary px-2 py-1 rounded-lg text-[10px] font-medium" data-player="${player.name || player.uuid}" data-action="${a.action}">
+              ${a.label}
+            </button>
+          `).join('')}
         </div>
+      </div>`;
+  }
 
-        <!-- Players Grid -->
-        <% if (players && players.length > 0) { %>
-        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <% players.forEach(player => { %>
-            <div class="relative p-4 al-card shadow-lg group transition-all duration-200">
-              <div class="flex items-center">
-                <img
-                  src="<%= crafatarAvatarBase %><%= player.uuid %>?size=64&overlay"
-                  alt="<%= player.name %>'s Avatar"
-                  loading="lazy"
-                  class="rounded-lg mr-4"
-                  width="64"
-                  height="64"
-                />
-                <div>
-                  <p class="text-lg font-bold" style="color:var(--theme-text-strong)"><%= player.name %></p>
-                  <div class="flex items-center mt-1">
-                    <span class="al-dot-online mr-2"></span>
-                    <span class="text-xs" style="color:var(--theme-text-muted)"><%= t('active') %></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          <% }) %>
-        </div>
-        <% } else { %>
-          <div id="no-players-message" class="rounded-xl p-8 text-center" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
-              <!-- Server Offline Message -->
-              <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
-                  <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
-                </div>
-              </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('serverOffline') %></h2>
-              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                <%= t('serverOfflinePlayersDesc') %>
-              </p>
-              <div class="mt-6">
-                <button type="button" @click="refreshPlayers()" class="al-btn-primary px-4 py-2 rounded-lg inline-flex items-center">
-                  <%- icon('refresh-cw', { class: 'h-4 w-4 mr-2' }) %>
-                  <%= t('refresh') %>
-                </button>
-              </div>
-            <% } else if (serverIsOnline) { %>
-              <!-- Server Online but No Players Message -->
-              <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-success-bg);">
-                  <%- icon('ellipsis', { class: 'h-8 w-8', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
-                </div>
-              </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('serverOnline') %></h2>
-              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                <%= t('serverOnlineDesc') %>
-              </p>
-              <div class="mt-4 text-sm" style="color:var(--theme-text-muted)">
-                <div class="flex items-center justify-center gap-4">
-                  <div>
-                    <span class="font-semibold"><%= t('versionLabel') %></span> <%= serverInfo.version %>
-                  </div>
-                  <div>
-                    <span class="font-semibold"><%= t('capacityLabel') %></span> <%= serverInfo.onlinePlayers %>/<%= serverInfo.maxPlayers %>
-                  </div>
-                </div>
-              </div>
-            <% } else { %>
-              <!-- Unknown Status Message -->
-              <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-warning-bg);">
-                  <%- icon('circle-help', { class: 'h-8 w-8', style: 'color:var(--theme-warning)', strokeWidth: 2 }) %>
-                </div>
-              </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('statusUnknown') %></h2>
-              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                <%= t('statusUnknownDesc') %>
-              </p>
-            <% } %>
-          </div>
-        <% } %>
-      </div>
+  async function loadPlayers() {
+    try {
+      const res = await fetch(`/server/${serverUUID}/players/data`);
+      const data = await res.json();
+      const d = data.data || data || {};
+      const online = d.online || [];
+      const banned = d.banned || [];
+      const whitelisted = d.whitelisted || [];
 
-      <!-- Scoped auto-refresh script -->
-      <script nonce="<%- nonce %>">
-        (function() {
-          const REFRESH_MS = <%= playerListRefreshMs %>;
-          const CRAFATAR_BASE = '<%= crafatarAvatarBase %>';
-          const section = document.getElementById('players-section');
-          const countdownEl = document.getElementById('refresh-countdown');
-          let lastRefresh = Date.now();
+      document.getElementById('online-count').textContent = online.length;
+      document.getElementById('banned-count').textContent = banned.length;
 
-          function esc(s) {
-            if (typeof s !== 'string') return '';
-            return escHtml(s);
-          }
+      const onlineEl = document.getElementById('online-players');
+      if (online.length) {
+        onlineEl.innerHTML = online.map(p => renderPlayerCard(p, [
+          { action: 'kick', label: 'Kick' },
+          { action: 'ban', label: 'Ban' },
+        ])).join('');
+      } else {
+        onlineEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No players online</p>';
+      }
 
-          function renderData(data) {
-            const info = data.serverInfo;
-            const onlineEl = document.getElementById('onlineCount');
-            const maxEl = document.getElementById('maxCount');
-            const versionEl = document.getElementById('versionLabel');
-            if (info) {
-              if (onlineEl) onlineEl.textContent = info.onlinePlayers || 0;
-              if (maxEl) maxEl.textContent = info.maxPlayers || 0;
-              if (versionEl) versionEl.textContent = '<%= req.translations.versionLabel || "Version" %>: ' + (info.version || '<%= req.translations.unknown || "Unknown" %>');
-            }
+      const bannedEl = document.getElementById('banned-players');
+      if (banned.length) {
+        bannedEl.innerHTML = banned.map(p => renderPlayerCard(p, [
+          { action: 'pardon', label: 'Pardon' },
+        ])).join('');
+      } else {
+        bannedEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No banned players</p>';
+      }
 
-            const staticEmpty = document.getElementById('no-players-message');
-            let dynamicEmpty = document.getElementById('no-players-dynamic');
-            let grid = document.getElementById('PlayersGrid');
+      if (whitelisted.length > 0 || d.whitelistEnabled) {
+        document.getElementById('whitelist-card').classList.remove('hidden');
+        document.getElementById('whitelist-count').textContent = whitelisted.length;
+        const wlEl = document.getElementById('whitelisted-players');
+        if (whitelisted.length) {
+          wlEl.innerHTML = whitelisted.map(p => renderPlayerCard(p, [
+            { action: 'whitelist-remove', label: 'Remove' },
+          ])).join('');
+        } else {
+          wlEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No whitelisted players</p>';
+        }
+      }
 
-            if (data.players && data.players.length) {
-              if (dynamicEmpty) { dynamicEmpty.remove(); dynamicEmpty = null; }
-              if (staticEmpty) staticEmpty.remove();
-              if (!grid && section) {
-                grid = document.createElement('div');
-                grid.id = 'PlayersGrid';
-                grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4';
-                section.appendChild(grid);
-              }
-              grid.innerHTML = data.players.map(p => {
-                const name = esc(p.name);
-                const uuid = esc(p.uuid);
-                return '<div class="relative p-4 al-card shadow-lg group transition-all duration-200">'
-                  + '<div class="flex items-center">'
-                  + '<img src="' + CRAFATAR_BASE + uuid + '?size=64&overlay" alt="' + name + '\'s Avatar" class="rounded-lg mr-4" width="64" height="64" loading="lazy">'
-                  + '<div><p class="text-lg font-bold" style="color:var(--theme-text-strong)">' + name + '</p>'
-                  + '<div class="flex items-center mt-1"><span class="al-dot-online mr-2"></span>'
-                  + '<span class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.online || "Online" %></span></div></div></div></div>';
-              }).join('');
-            } else {
-              if (grid) grid.remove();
-              if (staticEmpty) staticEmpty.remove();
-              if (!dynamicEmpty && section) {
-                dynamicEmpty = document.createElement('div');
-                dynamicEmpty.id = 'no-players-dynamic';
-                dynamicEmpty.className = 'rounded-xl p-8 text-center';
-                dynamicEmpty.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border)';
-                dynamicEmpty.innerHTML = '<h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.noPlayersOnline || "No players online" %></h2>'
-                  + '<p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto"><%= req.translations.playersWillAppear || "Players will appear here when they join." %></p>';
-                section.appendChild(dynamicEmpty);
-              }
-            }
-          }
+      // Attach action listeners
+      document.querySelectorAll('.player-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentPlayer = btn.dataset.player;
+          currentAction = btn.dataset.action;
+          const actionLabels = { kick: 'Kick', ban: 'Ban', pardon: 'Pardon', 'whitelist-remove': 'Remove from whitelist' };
+          document.getElementById('modal-title').textContent = `${actionLabels[currentAction] || currentAction} Player`;
+          document.getElementById('modal-desc').textContent = `Are you sure you want to ${currentAction} ${currentPlayer}?`;
+          modal.style.display = 'flex';
+        });
+      });
+    } catch (e) {
+      console.error('Failed to load players', e);
+    }
+  }
 
-          async function refreshPlayers() {
-            lastRefresh = Date.now();
-            try {
-              const res = await fetch('/api/v2/servers/<%= server.UUID %>/players', { headers: { 'Accept': 'application/json' } });
-              if (!res.ok) return;
-              const data = await res.json();
-              if (data.error) return;
-              renderData(data);
-              const banner = document.getElementById('players-error-banner');
-              if (banner) banner.style.display = 'none';
-            } catch (e) { console.warn('Player refresh failed:', e); }
-          }
-          window.refreshPlayers = refreshPlayers;
+  async function executeAction() {
+    if (!currentPlayer || !currentAction) return;
+    try {
+      const res = await fetch(`/server/${serverUUID}/players/${encodeURIComponent(currentPlayer)}/${currentAction}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.success !== false) {
+        if (window.showToast) window.showToast(`Player ${currentAction}ed`, 'success');
+        loadPlayers();
+      }
+    } catch (e) {
+      console.error('Action failed', e);
+    }
+    closeModal();
+  }
 
-          if (countdownEl) {
-            setInterval(function() {
-              const remaining = Math.max(0, Math.ceil((REFRESH_MS - (Date.now() - lastRefresh)) / 1000));
-              countdownEl.textContent = remaining;
-            }, 500);
-          }
+  function closeModal() {
+    modal.style.display = 'none';
+    currentPlayer = null;
+    currentAction = null;
+  }
 
-          refreshPlayers();
-          setInterval(refreshPlayers, REFRESH_MS);
-        })();
-      </script>
-    </div>
+  document.getElementById('modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+  document.getElementById('modal-confirm')?.addEventListener('click', executeAction);
+  document.getElementById('refreshPlayersBtn')?.addEventListener('click', loadPlayers);
 
-      </div><!-- /server-page-body -->
-    </div>
-</main>
+  loadPlayers();
+  setInterval(loadPlayers, 15000);
+</script>
 
-
-<%- include('../../components/footer') %>
+<%- include('../../layouts/user-footer') %>

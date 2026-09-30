@@ -8,9 +8,9 @@
  * DELETE /api/v2/admin/roles/:id   — Delete role
  */
 
-import { Router } from "express";
-import prisma from "../../../../db";
-import { parseBody } from "../../../../utils/validation";
+import { Router } from 'express';
+import prisma from '../../../../db';
+import { parseBody } from '../../../../utils/validation';
 import {
   jsonOk,
   jsonError,
@@ -18,10 +18,10 @@ import {
   logActivity,
   parsePage,
   parsePerPage,
-} from "../helpers";
-import { adminCreateRoleBody, adminUpdateRoleBody } from "../dto";
-import { SUBUSER_PERMISSIONS } from "../../../../handlers/utils/auth/serverAuthUtil";
-import { ensureDefaultRoles } from "../../../../services/roleService";
+} from '../helpers';
+import { adminCreateRoleBody, adminUpdateRoleBody } from '../dto';
+import { SUBUSER_PERMISSIONS } from '../../../../handlers/utils/auth/serverAuthUtil';
+import { ensureDefaultRoles } from '../../../../services/roleService';
 
 const router = Router();
 
@@ -49,7 +49,7 @@ function isValidPermission(perm: string): boolean {
     return true;
   }
   // Allow wildcard forms like "servers.*", "files.*", etc.
-  if (perm.endsWith(".*")) {
+  if (perm.endsWith('.*')) {
     const prefix = perm.slice(0, -2);
     return VALID_PERMISSIONS.some((p) => p.startsWith(`${prefix}.`));
   }
@@ -59,7 +59,7 @@ function isValidPermission(perm: string): boolean {
 function validatePermissions(permissions: string[]): string | null {
   const invalid = permissions.filter((p) => !isValidPermission(p));
   if (invalid.length > 0) {
-    return `Invalid permission(s): ${invalid.join(", ")}`;
+    return `Invalid permission(s): ${invalid.join(', ')}`;
   }
   return null;
 }
@@ -67,7 +67,7 @@ function validatePermissions(permissions: string[]): string | null {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/roles — List all roles
 // ---------------------------------------------------------------------------
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   await ensureDefaultRoles();
 
   const page = parsePage(req.query.page);
@@ -80,7 +80,7 @@ router.get("/", async (req, res) => {
       },
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { sortOrder: "asc" },
+      orderBy: { sortOrder: 'asc' },
     }),
     prisma.role.count(),
   ]);
@@ -113,19 +113,19 @@ router.get("/", async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/roles — Create role
 // ---------------------------------------------------------------------------
-router.post("/", parseBody(adminCreateRoleBody), async (req, res) => {
+router.post('/', parseBody(adminCreateRoleBody), async (req, res) => {
   const data = req.validatedBody as any;
 
   // Check name uniqueness
   const existing = await prisma.role.findUnique({ where: { name: data.name } });
   if (existing) {
-    return jsonError(res, "CONFLICT", "Role name already exists", 409);
+    return jsonError(res, 'CONFLICT', 'Role name already exists', 409);
   }
 
   // Validate permissions
   const permError = validatePermissions(data.permissions ?? []);
   if (permError) {
-    return jsonError(res, "BAD_REQUEST", permError, 400);
+    return jsonError(res, 'BAD_REQUEST', permError, 400);
   }
 
   const role = await prisma.role.create({
@@ -142,7 +142,7 @@ router.post("/", parseBody(adminCreateRoleBody), async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    "role.created",
+    'role.created',
     undefined,
     { name: role.name },
     req.ip,
@@ -165,10 +165,10 @@ router.post("/", parseBody(adminCreateRoleBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/roles/:id — Get role details
 // ---------------------------------------------------------------------------
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, "BAD_REQUEST", "Invalid role ID", 400);
+    return jsonError(res, 'BAD_REQUEST', 'Invalid role ID', 400);
   }
 
   const role = await prisma.role.findUnique({
@@ -179,7 +179,7 @@ router.get("/:id", async (req, res) => {
   });
 
   if (!role) {
-    return jsonError(res, "NOT_FOUND", "Role not found", 404);
+    return jsonError(res, 'NOT_FOUND', 'Role not found', 404);
   }
 
   jsonOk(res, {
@@ -200,27 +200,27 @@ router.get("/:id", async (req, res) => {
 // ---------------------------------------------------------------------------
 // PUT /api/v2/admin/roles/:id — Update role
 // ---------------------------------------------------------------------------
-router.put("/:id", parseBody(adminUpdateRoleBody), async (req, res) => {
+router.put('/:id', parseBody(adminUpdateRoleBody), async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, "BAD_REQUEST", "Invalid role ID", 400);
+    return jsonError(res, 'BAD_REQUEST', 'Invalid role ID', 400);
   }
 
   const existing = await prisma.role.findUnique({ where: { id } });
   if (!existing) {
-    return jsonError(res, "NOT_FOUND", "Role not found", 404);
+    return jsonError(res, 'NOT_FOUND', 'Role not found', 404);
   }
 
   const data = req.validatedBody as any;
   const updateData: Record<string, unknown> = {};
 
   if (data.name !== undefined) {
-    if (existing.name === "owner") {
-      return jsonError(res, "FORBIDDEN", "Cannot rename the owner role", 403);
+    if (existing.name === 'owner') {
+      return jsonError(res, 'FORBIDDEN', 'Cannot rename the owner role', 403);
     }
     const dup = await prisma.role.findUnique({ where: { name: data.name } });
     if (dup && dup.id !== id) {
-      return jsonError(res, "CONFLICT", "Role name already exists", 409);
+      return jsonError(res, 'CONFLICT', 'Role name already exists', 409);
     }
     updateData.name = data.name;
   }
@@ -244,13 +244,13 @@ router.put("/:id", parseBody(adminUpdateRoleBody), async (req, res) => {
   if (data.permissions !== undefined) {
     const permError = validatePermissions(data.permissions);
     if (permError) {
-      return jsonError(res, "BAD_REQUEST", permError, 400);
+      return jsonError(res, 'BAD_REQUEST', permError, 400);
     }
     updateData.permissions = data.permissions;
   }
 
   if (Object.keys(updateData).length === 0) {
-    return jsonError(res, "BAD_REQUEST", "No fields to update", 400);
+    return jsonError(res, 'BAD_REQUEST', 'No fields to update', 400);
   }
 
   const updated = await prisma.role.update({
@@ -260,7 +260,7 @@ router.put("/:id", parseBody(adminUpdateRoleBody), async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    "role.updated",
+    'role.updated',
     undefined,
     { id, fields: Object.keys(updateData) },
     req.ip,
@@ -283,10 +283,10 @@ router.put("/:id", parseBody(adminUpdateRoleBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/admin/roles/:id — Delete role
 // ---------------------------------------------------------------------------
-router.delete("/:id", async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, "BAD_REQUEST", "Invalid role ID", 400);
+    return jsonError(res, 'BAD_REQUEST', 'Invalid role ID', 400);
   }
 
   const role = await prisma.role.findUnique({
@@ -295,20 +295,20 @@ router.delete("/:id", async (req, res) => {
   });
 
   if (!role) {
-    return jsonError(res, "NOT_FOUND", "Role not found", 404);
+    return jsonError(res, 'NOT_FOUND', 'Role not found', 404);
   }
 
   if (role.isSystem) {
-    return jsonError(res, "FORBIDDEN", "Cannot delete a system role", 403);
+    return jsonError(res, 'FORBIDDEN', 'Cannot delete a system role', 403);
   }
-  if (role.name === "owner") {
-    return jsonError(res, "FORBIDDEN", "Cannot delete the owner role", 403);
+  if (role.name === 'owner') {
+    return jsonError(res, 'FORBIDDEN', 'Cannot delete the owner role', 403);
   }
 
   if (role._count.users > 0) {
     return jsonError(
       res,
-      "CONFLICT",
+      'CONFLICT',
       `Cannot delete role with ${role._count.users} user(s) assigned. Reassign users first.`,
       409,
     );
@@ -318,7 +318,7 @@ router.delete("/:id", async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    "role.deleted",
+    'role.deleted',
     undefined,
     { name: role.name },
     req.ip,

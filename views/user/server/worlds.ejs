@@ -1,194 +1,95 @@
-<%- include('../../components/header', { title: t('worlds') }) %>
+<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Worlds' }) %>
 
-<main class="h-screen m-auto" style="color:var(--theme-text)">
-  <div class="flex h-full">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);"><%= t('worlds') %></span>
+    </li>
+  </ol>
+</nav>
 
-    <!-- Main Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('dashboard'), href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: t('worlds') }
-      ] }) %>
-      <!-- Page Header: title + meta left -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/server-header') %>
-            <!-- Server meta: image · node · id -->
-            <%- include('../../components/server-meta') %>
+<div class="px-6 sm:px-8 pb-12" data-server-uuid="<%= server.UUID %>">
+
+  <h1 class="text-xl font-semibold mb-6" style="color:var(--theme-text);"><%= t('worlds') %></h1>
+
+  <div id="worlds-list">
+    <% if (!worlds || worlds.length === 0) { %>
+      <div class="al-card p-8 text-center">
+        <%- icon('globe', { class: 'w-10 h-10 mx-auto mb-3', strokeWidth: 1.5, style: 'color:var(--theme-text-muted);' }) %>
+        <p class="text-sm mb-1" style="color:var(--theme-text-strong);">No worlds found</p>
+        <p class="text-xs" style="color:var(--theme-text-muted);">Start your server to generate worlds.</p>
+      </div>
+    <% } else { %>
+      <% worlds.forEach(function(world) { %>
+        <div class="al-card p-4 mb-3 flex flex-col sm:flex-row sm:items-center gap-3" data-world-name="<%= world.name %>">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-bg-secondary);">
+              <%- icon('globe', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-text-muted);' }) %>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= world.name %></p>
+              <p class="text-[10px]" style="color:var(--theme-text-muted);">
+                <% if (world.size) { %>Size: <%= (world.size / 1024 / 1024).toFixed(1) %> MB<% } %>
+                <% if (world.players !== undefined) { %> · <%= world.players %> player(s)<% } %>
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <% if (world.name !== 'world') { %>
+              <button type="button" class="world-action-btn al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium" data-world="<%= world.name %>" data-action="download">
+                <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> Download
+              </button>
+              <button type="button" class="world-action-btn world-delete-btn al-btn-danger px-3 py-1.5 rounded-lg text-xs font-medium" data-world="<%= world.name %>" data-action="delete">
+                <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+              </button>
+            <% } else { %>
+              <span class="text-[10px] px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">Default</span>
+            <% } %>
           </div>
         </div>
-      </div>
+      <% }); %>
+    <% } %>
+  </div>
 
-      <%- include('../../components/installHeader') %>
+</div>
 
-            <!-- Error Message -->
-      <% if (errorMessage && errorMessage.message) { %>
-          <div class="mx-4 sm:mx-8 mt-8">
-            <%- include('../../components/ui/alert', { type: 'danger', message: 'Error', detail: errorMessage.message }) %>
-          </div>
-      <% } %>
+<script type="module" nonce="<%- nonce %>">
+  const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
 
-              <!-- No worlds message -->
-              <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow">
-                <div>
-                  <div id="noWorldsMessage" data-collapsible="true" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-                    <%- icon('info', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-text-muted)' }) %>
-                    <div>
-                      <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('noWorldsFound') %></p>
-                      <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noWorldsFoundDesc') %></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  document.querySelectorAll('.world-action-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const world = btn.dataset.world;
+      const action = btn.dataset.action;
 
-              <!-- Server Template -->
-              <%- include('../../components/server-template', { features: ['players', 'worlds'] }) %>
+      if (action === 'delete') {
+        if (!confirm(`Delete world "${world}"? This cannot be undone.`)) return;
+      }
 
-      <div id="server-page-body">
-
-      <div class="px-6 mt-8">
-
-        <!-- Table of worlds -->
-        <div class="collapsible-row no-anim<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="overflow-x-auto shadow rounded-lg al-card" id="serverTable">
-          <table class="al-table min-w-full">
-            <colgroup>
-              <col style="min-width:240px">
-              <col style="min-width:160px">
-            </colgroup>
-            <thead class="al-table-head">
-              <tr>
-                <th scope="col" class="al-table-th py-3.5 pl-4 pr-3 sm:pl-6"><%= t('name') %></th>
-                <th scope="col" class="al-table-th py-3.5 pl-4 pr-3 sm:pl-6"><%= t('actionsColumn') %></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y" style="border-color:var(--theme-border)">
-              <% let worldIdx = 0; worlds.forEach(function(world) { %>
-                <tr style="--i:<%= worldIdx++ %>" class="al-table-tr transition-colors">
-                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                    <div class="flex items-center">
-                      <div class="mr-5 flex-shrink-0">
-                        <%
-                          let iconPath = '';
-                          if (world.name === 'world') {
-                            iconPath = assetUrl('/assets/world_icons/overworld.png');
-                          } else if (world.name === 'world_nether') {
-                            iconPath = assetUrl('/assets/world_icons/nether.png');
-                          } else if (world.name === 'world_the_end') {
-                            iconPath = assetUrl('/assets/world_icons/end.png');
-                          } else if (world.name.includes('nether')) {
-                            iconPath = assetUrl('/assets/world_icons/nether.png');
-                          } else if (world.name.includes('end')) {
-                            iconPath = assetUrl('/assets/world_icons/end.png');
-                          } else {
-                            iconPath = assetUrl('/assets/world_icons/overworld.png');
-                          }
-                        %>
-                        <img loading="lazy" class="h-10 w-10 rounded-full border" style="border-color:var(--theme-border)" src="<%= iconPath %>" alt="<%= t('worldIconAlt') %>" />
-                      </div>
-                      <div>
-                        <div class="font-medium" style="color:var(--theme-text-strong)"><%= world.name %></div>
-                        <div class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('minecraftWorld') %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="whitespace-nowrap px-3 py-4 text-sm">
-                    <div class="flex gap-3">
-                      <button
-                        type="button"
-                        class="al-btn-danger rounded-xl px-3 py-2 text-center text-sm font-medium shadow-sm"
-                        onclick="confirmDeleteWorld(this.dataset.worldName)"
-                        data-world-name="<%= world.name.replace(/"/g, '&quot;') %>"
-                      >
-                        <div class="flex items-center">
-                          <%- icon('trash-2', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
-                          <%= t('removeWorld') %>
-                        </div>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-    </div>
-
-      </div><!-- /server-page-body -->
-
-      </div>
-</main>
-
-<!-- Delete World Confirmation Modal -->
-<%- include('../../components/footer') %>
-
-<script nonce="<%- nonce %>">
-  const noWorldsMessage = document.getElementById('noWorldsMessage');
-  const serverTable = document.getElementById('serverTable');
-
-  setTimeout(() => {
-    if (<%= worlds.length %> > 0) {
-      document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.add('open');
-      document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.remove('open');
-    } else {
-      document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.remove('open');
-      document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.add('open');
-    }
-  }, 500);
-
-  function confirmDeleteWorld(worldName) {
-    window.modal.confirm({
-      title: '<%= req.translations.deleteWorld || "Delete World" %>',
-      body: ('<%= req.translations.deleteWorldConfirm || "Delete" %> "' + worldName + '"? <%= req.translations.deleteWorldWarning || "All world data will be permanently lost and cannot be recovered." %>'),
-      danger: true,
-      confirmLabel: '<%= req.translations.deleteWorld || "Delete World" %>',
-      onConfirm: () => deleteWorld(worldName, () => {})
-    });
-  }
-
-  function deleteWorld(worldName, callback) {
-    showToast('<%= req.translations.deletingWorld || "Deleting world" %> ' + worldName + '...', 'info');
-
-    fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(worldName), {
-      method: 'DELETE',
-      headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }
-    })
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(data => {
-          throw new Error(data.error || '<%= req.translations.failedToDeleteWorld || "Failed to delete world" %>');
+      try {
+        const res = await fetch(`/server/${serverUUID}/worlds/${encodeURIComponent(world)}/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
         });
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        showToast('<%= req.translations.worldDeleted || "World" %> ' + worldName + ' <%= req.translations.deleted || "deleted." %>', 'success');
-
-        const rows = document.querySelectorAll('tr');
-        for (const row of rows) {
-          if (row.textContent.includes(worldName)) {
-            al.removeRow(row);
-            break;
+        const data = await res.json();
+        if (data.success !== false) {
+          if (action === 'delete') {
+            btn.closest('[data-world-name]')?.remove();
           }
+          if (window.showToast) window.showToast(`World ${action}d`, 'success');
         }
-      } else {
-        showToast(data.error || '<%= req.translations.failedToDeleteWorld || "Failed to delete world" %>', 'error');
-        if (callback) callback();
+      } catch (e) {
+        console.error(`World ${action} failed`, e);
       }
-    })
-    .catch(error => {
-      console.error('Error deleting world:', error);
-      showToast(error.message || '<%= req.translations.failedToDeleteWorld || "Failed to delete world" %>', 'error');
-      if (callback) callback();
     });
-  }
+  });
 </script>
+
+<%- include('../../layouts/user-footer') %>

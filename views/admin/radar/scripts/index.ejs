@@ -1,0 +1,122 @@
+<%- include('../../../layouts/admin', { title: 'Radar Scripts' }) %>
+
+<%- include('../../../partials/flash-messages') %>
+
+<%- include('../../../partials/ui/breadcrumb', { items: [
+  { label: t('admin'), url: '/admin' },
+  { label: 'Radar', url: '/admin/radar' },
+  { label: 'Scripts' }
+] }) %>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">Radar Scripts</h1>
+    <p class="al-page-desc">Detection scripts used when scanning server volumes for malicious content.</p>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <a href="/admin/radar" class="al-btn-secondary inline-flex items-center gap-1.5">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+    </a>
+    <a href="/admin/radar/scripts/create" class="al-btn-primary inline-flex items-center gap-1.5">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> New Script
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body">
+  <%
+    var list = (typeof scripts !== 'undefined' && Array.isArray(scripts)) ? scripts : [];
+  %>
+  <% if (list.length === 0) { %>
+    <%- include('../../../partials/empty-state', {
+      iconName: 'file-code',
+      title: 'No scripts yet',
+      description: 'Create a detection script to start scanning servers.',
+      action: '<a href="/admin/radar/scripts/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + ' New Script</a>'
+    }) %>
+  <% } else { %>
+  <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
+    <table class="al-table min-w-full">
+      <colgroup>
+        <col style="min-width:240px">
+        <col style="min-width:160px">
+        <col style="min-width:100px">
+        <col style="min-width:160px">
+      </colgroup>
+      <thead class="al-table-head">
+        <tr>
+          <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+          <th class="al-table-th px-3 py-3.5 col-hide">Description</th>
+          <th class="al-table-th px-3 py-3.5 col-hide">Version</th>
+          <th class="al-table-th px-3 py-3.5">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y" style="border-color:var(--theme-border)">
+        <% let scriptIdx = 0; list.forEach(function(s) { %>
+        <tr class="al-table-tr transition-colors" style="--i:<%= scriptIdx++ %>">
+          <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3">
+            <p class="font-medium" style="color:var(--theme-text-strong)"><%= s.name || s.id %></p>
+            <% if (s.filename) { %><p class="text-xs mt-0.5 font-mono" style="color:var(--theme-text-muted)"><%= s.filename %></p><% } %>
+          </td>
+          <td class="al-table-td px-3 py-4 col-hide">
+            <p class="text-xs max-w-sm truncate" style="color:var(--theme-text-muted)"><%= s.description || '—' %></p>
+          </td>
+          <td class="al-table-td whitespace-nowrap px-3 py-4 text-sm col-hide" style="color:var(--theme-text-muted)">v<%= s.version || '1.0.0' %></td>
+          <td class="al-table-td whitespace-nowrap px-3 py-4">
+            <div class="flex items-center gap-2">
+              <a href="/admin/radar/scripts/edit/<%= encodeURIComponent(s.id) %>" class="al-btn-secondary inline-flex items-center gap-1.5 !px-2.5 !py-1.5 text-xs">
+                <%- icon('pencil', { class: 'size-3.5', strokeWidth: 1.5 }) %> Edit
+              </a>
+              <button type="button" class="al-btn-secondary inline-flex items-center gap-1.5 !px-2.5 !py-1.5 text-xs js-delete-script"
+                data-id="<%= encodeURIComponent(s.id) %>" data-name="<%= s.name || s.id %>"
+                style="color:var(--theme-danger); border-color:color-mix(in srgb, var(--theme-danger) 35%, transparent);">
+                <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %> Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+
+  document.querySelectorAll('.js-delete-script').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = btn.dataset.id;
+      var name = btn.dataset.name;
+      if (!id) return;
+      var run = function() {
+        fetch('/admin/radar/scripts/' + id + '/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            if (res.success) { showToast('Script deleted.', 'success'); window.location.reload(); }
+            else { showToast(res.message || 'Failed to delete script.', 'error'); }
+          })
+          .catch(function() { showToast('Something went wrong.', 'error'); });
+      };
+      if (window.modal && window.modal.confirm) {
+        window.modal.confirm({
+          title: 'Delete Script',
+          body: 'Delete "' + name + '"? Scans will no longer use it.',
+          danger: true,
+          confirmLabel: 'Delete',
+          onConfirm: run,
+        });
+      } else if (window.confirm('Delete "' + name + '"?')) {
+        run();
+      }
+    });
+  });
+})();
+</script>
+
+<%- include('../../../layouts/admin-footer') %>

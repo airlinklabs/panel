@@ -1,0 +1,43 @@
+<!-- UI Table component -->
+<%
+// Params: id, class, columns (array of {header, key, class}), rows (array of objects), emptyState
+const tableId = typeof id !== 'undefined' ? id : '';
+const tableCls = typeof cls !== 'undefined' ? cls : '';
+const tableColumns = typeof columns !== 'undefined' ? columns : [];
+const tableRows = typeof rows !== 'undefined' ? rows : [];
+const tableEmpty = typeof emptyState !== 'undefined' ? emptyState : 'No data available.';
+%>
+<div class="al-table-wrapper <%= tableCls %>" <% if (tableId) { %> id="<%= tableId %>-wrapper"<% } %>>
+  <table class="al-table w-full" id="<%= tableId %>">
+    <% if (tableColumns.length > 0) { %>
+      <thead class="al-table-thead">
+        <tr>
+          <% tableColumns.forEach(function(col) { %>
+            <th class="al-table-th <%= typeof col.class !== 'undefined' ? col.class : '' %>">
+              <%- col.header %>
+            </th>
+          <% }); %>
+        </tr>
+      </thead>
+    <% } %>
+    <tbody class="al-table-tbody">
+      <% if (tableRows.length === 0) { %>
+        <tr>
+          <td colspan="<%= tableColumns.length || 1 %>" class="al-table-empty text-center py-8">
+            <%- tableEmpty %>
+          </td>
+        </tr>
+      <% } else { %>
+        <% tableRows.forEach(function(row, rowIdx) { %>
+          <tr class="al-table-row" data-index="<%= rowIdx %>">
+            <% tableColumns.forEach(function(col) { %>
+              <td class="al-table-td <%= typeof col.class !== 'undefined' ? col.class : '' %>">
+                <%- typeof row[col.key] !== 'undefined' ? row[col.key] : '' %>
+              </td>
+            <% }); %>
+          </tr>
+        <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+</div>

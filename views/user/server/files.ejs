@@ -1,24 +1,4 @@
-<%- include('../../components/header', { title: t('files') }) %>
-<style>
-  .al-file-panel { contain: layout paint; }
-  .al-file-row {
-    animation: al-file-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--i, 0) * 18ms);
-  }
-  .al-file-row:hover .al-file-icon { transform: translateY(-1px); }
-  .al-file-row.is-selected { background: var(--theme-bg-secondary, rgb(245 245 245)); }
-  .dark .al-file-row.is-selected { background: var(--theme-bg-hover, rgb(255 255 255 / 0.04)); }
-  .al-file-icon { transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms ease; }
-
-  @keyframes al-file-row-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .al-file-row { animation: none; }
-    .al-file-icon { transition-duration: 0.01ms !important; }
-  }
-</style>
+<%- include('../../layouts/user', { title: t('files') }) %>
 
 <%
 function getFileIcon(category) {
@@ -47,383 +27,190 @@ function escAttr(val) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 }
-
-function escJS(val) {
-  return String(val)
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/"/g, '\\"')
-    .replace(/</g, '\\x3c')
-    .replace(/>/g, '\\x3e');
-}
 %>
 
-<main class="h-screen m-auto" style="color:var(--theme-text)">
-  <div class="flex h-full">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name, url: '/server/' + server.UUID },
+    { label: t('files') }
+  ] }) %>
+</div>
 
-    <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('dashboard'), href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: t('files') }
-      ] }) %>
-      <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/server-header') %>
-            <%- include('../../components/server-meta') %>
-          </div>
-          <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-          <div class="flex flex-wrap gap-1.5 shrink-0">
-            <button id="createFile" onclick="openCreateFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('file-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
-                <%= t('newFile') %>
-            </button>
-
-            <button id="createFolder" onclick="openCreateFolderModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('folder-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
-                <%= t('newFolder') %>
-            </button>
-
-            <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('upload', { class: 'size-3.5 inline-flex mr-1' }) %>
-                <%= t('uploadFile') %>
-            </button>
-
-            <button id="pullFile" onclick="openPullFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('download', { class: 'size-3.5 inline-flex mr-1' }) %>
-                <%= t('pullFromUrl') %>
-            </button>
-
-            <button onclick="refreshFileList()" type="button" class="al-btn-secondary">
-                <%- icon('refresh-cw', { class: 'size-3.5 inline-flex mr-1' }) %>
-                <%= t('refresh') %>
-            </button>
-
-              <%- include('../../components/sftp', { server: server }) %>
-          </div>
-          <% } %>
-        </div>
-      </div>
-
-      <%- include('../../components/installHeader') %>
-
-      <!-- Daemon down message removed as requested -->
-
-      <!-- Server Template -->
-      <%- include('../../components/server-template') %>
-
-      <div id="server-page-body">
-
-      <!-- Daemon Offline Warning -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-4 sm:mx-8 mt-6 rounded-xl p-3 flex items-center" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
-        <div class="flex-shrink-0 mr-2.5">
-          <%- icon('triangle-alert', { class: 'h-4 w-4', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
-        </div>
-        <div>
-          <h3 class="text-[13px] font-medium" style="color:var(--theme-danger);"><%= t('connectionError') %></h3>
-          <p class="text-[11px]" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
-          <button type="button" onclick="Turbo.visit(window.location.href)" class="al-btn-danger mt-1.5 px-2.5 py-1 text-[11px] rounded-lg transition-colors inline-flex items-center gap-1.5">
-            <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-            <%= t('retryConnection') %>
-          </button>
-        </div>
-      </div>
-      <% } %>
-
-      <!-- File Table or Daemon Offline Message -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-        <!-- Daemon Offline Message -->
-        <div class="px-6 sm:px-8 mt-6">
-          <div class="al-card rounded-xl p-6 text-center">
-            <div class="flex justify-center mb-4">
-              <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
-              <%- icon('wifi-off', { class: 'size-5', strokeWidth: 1.5 }) %>
-              </div>
-            </div>
-            <h2 class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= t('nodeOfflineTitle') %></h2>
-            <p class="mt-1.5 text-[13px] max-w-md mx-auto" style="color:var(--theme-text-muted)">
-              <%= t('nodeOfflineDesc') %>
-            </p>
-            <div class="mt-4">
-              <button type="button" onclick="Turbo.visit(window.location.href)" class="al-btn-primary px-3 py-1.5 text-[13px] rounded-lg inline-flex items-center gap-1.5">
-                <%- icon('refresh-cw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-                <%= t('retryConnection') %>
-              </button>
-            </div>
-          </div>
-        </div>
-      <% } else { %>
-        <!-- File Table -->
-        <div class="px-6 sm:px-8 mt-6">
-          <div class="al-file-panel overflow-x-auto rounded-xl" style="border:1px solid var(--theme-border);">
-            <div class="px-3 py-2 flex items-center overflow-hidden">
-              <nav class="flex items-center gap-0 text-[11px] min-w-0 overflow-hidden">
-                <a class="hover:text-[var(--theme-text)] transition shrink-0" href="./files" style="color:var(--theme-text-muted)">/home/container/</a><span style="color:var(--theme-text-muted)"></span>
-                <%
-                    if (req.query.path) {
-                        const parts = req.query.path.split('/');
-                        let currentPath = '';
-
-                        parts.forEach((part, index) => {
-                            currentPath += part;
-
-                            if (index < parts.length - 1) {
-                                %>
-                                <a href="./files?path=<%= currentPath %>" class="hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span class="mx-0.5" style="color:var(--theme-text-muted)">/</span>
-                                <%
-                                currentPath += '/';
-                            } else {
-                                %>
-                                <span class="font-medium" style="color:var(--theme-text-strong)"><%= part %></span>
-                                <%
-                            }
-                        });
-                    }
-                %>
-              </nav>
-            </div>
-            <!-- Search/filter bar -->
-            <div class="px-3 py-1.5 flex items-center gap-2" style="border-bottom:1px solid var(--theme-border);">
-              <%- icon('search', { size: 12, class: 'shrink-0' }) %>
-              <input
-                id="fileSearchInput"
-                type="text"
-                placeholder="<%= t('filterFiles') %>"
-                class="flex-1 bg-transparent text-[13px] focus:outline-none"
-                style="color:var(--theme-text-strong);"
-                autocomplete="off"
-                spellcheck="false"
-                aria-label="<%= t('filterFiles') %>">
-              <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="<%= t('clearSearchFilter') %>" style="color:var(--theme-text-muted);">
-                <%- icon('x', { size: 10 }) %>
-              </button>
-            </div>
-            <table class="min-w-full al-table" style="background:var(--theme-bg-card);">
-              <thead class="al-table-head">
-              <tr>
-                <th class="px-3 py-2 text-left w-10" scope="col">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-3.5 w-3.5 rounded transition file-checkbox" aria-label="<%= t('selectFileAll') %>">
-                </th>
-                <th class="al-table-th px-3 py-2 text-left" scope="col"><%= t('name') %></th>
-                <th class="al-table-th px-3 py-2 text-left w-24" scope="col"><%= t('size') %></th>
-                <th class="al-table-th px-3 py-2 text-left w-32 hidden md:table-cell" scope="col"><%= t('modified') %></th>
-              </tr>
-            </thead>
-            <tbody id="fileTableBody">
-              <%- include('./files-rows', { files, currentPath, server }) %>
-            </tbody>
-          </table>
-          <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: filesPageSize }) %>
-        </div>
-      </div>
-      <% } %>
-    </div>
-
-    <!-- Modals and stuff -->
-
-   <!-- Floating Action Bar (only show when daemon is online) -->
-   <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-14 lg:bottom-0 right-0 z-40 py-3.5 px-6 flex items-center justify-between gap-4 left-0 lg:left-60 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="background:var(--theme-bg-card); border-top:1px solid var(--theme-border);">
-     <div class="flex items-center gap-2.5">
-       <%- icon('check-square', { size: 15, class: 'shrink-0' }) %>
-        <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('filesSelected') %></span>
-     </div>
-     <div class="flex items-center gap-2">
-       <button type="button" id="massRenameBtn"
-         class="al-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-          <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
-          <%= t('rename') %>
-        </button>
-        <button type="button" id="massArchiveBtn"
-          class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-          <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
-          <%= t('archive') %>
-        </button>
-        <button type="button" id="massDeleteBtn"
-          class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-          <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
-          <%= t('delete') %>
-       </button>
-       <button type="button" id="dismissSelectionBtn"
-         class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition ml-1"
-         style="color:var(--theme-text-muted);"
-         title="<%= t('deselectAll') %>">
-         <%- icon('x', { size: 13 }) %>
-       </button>
-     </div>
-   </div>
-   <% } %>
-  <!-- Move file modal -->
-  <div id="moveModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="moveModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b">
-        <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('moveFile') %></h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('moveFileDesc') %></p>
-        </div>
-        <button type="button" onclick="closeMoveModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <input type="hidden" id="moveSourcePath">
-        <input type="text" id="moveDestPath"
-          class="al-input font-mono"
-          placeholder="path/to/destination/">
-      </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('cancel') %>
-        </button>
-        <button type="button" onclick="confirmMove()" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('move-right', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('move') %>
-        </button>
-      </div>
-    </div>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('files') %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('box', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="truncate max-w-[140px]"><%= server.image?.name %></span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('server', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="truncate max-w-[100px]"><%= server.node?.name %></span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('hash', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="font-mono"><%= server.UUID.split('-')[0] %></span>
+      </span>
+    </p>
   </div>
-
-  <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="massDeleteModalPanel" class="al-sheet-panel rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b">
-        <div>
-          <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('confirmMassDeletion') %></p>
-        </div>
-        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <p id="massDeleteMessage" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
-      </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('cancel') %>
-        </button>
-        <button type="button" id="confirmMassDelete" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('delete') %>
-        </button>
-      </div>
-    </div>
- </div>
-    <!-- Create file / folder modal -->
-  <div id="createFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="createFileModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b">
-        <div>
-          <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('newFile') %></h2>
-          <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('newFileDesc') %></p>
-        </div>
-        <button type="button" onclick="closeCreateFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <input type="text" id="FileName" data-mode="file"
-          class="al-input font-mono"
-          placeholder="filename.txt or folder/filename.txt"
-          onkeydown="handleFileNameKeyPress(event)">
-        <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
-      </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('cancel') %>
-        </button>
-        <button type="button" onclick="confirmCreateFile()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-          <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('create') %>
-        </button>
-      </div>
-    </div>
+  <div>
+    <button id="createFile" type="button" class="al-btn-secondary">
+      <%- icon('file-plus', { class: 'size-4' }) %>
+      <%= t('newFile') %>
+    </button>
+    <button id="createFolder" type="button" class="al-btn-secondary">
+      <%- icon('folder-plus', { class: 'size-4' }) %>
+      <%= t('newFolder') %>
+    </button>
+    <button id="uploadFile" type="button" class="al-btn-secondary">
+      <%- icon('upload', { class: 'size-4' }) %>
+      <%= t('uploadFile') %>
+    </button>
+    <button id="pullFile" type="button" class="al-btn-secondary">
+      <%- icon('download', { class: 'size-4' }) %>
+      <%= t('pullFromUrl') %>
+    </button>
+    <button id="refreshFiles" type="button" class="al-btn-secondary">
+      <%- icon('refresh-cw', { class: 'size-4' }) %>
+      <%= t('refresh') %>
+    </button>
   </div>
+</header>
 
-  <!-- Upload file — uses shared upload modal from footer -->
-
-  <!-- Pull file from URL -->
-  <div id="pullFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b">
-        <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('pullFileFromUrl') %></h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('pullFileDesc') %></p>
-        </div>
-        <button type="button" onclick="closePullFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <div class="mb-4">
-          <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('fileUrl') %></label>
-          <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
-          <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
-        </div>
-      </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          <%= t('cancel') %>
-        </button>
-        <button type="button" id="pullButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-          <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <%= t('pull') %>
-        </button>
-      </div>
+<div class="al-page-body">
+  <!-- File Table -->
+  <div class="al-file-panel">
+    <!-- Breadcrumb path -->
+    <nav class="al-file-pathbar" aria-label="<%= t('files') %>">
+      <a class="al-file-path" href="./files">/home/container/</a>
+      <%
+        const currentPath = (typeof filesCurrentPath !== 'undefined' && filesCurrentPath) ? filesCurrentPath : '';
+        if (currentPath) {
+          const parts = currentPath.split('/').filter(Boolean);
+          let buildPath = '';
+          parts.forEach((part, index) => {
+            buildPath += part;
+            if (index < parts.length - 1) { %>
+              <a href="./files?path=<%= buildPath %>" class="al-file-path"><%= part %></a><span class="al-file-path-sep">/</span>
+            <% buildPath += '/';
+            } else { %>
+              <span class="al-file-path-current"><%= part %></span>
+            <% }
+          });
+        }
+      %>
+    </nav>
+    <!-- Search/filter -->
+    <div class="al-file-search">
+      <%- icon('search', { size: 14, class: 'shrink-0' }) %>
+      <input id="fileSearchInput" type="text" placeholder="<%= t('filterFiles') %>"
+        class="al-file-search-input"
+        autocomplete="off" spellcheck="false"
+        aria-label="<%= t('filterFiles') %>">
+      <button type="button" id="clearFileSearch" class="al-file-search-clear hidden" aria-label="<%= t('clearSearchFilter') %>">
+        <%- icon('x', { size: 12 }) %>
+      </button>
     </div>
+    <table class="al-table min-w-full">
+      <thead class="al-table-head">
+        <tr>
+          <th class="al-table-th w-10" scope="col">
+            <input type="checkbox" id="selectAll" class="al-form-checkbox file-checkbox" aria-label="<%= t('selectFileAll') %>">
+          </th>
+          <th class="al-table-th" scope="col"><%= t('name') %></th>
+          <th class="al-table-th w-24" scope="col"><%= t('size') %></th>
+          <th class="al-table-th w-32 hidden md:table-cell" scope="col"><%= t('modified') %></th>
+        </tr>
+      </thead>
+      <tbody id="fileTableBody">
+        <%- include('./files-rows') %>
+      </tbody>
+    </table>
   </div>
+</div>
 
-  
-      </div><!-- /server-page-body -->
+<!-- Floating Action Bar -->
+<div id="floatingActionBar" class="al-file-actions translate-y-full">
+  <div class="flex items-center gap-2.5">
+    <%- icon('check-square', { size: 16, class: 'shrink-0' }) %>
+    <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)"></span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button type="button" id="massRenameBtn" class="al-btn-secondary al-btn-sm">
+      <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+      <%= t('rename') %>
+    </button>
+    <button type="button" id="massArchiveBtn" class="al-btn-primary al-btn-sm">
+      <%- icon('file-archive', { size: 14, class: 'shrink-0' }) %>
+      <%= t('archive') %>
+    </button>
+    <button type="button" id="massDeleteBtn" class="al-btn-danger al-btn-sm">
+      <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+      <%= t('delete') %>
+    </button>
+    <button type="button" id="dismissSelectionBtn" class="al-btn-ghost al-btn-icon-only ml-1" title="<%= t('deselectAll') %>" aria-label="<%= t('deselectAll') %>">
+      <%- icon('x', { size: 14 }) %>
+    </button>
+  </div>
+</div>
 
+<!-- Modals -->
+
+<!-- Create file / folder modal -->
+<div id="createFileModal" class="al-sheet-overlay opacity-0 pointer-events-none">
+  <div id="createFileModalPanel" class="al-sheet-panel w-full sm:max-w-md flex flex-col" role="dialog" aria-modal="true" aria-labelledby="createModalTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:var(--theme-shadow-xl);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div class="min-w-0">
+        <h2 id="createModalTitle" class="al-card-title"><%= t('newFile') %></h2>
+        <p id="createModalHint" class="al-card-subtitle"><%= t('newFileDesc') %></p>
       </div>
-</main>
-
-<%- include('../../components/loading-popup')%>
-<%- include('../../components/image-viewer')%>
-
-<!-- Rename Modal -->
-<div id="renameModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-  <div id="renameModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-    <div class="flex justify-between items-center px-6 py-4 border-b">
-      <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rename') %></h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('renameDesc') %></p>
-      </div>
-      <button type="button" onclick="closeRenameModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
+      <button type="button" id="closeCreateFileModal" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <input type="text" id="newFileName"
-        class="al-input font-mono"
-        placeholder="new-name.txt or subfolder/new-name.txt">
-      <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <input type="text" id="FileName" data-mode="file" class="al-input font-mono" placeholder="<%= t('fileNamePlaceholder') %>" aria-label="<%= t('newFile') %>">
+      <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
     </div>
-    <input type="hidden" id="currentFileName">
-    <input type="hidden" id="currentFilePath">
-    <div class="flex gap-2 px-6 py-4 border-t justify-end">
-      <button type="button" onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" id="cancelCreateFile" class="al-btn-secondary al-btn-sm">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="button" onclick="confirmRename()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
+      <button type="button" id="confirmCreateFile" class="al-btn-primary al-btn-sm">
+        <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
+        <%= t('create') %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div id="renameModal" class="al-sheet-overlay opacity-0 pointer-events-none">
+  <div id="renameModalPanel" class="al-sheet-panel w-full sm:max-w-md flex flex-col" role="dialog" aria-modal="true" aria-label="<%= t('rename') %>" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:var(--theme-shadow-xl);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('rename') %></h2>
+        <p class="al-card-subtitle"><%= t('renameDesc') %></p>
+      </div>
+      <button type="button" id="closeRenameModal" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <input type="text" id="newFileName" class="al-input font-mono" placeholder="<%= t('renamePlaceholder') %>" aria-label="<%= t('rename') %>">
+      <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
+      <input type="hidden" id="currentFileName">
+      <input type="hidden" id="currentFilePath">
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" id="cancelRename" class="al-btn-secondary al-btn-sm">
+        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
+        <%= t('cancel') %>
+      </button>
+      <button type="button" id="confirmRename" class="al-btn-primary al-btn-sm">
         <%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('rename') %>
       </button>
@@ -431,998 +218,65 @@ function escJS(val) {
   </div>
 </div>
 
+<!-- Pull file from URL modal -->
+<div id="pullFileModal" class="al-sheet-overlay opacity-0 pointer-events-none">
+  <div id="pullFileModalPanel" class="al-sheet-panel w-full sm:max-w-md flex flex-col" role="dialog" aria-modal="true" aria-labelledby="pullModalTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:var(--theme-shadow-xl);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div class="min-w-0">
+        <h2 id="pullModalTitle" class="al-card-title"><%= t('pullFileFromUrl') %></h2>
+        <p class="al-card-subtitle"><%= t('pullFileDesc') %></p>
+      </div>
+      <button type="button" id="closePullFileModal" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <label for="pullUrlInput" class="al-form-label"><%= t('fileUrl') %></label>
+      <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
+      <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" id="cancelPullFile" class="al-btn-secondary al-btn-sm">
+        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
+        <%= t('cancel') %>
+      </button>
+      <button type="button" id="pullButton" class="al-btn-primary al-btn-sm">
+        <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('pull') %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mass Delete Confirmation Modal -->
+<div id="massDeleteModal" class="al-sheet-overlay opacity-0 pointer-events-none">
+  <div id="massDeleteModalPanel" class="al-sheet-panel w-full sm:max-w-sm flex flex-col" role="alertdialog" aria-modal="true" aria-labelledby="massDeleteTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:var(--theme-shadow-xl);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <p id="massDeleteTitle" class="al-card-title"><%= t('confirmMassDeletion') %></p>
+      <button type="button" id="closeMassDeleteModal" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <p id="massDeleteMessage" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" id="cancelMassDelete" class="al-btn-secondary al-btn-sm">
+        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
+        <%= t('cancel') %>
+      </button>
+      <button type="button" id="confirmMassDelete" class="al-btn-danger al-btn-sm">
+        <%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>
+        <%= t('delete') %>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script nonce="<%- nonce %>">
-(function () {
-  function handleFileNameKeyPress(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        confirmCreateFile();
-    }
-  }
-
-  if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
-      const { showImageViewer, closeImageViewer, downloadViewedImage } = window.imageViewerSystem();
-      window.showImageViewer = showImageViewer;
-      window.closeImageViewer = closeImageViewer;
-      window.downloadViewedImage = downloadViewedImage;
-    }
-
-    document.querySelectorAll('a[data-click="viewer"]').forEach((el) => {
-      el.addEventListener('click', (event) => {
-        event.preventDefault();
-        const img = el;
-        if (typeof window.showImageViewer === 'function') {
-          window.showImageViewer(img.dataset.filename, img.dataset.path, img.dataset.size, img.dataset.uuid);
-        }
-      });
-    });
-
-  const fileListPath = '<%= currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
-
-  // In-place refresh of the file table — replaces location.reload() after
-  // create/delete/rename/move/upload/archive operations. Re-fetches the
-  // server-rendered rows so markup and icons stay identical to the initial
-  // page, then re-binds row events.
-  function bindFileRowEvents(root) {
-    root = root || document;
-    root.querySelectorAll('a[data-click="viewer"]').forEach((el) => {
-      el.addEventListener('click', (event) => {
-        event.preventDefault();
-        const img = el;
-        if (typeof window.showImageViewer === 'function') {
-          window.showImageViewer(img.dataset.filename, img.dataset.path, img.dataset.size, img.dataset.uuid);
-        }
-      });
-    });
-    root.querySelectorAll('.file-checkbox:not(#selectAll)').forEach(checkbox => {
-      checkbox.addEventListener('change', event => {
-        if (window.animateCheckbox) window.animateCheckbox(checkbox);
-        const fileName = event.target.dataset.filename;
-        if (event.target.checked) {
-          if (!selectedFiles.includes(fileName)) selectedFiles.push(fileName);
-        } else {
-          selectedFiles = selectedFiles.filter(name => name !== fileName);
-        }
-        const allBoxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
-        const checkedCount = document.querySelectorAll('.file-checkbox:not(#selectAll):checked').length;
-        selectAllCheckbox.checked = checkedCount === allBoxes.length;
-        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < allBoxes.length;
-        updateSelectedFiles();
-      });
-    });
-    const searchInput = document.getElementById('fileSearchInput');
-    if (searchInput && searchInput.value) {
-      const q = searchInput.value.toLowerCase().trim();
-      root.querySelectorAll('tbody tr.al-file-row, tr.al-file-row').forEach(row => {
-        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
-        row.style.display = name.includes(q) ? '' : 'none';
-      });
-    }
-  }
-
-  async function refreshFileList() {
-    const tbody = document.getElementById('fileTableBody');
-    if (!tbody) { Turbo.visit(window.location.href); return; }
-    const loadingRows = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted)"><span class="inline-flex items-center gap-2"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading files…</span></td></tr>';
-    tbody.innerHTML = loadingRows;
-    try {
-      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(fileListPath || '/'));
-      const data = await res.json();
-      if (!data.success || typeof data.html !== 'string') { throw new Error('Bad response'); }
-      tbody.innerHTML = data.html;
-      bindFileRowEvents(tbody);
-      if (window.alTableScan) alTableScan(tbody);
-      selectedFiles = [];
-      updateSelectedFiles();
-      if (window.staggerFileRows) window.staggerFileRows();
-    } catch (err) {
-      Turbo.visit(window.location.href);
-    }
-  }
-
-  function deletefile(fileName, filePath) {
-    window.modal.confirm({
-      title: '<%= req.translations.deleteFileTitle || "Delete File" %>',
-      body: '<%= req.translations.deleteFileBody || "Are you sure you want to delete \\"{fileName}\\"? This cannot be undone." %>'.replace('{fileName}', fileName),
-      danger: true,
-      confirmLabel: '<%= req.translations.delete || "Delete" %>',
-      onConfirm: () => {
-      const loader = showLoadingPopup('<%= req.translations.deletingFile || "Deleting File" %>', '<%= req.translations.removingFileFromServer || "Removing file from server..." %>');
-      fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(filePath), {
-        method: 'DELETE'
-      })
-      .then(response => {
-        loader.close();
-        if (response.ok) {
-           showToast(fileName + '<%= req.translations.fileDeletedSuffix || " deleted." %>', 'success');
-          refreshFileList();
-        } else {
-          showToast('<%= req.translations.failedToDeleteFile || "Failed to delete file" %>', 'error');
-        }
-      })
-      .catch(error => {
-        loader.close();
-        console.error('Error:', error);
-        showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-      });
-      }
-    });
-  }
-
-  function downloadfile(fileName, filePath) {
-    // The panel route mints a one-time daemon token and 302s to the daemon,
-    // which serves the file directly — opening it in a new tab keeps this
-    // page's state intact.
-    const url = '/server/<%= server.UUID %>/files/download/' + encodeURIComponent(filePath);
-    const a = document.createElement('a');
-    a.href = url;
-    a.rel = 'noopener';
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
- // File Select thingy
-
-  const selectAllCheckbox = document.getElementById('selectAll');
-  const fileCheckboxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
-  const floatingActionBar = document.getElementById('floatingActionBar');
-  const selectedFilesCount = document.getElementById('selectedFilesCount');
-  const massDeleteBtn = document.getElementById('massDeleteBtn');
-  const massDeleteModal = document.getElementById('massDeleteModal');
-  const massDeleteMessage = document.getElementById('massDeleteMessage');
-  const confirmMassDeleteBtn = document.getElementById('confirmMassDelete');
-
-  let selectedFiles = [];
-
-  function updateSelectedFiles() {
-    const selectedCount = selectedFiles.length;
-    if (selectedFiles.length > 0) {
-    floatingActionBar.classList.remove('translate-y-full');
-  } else {
-    floatingActionBar.classList.add('translate-y-full');
-  }
-    document.querySelectorAll('.file-checkbox[data-filename]').forEach(checkbox => {
-      const row = checkbox.closest('tr');
-      if (row) row.classList.toggle('is-selected', checkbox.checked);
-    });
-    document.getElementById('selectedFilesCount').innerText = selectedCount + ' <%= req.translations.filesCountSuffix || "file(s) selected" %>';
-
-    document.getElementById('massDeleteBtn').disabled = selectedCount === 0;
-    document.getElementById('massArchiveBtn').disabled = selectedCount === 0;
-}
-
-document.getElementById('massArchiveBtn').addEventListener('click', () => {
-    if (selectedFiles.length > 0) {
-        window.modal.confirm({
-          title: '<%= req.translations.confirmArchiveTitle || "Confirm Archive" %>',
-          body: '<%= req.translations.confirmArchiveBody || "Archive {count} selected file(s)?" %>'.replace('{count}', selectedFiles.length),
-          danger: false,
-          confirmLabel: '<%= req.translations.archiveLabel || "Archive" %>',
-          onConfirm: () => archiveFiles(selectedFiles)
-        });
-    }
-});
-
-
-// Select All functionality
-selectAllCheckbox.addEventListener('change', event => {
-    if (window.animateCheckbox) window.animateCheckbox(selectAllCheckbox);
-    const isChecked = event.target.checked;
-
-    // Get all file checkboxes (excluding the select all checkbox itself)
-    const fileCheckboxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
-
-    fileCheckboxes.forEach(checkbox => {
-        checkbox.checked = isChecked;
-        if (window.animateCheckbox) window.animateCheckbox(checkbox);
-        const fileName = checkbox.dataset.filename;
-
-        if (isChecked) {
-            if (!selectedFiles.includes(fileName)) {
-                selectedFiles.push(fileName);
-            }
-        } else {
-            selectedFiles = selectedFiles.filter(name => name !== fileName);
-        }
-    });
-
-    updateSelectedFiles();
-});
-
-document.querySelectorAll('.file-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', event => {
-        if (window.animateCheckbox) window.animateCheckbox(checkbox);
-        const fileName = event.target.dataset.filename;
-
-        if (event.target.checked) {
-            if (!selectedFiles.includes(fileName)) selectedFiles.push(fileName);
-        } else {
-            selectedFiles = selectedFiles.filter(name => name !== fileName);
-        }
-
-        // Update select all checkbox state
-        const fileCheckboxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
-        const checkedCount = document.querySelectorAll('.file-checkbox:not(#selectAll):checked').length;
-        selectAllCheckbox.checked = checkedCount === fileCheckboxes.length;
-        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < fileCheckboxes.length;
-
-        updateSelectedFiles();
-    });
-});
-
-function archiveFiles(files) {
-    const loader = showLoadingPopup('<%= req.translations.creatingArchive || "Creating Archive" %>', '<%= req.translations.preparingFilesForArchive || "Preparing files for archiving..." %>');
-    loader.updateProgress(20, '<%= req.translations.compressingFiles || "Compressing files..." %>');
-
-    fetch('/api/v2/servers/<%= server.UUID %>/files/zip', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          relativePath: files,
-          zipname: 'archive'
-         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        loader.updateProgress(100, '<%= req.translations.archiveCreated || "Archive created!" %>');
-        setTimeout(() => {
-            loader.close();
-            if (data.success) {
-                showToast('<%= req.translations.filesArchived || "Files archived." %>', 'success');
-                selectedFiles = [];
-                updateSelectedFiles();
-                refreshFileList();
-            } else {
-                showToast('<%= req.translations.failedToArchiveFiles || "Failed to archive files" %>', 'error');
-            }
-        }, 500);
-    })
-    .catch(error => {
-        loader.close();
-        console.error('Error:', error);
-        showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-    });
-}
-
-massDeleteBtn.addEventListener('click', function() {
-  massDeleteMessage.textContent = '<%= req.translations.massDeleteBody || "Are you sure you want to delete {count} file(s)? This is a permanent action and cannot be reversed." %>'.replace('{count}', selectedFiles.length);
-  const panel = document.getElementById('massDeleteModalPanel');
-  massDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
-  Animate.openModal(massDeleteModal, panel);
-});
-
-function closeMassDeleteModal() {
-  const panel = document.getElementById('massDeleteModalPanel');
-  const done = function () {
-    massDeleteModal.classList.add('opacity-0', 'pointer-events-none');
-  };
-  Animate.closeModal(massDeleteModal, panel, done);
-}
-
-confirmMassDeleteBtn.addEventListener('click', async function() {
-  closeMassDeleteModal();
-
-  const loader = showLoadingPopup('<%= req.translations.deletingFiles || "Deleting Files" %>', '<%= req.translations.removingFilesCount || "Removing {count} files..." %>'.replace('{count}', selectedFiles.length));
-  loader.updateProgress(10, '<%= req.translations.processingDeletionRequests || "Processing deletion requests..." %>');
-
-  const deletePromises = selectedFiles.map(fileName =>
-    fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(fileName), {
-      method: 'DELETE'
-    })
-  );
-
-  try {
-    await Promise.all(deletePromises);
-    loader.updateProgress(100, '<%= req.translations.filesDeleted || "Files deleted." %>');
-    setTimeout(() => {
-      loader.close();
-      showToast(selectedFiles.length + '<%= req.translations.filesDeletedCountSuffix || " files deleted." %>', 'success');
-      refreshFileList();
-    }, 500);
-  } catch (error) {
-    loader.close();
-    console.error('Error deleting files:', error);
-    showToast('<%= req.translations.failedToDeleteFiles || "Failed to delete files" %>', 'error');
-  }
-});
-
-
-updateSelectedFiles();
-
-// New File
-function openCreateFileModal() {
-    const modal = document.getElementById('createFileModal');
-    const input = document.getElementById('FileName');
-    const panel = document.getElementById('createFileModalPanel');
-
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    Animate.openModal(modal, panel);
-
-    input.focus();
-  }
-
-  function closeCreateFileModal() {
-    const modal = document.getElementById('createFileModal');
-    const panel = document.getElementById('createFileModalPanel');
-    const done = function () {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    };
-    Animate.closeModal(modal, panel, done);
-  }
-
-
-  function openRenameModal(fileName, filePath) {
-    const modal = document.getElementById('renameModal');
-    const input = document.getElementById('newFileName');
-    const panel = document.getElementById('renameModalPanel');
-    document.getElementById('currentFileName').value = fileName;
-    document.getElementById('currentFilePath').value = filePath;
-
-    // Show the full path so the user can edit folder too
-    input.value = filePath;
-
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    Animate.openModal(modal, panel);
-
-    // Select only the filename part (after the last slash), excluding extension
-    const slashIndex = filePath.lastIndexOf('/');
-    const nameStart = slashIndex + 1;
-    const lastDotIndex = filePath.lastIndexOf('.');
-    const nameEnd = lastDotIndex > nameStart ? lastDotIndex : filePath.length;
-    input.setSelectionRange(nameStart, nameEnd);
-    input.focus();
-  }
-
-  function closeRenameModal() {
-    const modal = document.getElementById('renameModal');
-    const panel = document.getElementById('renameModalPanel');
-    const done = function () {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    };
-    Animate.closeModal(modal, panel, done);
-  }
-
-  // Add event listener for Enter key in rename modal
-  document.getElementById('newFileName').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      confirmRename();
-    }
-  });
-
-  function rename(fileName, filePath) {
-    openRenameModal(fileName, filePath);
-  }
-
-  async function extractZip(fileName, filePath) {
-    try {
-        const loader = showLoadingPopup('<%= req.translations.extractingArchive || "Extracting Archive" %>', '<%= req.translations.preparingToExtract || "Preparing to extract files..." %>');
-        loader.updateProgress(20, '<%= req.translations.extractingFiles || "Extracting files..." %>');
-
-        const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
-
-        const response = await fetch(`/api/v2/servers/<%= server.UUID %>/files/unzip`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                relativePath: parentPath || '/',
-                zipname: fileName
-            })
-        });
-
-        if (response.ok) {
-            loader.updateProgress(100, '<%= req.translations.filesExtractedSuccess || "Files extracted successfully!" %>');
-            setTimeout(() => {
-                loader.close();
-                showToast('<%= req.translations.fileExtracted || "File extracted." %>', 'success');
-                refreshFileList();
-            }, 500);
-        } else {
-            loader.close();
-            const error = await response.json();
-            showToast(error.error || '<%= req.translations.failedToExtractFile || "Failed to extract file" %>', 'error');
-        }
-    } catch (error) {
-        console.error('Error extracting file:', error);
-        showToast('<%= req.translations.failedToExtractFile || "Failed to extract file" %>', 'error');
-    }
-  }
-
-  // File Upload Functions — uses shared upload modal from footer
-  function openUploadFileModal() {
-    openUploadModal({
-      title: '<%= req.translations.uploadFile || "Upload file" %>',
-      onFile: confirmFileUpload,
-    });
-  }
-
-  function closeUploadFileModal() {
-    closeUploadModal();
-  }
-
-  async function confirmFileUpload(file) {
-    if (!(file instanceof File)) {
-      showToast('<%= req.translations.invalidFileSelected || "Invalid file selected" %>', 'error');
-      return;
-    }
-
-    const fileName = file.name;
-    const fileSize = file.size;
-
-    let uploadToast = window.showProgressToast ? window.showProgressToast(`Uploading ${fileName}…`, {
-      group: 'upload:<%= server.UUID %>',
-      autoCompleteAt100: false,
-    }) : window.showLoadingToast('Uploading File');
-
-    window.addEventListener('beforeunload', function handleUploadUnload() {
-      if (uploadToast) {
-        uploadToast.close();
-        uploadToast = null;
-      }
-      window.removeEventListener('beforeunload', handleUploadUnload);
-    });
-
-    try {
-    const MAX_FILE_SIZE = 100 * 1024 * 1024;
-      if (fileSize > MAX_FILE_SIZE) {
-        uploadToast.close();
-        uploadToast = null;
-        showToast('<%= req.translations.fileTooLarge || "File is too large. Maximum size is 100MB" %>', 'error');
-        return;
-      }
-
-      // Use FormData instead of JSON for more reliable file uploads
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('path', '<%= currentPath %>');
-      formData.append('fileName', fileName);
-
-      uploadToast.setMessage(`Uploading ${fileName}… 0%`);
-
-      try {
-        // Use XMLHttpRequest for better progress tracking and reliability
-        const xhr = new XMLHttpRequest();
-
-        xhr.open('POST', `/server/<%= server.UUID %>/upload`, true);
-
-        xhr.upload.onprogress = function(e) {
-          if (uploadToast && e.lengthComputable) {
-            uploadToast.setMessage(`Uploading ${fileName}…`);
-          }
-        };
-
-        xhr.onload = function() {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            if (uploadToast) {
-              uploadToast.complete(true, `File ${fileName} uploaded.`);
-              uploadToast = null;
-            }
-            setTimeout(() => {
-              refreshFileList();
-            }, 500);
-          } else {
-            let uploadFailToast = uploadToast;
-            uploadToast = null;
-            try {
-              const errorData = JSON.parse(xhr.responseText);
-              console.error('Upload error response:', errorData);
-
-              let errorMessage = '<%= req.translations.failedToUploadFile || "Failed to upload file" %>';
-              if (errorData.error) {
-                errorMessage = errorData.error;
-              } else if (errorData.details && errorData.details.error) {
-                errorMessage = errorData.details.error;
-              }
-
-              uploadFailToast.close();
-              uploadFailToast = null;
-              showToast(errorMessage, 'error');
-            } catch (e) {
-              console.error('Error parsing error response:', e);
-              uploadFailToast.close();
-              uploadFailToast = null;
-              showToast(`<%= req.translations.failedToUploadFileStatus || "Failed to upload file" %>: ${xhr.status} ${xhr.statusText}`, 'error');
-            }
-          }
-        };
-
-        xhr.onerror = function() {
-          if (uploadToast) {
-            uploadToast.close();
-            uploadToast = null;
-          }
-          console.error('XHR error during upload');
-          showToast('<%= req.translations.connectionErrorUpload || "Connection error during file upload" %>', 'error');
-        };
-
-        xhr.ontimeout = function() {
-          if (uploadToast) {
-            uploadToast.close();
-            uploadToast = null;
-          }
-          console.error('XHR timeout during upload');
-          showToast('<%= req.translations.uploadTimedOut || "Upload timed out. Try a smaller file." %>', 'error');
-        };
-
-        xhr.timeout = <%= fileUploadTimeoutMs %>;
-
-        xhr.send(formData);
-      } catch (error) {
-        if (uploadToast) {
-          uploadToast.close();
-          uploadToast = null;
-        }
-        console.error('Error uploading file:', error);
-         showToast('<%= req.translations.errorOccurred || "Something went wrong." %>', 'error');
-      }
-    } catch (error) {
-      if (uploadToast) {
-        uploadToast.close();
-        uploadToast = null;
-      }
-      console.error('Error uploading file:', error);
-      showToast('<%= req.translations.errorUploadingFile || "An error occurred while uploading the file" %>', 'error');
-    }
-  }
-
-
-  // ── New Folder ─────────────────────────────────────────────────────────────
-  function openCreateFolderModal() {
-    document.getElementById('FileName').value = '';
-    document.getElementById('fileNamePreview').textContent = '';
-    document.getElementById('fileNamePreview').classList.add('hidden');
-    document.getElementById('createModalTitle').textContent = '<%= req.translations.newFolder || "New Folder" %>';
-    document.getElementById('createModalHint').textContent = '<%= req.translations.folderNameHint || "Folder name. Use / to create nested folders." %>';
-    document.getElementById('FileName').setAttribute('data-mode', 'folder');
-    openCreateFileModal();
-  }
-
-  // ── Path preview for create & rename ──────────────────────────────────────
-  function updatePathPreview(inputEl, previewEl) {
-    const val = inputEl.value;
-    if (!val.includes('/')) {
-      previewEl.classList.add('hidden');
-      return;
-    }
-    const parts = val.split('/').filter(Boolean);
-    if (parts.length < 2) { previewEl.classList.add('hidden'); return; }
-    const folders = parts.slice(0, -1).join('/');
-    const file = parts[parts.length - 1];
-    previewEl.textContent = '';
-    const span1 = document.createElement('span');
-    span1.style.color = 'var(--theme-text-muted)';
-    span1.textContent = '<%= req.translations.willCreate || "Will create: " %>';
-    const span2 = document.createElement('span');
-    span2.style.color = 'var(--theme-accent)';
-    span2.textContent = folders + '/';
-    const span3 = document.createElement('span');
-    span3.style.color = 'var(--theme-text)';
-    span3.textContent = file || '...';
-    previewEl.appendChild(span1);
-    previewEl.appendChild(span2);
-    previewEl.appendChild(span3);
-    previewEl.classList.remove('hidden');
-  }
-
-  document.getElementById('FileName').addEventListener('input', function() {
-    updatePathPreview(this, document.getElementById('fileNamePreview'));
-  });
-
-  document.getElementById('newFileName').addEventListener('input', function() {
-    updatePathPreview(this, document.getElementById('renamePreview'));
-  });
-
-  // ── confirmCreateFile: handle slash paths & folder mode ───────────────────
-  async function confirmCreateFile() {
-    const raw = document.getElementById('FileName').value.trim();
-    const mode = document.getElementById('FileName').getAttribute('data-mode');
-    if (!raw) { closeCreateFileModal(); return; }
-
-    const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
-    let finalPath;
-
-    if (raw.startsWith('/')) {
-      finalPath = raw.replace(/^\/+/, '');
-    } else {
-      finalPath = base ? base + '/' + raw : raw;
-    }
-
-    if (mode === 'folder') {
-      // Prefer the daemon mkdir endpoint (capability-detected via fallback):
-      // on failure, fall back to the keep-file trick so old daemons keep working.
-      closeCreateFileModal();
-      const loader = showLoadingPopup('Creating', '<%= req.translations.creatingFolder || "Creating folder..." %>');
-      try {
-        const parts = finalPath.split('/');
-        const name = parts.pop();
-        const parent = parts.join('/');
-        const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/mkdir', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: parent || '/', name }),
-        });
-        loader.close();
-        if (res.ok) {
-          showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
-          refreshFileList();
-        } else {
-          showToast('<%= req.translations.folderCreateFailedFallback || "Failed to create folder, retrying with fallback" %>', 'error');
-          tryCreateFolderViaFile(finalPath, raw);
-        }
-      } catch {
-        loader.close();
-        tryCreateFolderViaFile(finalPath, raw);
-      }
-      return;
-    }
-    const label = mode === 'folder' ? ('<%= req.translations.creatingFolder || "Creating folder..." %>') : ('<%= req.translations.creatingFile || "Creating file..." %>');
-    const loader = showLoadingPopup('Creating', label);
-
-    const hasSlash = finalPath.includes('/');
-
-    if (!hasSlash) {
-      // Simple file in current dir — direct POST
-      try {
-        const encoded = encodeURIComponent(finalPath);
-        const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encoded, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: '' }),
-        });
-        if (res.ok) {
-          loader.updateProgress(100, '<%= req.translations.done || "Done!" %>');
-          setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
-        } else {
-          loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error');
-        }
-      } catch { loader.close(); showToast('<%= req.translations.fileCreateError || "Error creating file" %>', 'error'); }
-      return;
-    }
-
-    // Slash path — create a temp file first, then rename it to the target path
-    // This lets the daemon handle directory creation via the rename/move endpoint
-    const tempName = '__tmp_' + Date.now();
-    const tempPath = base ? base + '/' + tempName : tempName;
-
-    try {
-      const res1 = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encodeURIComponent(tempPath), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: '' }),
-      });
-      if (!res1.ok) { loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error'); return; }
-
-      loader.updateProgress(50, '<%= req.translations.movingToTarget || "Moving to target path..." %>');
-
-      const res2 = await fetch('/api/v2/servers/<%= server.UUID %>/files/rename', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: tempPath, newName: finalPath }),
-      });
-      if (res2.ok) {
-        loader.updateProgress(100, '<%= req.translations.done || "Done!" %>');
-        setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
-      } else {
-        loader.close(); showToast('<%= req.translations.moveToTargetFailed || "Failed to move to target path" %>', 'error');
-      }
-    } catch { loader.close(); showToast('<%= req.translations.fileCreateError || "Error creating file" %>', 'error'); }
-  }
-
-  // Fallback for daemons without /fs/mkdir — create a .airlink_keep file inside.
-  async function tryCreateFolderViaFile(finalPath, raw) {
-    const keepPath = finalPath.replace(/\/*$/, '') + '/.airlink_keep';
-    const encoded = encodeURIComponent(keepPath);
-    try {
-      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encoded, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: '' }),
-      });
-      if (res.ok) {
-        showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
-        refreshFileList();
-      } else {
-        showToast('<%= req.translations.folderCreateFailed || "Failed to create folder" %>', 'error');
-      }
-    } catch {
-      showToast('<%= req.translations.folderCreateError || "Error creating folder" %>', 'error');
-    }
-  }
-
-  // ── confirmRename: input is the full target path ──────────────────────────
-  async function confirmRename() {
-    const newPath = document.getElementById('newFileName').value.trim();
-    const filePath = document.getElementById('currentFilePath').value;
-    if (!newPath || newPath === filePath) { closeRenameModal(); return; }
-
-    closeRenameModal();
-    const loader = showLoadingPopup('<%= req.translations.renamingFile || "Renaming" %>', '<%= req.translations.processingEllipsis || "Processing..." %>');
-
-    try {
-      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/rename', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: filePath, newName: newPath }),
-      });
-      loader.close();
-      if (res.ok) {
-        showToast('<%= req.translations.renamedSuccess || "Renamed." %>', 'success');
-        refreshFileList();
-      } else {
-        showToast('<%= req.translations.failedToRename || "Failed to rename" %>', 'error');
-      }
-    } catch { loader.close(); showToast('<%= req.translations.failedToRename || "Failed to rename" %>', 'error'); }
-  }
-
-  // ── Copy path ─────────────────────────────────────────────────────────────
-  function copyFilePath(path) {
-    navigator.clipboard.writeText(path).then(() => showToast('<%= req.translations.copiedExcl || "Copied!" %>', 'success'));
-  }
-
-  // ── Dismiss selection ────────────────────────────────────────────────────
-  document.getElementById('dismissSelectionBtn')?.addEventListener('click', () => {
-    document.querySelectorAll('.file-checkbox').forEach(cb => {
-      cb.checked = false;
-      const row = cb.closest('tr');
-      if (row) row.classList.remove('is-selected');
-    });
-    selectedFiles = [];
-    updateSelectedFiles();
-  });
-
-  // ── Keyboard shortcuts ───────────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd+A — select all
-    if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.target.closest('input, textarea')) {
-      e.preventDefault();
-      document.querySelectorAll('.file-checkbox').forEach(cb => {
-        cb.checked = true;
-        const row = cb.closest('tr');
-        if (row) row.classList.add('is-selected');
-        const name = cb.dataset.filename;
-        if (name && !selectedFiles.includes(name)) selectedFiles.push(name);
-      });
-      updateSelectedFiles();
-    }
-    // Escape — deselect all
-    if (e.key === 'Escape' && selectedFiles.length > 0) {
-      document.querySelectorAll('.file-checkbox').forEach(cb => {
-        cb.checked = false;
-        cb.closest('tr')?.classList.remove('is-selected');
-      });
-      selectedFiles = [];
-      updateSelectedFiles();
-    }
-    // Delete — mass delete selected
-    if (e.key === 'Delete' && selectedFiles.length > 0 && !e.target.closest('input, textarea')) {
-      document.getElementById('massDeleteBtn')?.click();
-    }
-  });
-
-  // ── File search/filter ───────────────────────────────────────────────────
-  (function initFileSearch() {
-    const input   = document.getElementById('fileSearchInput');
-    const clearBtn = document.getElementById('clearFileSearch');
-    if (!input) return;
-
-    const applyFilter = (q) => {
-      const rowMatches = (row) => {
-        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
-        return !q || name.includes(q);
-      };
-      if (window.__alPagination && typeof window.__alPagination.setFilter === 'function') {
-        window.__alPagination.setFilter(rowMatches);
-        return;
-      }
-      document.querySelectorAll('tbody tr.al-file-row').forEach(row => {
-        row.style.display = rowMatches(row) ? '' : 'none';
-      });
-    };
-
-    input.addEventListener('input', () => {
-      const q = input.value.toLowerCase().trim();
-      clearBtn.classList.toggle('hidden', !q);
-      applyFilter(q);
-    });
-
-    clearBtn.addEventListener('click', () => {
-      input.value = '';
-      input.dispatchEvent(new Event('input'));
-      input.focus();
-    });
-  })();
-
-  // ── Move file modal ──────────────────────────────────────────────────────
-  function openMoveModal(name, path) {
-    document.getElementById('moveSourcePath').value = path;
-    document.getElementById('moveDestPath').value   = '';
-    const modal = document.getElementById('moveModal');
-    const panel = document.getElementById('moveModalPanel');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    Animate.openModal(modal, panel);
-    setTimeout(() => document.getElementById('moveDestPath').focus(), 80);
-  }
-  function closeMoveModal() {
-    const modal = document.getElementById('moveModal');
-    const panel = document.getElementById('moveModalPanel');
-    const done = function () {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    };
-    Animate.closeModal(modal, panel, done);
-  }
-  async function confirmMove() {
-    const src  = document.getElementById('moveSourcePath').value;
-    const dest = document.getElementById('moveDestPath').value.trim();
-    if (!dest) { showToast('<%= req.translations.enterDestinationPath || "Enter a destination path." %>', 'error'); return; }
-    try {
-      const res = await fetch(`/api/v2/servers/<%- server.UUID %>/files/move`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ oldPath: src, newPath: dest }),
-      });
-      if (!res.ok) throw new Error('Move failed');
-      closeMoveModal();
-      showToast('<%= req.translations.fileMoved || "File moved." %>', 'success');
-      refreshFileList();
-    } catch {
-      showToast('<%= req.translations.moveFailedCheckPath || "Move failed — check the destination path." %>', 'error');
-    }
-  }
-
-  // ── Duplicate file ───────────────────────────────────────────────────────
-  async function duplicateFile(name, path) {
-    const ext  = name.includes('.') ? '.' + name.split('.').pop() : '';
-    const base = name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name;
-    const dir  = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
-    try {
-      const res = await fetch(`/api/v2/servers/<%- server.UUID %>/files/copy`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ location: path }),
-      });
-      if (!res.ok) throw new Error('Copy failed');
-      showToast('<%= req.translations.duplicatedAs || "Duplicated as" %> ' + name.split('/').pop() + '.', 'success');
-      refreshFileList();
-    } catch {
-      showToast('<%= req.translations.duplicateFailed || "Duplicate failed." %>', 'error');
-    }
-  }
-
-  // ── toggleDropdown: position fixed dropdown at click coords ───────────────
-
-
-
-  // Rename from action bar — only works when exactly 1 file selected
-  document.getElementById('massRenameBtn').addEventListener('click', () => {
-    if (selectedFiles.length !== 1) {
-      showToast('<%= req.translations.selectOneFileToRename || "Select exactly one file to rename" %>', 'error');
-      return;
-    }
-    const fullPath = selectedFiles[0];
-    const name = fullPath.split('/').pop();
-    openRenameModal(name, fullPath);
-  });
-
-  window.staggerFileRows = function staggerFileRows() {
-    const rows = document.querySelectorAll('tbody tr');
-    rows.forEach(function(row, i) {
-      row.style.opacity = '0';
-      row.style.transform = 'translateY(5px)';
-      row.style.transition = 'none';
-      setTimeout(function() {
-        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-        row.style.opacity = '1';
-        row.style.transform = 'translateY(0)';
-        setTimeout(function() {
-          row.style.transition = '';
-          row.style.opacity = '';
-          row.style.transform = '';
-        }, 200);
-      }, i * 25);
-    });
-  };
-  window.staggerFileRows();
-
-  // ── Pull file from URL ──────────────────────────────────────────────────
-  function openPullFileModal() {
-    const modal = document.getElementById('pullFileModal');
-    const input = document.getElementById('pullUrlInput');
-    const preview = document.getElementById('pullUrlPreview');
-    const button = document.getElementById('pullButton');
-    if (!modal) return;
-    input.value = '';
-    preview.classList.add('hidden');
-    button.disabled = false;
-    button.classList.remove('opacity-60');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    Animate.openModal(modal, document.getElementById('pullFileModalPanel'));
-    setTimeout(() => input.focus(), 80);
-  }
-
-  function closePullFileModal() {
-    const modal = document.getElementById('pullFileModal');
-    const panel = document.getElementById('pullFileModalPanel');
-    const done = function () {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    };
-    Animate.closeModal(modal, panel, done);
-  }
-
-  const pullUrlInput = document.getElementById('pullUrlInput');
-  if (pullUrlInput) {
-    pullUrlInput.addEventListener('input', () => {
-      const preview = document.getElementById('pullUrlPreview');
-      const url = pullUrlInput.value.trim();
-      if (!url) { preview.classList.add('hidden'); return; }
-      let name = '';
-      try {
-        const parsed = new URL(url);
-        name = parsed.pathname.split('/').filter(Boolean).pop() || '';
-      } catch (e) { /* invalid URL, skip preview */ }
-      if (!name) { preview.classList.add('hidden'); return; }
-      const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
-      preview.textContent = '<%= req.translations.willSaveAs || "Will save as: " %>' + (base ? base + '/' : '/') + name;
-      preview.classList.remove('hidden');
-    });
-    pullUrlInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('pullButton').click(); }
-    });
-  }
-
-  document.getElementById('pullButton')?.addEventListener('click', async () => {
-    const url = document.getElementById('pullUrlInput').value.trim();
-    if (!url) { showToast('<%= req.translations.enterFileUrl || "Enter a file URL." %>', 'error'); return; }
-    let parsed;
-    try { parsed = new URL(url); } catch { showToast('<%= req.translations.invalidUrl || "Invalid URL." %>', 'error'); return; }
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      showToast('<%= req.translations.onlyHttpAllowed || "Only http(s) URLs are allowed." %>', 'error');
-      return;
-    }
-
-    closePullFileModal();
-    const loader = showLoadingPopup('<%= req.translations.pullingFile || "Pulling File" %>', '<%= req.translations.downloadingFromUrl || "Downloading from URL..." %>');
-    try {
-      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/pull', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, path: '<%= currentPath %>' }),
-      });
-      const data = await res.json();
-      loader.close();
-      if (res.ok && data.success) {
-        showToast(data.message || '<%= req.translations.filePulled || "File pulled." %>', 'success');
-        refreshFileList();
-      } else {
-        showToast(data.error || '<%= req.translations.failedToPullFile || "Failed to pull file." %>', 'error');
-      }
-    } catch {
-      loader.close();
-      showToast('<%= req.translations.failedToPullFileCheckUrl || "Failed to pull file — check the URL and try again." %>', 'error');
-    }
-  });
-
-  window.openCreateFileModal = openCreateFileModal;
-  window.openCreateFolderModal = openCreateFolderModal;
-  window.openUploadFileModal = openUploadFileModal;
-  window.openPullFileModal = openPullFileModal;
-  window.closeMoveModal = closeMoveModal;
-  window.confirmMove = confirmMove;
-  window.closeMassDeleteModal = closeMassDeleteModal;
-  window.closeCreateFileModal = closeCreateFileModal;
-  window.confirmCreateFile = confirmCreateFile;
-  window.handleFileNameKeyPress = handleFileNameKeyPress;
-  window.closeUploadFileModal = closeUploadFileModal;
-  window.openUploadFileModal = openUploadFileModal;
-  window.closePullFileModal = closePullFileModal;
-  window.closeRenameModal = closeRenameModal;
-  window.confirmRename = confirmRename;
-})();
+  window.__serverUUID = '<%= server.UUID %>';
+  window.__currentPath = '<%= (typeof filesCurrentPath !== "undefined" && filesCurrentPath) ? filesCurrentPath.replace(/'/g, "\\'") : "" %>';
 </script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/user/server/files.js') %>"></script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/user-footer') %>

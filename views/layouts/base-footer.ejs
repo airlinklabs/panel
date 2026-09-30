@@ -1,0 +1,18 @@
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/realtime.js') %>?v=1"></script>
+<script nonce="<%- nonce %>">
+(function () {
+  if (window.alRealtime) return;
+  if (!window.ALRealtimeClient) return;
+  var realtime = window.ALRealtimeClient.create();
+  window.alRealtime = realtime;
+  window.alState = { get: function () { return null; } };
+  Promise.resolve().then(function () {
+    window.dispatchEvent(new CustomEvent('al:realtime-ready', {
+      detail: { state: window.alState, realtime: realtime },
+    }));
+  });
+})();
+</script>
+<%- include('../partials/upload-modal') %>
+</body>
+</html>

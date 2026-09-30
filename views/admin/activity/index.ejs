@@ -1,0 +1,175 @@
+<%- include('../../layouts/admin', { title: t('Activity Log') }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('Activity Log') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('Activity Log') %></h1>
+    <p class="al-page-desc"><%= t('activityRecordedCount', { count: total || 0 }) %></p>
+  </div>
+</div>
+
+<div class="al-page-body space-y-5">
+  <form method="GET" action="/admin/activity" class="al-card">
+    <div class="al-card-body">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <%- include('../../partials/ui/form-field', {
+          type: 'select',
+          name: 'category',
+          id: 'category',
+          label: t('activityCategory'),
+          value: (filters && filters.category) || '',
+          options: [
+            { value: '', label: t('activityAllCategories') },
+            { value: 'server', label: t('activityCategoryServer') },
+            { value: 'file', label: t('activityCategoryFiles') },
+            { value: 'backup', label: t('activityCategoryBackups') },
+            { value: 'database', label: t('activityCategoryDatabases') },
+            { value: 'user', label: t('activityCategoryUser') },
+            { value: 'node', label: t('activityCategoryNodes') },
+            { value: 'image', label: t('activityCategoryImages') },
+            { value: 'apikey', label: t('activityCategoryApiKeys') }
+          ]
+        }) %>
+
+        <%- include('../../partials/ui/form-field', {
+          type: 'text',
+          name: 'actor',
+          id: 'actor',
+          label: t('activityActorLabel'),
+          placeholder: t('activityActorPlaceholder'),
+          value: (filters && filters.actor) || ''
+        }) %>
+
+        <%- include('../../partials/ui/form-field', {
+          type: 'date',
+          name: 'from',
+          id: 'from',
+          label: t('activityFromLabel'),
+          value: (filters && filters.from) || ''
+        }) %>
+
+        <%- include('../../partials/ui/form-field', {
+          type: 'date',
+          name: 'to',
+          id: 'to',
+          label: t('activityToLabel'),
+          value: (filters && filters.to) || ''
+        }) %>
+
+        <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+          <button type="submit" class="al-btn-primary flex-1"><%= t('activityFilterBtn') %></button>
+          <a href="/admin/activity" class="al-btn-secondary"><%= t('activityResetBtn') %></a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="al-card">
+    <h2 class="al-card-header"><span class="al-card-title"><%= t('activityRecentActivity') %></span></h2>
+    <div class="al-card-body">
+      <% if (!logs || logs.length === 0) { %>
+        <p class="text-sm al-text-muted"><%= t('activityNoMatchingFilters') %></p>
+      <% } else { %>
+        <%
+          var groups = [];
+          logs.forEach(function(log) {
+            var day = new Date(log.createdAt).toDateString();
+            var existing = groups.find(function(g) { return g.day === day; });
+            if (existing) existing.items.push(log); else groups.push({ day: day, items: [log] });
+          });
+        %>
+        <div>
+          <% groups.forEach(function(group) { %>
+            <div class="al-activity-group">
+              <p class="al-section-label"><%= new Date(group.items[0].createdAt).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) %></p>
+              <ul class="al-activity-list">
+                <% group.items.forEach(function(log) {
+                  var meta = log.metadata || { label: log.event, category: 'other' };
+                  var hasMeta = log.metadata && Object.keys(log.metadata).length > 0;
+                %>
+                  <li class="al-activity-item">
+                    <div class="al-activity-main">
+                      <p class="al-activity-title">
+                        <span class="truncate"><%= meta.label || log.event %></span>
+                        <span class="al-badge-neutral font-mono"><%= log.event %></span>
+                      </p>
+                      <p class="al-activity-meta">
+                        <span class="al-text-strong font-medium"><%= log.actor ? log.actor.username : t('activitySystemActor') %></span>
+                        <% if (log.server) { %>
+                          &middot; <a href="/admin/servers/<%= log.server.UUID %>"><%= log.server.name %></a>
+                        <% } %>
+                        &middot; <span><%= new Date(log.createdAt).toLocaleString() %></span>
+                        <% if (log.ip) { %>
+                          &middot; <span class="font-mono"><%= log.ip %></span>
+                        <% } %>
+                      </p>
+                    </div>
+                    <% if (hasMeta) { %>
+                      <button type="button" class="al-btn-secondary al-btn-sm activity-toggle"
+                        data-meta-id="<%= log.id %>"
+                        aria-expanded="false" aria-controls="activity-meta-<%= log.id %>"><%= t('activityDetailsBtn') %></button>
+                      <div id="activity-meta-<%= log.id %>" class="al-activity-details" hidden>
+                        <pre><%- JSON.stringify(log.metadata, null, 2) %></pre>
+                      </div>
+                    <% } %>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          <% }); %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+          <%
+            var qs = [];
+            if (filters && filters.event) qs.push('event=' + encodeURIComponent(filters.event));
+            if (filters && filters.server) qs.push('server=' + encodeURIComponent(filters.server));
+            if (filters && filters.actor) qs.push('actor=' + encodeURIComponent(filters.actor));
+            if (filters && filters.category) qs.push('category=' + encodeURIComponent(filters.category));
+            if (filters && filters.from) qs.push('from=' + encodeURIComponent(filters.from));
+            if (filters && filters.to) qs.push('to=' + encodeURIComponent(filters.to));
+            var qsPrev = qs.map(function(q) { return '&' + q; }).join('');
+          %>
+          <nav class="al-activity-pager" aria-label="<%= t('pagination') %>">
+            <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= qsPrev %>"
+              class="al-btn-secondary al-btn-sm <%= page <= 1 ? 'is-disabled' : '' %>"
+              <% if (page <= 1) { %>aria-disabled="true" tabindex="-1"<% } %>><%= t('prev') %></a>
+            <span class="text-sm al-text-muted"><%= t('activityPageOf', { page: page, totalPages: totalPages }) %></span>
+            <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= qsPrev %>"
+              class="al-btn-secondary al-btn-sm <%= page >= totalPages ? 'is-disabled' : '' %>"
+              <% if (page >= totalPages) { %>aria-disabled="true" tabindex="-1"<% } %>><%= t('next') %></a>
+          </nav>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  document.querySelectorAll('.activity-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var meta = document.getElementById('activity-meta-' + btn.dataset.metaId);
+      if (!meta) return;
+      var willOpen = meta.hasAttribute('hidden');
+      if (willOpen) {
+        meta.removeAttribute('hidden');
+      } else {
+        meta.setAttribute('hidden', '');
+      }
+      btn.textContent = willOpen ? '<%= t('activityHideBtn') %>' : '<%= t('activityDetailsBtn') %>';
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

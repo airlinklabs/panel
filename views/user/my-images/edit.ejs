@@ -1,0 +1,138 @@
+<%- include('../../layouts/user', { title: 'Edit Image' }) %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <div class="flex items-start gap-4">
+    <a href="/my-images" class="al-btn al-btn-ghost p-2 shrink-0">
+      <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
+    </a>
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('editImage') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= typeof image !== 'undefined' && image ? image.name : '' %></p>
+    </div>
+  </div>
+
+  <% if (typeof image === 'undefined' || !image) { %>
+  <div class="mt-8">
+    <%- include('../../partials/empty-state', {
+      iconName: 'alert-triangle',
+      title: t('imageNotFound'),
+      description: t('imageMayHaveBeenDeleted')
+    }) %>
+  </div>
+  <% } else { %>
+
+  <form id="editImageForm" class="mt-5 max-w-2xl">
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('basicInfo') %></h3>
+      <div class="al-form-field">
+        <label class="al-form-label"><%= t('imageName') %> <span class="text-red-500">*</span></label>
+        <input type="text" name="name" class="al-form-input" required maxlength="100"
+          value="<%= image.name %>">
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('author') %></label>
+        <input type="text" name="author" class="al-form-input" maxlength="100"
+          value="<%= image.author || '' %>">
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('description') %></label>
+        <textarea name="description" class="al-form-textarea" rows="2" maxlength="500"><%= image.description || '' %></textarea>
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('status') %></label>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
+            style="<%= image.status === 'approved' ? 'background:var(--theme-success-bg);color:var(--theme-success)' : image.status === 'pending' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : 'background:var(--theme-danger-bg);color:var(--theme-danger)' %>">
+            <%= image.status %>
+          </span>
+          <% if (image.rejectionReason) { %>
+          <span class="text-[11px]" style="color:var(--theme-danger)"><%= image.rejectionReason %></span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('dockerConfig') %></h3>
+      <div class="al-form-field">
+        <label class="al-form-label"><%= t('dockerImages') %> (JSON) <span class="text-red-500">*</span></label>
+        <textarea name="dockerImages" class="al-form-textarea font-mono text-[12px]" rows="3" required><%= image.dockerImages ? (typeof image.dockerImages === 'string' ? image.dockerImages : JSON.stringify(image.dockerImages)) : '' %></textarea>
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('startupCommand') %> <span class="text-red-500">*</span></label>
+        <input type="text" name="startup" class="al-form-input font-mono text-[12px]"
+          value="<%= image.startup || '' %>" required>
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('stopCommand') %></label>
+        <input type="text" name="stop" class="al-form-input font-mono text-[12px]"
+          value="<%= image.stop || '' %>">
+      </div>
+    </div>
+
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('variables') %> (JSON)</h3>
+      <div class="al-form-field">
+        <textarea name="variables" class="al-form-textarea font-mono text-[12px]" rows="5"><%= image.variables ? (typeof image.variables === 'string' ? image.variables : JSON.stringify(image.variables)) : '' %></textarea>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" id="submitBtn" class="al-btn al-btn-primary">
+        <%- icon('save', { class: 'w-4 h-4' }) %> <%= t('saveChanges') %>
+      </button>
+      <button type="button" onclick="resubmit()" class="al-btn al-btn-secondary">
+        <%- icon('refresh-cw', { class: 'w-4 h-4' }) %> Resubmit for Review
+      </button>
+      <a href="/my-images" class="al-btn al-btn-ghost"><%= t('cancel') %></a>
+    </div>
+  </form>
+
+  <% } %>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  var imageId = <%= typeof image !== 'undefined' && image ? image.id : 'null' %>;
+
+  document.getElementById('editImageForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!imageId) return;
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+
+    try {
+      var fd = new FormData(e.target);
+      var data = {};
+      fd.forEach(function(val, key) { data[key] = val; });
+
+      var r = await fetch('/my-images/update/' + imageId + '/published', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify(data)
+      });
+
+      if (r.ok) { showToast('<%= t("imageUpdated") %>', 'success'); window.location.href = '/my-images'; }
+      else { var err = await r.text(); showToast(err, 'error'); btn.disabled = false; }
+    } catch(err) {
+      showToast('<%= t("failedToUpdate") %>', 'error');
+      btn.disabled = false;
+    }
+  });
+
+  window.resubmit = async function() {
+    if (!imageId) return;
+    try {
+      var r = await fetch('/my-images/update/' + imageId + '/published', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ status: 'pending' })
+      });
+      if (r.ok) { showToast('Resubmitted for review', 'success'); window.location.href = '/my-images'; }
+    } catch(err) { showToast('Failed to resubmit', 'error'); }
+  };
+})();
+</script>
+
+<%- include('../../layouts/user-footer') %>

@@ -31,6 +31,8 @@ import backupsRouter from './backups';
 import schedulesRouter from './schedules';
 import subusersRouter from './subusers';
 import startupRouter from './startup';
+import sftpRouter from './sftp';
+import logsRouter from './logs';
 import accountRouter from './account';
 import passkeyRouter from './passkey';
 import systemRouter from './system';
@@ -76,47 +78,66 @@ const v2Module: Module = {
           return isAuthenticated()(req, res, next);
         };
 
+    // Server-scoped sub-resources are nested under /servers/:id/<resource>
+    // (the shape every router header, page controller and view documents).
+    // Nested mounts are registered BEFORE /servers so the per-resource
+    // capability (files.*, backups.*, …) wins over servers.* for Bearer
+    // clients, and so matching requests authenticate + rate-limit exactly
+    // once. The sub-routers must be constructed with `mergeParams: true`
+    // for resolveServer() to see the :id mount param (the server UUID).
     v2.use(
-      '/servers',
-      apiKeyOrSessionAuth('servers.*'),
-      redisRateLimit,
-      serversRouter,
-    );
-    v2.use(
-      '/files',
+      '/servers/:id/files',
       apiKeyOrSessionAuth('files.*'),
       redisRateLimit,
       filesRouter,
     );
     v2.use(
-      '/databases',
+      '/servers/:id/databases',
       apiKeyOrSessionAuth('databases.*'),
       redisRateLimit,
       databasesRouter,
     );
     v2.use(
-      '/backups',
+      '/servers/:id/backups',
       apiKeyOrSessionAuth('backups.*'),
       redisRateLimit,
       backupsRouter,
     );
     v2.use(
-      '/schedules',
+      '/servers/:id/schedules',
       apiKeyOrSessionAuth('schedules.*'),
       redisRateLimit,
       schedulesRouter,
     );
     v2.use(
-      '/subusers',
+      '/servers/:id/subusers',
       apiKeyOrSessionAuth('subusers.*'),
       redisRateLimit,
       subusersRouter,
     );
     v2.use(
-      '/startup',
+      '/servers/:id/startup',
       apiKeyOrSessionAuth('startup.*'),
       redisRateLimit,
       startupRouter,
+    );
+    v2.use(
+      '/servers/:id/sftp',
+      apiKeyOrSessionAuth('files.*'),
+      redisRateLimit,
+      sftpRouter,
+    );
+    v2.use(
+      '/servers/:id/logs',
+      apiKeyOrSessionAuth('servers.*'),
+      redisRateLimit,
+      logsRouter,
+    );
+    v2.use(
+      '/servers',
+      apiKeyOrSessionAuth('servers.*'),
+      redisRateLimit,
+      serversRouter,
     );
 
     // -----------------------------------------------------------------------

@@ -1,0 +1,36 @@
+<!-- UI Card component -->
+<%
+// Params: variant ('default'|'accent'), class, header, body (content), footer, title, subtitle
+const cardVariant = typeof variant !== 'undefined' ? variant : 'default';
+const cardCls = typeof cls !== 'undefined' ? cls : '';
+const cardHasHeader = typeof header !== 'undefined' && header;
+const cardHasFooter = typeof footer !== 'undefined' && footer;
+const cardTitle = typeof title !== 'undefined' ? title : '';
+const cardSubtitle = typeof subtitle !== 'undefined' ? subtitle : '';
+const cardBody = typeof body !== 'undefined' ? body : '';
+const cardId = typeof id !== 'undefined' ? id : '';
+%>
+<div class="al-card <%= cardVariant === 'accent' ? 'al-card-accent' : '' %> <%= cardCls %>"
+  <% if (cardId) { %> id="<%= cardId %>"<% } %>>
+  <% if (cardHasHeader || cardTitle) { %>
+    <div class="al-card-header">
+      <div>
+        <% if (cardTitle) { %>
+          <h3 class="al-card-title"><%- cardTitle %></h3>
+        <% } %>
+        <% if (cardSubtitle) { %>
+          <p class="al-card-subtitle"><%- cardSubtitle %></p>
+        <% } %>
+      </div>
+      <% if (cardHasHeader) { %>
+        <%- header %>
+      <% } %>
+    </div>
+  <% } %>
+  <div class="al-card-body">
+    <%- cardBody || body %>
+  </div>
+  <% if (cardHasFooter) { %>
+    <div class="al-card-footer"><%- footer %></div>
+  <% } %>
+</div>

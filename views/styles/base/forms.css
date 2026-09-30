@@ -1,0 +1,54 @@
+/* ── Theme-aware native input overrides ───────────────────────
+   Tailwind CSS v4 forms plugin hardcodes white backgrounds and a
+   blue focus ring. These overrides come AFTER the plugin in source
+   order, so they win within the same cascade layer. */
+@layer base {
+  input:where([type="text"]),
+  input:where(:not([type])),
+  input:where([type="email"]),
+  input:where([type="url"]),
+  input:where([type="password"]),
+  input:where([type="number"]),
+  input:where([type="date"]),
+  input:where([type="datetime-local"]),
+  input:where([type="month"]),
+  input:where([type="search"]),
+  input:where([type="tel"]),
+  input:where([type="time"]),
+  input:where([type="week"]),
+  select,
+  select:where([multiple]),
+  textarea {
+    background-color: var(--theme-bg-input, #fff);
+    border-color: var(--theme-border-input, oklch(55.1% 0.027 264.364));
+    border-radius: var(--theme-radius-input, 0.75rem);
+    color: var(--theme-text-strong, #171717);
+  }
+
+  input:where([type="text"]):focus,
+  input:where(:not([type])):focus,
+  input:where([type="email"]):focus,
+  input:where([type="url"]):focus,
+  input:where([type="password"]):focus,
+  input:where([type="number"]):focus,
+  input:where([type="date"]):focus,
+  input:where([type="datetime-local"]):focus,
+  input:where([type="month"]):focus,
+  input:where([type="search"]):focus,
+  input:where([type="tel"]):focus,
+  input:where([type="time"]):focus,
+  input:where([type="week"]):focus,
+  select:focus,
+  select:where([multiple]):focus,
+  textarea:focus {
+    border-color: var(--theme-border-accent);
+    box-shadow: 0 0 0 3px var(--theme-accent-subtle);
+    --tw-ring-color: transparent;
+    outline: none;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--theme-text-placeholder, oklch(55.1% 0.027 264.364));
+  }
+}

@@ -1,180 +1,65 @@
-<%- include('../components/auth-header', { title: 'Two-Factor Verification' }) %>
+<%- include('../layouts/auth', { title: t('twoFactorAuth') }) %>
 
-<%- include('../components/auth-styles') %>
-<style>
-  .auth-image {
-    background: url('<%= settings.loginWallpaper || assetUrl('/assets/wallpapers/login.jpeg') %>') center/cover no-repeat;
-  }
-</style>
-
-<div class="auth-split">
-  <div class="auth-panel" id="authPanel">
-
-    <div class="mb-8">
-      <% if (settings.logo) { %>
-      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
-      <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)"><%= t('twoFactorVerifyTitle') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('twoFactorVerifyDesc') %></p>
-    </div>
-
-    <% if (req.query.err) { %>
-    <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)">
-      <p class="text-sm font-medium" style="color:var(--theme-danger)">Invalid code. Try again.</p>
-    </div>
-    <% } %>
-
-    <div id="two-factor-verify-status"></div>
-
-    <div id="passkeySection" class="mb-4" style="display:none">
-      <button type="button" id="passkeyBtn" class="auth-submit w-full" style="display:flex;justify-content:center;gap:8px">
-        <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <span class="btn-label"><%= t('loginPasskeyButton') %></span>
-        <span class="spinner"></span>
-      </button>
-      <p class="text-sm text-center mt-3" style="color:var(--theme-text-muted)">— <%= t('orUseDifferentMethod') %> —</p>
-    </div>
-
-    <form
-      id="verifyForm"
-      hx-post="/2fa"
-      hx-target="#two-factor-verify-status"
-      hx-swap="innerHTML"
-      hx-disabled-elt="find button[type='submit']"
-      hx-indicator="#verify-form-status"
-      method="POST"
-      action="/2fa"
-      autocomplete="off"
-      novalidate>
-      <%- include('../components/csrf') %>
-      <div class="space-y-4">
-        <div>
-          <label class="auth-label" for="token" id="tokenLabel"><%= t('twoFactorCodeLabel') %></label>
-          <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code"
-            required autofocus class="auth-input" placeholder="••••••" style="text-align:center;font-size:20px;letter-spacing:0.4em;font-family:monospace">
-        </div>
-
-        <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
-          <%- icon('shield-check', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span class="btn-label"><%= t('verifyAndSignIn') %></span>
-          <span class="spinner"></span>
-        </button>
-        <p id="verify-form-status" class="htmx-indicator text-sm text-center" style="color:var(--theme-text-muted)">Verifying…</p>
+<div class="al-auth">
+  <div class="al-auth-form">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <img class="al-auth-logo"
+          src="<%= (settings && settings.logo && settings.logo.startsWith('/')) ? settings.logo : '/' + ((settings && settings.logo) || 'favicon.ico') %>"
+          alt="<%= (settings && settings.title) || 'Airlink' %>" width="48" height="48">
+        <h1 class="al-auth-title mt-6"><%= t('twoFactorTitle') %></h1>
+        <p class="al-auth-subtitle"><%= t('twoFactorSubtitle') %></p>
       </div>
-    </form>
 
-    <p class="text-sm text-center mt-4" style="color:var(--theme-text-muted)">
-      <button type="button" id="toggleRecovery" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('useRecoveryCode') %></button>
-    </p>
+      <% if (req.query.err) { %>
+      <div class="al-auth-error mt-6" role="alert" aria-live="assertive">
+        <span class="mt-0.5 shrink-0"><%- icon('alert-triangle', { class: 'h-5 w-5', style: 'color:var(--theme-danger)' }) %></span>
+        <div>
+          <p class="al-auth-error-title">
+            <% if (req.query.err === 'missing') { %><%= t('errorTitleAllFieldsRequired') %>
+            <% } else { %><%= t('errorTitleInvalidCredentials') %><% } %>
+          </p>
+          <p class="al-auth-error-body">
+            <% if (req.query.err === 'missing') { %><%= t('errorAllFieldsRequired') %>
+            <% } else { %><%= t('errorInvalidCredentials') %><% } %>
+          </p>
+        </div>
+      </div>
+      <% } %>
 
-    <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
-      <%= t('lostAuthenticator') %>
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('signInAgain') %></a>
-    </p>
+      <form method="POST" action="/2fa" class="mt-8 space-y-6">
+        <%- include('../partials/csrf') %>
 
+        <%- include('../partials/ui/form-field', {
+          type: 'text',
+          name: 'token',
+          label: t('field2faCode'),
+          id: 'twofa-code',
+          placeholder: t('field2faCodePlaceholder'),
+          required: true,
+          autocomplete: 'one-time-code',
+          inputmode: 'numeric',
+          cls: 'text-center text-2xl tracking-[0.4em] font-mono'
+        }) %>
+
+        <%- include('../partials/ui/button', {
+          type: 'submit',
+          label: t('verify'),
+          variant: 'primary',
+          size: 'lg',
+          cls: 'w-full'
+        }) %>
+      </form>
+
+      <p class="mt-6 text-sm" style="color:var(--theme-text-muted);">
+        <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary); text-underline-offset:3px;">
+          <%= t('backToLogin') %>
+        </a>
+      </p>
+    </div>
   </div>
-  <div class="auth-image"></div>
+
+  <%- include('../partials/auth-visual', { wallpaper: settings.loginWallpaper, fallback: '/assets/auth/login.jpg' }) %>
 </div>
 
-<script nonce="<%- nonce %>">
-(function () {
-  requestAnimationFrame(function () {
-    requestAnimationFrame(function () {
-      document.getElementById('authPanel').classList.add('visible');
-    });
-  });
-
-  var recoveryMode = false;
-  var tokenInput = document.getElementById('token');
-  var tokenLabel = document.getElementById('tokenLabel');
-  var toggleBtn = document.getElementById('toggleRecovery');
-
-  toggleBtn.addEventListener('click', function () {
-    recoveryMode = !recoveryMode;
-    if (recoveryMode) {
-      tokenInput.type = 'text';
-      tokenInput.removeAttribute('inputmode');
-      tokenInput.removeAttribute('pattern');
-      tokenInput.maxLength = 14;
-      tokenInput.autocomplete = 'off';
-      tokenInput.placeholder = 'XXXX-XXXX-XXXX';
-      tokenInput.value = '';
-      tokenLabel.textContent = '<%= req.translations.recoveryCodeLabel || "Recovery code" %>';
-      toggleBtn.textContent = '<%= req.translations.use6DigitCodeInstead || "Use the 6-digit code instead" %>';
-    } else {
-      tokenInput.type = 'text';
-      tokenInput.setAttribute('inputmode', 'numeric');
-      tokenInput.setAttribute('pattern', '[0-9]*');
-      tokenInput.maxLength = 6;
-      tokenInput.autocomplete = 'one-time-code';
-      tokenInput.placeholder = '••••••';
-      tokenInput.value = '';
-      tokenLabel.textContent = '<%= req.translations.twoFactorCodeLabel || "6-digit code" %>';
-      toggleBtn.textContent = '<%= req.translations.useRecoveryCode || "Use a recovery code instead" %>';
-    }
-    tokenInput.focus();
-  });
-})();
-</script>
-
-<script type="module" nonce="<%- nonce %>">
-  import { startAuthentication } from '<%= assetUrl('/vendor/@simplewebauthn/browser/esm/index.js') %>';
-
-  (async function () {
-    var section = document.getElementById('passkeySection');
-    var btn = document.getElementById('passkeyBtn');
-    var statusEl = document.getElementById('two-factor-verify-status');
-    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-    try {
-      var checkRes = await fetch('/api/v2/passkey/auth/options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken }
-      });
-      if (checkRes.ok) {
-        section.style.display = '';
-      }
-    } catch (e) {
-      // passkey not available for this user, leave hidden
-    }
-
-    btn.addEventListener('click', async function () {
-      btn.disabled = true;
-      btn.querySelector('.btn-label').textContent = '<%= req.translations.waitingForPasskey || "Waiting for passkey\u2026" %>';
-      statusEl.innerHTML = '';
-
-      try {
-        var optionsRes = await fetch('/api/v2/passkey/auth/options', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken }
-        });
-        if (!optionsRes.ok) {
-          var errData = await optionsRes.json().catch(function () { return {}; });
-          throw new Error(errData.error || '<%= req.translations.failedToGetPasskeyOptions || "Failed to get passkey options" %>');
-        }
-        var options = await optionsRes.json();
-
-        var credential = await startAuthentication({ optionsJSON: options });
-
-        var verifyRes = await fetch('/api/v2/passkey/auth/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
-          body: JSON.stringify(credential)
-        });
-        var verifyData = await verifyRes.json();
-        if (verifyRes.ok && verifyData.redirect) {
-          window.location.href = verifyData.redirect;
-        } else {
-          throw new Error(verifyData.error || '<%= req.translations.passkeyVerificationFailed || "Passkey verification failed" %>');
-        }
-      } catch (err) {
-        statusEl.innerHTML = '<div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)"><p class="text-sm font-medium" style="color:var(--theme-danger)">' + (err.message || '<%= req.translations.passkeySignInFailed || "Passkey sign-in failed" %>') + '</p></div>';
-      } finally {
-        btn.disabled = false;
-        btn.querySelector('.btn-label').textContent = '<%= req.translations.loginPasskeyButton || "Sign in with passkey" %>';
-      }
-    });
-  })();
-</script>
-
-<%- include('../components/footer') %>
+<%- include('../layouts/auth-footer') %>

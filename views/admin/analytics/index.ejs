@@ -1,0 +1,278 @@
+<%- include('../../layouts/admin', { title: t('adminAnalyticsTitle') }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbAnalytics') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminAnalyticsTitle') %></h1>
+    <p class="al-page-desc"><%= t('analyticsLiveDesc') %></p>
+  </div>
+  <div>
+    <button type="button" id="refreshBtn" class="al-btn-secondary">
+      <%- icon('refresh-cw', { id: 'refreshIcon', class: 'w-4 h-4', strokeWidth: 1.5 }) %>
+      <%= t('analyticsRefreshBtn') %>
+    </button>
+  </div>
+</div>
+
+<div class="al-page-body space-y-5">
+  <div data-al-tabs data-tabs-default="servers" data-tabs-hash>
+    <div role="tablist" class="flex gap-1 mb-6 flex-wrap">
+      <button type="button" id="tab-servers" aria-controls="panel-servers" data-tab="servers" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabServers') %></button>
+      <button type="button" id="tab-nodes" aria-controls="panel-nodes" data-tab="nodes" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabNodes') %></button>
+      <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabActivity') %></button>
+    </div>
+
+    <div id="loading-state" class="flex items-center gap-3 py-12 al-text-muted" aria-live="polite">
+      <%- icon('loader-circle', { class: 'animate-spin w-5 h-5', strokeWidth: 2 }) %>
+      <span class="text-sm"><%= t('analyticsLoadingData') %></span>
+    </div>
+
+    <!-- SERVERS TAB -->
+    <div id="panel-servers" data-tab-panel="servers" role="tabpanel" aria-labelledby="tab-servers" class="tab-panel space-y-5">
+      <div class="al-stat-grid">
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsTotalServers') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="sv-total"><%= servers?.total ?? '--' %></p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsAllocatedRam') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="sv-ram"><%= servers?.totalRamMb >= 1024 ? (servers.totalRamMb / 1024).toFixed(1) + ' GB' : (servers?.totalRamMb ?? 0) + ' MB' %></p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsAllocatedCpu') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="sv-cpu"><%= servers?.totalCpuPct ?? 0 %>%</p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsAllocatedDisk') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="sv-storage"><%= servers?.totalStorageGb ?? 0 %> GB</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <section class="al-section">
+          <div class="al-section-head">
+            <h2 class="al-section-title"><%= t('analyticsImagesInUse') %></h2>
+          </div>
+          <div class="al-table-wrapper" id="sv-images">
+            <table class="al-table al-table-card">
+              <thead class="al-table-thead">
+                <tr>
+                  <th scope="col" class="al-table-th"><%= t('Image') %></th>
+                  <th scope="col" class="al-table-th"><%= t('instances') %></th>
+                </tr>
+              </thead>
+              <tbody class="al-table-tbody">
+                <% if (servers?.topImages && servers.topImages.length > 0) { %>
+                  <% servers.topImages.forEach(function(img) { %>
+                    <tr class="al-table-tr">
+                      <td class="al-table-td al-table-cell-strong truncate" data-label="<%= t('Image') %>"><%= img.name %></td>
+                      <td class="al-table-td tabular-nums" data-label="<%= t('instances') %>"><%= img.count %></td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="2" class="al-table-td al-table-empty py-8"><%= t('noServersYet') %></td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="al-section">
+          <div class="al-section-head">
+            <h2 class="al-section-title"><%= t('analyticsHighestAllocated') %></h2>
+          </div>
+          <div class="al-table-wrapper">
+            <table class="al-table al-table-card">
+              <thead class="al-table-thead">
+                <tr>
+                  <th scope="col" class="al-table-th"><%= t('name') %></th>
+                  <th scope="col" class="al-table-th"><%= t('memory') %></th>
+                  <th scope="col" class="al-table-th"><%= t('cpu') %></th>
+                  <th scope="col" class="al-table-th"><%= t('storage') %></th>
+                </tr>
+              </thead>
+              <tbody class="al-table-tbody">
+                <% if (servers?.topServers && servers.topServers.length > 0) { %>
+                  <% servers.topServers.forEach(function(sv) { %>
+                    <tr class="al-table-tr">
+                      <td class="al-table-td" data-label="<%= t('name') %>">
+                        <div class="al-table-cell-strong truncate"><%= sv.name %></div>
+                        <div class="text-xs mt-0.5 al-text-muted truncate"><%= sv.owner %> &middot; <%= sv.image %></div>
+                      </td>
+                      <td class="al-table-td tabular-nums" data-label="<%= t('memory') %>"><%= sv.memory %> MB</td>
+                      <td class="al-table-td tabular-nums" data-label="<%= t('cpu') %>"><%= sv.cpu %>%</td>
+                      <td class="al-table-td tabular-nums" data-label="<%= t('storage') %>"><%= sv.storage %> GB</td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="al-table-td al-table-empty py-8"><%= t('noServers') %></td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- NODES TAB -->
+    <div id="panel-nodes" data-tab-panel="nodes" role="tabpanel" aria-labelledby="tab-nodes" class="tab-panel space-y-5" hidden>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsNodesLabel') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong"><%= nodes?.length ?? 0 %></p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsOnlineLabel') %></p>
+          <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-success)" id="nd-online">--</p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsOfflineLabel') %></p>
+          <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-danger)" id="nd-offline">--</p>
+        </div>
+      </div>
+      <div id="nd-list" class="space-y-4"></div>
+    </div>
+
+    <!-- ACTIVITY TAB -->
+    <div id="panel-activity" data-tab-panel="activity" role="tabpanel" aria-labelledby="tab-activity" class="tab-panel space-y-5" hidden>
+      <div class="al-stat-grid">
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsUsersLabel') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong"><%= activity?.totalUsers ?? 0 %></p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsImagesInstalled') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong"><%= activity?.totalImages ?? 0 %></p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsLogins30d') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="ac-logins">--</p>
+        </div>
+        <div class="al-card">
+          <p class="al-section-label"><%= t('analyticsAvgPerDay') %></p>
+          <p class="text-2xl font-semibold tabular-nums al-text-strong" id="ac-avg">--</p>
+        </div>
+      </div>
+
+      <section class="al-section">
+        <div class="al-section-head">
+          <h2 class="al-section-title"><%= t('analyticsRecentLogins') %></h2>
+        </div>
+        <div class="al-table-wrapper">
+          <table class="al-table al-table-card">
+            <thead class="al-table-thead">
+              <tr>
+                <th scope="col" class="al-table-th"><%= t('analyticsUserId') %></th>
+                <th scope="col" class="al-table-th"><%= t('ipAddress') %></th>
+                <th scope="col" class="al-table-th"><%= t('activityTime') %></th>
+              </tr>
+            </thead>
+            <tbody class="al-table-tbody">
+              <% if (activity?.recentLogins && activity.recentLogins.length > 0) { %>
+                <% activity.recentLogins.forEach(function(l) { %>
+                  <tr class="al-table-tr">
+                    <td class="al-table-td font-mono text-xs" data-label="<%= t('analyticsUserId') %>">#<%= l.userId %></td>
+                    <td class="al-table-td font-mono text-xs" data-label="<%= t('ipAddress') %>"><%= l.ipAddress || t('unknown') %></td>
+                    <td class="al-table-td text-xs" data-label="<%= t('activityTime') %>"><%= new Date(l.timestamp).toLocaleString() %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="3" class="al-table-td al-table-empty py-8"><%= t('noLoginHistory') %></td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var loginsByDay = <%- JSON.stringify(activity?.loginsByDay || {}) %>;
+  var nodes = <%- JSON.stringify(nodes || []) %>;
+  var totalLogins = Object.values(loginsByDay).reduce(function(s, v) { return s + v; }, 0);
+  var avgPerDay = Math.round(totalLogins / 30);
+
+  // UI copy reaches this script through the i18n catalogue, never as literals.
+  var L = {
+    online: <%- JSON.stringify(t('online')) %>,
+    offline: <%- JSON.stringify(t('offline')) %>,
+    ram: <%- JSON.stringify(t('ram')) %>,
+    cpu: <%- JSON.stringify(t('cpu')) %>,
+    disk: <%- JSON.stringify(t('disk')) %>
+  };
+
+  var loginsEl = document.getElementById('ac-logins');
+  var avgEl = document.getElementById('ac-avg');
+  if (loginsEl) loginsEl.textContent = totalLogins;
+  if (avgEl) avgEl.textContent = avgPerDay;
+
+  // Node status (client-side check)
+  var online = 0, offline = 0;
+  nodes.forEach(function(n) { if (n.online) online++; else offline++; });
+  var onEl = document.getElementById('nd-online');
+  var offEl = document.getElementById('nd-offline');
+  if (onEl) onEl.textContent = online;
+  if (offEl) offEl.textContent = offline;
+
+  // Render node list. Node fields are data, not markup: they go in through
+  // textContent so a name can never break out of its element.
+  var listEl = document.getElementById('nd-list');
+  if (listEl && nodes.length) {
+    nodes.forEach(function(n) {
+      var card = document.createElement('div');
+      card.className = 'al-card';
+      card.innerHTML =
+        '<div class="al-card-header">' +
+          '<div class="flex min-w-0 items-center gap-2.5">' +
+            '<span class="' + (n.online ? 'al-dot-online' : 'al-dot-offline') + '"></span>' +
+            '<div class="min-w-0">' +
+              '<p class="al-card-title truncate"></p>' +
+              '<p class="al-card-header-desc font-mono truncate"></p>' +
+            '</div>' +
+          '</div>' +
+          '<span class="' + (n.online ? 'al-badge-online' : 'al-badge-offline') + '"></span>' +
+        '</div>' +
+        '<div class="al-card-body grid grid-cols-3 gap-4">' +
+          '<div><p class="al-section-label">' + L.ram + '</p><p class="text-sm font-medium al-text-strong"></p></div>' +
+          '<div><p class="al-section-label">' + L.cpu + '</p><p class="text-sm font-medium al-text-strong"></p></div>' +
+          '<div><p class="al-section-label">' + L.disk + '</p><p class="text-sm font-medium al-text-strong"></p></div>' +
+        '</div>';
+
+      card.querySelector('.al-card-title').textContent = n.name;
+      card.querySelector('.al-card-header-desc').textContent = n.address + ':' + n.port;
+      card.querySelector('.al-badge-online, .al-badge-offline').textContent = n.online ? L.online : L.offline;
+
+      var values = card.querySelectorAll('.al-card-body .text-sm');
+      values[0].textContent = n.ram >= 1024 ? (n.ram / 1024).toFixed(1) + ' GB' : n.ram + ' MB';
+      values[1].textContent = n.cpu + '%';
+      values[2].textContent = n.disk + ' GB';
+
+      listEl.appendChild(card);
+    });
+  }
+
+  document.getElementById('loading-state').classList.add('hidden');
+
+  document.getElementById('refreshBtn').addEventListener('click', function() {
+    window.location.reload();
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

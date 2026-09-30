@@ -1,951 +1,182 @@
-<%- include('../components/header', { title: t('userDashboardTitle') }) %>
+<%- include('../layouts/user', { title: t('dashboard') }) %>
+<%
+  const hasServers = typeof servers !== 'undefined' && Array.isArray(servers) && servers.length > 0;
+  const canCreate = typeof canCreateServer !== 'undefined' && canCreateServer;
+  const hasError = typeof errorMessage !== 'undefined' && errorMessage && errorMessage.message;
+  const hasFolders = typeof folders !== 'undefined' && Array.isArray(folders) && folders.length > 0;
 
-<style>
-  ::-webkit-scrollbar { display: none; }
-  @keyframes al-view-in { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-  #page-content { animation: al-view-in 0.35s ease both; }
-  @media (prefers-reduced-motion: reduce) { #page-content { animation: none; } }
-  .vt-active { background: var(--theme-bg-input); color: var(--theme-text-strong); box-shadow: 0 1px 3px var(--theme-border-subtle); }
-  .fc-drag-over { border-color: var(--theme-warning) !important; background: var(--theme-warning-bg) !important; box-shadow: 0 0 0 2px var(--theme-warning-bg) !important; }
-  .sc-dragging { opacity: 0.4; transform: scale(0.97); box-shadow: none !important; }
-  .ov-open { opacity: 1 !important; pointer-events: auto !important; }
-  .pop-transform { transform: scale(1); opacity: 1; }
-</style>
+  /* Server names and UUIDs are user data; the list view's cells are built
+     as HTML strings for partials/ui/table, so escape them here. */
+  function escCell(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function statCell(v) {
+    const raw = v === null || v === undefined || v === '' ? '--' : `${v}%`;
+    return `<span class="al-badge al-badge-neutral font-mono tabular-nums">${escCell(raw)}</span>`;
+  }
+%>
 
-<div x-data="dashboard()">
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <div class="hidden lg:block w-60 h-full"><%- include('../components/sidebar') %></div>
-<%- include('../components/template') %>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('dashboard') %></h1>
+    <p class="al-page-desc"><%= t('welcomeBack') %>, <%= user.username %></p>
+  </div>
+  <% if (hasServers || canCreate) { %>
+  <div>
+    <% if (hasServers) { %>
+    <div class="al-segmented" role="group" aria-label="<%= t('viewMode') %>">
+      <button id="gridViewBtn" type="button" class="al-segmented-btn" aria-pressed="true">
+        <%- icon('grid', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %><%= t('gridView') %>
+      </button>
+      <button id="listViewBtn" type="button" class="al-segmented-btn" aria-pressed="false">
+        <%- icon('list', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %><%= t('listView') %>
+      </button>
+    </div>
+    <% } %>
+    <% if (canCreate) { %>
+    <a href="/create-server" class="al-btn al-btn-primary shrink-0">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= t('createServer') %>
+    </a>
+    <% } %>
+  </div>
+  <% } %>
+</header>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-      <%- include('../components/ui/breadcrumb', { items: [
-        { label: t('navDashboard') }
-      ] }) %>
-      <div class="al-page-body pt-4">
+<div class="al-page-body">
+  <% if (hasError) { %>
+  <div class="al-alert-warning mb-4" role="alert">
+    <%- icon('alert-triangle', { class: 'h-4 w-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0">
+      <p class="al-alert-title"><%= t('errorTitle') %></p>
+      <p class="al-alert-body"><%= errorMessage.message %></p>
+    </div>
+  </div>
+  <% } %>
 
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div>
-            <h1 class="al-page-title"><%= t('userDashboardTitle') %></h1>
-            <p class="al-page-desc"><%= t('userDashboardText') %></p>
-          </div>
-          <div class="flex items-center gap-2">
-            <% if (canCreateServer) { %>
-            <a href="/create-server" class="al-btn-primary">
-              <%- icon('plus', { class: 'h-4 w-4' }) %>
-              <%= t('newServer') %>
-            </a>
-            <% } %>
-            <button type="button" id="newFolderBtn" class="al-btn-secondary">
-              <%- icon('folder-plus', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
-              <%= t('newFolder') %>
-            </button>
-            <% if (servers && servers.length > 0) { %>
-            <div class="flex items-center gap-1 p-1 rounded-xl" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-              <button type="button" id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="true">
-                <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
-                <%= t('gridView') %>
-              </button>
-              <button type="button" id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="false">
-                <%- icon('list', { class: 'h-4 w-4' }) %>
-                <%= t('listView') %>
-              </button>
-            </div>
-            <% } %>
+  <% if (!hasServers) { %>
+    <%- include('../partials/empty-state', {
+      iconName: 'server',
+      title: t('noServersYet'),
+      description: t('createFirstServerDesc'),
+      action: canCreate
+        ? '<a href="/create-server" class="al-btn al-btn-primary">' + t('createServer') + '</a>'
+        : ''
+    }) %>
+  <% } else { %>
+
+  <div id="gridView">
+    <% if (hasFolders) { %>
+      <% folders.forEach(function(folder) { %>
+      <section class="al-section mb-6">
+        <div class="al-section-head">
+          <div class="flex min-w-0 items-center gap-2">
+            <%- icon('folder', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
+            <h2 class="al-section-title truncate"><%= folder.name %></h2>
           </div>
         </div>
-
-        <!-- Alerts -->
-        <% if (req.query.err === 'NOTACTIVEYET') { %>
-        <%- include('../components/ui/alert', { type: 'warning', message: req.translations.awaitingInstallation || "Server is installing", detail: req.translations.awaitingInstallationDesc || "This server is not ready yet. It will be available once installation completes." }) %>
-        <% } %>
-        <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
-        <%- include('../components/ui/alert', { type: 'warning', message: t('serverLimitReached'), detail: t('serverLimitReachedDesc') }) %>
-        <% } %>
-        <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
-        <div class="al-alert-danger mb-5">
-          <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
-          <div class="flex-1">
-            <p class="font-medium"><%= t('connectionError') %></p>
-            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('connectionErrorDesc') %></p>
-            <% if (typeof offlineNodes !== 'undefined' && offlineNodes.length > 0) { %>
-            <ul class="text-xs opacity-80 mt-2 space-y-1">
-              <% offlineNodes.forEach(node => { %>
-              <li class="flex items-center gap-1.5">
-                <%- icon('server', { class: 'size-3 shrink-0', strokeWidth: 1.5 }) %>
-                <span class="font-medium"><%= node.name %></span>
-                <span>—</span>
-                <span><%= node.reason %></span>
-              </li>
-              <% }); %>
-            </ul>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('daemonNotResponding') %></p>
-            <% } %>
-          </div>
-          <button type="button" id="retryDaemonCheck" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('retry') %></button>
-        </div>
-        <% } %>
-
-        <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
-        <% var createServerAction = '<a href="' + (user.isAdmin ? '/admin/servers/create' : '/create-server') + '" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' ' + t('createServer') + '</span></a>'; %>
-        <%- include('../components/ui/empty-state', {
-          iconName: 'server',
-          title: t('noServersYet'),
-          description: user.isAdmin ? t('createFirstServer') : (canCreateServer ? t('createFirstServerOrAskAdmin') : t('adminWillAssign')),
-          action: user.isAdmin || canCreateServer ? createServerAction : ''
-        }) %>
-        <% } else { %>
-
-        <!-- ── Folders ──────────────────────────────────────── -->
-        <% if (folders && folders.length > 0) { %>
-        <div class="mb-6">
-          <p class="al-section-label"><%= t('folders') %></p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5" id="folderGrid">
-            <% let folderIdx = 0; folders.forEach(folder => { %>
-            <div class="al-card flex items-center gap-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:border-[var(--theme-border-accent)] group folder-card"
-              role="button"
-              tabindex="0"
-              aria-label="Open folder <%= folder.name %>"
-              style="--i:<%= folderIdx++ %>"
-              data-folder-id="<%= folder.id %>"
-              data-folder-name="<%= folder.name %>"
-              data-folder-members='<%= JSON.stringify(folder.members.map(m => m.serverUUID)) %>'>
-              <%- icon('folder', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-warning);', fill: 'currentColor' }) %>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= folder.name %></p>
-                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= tn('servers', folder.members.length) %></p>
-              </div>
-            </div>
-            <% }); %>
-          </div>
-          <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('dragServerToFolder') %></p>
-        </div>
-        <% } %>
-
-        <!-- ── Servers header ───────────────────────────────── -->
-        <p class="al-section-label"><%= t('servers') %></p>
-
-        <!-- Grid view -->
-        <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-5">
-          <% let serverIdx = 0; servers.forEach(server => { %>
-          <%
-            const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
-            if (inFolder) return;
-          %>
-          <%
-            const statusForBadge = server.Suspended ? 'suspended'
-              : server.status === 'running' ? 'online'
-              : server.dockerStatus === 'restarting' ? 'starting'
-              : 'offline';
-          %>
-          <div class="al-server-card group relative block al-card cursor-grab hover:border-[var(--theme-border-accent)] hover:shadow-md transition-[box-shadow,transform,border-color] duration-150 active:cursor-grabbing"
-            data-server-uuid="<%= server.UUID %>"
-            data-server-name="<%= server.name %>"
-            style="--i:<%= serverIdx++ %>"
-            draggable="true">
-            <a href="../server/<%= server.UUID %>" class="block">
-              <div class="flex items-start justify-between mb-2">
-                <div class="min-w-0 flex-1 mr-2">
-                  <h3 class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
-                    <% if (server.shared) { %>
-                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> <%= t('shared') %></span>
-                    <% } %>
-                  </h3>
-                  <% if (server.description) { %>
-                    <p class="text-xs mt-0.5 truncate" style="color:var(--theme-text-muted);"><%= server.description %></p>
-                  <% } else { %>
-                    <p class="text-xs mt-0.5 truncate italic" style="color:var(--theme-text-placeholder);"><%= t('noDescription') %></p>
-                  <% } %>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <%- include('../components/ui/status-badge', { status: statusForBadge }) %>
-                </div>
-              </div>
-              <div class="flex gap-2 mb-2">
-                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('ram') %></p>
-                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.ramUsage) %>%</p>
-                </div>
-                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('cpu') %></p>
-                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.cpuUsage) %>%</p>
-                </div>
-                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('disk') %></p>
-                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? t('unlimited') : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
-                </div>
-              </div>
-              <div class="flex items-center justify-between pt-1.5 border-t" style="border-color:var(--theme-border);">
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <img loading="lazy" decoding="async" class="h-3.5 w-3.5 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : t('unknown') %>">
-                  <span class="text-[11px] truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : t('unknown') %></span>
-                </div>
-                <% if (server.node) { %>
-                <span class="text-xs shrink-0 ml-2 truncate max-w-[6rem]" style="color:var(--theme-text-placeholder);"><%= server.node.name || server.node.address %></span>
-                <% } %>
-              </div>
-            </a>
-            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-[var(--theme-bg-hover)] z-10" style="color:var(--theme-text-muted);" aria-label="<%= t('actions') %>" data-uuid="<%= server.UUID %>">
-              <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
-            </button>
-            <!-- Context menu -->
-            <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" role="menu" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-              <button type="button" role="menuitem" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="<%= t('addToFolder') %>"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addToFolder') %></button>
-              <button type="button" role="menuitem" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="<%= t('removeFromFolder') %>"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('removeFromFolder') %></button>
-            </div>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% servers.filter(function(s) { return folder.members && folder.members.some(function(m) { return m.serverUUID === s.UUID; }); }).forEach(function(server) { %>
+            <%- include('../partials/server-card', { server: server }) %>
           <% }); %>
         </div>
+      </section>
+      <% }); %>
 
-        <!-- List view -->
-        <div id="listView" class="rounded-xl overflow-hidden shadow-sm hidden mb-6" style="border:1px solid var(--theme-border);">
-          <table class="al-table">
-            <colgroup>
-              <col style="min-width:220px">
-              <col style="min-width:90px">
-              <col style="min-width:130px">
-              <col style="min-width:80px">
-              <col style="min-width:80px">
-            </colgroup>
-            <thead class="al-table-head">
-              <tr>
-                <th class="al-table-th pl-6"><%= t('serverColumn') %></th>
-                <th class="al-table-th"><%= t('statusColumn') %></th>
-                <th class="al-table-th"><%= t('ownerColumn') %></th>
-                <th class="al-table-th"><%= t('ram') %></th>
-                <th class="al-table-th"><%= t('cpu') %></th>
-              </tr>
-            </thead>
-            <tbody style="border-color:var(--theme-border);">
-              <% let listIdx = 0; servers.forEach(server => { %>
-              <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
-              <tr style="--i:<%= listIdx++ %>; border-color:var(--theme-border);" data-server-uuid="<%= server.UUID %>" data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="al-table-tr cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset">
-                <td class="al-table-td pl-6">
-                  <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
-                    <% if (server.shared) { %>
-                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> <%= t('shared') %></span>
-                    <% } %>
-                  </p>
-                  <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>
-                </td>
-                <td class="al-table-td">
-                <div class="flex items-center gap-2 shrink-0">
-                  <%- include('../components/ui/status-badge', { status: server.Suspended ? 'suspended' : server.status === 'running' ? 'online' : server.dockerStatus === 'restarting' ? 'starting' : 'offline' }) %>
-                </div>
-                </td>
-                <td class="al-table-td"><%= server.owner ? server.owner.username : t('unknown') %></td>
-                <td class="al-table-td"><%= Math.round(server.ramUsage) %>%</td>
-                <td class="al-table-td"><%= Math.round(server.cpuUsage) %>%</td>
-              </tr>
-              <% }); %>
-            </tbody>
-          </table>
+      <% var unfoldered = servers.filter(function(s) { return !folders.some(function(f) { return f.members && f.members.some(function(m) { return m.serverUUID === s.UUID; }); }); }); %>
+      <% if (unfoldered.length > 0) { %>
+      <section class="al-section mb-6">
+        <div class="al-section-head">
+          <div class="flex min-w-0 items-center gap-2">
+            <%- icon('layers', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
+            <h2 class="al-section-title"><%= t('other') %></h2>
+          </div>
         </div>
-
-        <% if (totalPages > 1) { %>
-        <div class="flex items-center justify-center gap-2 mt-2">
-          <% if (currentPage > 1) { %>
-          <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= t('prev') %></a>
-          <% } %>
-          <span class="text-[13px]" style="color:var(--theme-text-muted);"><%= currentPage %> / <%= totalPages %></span>
-          <% if (currentPage < totalPages) { %>
-          <a href="/?page=<%= currentPage + 1 %>" class="al-btn-secondary"><%= t('next') %></a>
-          <% } %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% unfoldered.forEach(function(server) { %>
+            <%- include('../partials/server-card', { server: server }) %>
+          <% }); %>
         </div>
-        <% } %>
-
-        <% } %>
+      </section>
+      <% } %>
+    <% } else { %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% servers.forEach(function(server) { %>
+          <%- include('../partials/server-card', { server: server }) %>
+        <% }); %>
       </div>
-    </div>
+    <% } %>
   </div>
-</main>
 
-<!-- Drag ghost element -->
-<div id="drag-ghost" class="fixed z-[60] pointer-events-none rounded-xl px-3.5 py-2.5 text-[13px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis" style="display:none; transform:rotate(2deg); background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text-strong);">
-  <%- icon('folder', { class: 'w-3.5 h-3.5 shrink-0', style: 'color:var(--theme-warning);', fill: 'currentColor' }) %>
-  <span id="drag-ghost-name"></span>
-</div>
-
-<!-- Folder popup -->
-<div class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay">
-    <div id="folderPopupPanel" class="al-sheet-panel border rounded-2xl w-full max-w-[440px] max-h-[85vh] flex flex-col overflow-hidden will-change-transform" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <div class="flex justify-between items-center px-6 py-4 border-b flex-shrink-0" style="border-color:var(--theme-border);">
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="folderPopupTitle"></h2>
-      <div class="flex items-center gap-1">
-        <button type="button" id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" style="color:var(--theme-danger);" title="<%= t('deleteFolder') %>" aria-label="<%= t('deleteFolder') %>">
-          <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
-        </button>
-        <button type="button" id="closeFolderPopup" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-    </div>
-    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <div id="folderPopupContent" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-    </div>
-  </div>
-</div>
-
-<!-- New folder dialog -->
-<div class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay">
-    <div id="newFolderPanel" class="al-sheet-panel border rounded-2xl w-full max-w-[380px] max-h-[85vh] flex flex-col will-change-transform" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-      <h2 id="newFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('newFolder') %></h2>
-      <button type="button" onclick="document.getElementById('cancelNewFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
-        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-      </button>
-    </div>
-    <div class="px-6 py-4">
-      <p class="text-xs mb-4" style="color:var(--theme-text-muted);"><%= t('giveFolderName') %></p>
-      <label for="newFolderName" class="sr-only"><%= t('folderName') %></label>
-      <input id="newFolderName" type="text" class="al-input" placeholder="<%= t('folderNamePlaceholder') %>">
-    </div>
-    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" id="cancelNewFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
-      <button type="button" id="confirmNewFolder" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('create') %></button>
-    </div>
-  </div>
-</div>
-
-<!-- Delete folder confirm dialog -->
-<div class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay">
-    <div id="deleteFolderPanel" class="al-sheet-panel border rounded-2xl w-full max-w-[380px] max-h-[85vh] flex flex-col will-change-transform" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-      <h2 id="deleteFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('deleteFolderQuestion') %></h2>
-      <button type="button" onclick="document.getElementById('cancelDeleteFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
-        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-      </button>
-    </div>
-    <div class="px-6 py-4">
-      <p class="text-xs" style="color:var(--theme-text-muted);"><%= t('serversInsideAccessible') %></p>
-    </div>
-    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" id="cancelDeleteFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
-      <button type="button" id="confirmDeleteFolder" class="al-btn-danger"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('deleteFolder') %></button>
-    </div>
-  </div>
-</div>
-
-
-<div id="dashboard-data" class="hidden"></div>
-<script nonce="<%- nonce %>">
-  document.getElementById('dashboard-data').dataset.folders = '<%- JSON.stringify(folders || []).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
-  document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
-</script>
-
-<script nonce="<%- nonce %>">
-function dashboard() {
-  return {
-    init() {
-      const self = this;
-      var FOCUS_DELAY = 80;
-      var DRAG_END_DELAY = 50;
-      var SECONDS_PER_DAY = 86400;
-      var SECONDS_PER_HOUR = 3600;
-      var SECONDS_PER_MINUTE = 60;
-
-      document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-
-      var bridge = document.getElementById('dashboard-data');
-      var allFolders = JSON.parse(bridge.dataset.folders || '[]');
-      var allServers = JSON.parse(bridge.dataset.servers || '[]');
-
-      function escapeHtml(str) {
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      }
-
-      function folderMemberUUIDs(folder) {
-        return (folder.members || []).map(function (m) { return m.serverUUID; });
-      }
-
-      function serverInFolder(uuid) {
-        return allFolders.some(function (f) { return folderMemberUUIDs(f).indexOf(uuid) !== -1; });
-      }
-
-      function setServerFolder(uuid, folderId) {
-        allFolders.forEach(function (f) {
-          var members = folderMemberUUIDs(f);
-          var idx = members.indexOf(uuid);
-          if (idx !== -1) {
-            if (String(f.id) === String(folderId)) return;
-            f.members.splice(idx, 1);
-          }
-        });
-        if (folderId !== null) {
-          var target = null;
-          allFolders.forEach(function (f) { if (String(f.id) === String(folderId)) target = f; });
-          if (target && folderMemberUUIDs(target).indexOf(uuid) === -1) {
-            target.members.push({ serverUUID: uuid });
-          }
-        }
-      }
-
-      function folderCardHtml(folder, idx) {
-        var members = folderMemberUUIDs(folder);
-        return '<div class="al-card flex items-center gap-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:border-[var(--theme-border-accent)] group folder-card" role="button" tabindex="0" aria-label="Open folder ' + escapeHtml(folder.name) + '" style="--i:' + idx + '" data-folder-id="' + folder.id + '" data-folder-name="' + escapeHtml(folder.name) + '" data-folder-members=\'' + JSON.stringify(members) + '\'>' +
-          alIcon('folder', 'h-5 w-5 shrink-0', { style: 'color:var(--theme-warning);' }) +
-          '<div class="min-w-0 flex-1">' +
-            '<p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);">' + escapeHtml(folder.name) + '</p>' +
-            '<p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">' + members.length + ' ' + (members.length !== 1 ? '<%= req.translations.serverPlural || "servers" %>' : 'server') + '</p>' +
-          '</div>' +
-        '</div>';
-      }
-
-      function renderServerViews() {
-        document.querySelectorAll('.al-server-card[data-server-uuid]').forEach(function (card) {
-          var inFolder = serverInFolder(card.dataset.serverUuid);
-          card.classList.toggle('hidden', inFolder);
-          var removeBtn = card.querySelector('.ctx-remove-from-folder');
-          if (removeBtn) removeBtn.style.display = inFolder ? '' : 'none';
-        });
-        document.querySelectorAll('tr[data-server-uuid]').forEach(function (row) {
-          row.classList.toggle('hidden', serverInFolder(row.dataset.serverUuid));
-        });
-      }
-
-      var folderPopupContent = document.getElementById('folderPopupContent');
-      var folderPopupTitle = document.getElementById('folderPopupTitle');
-      var deleteFolderBtn = document.getElementById('deleteFolderBtn');
-
-      function renderFolderPopupContent(memberUUIDs) {
-        folderPopupContent.innerHTML = '';
-        var serversIn = allServers.filter(function (s) { return memberUUIDs.includes(s.UUID); });
-        if (serversIn.length === 0) {
-          folderPopupContent.innerHTML = '<p class="text-sm text-neutral-400 col-span-2"><%= req.translations.noServersDragHere || "No servers — drag a card here to add one." %></p>';
-          return;
-        }
-        serversIn.forEach(function (s) {
-          var row = document.createElement('div');
-          row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-          var running = s.status === 'running';
-          row.innerHTML =
-            '<a href="/server/' + s.UUID + '" class="flex items-center gap-2 flex-1 min-w-0">' +
-              '<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + escapeHtml(s.name) + '</span>' +
-              '<span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ' + (running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400') + '">' +
-                (running ? '<%= req.translations.running || "Running" %>' : '<%= req.translations.stopped || "Stopped" %>') +
-              '</span>' +
-            '</a>' +
-            '<button data-uuid="' + s.UUID + '" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="<%= req.translations.removeFromFolder || "Remove from folder" %>" aria-label="<%= req.translations.removeFromFolder || "Remove from folder" %>">' +
-              alIcon('trash-2', 'w-4 h-4') +
-            '</button>';
-          row.querySelector('.remove-from-folder-btn').addEventListener('click', async function (e) {
-            e.preventDefault();
-            var uuid = e.currentTarget.dataset.uuid;
-            try {
-              var r = await fetch('/api/v2/account/folders/servers/' + uuid, { method: 'DELETE' });
-              var d = await r.json();
-              if (d.success) {
-                showToast('<%= req.translations.removedFromFolder || "Removed from folder." %>', 'success');
-                setServerFolder(uuid, null);
-                renderFolders();
-                renderServerViews();
-                if (window.al) {
-                  window.al.removeRow(row).then(function () {
-                    var f = null;
-                    allFolders.forEach(function (x) { if (String(x.id) === String(activeFolderId)) f = x; });
-                    renderFolderPopupContent(f ? folderMemberUUIDs(f) : memberUUIDs);
-                  });
-                } else {
-                  renderFolderPopupContent(memberUUIDs);
-                }
-              }
-              else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-            } catch (err) {
-              console.error('Failed to remove from folder:', err);
-              showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-            }
-          });
-          folderPopupContent.appendChild(row);
-        });
-      }
-
-      function renderFolders() {
-        var section = document.querySelector('#folderGrid') ? document.querySelector('#folderGrid').closest('.mb-8') : null;
-        if (allFolders.length === 0) {
-          if (section) section.remove();
-          return;
-        }
-        if (!section) {
-          var serversLabel = null;
-          document.querySelectorAll('.al-section-label').forEach(function (l) { if (l.textContent === '<%= req.translations.servers || "Servers" %>') serversLabel = l; });
-          section = document.createElement('div');
-          section.className = 'mb-8';
-          section.innerHTML = '<p class="al-section-label"><%= req.translations.folders || "Folders" %></p><div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" id="folderGrid"></div><p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.dragServerToFolder || "Drag a server card onto a folder to add it" %></p>';
-          if (serversLabel && serversLabel.parentNode) serversLabel.parentNode.insertBefore(section, serversLabel);
-          else document.getElementById('page-content').appendChild(section);
-        }
-        var grid = section.querySelector('#folderGrid');
-        var html = '';
-        allFolders.forEach(function (f, i) { html += folderCardHtml(f, i); });
-        grid.innerHTML = html;
-        grid.querySelectorAll('.folder-card').forEach(function (card) { bindFolderCard(card); });
-      }
-
-      function bindFolderCard(card) {
-        card.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
-        });
-        card.addEventListener('click', function (e) {
-          if (e.target.closest('.folder-delete-btn') || e.target.closest('.folder-menu-btn')) return;
-          var memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
-          activeFolderId = card.dataset.folderId;
-          folderPopupTitle.textContent = card.dataset.folderName;
-          renderFolderPopupContent(memberUUIDs);
-          openOverlay(folderPopupOverlay, folderPopupPanel);
-        });
-        card.addEventListener('dragover', function (e) {
-          if (!dragUUID) return;
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          card.classList.add('fc-drag-over');
-        });
-        card.addEventListener('dragleave', function () { card.classList.remove('fc-drag-over'); });
-        card.addEventListener('drop', async function (e) {
-          e.preventDefault();
-          card.classList.remove('fc-drag-over');
-          if (!dragUUID) return;
-          var folderId = card.dataset.folderId;
-          try {
-            var r = await fetch('/api/v2/account/folders/' + folderId + '/servers', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ serverUUID: dragUUID }),
-            });
-            var d = await r.json();
-            if (d.success) {
-              showToast('"' + dragName + '" <%= req.translations.addedToFolder || "added to folder." %>', 'success');
-              setServerFolder(dragUUID, folderId);
-              renderFolders();
-              renderServerViews();
-            }
-            else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-          } catch (err) {
-            console.error('Failed to add server to folder:', err);
-            showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-          }
-        });
-      }
-
-      function openOverlay(overlay, panel) {
-        overlay.setAttribute('data-open', '');
-        Animate.openModal(overlay, panel);
-      }
-
-      function closeOverlay(overlay, panel, after) {
-        var done = function () {
-          overlay.removeAttribute('data-open');
-          if (after) after();
+  <div id="listView" class="hidden">
+    <%
+      const listRows = servers.map(function(s) {
+        const running = s.status === 'running';
+        return {
+          server: '<a class="al-table-cell-strong al-btn-link" href="/server/' + escCell(s.UUID) + '">' + escCell(s.name) + '</a>',
+          status: '<span class="' + (running ? 'al-badge-online' : 'al-badge-offline') +
+            '"><span class="al-dot-' + (running ? 'online al-dot-ping' : 'offline') + '"></span>' +
+            escCell(running ? t('running') : t('stopped')) + '</span>',
+          ram: statCell(s.ramUsage),
+          cpu: statCell(s.cpuUsage),
         };
-        Animate.closeModal(overlay, panel, done);
-      }
-
-      var gridView = document.getElementById('gridView');
-      var listView = document.getElementById('listView');
-      var gridViewBtn = document.getElementById('gridViewBtn');
-      var listViewBtn = document.getElementById('listViewBtn');
-
-      if (gridView && listView && gridViewBtn && listViewBtn) {
-        if (localStorage.getItem('serverViewPreference') === 'list') switchView('list');
-        gridViewBtn.addEventListener('click', function () { switchView('grid'); localStorage.setItem('serverViewPreference', 'grid'); });
-        listViewBtn.addEventListener('click', function () { switchView('list'); localStorage.setItem('serverViewPreference', 'list'); });
-
-        function switchView(which) {
-          var target = which === 'grid' ? gridView : listView;
-          gridView.classList.toggle('hidden', which !== 'grid');
-          listView.classList.toggle('hidden', which !== 'list');
-          gridViewBtn.classList.toggle('vt-active', which === 'grid');
-          listViewBtn.classList.toggle('vt-active', which === 'list');
-          gridViewBtn.setAttribute('aria-pressed', String(which === 'grid'));
-          listViewBtn.setAttribute('aria-pressed', String(which === 'list'));
-          target.classList.remove('al-view-entering');
-          void target.offsetWidth;
-          target.classList.add('al-view-entering');
-        }
-      }
-
-      document.querySelectorAll('tr[data-href]').forEach(function (row) {
-        row.addEventListener('click', function () { Turbo.visit(row.dataset.href); });
-        row.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); Turbo.visit(row.dataset.href); }
-        });
       });
+    %>
+    <%- include('../partials/ui/table', {
+      id: 'serverList',
+      columns: [
+        { header: t('serverColumn'), key: 'server' },
+        { header: t('status'), key: 'status' },
+        { header: t('ramUsage'), key: 'ram' },
+        { header: t('cpuUsage'), key: 'cpu' }
+      ],
+      rows: listRows,
+      emptyState: t('noServersYet')
+    }) %>
+  </div>
 
-      var newFolderOverlay = document.getElementById('newFolderOverlay');
-      var newFolderPanel = document.getElementById('newFolderPanel');
-      var newFolderName = document.getElementById('newFolderName');
-      var cancelNewFolder = document.getElementById('cancelNewFolder');
-      var confirmNewFolder = document.getElementById('confirmNewFolder');
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <%- include('../partials/pagination', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 1, totalPages: totalPages }) %>
+  <% } %>
 
-      document.getElementById('newFolderBtn').addEventListener('click', function () {
-        newFolderName.value = '';
-        openOverlay(newFolderOverlay, newFolderPanel);
-        setTimeout(function () { newFolderName.focus(); }, FOCUS_DELAY);
-      });
-      cancelNewFolder.addEventListener('click', function () { closeOverlay(newFolderOverlay, newFolderPanel); });
-      newFolderOverlay.addEventListener('click', function (e) { if (e.target === newFolderOverlay) closeOverlay(newFolderOverlay, newFolderPanel); });
-      newFolderName.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') confirmNewFolder.click();
-        if (e.key === 'Escape') closeOverlay(newFolderOverlay, newFolderPanel);
-      });
-      confirmNewFolder.addEventListener('click', async function () {
-        var name = newFolderName.value.trim();
-        if (!name) return;
-        confirmNewFolder.disabled = true;
-        try {
-          var r = await fetch('/api/v2/account/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name }) });
-          var d = await r.json();
-          confirmNewFolder.disabled = false;
-          if (d.success) {
-            showToast('<%= req.translations.folderCreated || "Folder created." %>', 'success');
-            allFolders.push(d.folder);
-            closeOverlay(newFolderOverlay, newFolderPanel);
-            renderFolders();
-          }
-          else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-        } catch (err) {
-          console.error('Failed to create folder:', err);
-          confirmNewFolder.disabled = false;
-          showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-        }
-      });
+  <% } %>
+</div>
 
-      var folderPopupOverlay = document.getElementById('folderPopupOverlay');
-      var folderPopupPanel = document.getElementById('folderPopupPanel');
-      var activeFolderId = null;
+<script nonce="<%- nonce %>">
+  (function () {
+    var grid = document.getElementById('gridView');
+    var list = document.getElementById('listView');
+    var gridBtn = document.getElementById('gridViewBtn');
+    var listBtn = document.getElementById('listViewBtn');
+    if (!grid || !list || !gridBtn || !listBtn) { return; }
 
-      document.getElementById('closeFolderPopup').addEventListener('click', function () {
-        closeOverlay(folderPopupOverlay, folderPopupPanel, function () { deleteFolderBtn.style.display = ''; });
-      });
-      folderPopupOverlay.addEventListener('click', function (e) {
-        if (e.target === folderPopupOverlay) {
-          closeOverlay(folderPopupOverlay, folderPopupPanel, function () { deleteFolderBtn.style.display = ''; });
-        }
-      });
+    var STORAGE_KEY = 'serverViewPreference';
 
-      var deleteFolderOverlay = document.getElementById('deleteFolderOverlay');
-      var deleteFolderPanel = document.getElementById('deleteFolderPanel');
-      var cancelDeleteFolder = document.getElementById('cancelDeleteFolder');
-      var confirmDeleteFolder = document.getElementById('confirmDeleteFolder');
-
-      deleteFolderBtn.addEventListener('click', function () {
-        closeOverlay(folderPopupOverlay, folderPopupPanel);
-        openOverlay(deleteFolderOverlay, deleteFolderPanel);
-      });
-
-      cancelDeleteFolder.addEventListener('click', function () { closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
-      deleteFolderOverlay.addEventListener('click', function (e) { if (e.target === deleteFolderOverlay) closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
-
-      confirmDeleteFolder.addEventListener('click', async function () {
-        if (!activeFolderId) return;
-        confirmDeleteFolder.disabled = true;
-        try {
-          var r = await fetch('/api/v2/account/folders/' + activeFolderId, { method: 'DELETE' });
-          var d = await r.json();
-          confirmDeleteFolder.disabled = false;
-          closeOverlay(deleteFolderOverlay, deleteFolderPanel);
-          if (d.success) {
-            showToast('Folder deleted.', 'success');
-            allFolders = allFolders.filter(function (f) { return String(f.id) !== String(activeFolderId); });
-            renderFolders();
-            renderServerViews();
-          } else showToast(d.error || '<%= req.translations.couldntDeleteFolder || "Couldn\u0027t delete the folder." %>', 'error');
-        } catch (err) {
-          console.error('Failed to delete folder:', err);
-          confirmDeleteFolder.disabled = false;
-          closeOverlay(deleteFolderOverlay, deleteFolderPanel);
-          showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-        }
-      });
-
-      var dragUUID = null;
-      var dragName = null;
-      var ghost = document.getElementById('drag-ghost');
-      var ghostName = document.getElementById('drag-ghost-name');
-      var GHOST_OFFSET_X = 14;
-      var GHOST_OFFSET_Y = 10;
-
-      function moveMouse(e) {
-        ghost.style.left = (e.clientX + GHOST_OFFSET_X) + 'px';
-        ghost.style.top = (e.clientY + GHOST_OFFSET_Y) + 'px';
-      }
-
-      document.querySelectorAll('.al-server-card[draggable]').forEach(function (card) {
-        card.addEventListener('dragstart', function (e) {
-          dragUUID = card.dataset.serverUuid;
-          dragName = card.dataset.serverName;
-          ghostName.textContent = dragName;
-          ghost.style.display = 'flex';
-          card.classList.add('sc-dragging');
-          card.dataset.dragging = '1';
-          var blank = document.createElement('canvas');
-          blank.width = blank.height = 1;
-          e.dataTransfer.setDragImage(blank, 0, 0);
-          e.dataTransfer.effectAllowed = 'move';
-          document.addEventListener('mousemove', moveMouse);
-        });
-        card.addEventListener('dragend', function () {
-          ghost.style.display = 'none';
-          card.classList.remove('sc-dragging');
-          document.querySelectorAll('.folder-card').forEach(function (f) { f.classList.remove('fc-drag-over'); });
-          document.removeEventListener('mousemove', moveMouse);
-          setTimeout(function () { delete card.dataset.dragging; }, DRAG_END_DELAY);
-          dragUUID = null;
-          dragName = null;
-        });
-        card.querySelector('a').addEventListener('click', function (e) {
-          if (card.dataset.dragging) e.preventDefault();
-        });
-        card.addEventListener('contextmenu', function (e) {
-          e.preventDefault();
-          document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-          var menu = card.querySelector('.server-ctx-menu');
-          if (menu) menu.classList.remove('hidden');
-        });
-        card.querySelector('a').addEventListener('keydown', function (e) {
-          if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
-            e.preventDefault();
-            document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-            var menu = card.querySelector('.server-ctx-menu');
-            if (menu) {
-              menu.classList.remove('hidden');
-              var first = menu.querySelector('button');
-              if (first && first.offsetParent !== null) first.focus();
-            }
-          }
-        });
-        var actionsBtn = card.querySelector('.server-actions-btn');
-        if (actionsBtn) {
-          actionsBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var wasHidden = card.querySelector('.server-ctx-menu').classList.contains('hidden');
-            document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-            if (wasHidden) {
-              var menu = card.querySelector('.server-ctx-menu');
-              if (menu) {
-                menu.classList.remove('hidden');
-                var first = menu.querySelector('button');
-                if (first && first.offsetParent !== null) first.focus();
-              }
-            }
-          });
-        }
-      });
-
-      document.addEventListener('click', function () {
-        document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-      });
-
-      document.querySelectorAll('.ctx-add-to-folder').forEach(function (btn) {
-        btn.addEventListener('click', async function (e) {
-          e.stopPropagation();
-          var uuid = btn.dataset.uuid;
-          if (allFolders.length === 0) { showToast('<%= req.translations.createFolderFirst || "Create a folder first." %>', 'error'); return; }
-          if (allFolders.length === 1) {
-            try {
-              var r = await fetch('/api/v2/account/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
-              var d = await r.json();
-              if (d.success) {
-                showToast('<%= req.translations.addedToFolder || "Added to folder." %>', 'success');
-                setServerFolder(uuid, allFolders[0].id);
-                renderFolders();
-                renderServerViews();
-                document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-              } else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-            } catch (err) {
-              console.error('Failed to add to folder:', err);
-              showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-            }
-            return;
-          }
-          openFolderPicker(uuid);
-        });
-      });
-
-      document.querySelectorAll('.ctx-remove-from-folder').forEach(function (btn) {
-        btn.addEventListener('click', async function (e) {
-          e.stopPropagation();
-          try {
-            var r = await fetch('/api/v2/account/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
-            var d = await r.json();
-            if (d.success) {
-              showToast('<%= req.translations.removedFromFolder || "Removed from folder." %>', 'success');
-              setServerFolder(btn.dataset.uuid, null);
-              renderFolders();
-              renderServerViews();
-              document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-            } else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-          } catch (err) {
-            console.error('Failed to remove from folder:', err);
-            showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-          }
-        });
-      });
-
-      function openFolderPicker(serverUUID) {
-        deleteFolderBtn.style.display = 'none';
-        activeFolderId = null;
-        folderPopupTitle.textContent = 'Choose folder';
-        folderPopupContent.innerHTML = '';
-        allFolders.forEach(function (f) {
-          var btn = document.createElement('button');
-          btn.className = 'flex items-center gap-2.5 w-full text-left bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-          btn.innerHTML = alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0') + '<span class="text-sm text-neutral-800 dark:text-white">' + escapeHtml(f.name) + '</span>';
-          btn.addEventListener('click', async function () {
-            try {
-              var r = await fetch('/api/v2/account/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: serverUUID }) });
-              var d = await r.json();
-              if (d.success) {
-                showToast('<%= req.translations.addedToFolder || "Added to folder." %>', 'success');
-                setServerFolder(serverUUID, f.id);
-                renderFolders();
-                renderServerViews();
-                closeOverlay(folderPopupOverlay, folderPopupPanel);
-              } else showToast(d.error || '<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
-            } catch (err) {
-              console.error('Failed to add to folder:', err);
-              showToast('<%= req.translations.networkErrorTryAgain || "Network error. Try again." %>', 'error');
-            }
-          });
-          folderPopupContent.appendChild(btn);
-        });
-        openOverlay(folderPopupOverlay, folderPopupPanel);
-      }
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
-          closeOverlay(folderPopupOverlay, folderPopupPanel);
-          closeOverlay(newFolderOverlay, newFolderPanel);
-          closeOverlay(deleteFolderOverlay, deleteFolderPanel);
-        }
-      });
-
-      var serverUUIDs = allServers.map(function (s) { return s.UUID; });
-
-      function fmtUptime(sec) {
-        if (sec === null || typeof sec === 'undefined') return '';
-        sec = Math.max(0, Math.floor(sec));
-        var d = Math.floor(sec / SECONDS_PER_DAY);
-        var h = Math.floor((sec % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
-        var m = Math.floor((sec % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-        var s = sec % SECONDS_PER_MINUTE;
-        if (d > 0) return d + 'd ' + h + 'h';
-        if (h > 0) return h + 'h ' + m + 'm';
-        if (m > 0) return m + 'm ' + s + 's';
-        return s + 's';
-      }
-
-      function applyServerStatus(uuid, status) {
-        var card = document.querySelector('[data-server-uuid="' + uuid + '"]');
-        if (!card) return;
-        var badge = card.querySelector('.al-badge-online, .al-badge-offline, .al-badge-warning, .al-badge-info');
-        if (!badge) return;
-        var liveTitle = '<%= req.translations.live || "Live" %>';
-        if (status.updatedAt) liveTitle += ' · ' + new Date(status.updatedAt).toLocaleTimeString();
-        if (status.daemonOffline) { badge.className = 'al-badge-offline'; badge.innerHTML = '<span class="al-dot-offline"></span> <%= req.translations.daemonOffline || "Daemon offline" %>'; badge.title = status.error || '<%= req.translations.daemonUnreachable || "Daemon unreachable" %>'; return; }
-        if (status.starting) { badge.className = 'al-badge-warning'; badge.innerHTML = '<span class="al-dot-warning"></span> <%= req.translations.serverStarting || "Starting" %>'; badge.title = liveTitle; return; }
-        if (status.stopping) { badge.className = 'al-badge-warning'; badge.innerHTML = '<span class="al-dot-warning"></span> <%= req.translations.serverStopping || "Stopping" %>'; badge.title = liveTitle; return; }
-        if (status.online) {
-          var uptime = fmtUptime(status.uptime);
-          badge.className = 'al-badge-online';
-          badge.innerHTML = '<span class="al-dot-online"></span> <%= req.translations.online || "Online" %>' + (uptime ? ' · ' + uptime : '');
-          badge.title = liveTitle + (uptime ? ' · <%= req.translations.upFor || "Up for" %> ' + uptime : '');
-          return;
-        }
-        badge.className = 'al-badge-offline';
-        badge.innerHTML = '<span class="al-dot-offline"></span> <%= req.translations.offline || "Offline" %>';
-        badge.title = liveTitle;
-      }
-
-      var realtimeWired = false;
-      var rt = null;
-      var st = null;
-      var realtimeDisposers = [];
-
-      function onRealtimeStatus(uuid, snap) {
-        if (!snap || snap.status !== 'success' || !snap.data) return;
-        var s = snap.data;
-        var since = s.updatedAt || s.since || null;
-        applyServerStatus(uuid, {
-          online: s.running === true,
-          starting: s.starting === true || s.status === 'starting' || s.status === 'restarting',
-          stopping: s.stopping === true || s.status === 'stopping',
-          daemonOffline: s.daemonOffline === true,
-          uptime: typeof s.uptime === 'number' ? s.uptime : null,
-          error: s.error,
-          updatedAt: since,
-        });
-        var entry = allServers.find(function (s) { return s.UUID === uuid; });
-        if (entry) {
-          if (s.online && s.running === true) entry.status = 'running';
-          else if (s.starting === true) entry.status = 'starting';
-          else if (s.stopping === true) entry.status = 'stopping';
-          else if (s.daemonOffline === true) entry.status = 'stopped';
-          else if (s.running === false) entry.status = 'stopped';
-        }
-      }
-
-      function onRealtimeConnect() {
-        serverUUIDs.forEach(function (uuid) {
-          rt.watch(uuid);
-          rt.watchEvents(uuid);
-        });
-      }
-
-      function wireRealtime() {
-        if (realtimeWired) return;
-        rt = window.alRealtime;
-        st = window.alState;
-        if (!rt || !st) return;
-        realtimeWired = true;
-        function unwatchAll() {
-          realtimeDisposers.splice(0).forEach(function (dispose) { dispose(); });
-          serverUUIDs.forEach(function (uuid) {
-            try { window.alRealtime.unwatch(uuid); window.alRealtime.unwatchEvents(uuid); } catch (e) {}
-          });
-        }
-        realtimeDisposers.push(rt.onStatusChange(function (status) {
-          if (status === 'connected') onRealtimeConnect();
-        }));
-        serverUUIDs.forEach(function (uuid) {
-          realtimeDisposers.push(st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); }));
-        });
-        window.addEventListener('pagehide', unwatchAll);
-        if (rt.status && rt.status() === 'connected') onRealtimeConnect();
-      }
-
-      if (window.alRealtime) wireRealtime();
-      else window.addEventListener('al:realtime-ready', wireRealtime);
-
-      document.getElementById('retryDaemonCheck')?.addEventListener('click', function () {
-        var btn = this;
-        var original = btn.innerHTML;
-        btn.disabled = true;
-        btn.textContent = '<%= req.translations.checking || "Checking\u2026" %>';
-        fetch(window.location.pathname, { headers: { 'X-Requested-With': 'fetch' } })
-          .then(function (r) { return r.text(); })
-          .then(function (html) {
-            btn.disabled = false;
-            btn.innerHTML = original;
-            if (html.indexOf('retryDaemonCheck') === -1) {
-              var banner = btn.closest('.al-alert-danger');
-              if (banner) banner.style.display = 'none';
-              showToast('<%= req.translations.allNodesOnline || "All nodes are online." %>', 'success');
-            } else {
-              showToast('<%= req.translations.nodesStillOffline || "Nodes are still offline." %>', 'error');
-            }
-          })
-          .catch(function () {
-            btn.disabled = false;
-            btn.innerHTML = original;
-            showToast('<%= req.translations.recheckFailed || "Re-check failed. Try again." %>', 'error');
-          });
-      });
+    function applyView(view) {
+      var isGrid = view !== 'list';
+      grid.classList.toggle('hidden', !isGrid);
+      list.classList.toggle('hidden', isGrid);
+      gridBtn.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
+      listBtn.setAttribute('aria-pressed', isGrid ? 'false' : 'true');
     }
-  };
-}
+
+    var saved = 'grid';
+    try { saved = localStorage.getItem(STORAGE_KEY) || 'grid'; } catch (e) { saved = 'grid'; }
+    applyView(saved);
+
+    gridBtn.addEventListener('click', function () {
+      applyView('grid');
+      try { localStorage.setItem(STORAGE_KEY, 'grid'); } catch (e) {}
+    });
+    listBtn.addEventListener('click', function () {
+      applyView('list');
+      try { localStorage.setItem(STORAGE_KEY, 'list'); } catch (e) {}
+    });
+  })();
 </script>
 
-</div><!-- /x-data -->
-<%- include('../components/footer') %>
+<%- include('../layouts/user-footer') %>

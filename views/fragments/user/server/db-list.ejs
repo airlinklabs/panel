@@ -17,7 +17,7 @@
       </div>
       <h2 class="mt-4 text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('noDatabasesYet') %></h2>
       <p class="mt-1 text-sm max-w-sm mx-auto" style="color:var(--theme-text-muted)"><%= t('noDatabasesYetDesc') %></p>
-      <button type="button" @click="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+      <button type="button" onclick="window.location.href='/servers/<%= server.UUID %>/databases/new'" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('createDatabase') %>
       </button>
@@ -89,22 +89,17 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1.5">
+                    <form method="POST" action="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>/rotate" style="display:inline" onsubmit="return confirm('<%= t('rotatePasswordConfirm') %>')">
+                      <%- include('../../../partials/csrf') %>
+                      <button type="submit"
+                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
+                        <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 2 }) %>
+                        <%= t('rotate') %>
+                      </button>
+                    </form>
                     <button
-                      hx-post="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>/rotate"
-                      hx-target="#server-db-list"
-                      hx-swap="outerHTML"
-                      hx-confirm="<%= t('rotatePasswordConfirm') %>"
-                      type="button"
-                      class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
-                      <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 2 }) %>
-                      <%= t('rotate') %>
-                    </button>
-                    <button
-                      hx-delete="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>"
-                      hx-target="#server-db-list"
-                      hx-swap="outerHTML"
-                      hx-confirm="<%= t('deleteDatabaseConfirm') %> (<%= db.databaseName %>)"
+                      onclick="if(confirm('<%= t('deleteDatabaseConfirm') %> (<%= db.databaseName %>))') { fetch('/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) window.location.reload(); else showToast('<%= t('deleteFailed') %>', 'error'); }).catch(() => showToast('<%= t('networkError') %>', 'error')); }"
                       type="button"
                       style="background:transparent;border:none;padding:0.5rem;color:var(--theme-danger);cursor:pointer;border-radius:0.5rem"
                       aria-label="<%= t('deleteDatabaseAria') %>">

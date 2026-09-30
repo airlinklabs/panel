@@ -1,0 +1,22 @@
+:root {
+  /* Theme surface colors — defined by storage/themes/* CSS files */
+  /* --theme-bg-card, --theme-bg-secondary, --theme-bg-hover, --theme-bg-input */
+  /* --theme-border, --theme-border-subtle, --theme-border-input, --theme-border-accent */
+  /* --theme-text, --theme-text-strong, --theme-text-muted, --theme-text-placeholder */
+  /* --theme-accent, --theme-accent-text, --theme-accent-subtle */
+  /* --theme-success, --theme-success-bg, --theme-danger, --theme-danger-bg */
+  /* --theme-warning, --theme-warning-bg, --theme-info, --theme-info-bg */
+  /* --theme-badge-neutral-bg, --theme-badge-neutral-text */
+  /* --theme-btn-primary-bg, --theme-btn-primary-text, --theme-btn-primary-hover */
+  /* --theme-btn-secondary-bg, --theme-btn-secondary-text, --theme-btn-secondary-border, --theme-btn-secondary-hover */
+  /* --theme-btn-danger-bg, --theme-btn-danger-text, --theme-btn-danger-hover */
+  /* --theme-btn-success-bg, --theme-btn-success-text, --theme-btn-success-hover */
+  /* --theme-btn-border */
+  /* --theme-toggle-bg */
+  /* --theme-shadow, --theme-shadow-sm, --theme-shadow-md, --theme-shadow-lg, --theme-shadow-xl */
+  /* --theme-skeleton-base, --theme-skeleton-shine */
+  /* --theme-nav-bg, --theme-nav-border, --theme-nav-text-active */
+  /* --theme-table-header-bg, --theme-table-row-hover */
+  /* --theme-radius-input */
+  /* --theme-border-accent */
+}

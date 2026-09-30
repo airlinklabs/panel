@@ -1,0 +1,6 @@
+:root {
+  /* z-index layers */
+  --z-dropdown: 9999;
+  --z-overlay: 70;
+  --z-tooltip: 2;
+}

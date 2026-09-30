@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import type { Server as HttpServer } from "node:http";
-import { createHash } from "node:crypto";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import express from 'express';
+import type { Server as HttpServer } from 'node:http';
+import { createHash } from 'node:crypto';
 
 // Mock prisma, logger, activity logger, and the key generator before importing
 // the modules under test.
-vi.mock("../src/db", () => ({
+vi.mock('../src/db', () => ({
   default: {
     users: {
       findUnique: vi.fn(),
@@ -31,39 +31,39 @@ vi.mock("../src/db", () => ({
   },
 }));
 
-vi.mock("../src/handlers/logger", () => ({
+vi.mock('../src/handlers/logger', () => ({
   default: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), success: vi.fn() },
 }));
 
-vi.mock("../src/handlers/utils/activity/activityLogger", () => ({
+vi.mock('../src/handlers/utils/activity/activityLogger', () => ({
   logActivity: vi.fn(),
 }));
 
-vi.mock("../src/utils/apiKey", () => ({
+vi.mock('../src/utils/apiKey', () => ({
   generateApiKey: vi.fn(),
 }));
 
-vi.mock("../src/handlers/settingsCache", () => ({
+vi.mock('../src/handlers/settingsCache', () => ({
   getSettings: vi.fn(),
 }));
 
-vi.mock("../src/handlers/sessionStore", () => ({
+vi.mock('../src/handlers/sessionStore', () => ({
   getSessionStore: vi.fn(),
 }));
 
-vi.mock("../src/handlers/realtime/events", () => ({
+vi.mock('../src/handlers/realtime/events', () => ({
   emitRealtime: vi.fn(),
   userEvent: vi.fn(),
 }));
 
-import prisma from "../src/db";
-import bcrypt from "bcryptjs";
-import usersModule from "../src/modules/admin/users";
-import apiKeysModule from "../src/modules/admin/apiKeys";
-import { apiValidator } from "../src/handlers/utils/api/apiValidator";
-import { generateApiKey } from "../src/utils/apiKey";
-import { getSettings } from "../src/handlers/settingsCache";
-import { getSessionStore } from "../src/handlers/sessionStore";
+import prisma from '../src/db';
+import bcrypt from 'bcryptjs';
+import usersModule from '../src/modules/admin/users';
+import apiKeysModule from '../src/modules/admin/apiKeys';
+import { apiValidator } from '../src/handlers/utils/api/apiValidator';
+import { generateApiKey } from '../src/utils/apiKey';
+import { getSettings } from '../src/handlers/settingsCache';
+import { getSessionStore } from '../src/handlers/sessionStore';
 
 const mockPrisma = vi.mocked(prisma);
 const mockGenerateApiKey = vi.mocked(generateApiKey);
@@ -71,34 +71,34 @@ const mockGetSettings = vi.mocked(getSettings);
 const mockGetSessionStore = vi.mocked(getSessionStore);
 
 const sha256 = (value: string) =>
-  createHash("sha256").update(value).digest("hex");
+  createHash('sha256').update(value).digest('hex');
 
 const adminUser = {
   id: 1,
   isAdmin: true,
-  role: "admin",
+  role: 'admin',
   totpEnabled: true,
-  username: "admin",
-  email: "admin@air.link",
-  permissions: "[]",
+  username: 'admin',
+  email: 'admin@air.link',
+  permissions: '[]',
 };
 const otherAdmin = {
   id: 3,
   isAdmin: true,
-  role: "admin",
+  role: 'admin',
   totpEnabled: true,
-  username: "boss",
-  email: "boss@air.link",
-  permissions: "[]",
+  username: 'boss',
+  email: 'boss@air.link',
+  permissions: '[]',
 };
 const regularUser = {
   id: 2,
   isAdmin: false,
-  role: "user",
+  role: 'user',
   totpEnabled: true,
-  username: "player",
-  email: "player@air.link",
-  permissions: "[]",
+  username: 'player',
+  email: 'player@air.link',
+  permissions: '[]',
 };
 
 function stubSession(user: { id: number; isAdmin?: boolean }) {
@@ -121,7 +121,7 @@ function buildApp(
   app.use(express.json());
   app.use(stubSession({ id: 1, isAdmin: true }));
   const routers = Array.isArray(router) ? router : [router];
-  routers.forEach((r) => app.use("/", r));
+  routers.forEach((r) => app.use('/', r));
   return app;
 }
 
@@ -142,12 +142,12 @@ async function request(
 ): Promise<Response> {
   if (!listener) {
     listener = app.listen(0);
-    await new Promise<void>((resolve) => listener!.once("listening", resolve));
+    await new Promise<void>((resolve) => listener!.once('listening', resolve));
   }
   const { port } = listener.address() as { port: number };
   return fetch(`http://127.0.0.1:${port}${url}`, {
     ...init,
-    redirect: "manual",
+    redirect: 'manual',
   });
 }
 
@@ -174,20 +174,20 @@ beforeEach(() => {
   mockGetSettings.mockResolvedValue(null);
 });
 
-describe("admin users CRUD", () => {
+describe('admin users CRUD', () => {
   const usersApp = () => buildApp(usersModule.router());
 
-  it("create hashes the password with bcrypt (never stores plaintext)", async () => {
+  it('create hashes the password with bcrypt (never stores plaintext)', async () => {
     mockPrisma.users.findFirst.mockResolvedValue(null);
     const createSpy = mockPrisma.users.create.mockResolvedValue({ id: 9 });
-    const password = "CorrectHorse42";
+    const password = 'CorrectHorse42';
 
-    const res = await request(usersApp(), "/admin/users/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await request(usersApp(), '/admin/users/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: "new@air.link",
-        username: "newuser",
+        email: 'new@air.link',
+        username: 'newuser',
         password,
       }),
     });
@@ -199,121 +199,121 @@ describe("admin users CRUD", () => {
     expect(bcrypt.compareSync(password, data.password)).toBe(true);
   }, 30_000);
 
-  it("create rejects empty username with a 400", async () => {
-    const res = await request(usersApp(), "/admin/users/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  it('create rejects empty username with a 400', async () => {
+    const res = await request(usersApp(), '/admin/users/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: "x@air.link",
-        username: "",
-        password: "CorrectP1",
+        email: 'x@air.link',
+        username: '',
+        password: 'CorrectP1',
       }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.create).not.toHaveBeenCalled();
   });
 
-  it("create rejects a malformed email with a 400", async () => {
-    const res = await request(usersApp(), "/admin/users/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  it('create rejects a malformed email with a 400', async () => {
+    const res = await request(usersApp(), '/admin/users/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: "not-an-email",
-        username: "newuser",
-        password: "CorrectP1",
+        email: 'not-an-email',
+        username: 'newuser',
+        password: 'CorrectP1',
       }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.create).not.toHaveBeenCalled();
   });
 
-  it("create rejects a weak password with a 400", async () => {
-    const res = await request(usersApp(), "/admin/users/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  it('create rejects a weak password with a 400', async () => {
+    const res = await request(usersApp(), '/admin/users/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: "x@air.link",
-        username: "newuser",
-        password: "abcdefg",
+        email: 'x@air.link',
+        username: 'newuser',
+        password: 'abcdefg',
       }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.create).not.toHaveBeenCalled();
   });
 
-  it("create rejects a duplicate username/email with a 400", async () => {
+  it('create rejects a duplicate username/email with a 400', async () => {
     mockPrisma.users.findFirst.mockResolvedValue({ id: 4 });
-    const res = await request(usersApp(), "/admin/users/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await request(usersApp(), '/admin/users/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: "dup@air.link",
-        username: "dupuser",
-        password: "CorrectP1",
+        email: 'dup@air.link',
+        username: 'dupuser',
+        password: 'CorrectP1',
       }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.create).not.toHaveBeenCalled();
   });
 
-  it("non-admin session is blocked by the create guard (403, no prisma write)", async () => {
+  it('non-admin session is blocked by the create guard (403, no prisma write)', async () => {
     const app = express();
     app.use(express.json());
     app.use(stubSession({ id: 2, isAdmin: false }));
-    app.use("/", usersModule.router());
-    const res = await request(app, "/admin/users/create-user", {
-      method: "POST",
+    app.use('/', usersModule.router());
+    const res = await request(app, '/admin/users/create-user', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
       body: JSON.stringify({
-        email: "vanity@air.link",
-        username: "gamer",
-        password: "CorrectP1",
-        isAdmin: "true",
+        email: 'vanity@air.link',
+        username: 'gamer',
+        password: 'CorrectP1',
+        isAdmin: 'true',
       }),
     });
     expect(res.status).toBe(403);
     expect(mockPrisma.users.create).not.toHaveBeenCalled();
   });
 
-  it("delete blocks the admin deleting their own account (400)", async () => {
+  it('delete blocks the admin deleting their own account (400)', async () => {
     stubUsersWith({ 1: adminUser });
-    const res = await request(usersApp(), "/admin/users/delete/1", {
-      method: "DELETE",
+    const res = await request(usersApp(), '/admin/users/delete/1', {
+      method: 'DELETE',
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.delete).not.toHaveBeenCalled();
   });
 
-  it("delete blocks removing the last admin (400)", async () => {
+  it('delete blocks removing the last admin (400)', async () => {
     mockPrisma.users.count.mockResolvedValue(1);
     stubUsersWith({ 1: adminUser, 3: otherAdmin });
-    const res = await request(usersApp(), "/admin/users/delete/3", {
-      method: "DELETE",
+    const res = await request(usersApp(), '/admin/users/delete/3', {
+      method: 'DELETE',
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.delete).not.toHaveBeenCalled();
   });
 
-  it("delete returns 409 when the target still owns servers", async () => {
+  it('delete returns 409 when the target still owns servers', async () => {
     stubUsersWith({ 1: adminUser, 2: regularUser });
     mockPrisma.server.count.mockResolvedValue(2);
-    const res = await request(usersApp(), "/admin/users/delete/2", {
-      method: "DELETE",
+    const res = await request(usersApp(), '/admin/users/delete/2', {
+      method: 'DELETE',
     });
     expect(res.status).toBe(409);
     expect(mockPrisma.users.delete).not.toHaveBeenCalled();
   });
 
-  it("delete cleans sessions and login history before deleting the user", async () => {
+  it('delete cleans sessions and login history before deleting the user', async () => {
     stubUsersWith({ 1: adminUser, 2: regularUser });
     mockPrisma.server.count.mockResolvedValue(0);
     const destroyUserSessions = vi.fn().mockResolvedValue(undefined);
     mockGetSessionStore.mockReturnValue({ destroyUserSessions } as any);
-    const res = await request(usersApp(), "/admin/users/delete/2", {
-      method: "DELETE",
+    const res = await request(usersApp(), '/admin/users/delete/2', {
+      method: 'DELETE',
     });
     expect(res.status).toBe(200);
     expect(destroyUserSessions).toHaveBeenCalledTimes(1);
@@ -321,73 +321,73 @@ describe("admin users CRUD", () => {
     expect(mockPrisma.users.delete).toHaveBeenCalledWith({ where: { id: 2 } });
   });
 
-  it("update rejects a malformed email without touching the DB", async () => {
+  it('update rejects a malformed email without touching the DB', async () => {
     stubUsersWith({ 1: adminUser, 2: regularUser });
-    const res = await request(usersApp(), "/admin/users/update/2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "nope" }),
+    const res = await request(usersApp(), '/admin/users/update/2', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'nope' }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.update).not.toHaveBeenCalled();
   });
 
-  it("update rejects a weak password without touching the DB", async () => {
+  it('update rejects a weak password without touching the DB', async () => {
     stubUsersWith({ 1: adminUser, 2: regularUser });
-    const res = await request(usersApp(), "/admin/users/update/2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: "short" }),
+    const res = await request(usersApp(), '/admin/users/update/2', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: 'short' }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.update).not.toHaveBeenCalled();
   });
 
-  it("update cannot demote the last remaining admin (400)", async () => {
+  it('update cannot demote the last remaining admin (400)', async () => {
     mockPrisma.users.count.mockResolvedValue(1);
     stubUsersWith({ 1: adminUser, 3: otherAdmin });
-    const res = await request(usersApp(), "/admin/users/update/3", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await request(usersApp(), '/admin/users/update/3', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isAdmin: false }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.update).not.toHaveBeenCalled();
   });
 
-  it("update cannot strip the session user of their own admin role (400)", async () => {
+  it('update cannot strip the session user of their own admin role (400)', async () => {
     mockPrisma.users.count.mockResolvedValue(2);
     stubUsersWith({ 1: adminUser });
-    const res = await request(usersApp(), "/admin/users/update/1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await request(usersApp(), '/admin/users/update/1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isAdmin: false }),
     });
     expect(res.status).toBe(400);
     expect(mockPrisma.users.update).not.toHaveBeenCalled();
   });
 
-  it("non-admin session is rejected by the update guard (403, no prisma write)", async () => {
+  it('non-admin session is rejected by the update guard (403, no prisma write)', async () => {
     const app = express();
     app.use(express.json());
     app.use(stubSession({ id: 2, isAdmin: false }));
-    app.use("/", usersModule.router());
-    const res = await request(app, "/admin/users/update/1", {
-      method: "POST",
+    app.use('/', usersModule.router());
+    const res = await request(app, '/admin/users/update/1', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      body: JSON.stringify({ username: "sneaky" }),
+      body: JSON.stringify({ username: 'sneaky' }),
     });
     expect(res.status).toBe(403);
     expect(mockPrisma.users.update).not.toHaveBeenCalled();
   });
 });
 
-describe("admin API-key CRUD + validator consistency", () => {
+describe('admin API-key CRUD + validator consistency', () => {
   const apiKeyApp = () => buildApp(apiKeysModule.router());
-  const FIXED_RAW = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij";
+  const FIXED_RAW = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij';
 
   function setupCreate(useHash: boolean) {
     mockGenerateApiKey.mockReturnValue(FIXED_RAW);
@@ -396,12 +396,12 @@ describe("admin API-key CRUD + validator consistency", () => {
     mockPrisma.apiKey.create.mockResolvedValue({ id: 5 });
   }
 
-  it("create stores a SHA-256 digest when hashApiKeys=true (list never sees the raw key)", async () => {
+  it('create stores a SHA-256 digest when hashApiKeys=true (list never sees the raw key)', async () => {
     setupCreate(true);
-    await request(apiKeyApp(), "/admin/apikeys/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "k" }),
+    await request(apiKeyApp(), '/admin/apikeys/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'k' }),
     });
     const stored = mockPrisma.apiKey.create.mock.calls[0][0].data.key;
     expect(stored).toBe(sha256(FIXED_RAW));
@@ -409,18 +409,18 @@ describe("admin API-key CRUD + validator consistency", () => {
     expect(stored).not.toBe(FIXED_RAW);
   });
 
-  it("create stores the raw key when hashApiKeys=false", async () => {
+  it('create stores the raw key when hashApiKeys=false', async () => {
     setupCreate(false);
-    await request(apiKeyApp(), "/admin/apikeys/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "k" }),
+    await request(apiKeyApp(), '/admin/apikeys/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'k' }),
     });
     const stored = mockPrisma.apiKey.create.mock.calls[0][0].data.key;
     expect(stored).toBe(FIXED_RAW);
   });
 
-  it("invariant: the canonical validator looks up exactly what create stored, in both modes", async () => {
+  it('invariant: the canonical validator looks up exactly what create stored, in both modes', async () => {
     for (const useHash of [true, false]) {
       vi.clearAllMocks();
       // restore essentials
@@ -431,10 +431,10 @@ describe("admin API-key CRUD + validator consistency", () => {
       });
 
       // drive the admin create endpoint
-      await request(apiKeyApp(), "/admin/apikeys/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "k" }),
+      await request(apiKeyApp(), '/admin/apikeys/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'k' }),
       });
       const storedKey = mockPrisma.apiKey.create.mock.calls[0][0].data.key;
 
@@ -451,38 +451,38 @@ describe("admin API-key CRUD + validator consistency", () => {
     }
   });
 
-  it("creating two keys with different raw values yields distinct stored keys (rotation semantics)", async () => {
+  it('creating two keys with different raw values yields distinct stored keys (rotation semantics)', async () => {
     setupCreate(true);
-    await request(apiKeyApp(), "/admin/apikeys/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "k1" }),
+    await request(apiKeyApp(), '/admin/apikeys/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'k1' }),
     });
     setupCreate(false);
     const keyA = mockPrisma.apiKey.create.mock.calls[0][0].data.key;
-    mockGenerateApiKey.mockReturnValue("ZZZZGHIJKLMNOPQRSTUVWXYZabcdefghij");
-    await request(apiKeyApp(), "/admin/apikeys/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "k2" }),
+    mockGenerateApiKey.mockReturnValue('ZZZZGHIJKLMNOPQRSTUVWXYZabcdefghij');
+    await request(apiKeyApp(), '/admin/apikeys/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'k2' }),
     });
     const keyB = mockPrisma.apiKey.create.mock.calls[1][0].data.key;
     expect(keyA).not.toBe(keyB);
   });
 
-  it("toggle flips the active flag and persists it", async () => {
+  it('toggle flips the active flag and persists it', async () => {
     mockPrisma.apiKey.findUnique.mockResolvedValue({ id: 7, active: true });
-    await request(apiKeyApp(), "/admin/apikeys/toggle/7", { method: "POST" });
+    await request(apiKeyApp(), '/admin/apikeys/toggle/7', { method: 'POST' });
     expect(mockPrisma.apiKey.update).toHaveBeenCalledWith({
       where: { id: 7 },
       data: { active: false, updatedAt: expect.any(Date) },
     });
   });
 
-  it("delete of a missing key returns a clean 404", async () => {
+  it('delete of a missing key returns a clean 404', async () => {
     mockPrisma.apiKey.findUnique.mockResolvedValue(null);
-    const res = await request(apiKeyApp(), "/admin/apikeys/delete/99", {
-      method: "POST",
+    const res = await request(apiKeyApp(), '/admin/apikeys/delete/99', {
+      method: 'POST',
     });
     expect(res.status).toBe(404);
     expect(mockPrisma.apiKey.delete).not.toHaveBeenCalled();

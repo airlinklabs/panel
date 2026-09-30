@@ -1,0 +1,249 @@
+<%- include('../../layouts/admin', { title: t('securityTitle') }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<%- include('../../partials/ui/breadcrumb', { items: [
+  { label: t('admin'), url: '/admin' },
+  { label: t('securityTitle') }
+] }) %>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title"><%= t('securityTitle') %></h1>
+    <p class="al-page-desc">Manage security settings, 2FA, CAPTCHA, and access controls.</p>
+  </div>
+</div>
+
+<div class="al-page-body" data-al-tabs data-tabs-default="overview" data-tabs-hash>
+
+  <div role="tablist" class="flex gap-1 mb-6 flex-wrap">
+    <button type="button" role="tab" aria-selected="true" aria-controls="panel-overview" id="tab-overview" data-tab="overview" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %> Overview</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-2fa" id="tab-2fa" data-tab="2fa" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('key-round', { class: 'size-4', strokeWidth: 1.5 }) %> 2FA</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-captcha" id="tab-captcha" data-tab="captcha" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('bot', { class: 'size-4', strokeWidth: 1.5 }) %> CAPTCHA</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-logins" id="tab-logins" data-tab="logins" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('log-in', { class: 'size-4', strokeWidth: 1.5 }) %> Logins</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-passwords" id="tab-passwords" data-tab="passwords" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('lock', { class: 'size-4', strokeWidth: 1.5 }) %> Passwords</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-registration" id="tab-registration" data-tab="registration" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %> Registration</button>
+  </div>
+
+  <!-- Overview -->
+  <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview" class="tab-panel space-y-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="al-card p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-success) 12%, transparent); color:var(--theme-success);">
+            <%- icon('shield-check', { class: 'size-5' }) %>
+          </div>
+          <div>
+            <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);">Active</p>
+            <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Security Status</p>
+          </div>
+        </div>
+      </div>
+      <div class="al-card p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-info) 12%, transparent); color:var(--theme-info);">
+            <%- icon('key-round', { class: 'size-5' }) %>
+          </div>
+          <div>
+            <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= settings.require2faForAdmins ? 'Required' : 'Optional' %></p>
+            <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Admin 2FA</p>
+          </div>
+        </div>
+      </div>
+      <div class="al-card p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-warning) 12%, transparent); color:var(--theme-warning);">
+            <%- icon('ban', { class: 'size-5' }) %>
+          </div>
+          <div>
+            <% let bannedCount = 0; try { bannedCount = JSON.parse(settings.bannedIps || '[]').length; } catch(e) {} %>
+            <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= bannedCount %></p>
+            <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Banned IPs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2FA -->
+  <div id="panel-2fa" role="tabpanel" aria-labelledby="tab-2fa" data-tab-panel="2fa" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <h2 class="al-card-header">Two-Factor Authentication</h2>
+      <div class="p-4 space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require 2FA for Admins</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Force all admin users to enable 2FA.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="require2faForAdmins" class="sr-only peer" <%= settings.require2faForAdmins ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require 2FA for All Users</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Force all users to enable 2FA on their accounts.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="twoFactorRequired" class="sr-only peer" <%= settings.twoFactorRequired ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPTCHA -->
+  <div id="panel-captcha" role="tabpanel" aria-labelledby="tab-captcha" data-tab-panel="captcha" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <h2 class="al-card-header">CAPTCHA Configuration</h2>
+      <div class="p-4 space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Enable CAPTCHA</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Show CAPTCHA on login and registration forms.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="captchaEnabled" class="sr-only peer" <%= settings.captchaEnabled ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">CAPTCHA Provider</label>
+          <select id="captchaProvider" class="al-input">
+            <option value="google-recaptcha" <%= settings.captchaProvider === 'google-recaptcha' ? 'selected' : '' %>>Google reCAPTCHA</option>
+            <option value="hcaptcha" <%= settings.captchaProvider === 'hcaptcha' ? 'selected' : '' %>>hCaptcha</option>
+            <option value="turnstile" <%= settings.captchaProvider === 'turnstile' ? 'selected' : '' %>>Cloudflare Turnstile</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Site Key</label>
+          <input type="text" id="captchaSiteKey" value="<%= settings.captchaSiteKey || '' %>" class="al-input">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Secret Key</label>
+          <input type="password" id="captchaSecretKey" value="<%= settings.captchaSecretKey || '' %>" class="al-input">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logins -->
+  <div id="panel-logins" role="tabpanel" aria-labelledby="tab-logins" data-tab-panel="logins" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <h2 class="al-card-header">Login Protection</h2>
+      <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">Configure brute-force protection settings.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 p-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max Failed Attempts</label>
+          <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100" class="al-input">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Lockout Duration (minutes)</label>
+          <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440" class="al-input">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passwords -->
+  <div id="panel-passwords" role="tabpanel" aria-labelledby="tab-passwords" data-tab-panel="passwords" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <h2 class="al-card-header">Password Policy</h2>
+      <div class="p-4 space-y-5">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Minimum Password Length</label>
+          <input type="number" id="minPasswordLength" value="<%= settings.minPasswordLength || 8 %>" min="6" max="128" class="al-input w-48">
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require Uppercase</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="requireUppercase" class="sr-only peer" <%= settings.requireUppercase !== false ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require Numbers</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="requireNumbers" class="sr-only peer" <%= settings.requireNumbers !== false ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require Special Characters</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="requireSpecial" class="sr-only peer" <%= settings.requireSpecial !== false ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registration -->
+  <div id="panel-registration" role="tabpanel" aria-labelledby="tab-registration" data-tab-panel="registration" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <h2 class="al-card-header">Registration Settings</h2>
+      <div class="p-4 space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow Public Registration</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow new users to create accounts.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="allowRegistration" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+
+  function collectSecurity() {
+    return {
+      require2faForAdmins: document.getElementById('require2faForAdmins')?.checked || false,
+      twoFactorRequired: document.getElementById('twoFactorRequired')?.checked || false,
+      captchaEnabled: document.getElementById('captchaEnabled')?.checked || false,
+      captchaProvider: document.getElementById('captchaProvider')?.value || '',
+      captchaSiteKey: document.getElementById('captchaSiteKey')?.value || '',
+      captchaSecretKey: document.getElementById('captchaSecretKey')?.value || '',
+      loginMaxAttempts: parseInt(document.getElementById('loginMaxAttempts')?.value || '5', 10),
+      loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes')?.value || '15', 10),
+      minPasswordLength: parseInt(document.getElementById('minPasswordLength')?.value || '8', 10),
+      requireUppercase: document.getElementById('requireUppercase')?.checked ?? true,
+      requireNumbers: document.getElementById('requireNumbers')?.checked ?? true,
+      requireSpecial: document.getElementById('requireSpecial')?.checked ?? true,
+      allowRegistration: document.getElementById('allowRegistration')?.checked || false,
+    };
+  }
+
+  document.querySelectorAll('.al-page-body input, .al-page-body select').forEach(function(el) {
+    el.addEventListener('change', function() {
+      var data = collectSecurity();
+      fetch('/admin/settings/security', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify(data),
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) { showToast('Security settings saved.', 'success'); }
+        else { showToast(res.message || 'Failed to save.', 'error'); }
+      }).catch(function() { showToast('Failed to save.', 'error'); });
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

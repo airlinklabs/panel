@@ -1,0 +1,608 @@
+<%- include('../../layouts/admin', { title: t('adminNodesTitle') }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbNodes') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminNodesTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminNodesText') %></p>
+  </div>
+  <div>
+    <a href="/admin/nodes#create" class="al-btn-secondary text-sm">
+      <%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('locationsTab') %>
+    </a>
+    <a href="/admin/nodes/create" class="al-btn-primary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('createNode') %>
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
+  <div role="tablist" class="flex gap-1 mb-6">
+    <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('nodes') %>
+    </button>
+    <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('locationsTab') %>
+    </button>
+  </div>
+
+  <!-- Nodes Tab -->
+  <div id="tab-panel-nodes" role="tabpanel" aria-labelledby="tab-btn-nodes" data-tab-panel="nodes">
+    <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="al-card">
+        <p class="al-section-label"><%= t('totalNodes') %></p>
+        <p class="text-2xl font-semibold tabular-nums al-text-strong" id="totalNodesTotal"><%= nodes.length %></p>
+        <% if (nodes.length > 0) { %>
+        <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('online') %>: <span id="onlineNodesTotal"><%= nodes.filter(n => n.status === 'Online').length %></span></p>
+        <% } else { %>
+        <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noNodesAvailable') %></p>
+        <% } %>
+      </div>
+      <div class="al-card">
+        <p class="al-section-label"><%= t('servers') %></p>
+        <p class="text-2xl font-semibold tabular-nums al-text-strong" id="totalNodeInstancesTotal">
+          <%= nodes.reduce((total, node) => total + (node._count ? node._count.servers : 0), 0) %>
+        </p>
+        <% const totalInstances = nodes.reduce((total, node) => total + (node._count ? node._count.servers : 0), 0); %>
+        <% if (totalInstances > 0 && nodes.length > 0) { %>
+        <p class="text-xs mt-2" style="color:var(--theme-text-muted);">
+          <%= t('averageDensity') %>:
+          <span id="avgNodeInstancesTotal"><%= (totalInstances / nodes.length).toFixed(2) %></span>
+        </p>
+        <% } else { %>
+        <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noServersAvailable') %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Daemon offline warning -->
+    <% if (nodes.some(node => node.status === 'Offline')) { %>
+    <div class="al-alert-danger mb-5">
+      <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+      <div class="flex-1">
+        <p class="al-alert-title"><%= t('connectionError') %></p>
+        <p class="al-alert-body"><%= t('oneOrMoreNodesOffline') %></p>
+      </div>
+      <button type="button" id="retryConnectionBtn" class="al-btn-ghost shrink-0 self-start text-xs">
+        <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('retry') %>
+      </button>
+    </div>
+    <% } %>
+
+    <!-- Node table -->
+    <div id="admin-nodes-table" class="al-table-wrapper">
+      <% if (nodes.length === 0) { %>
+        <%- include('../../partials/empty-state', {
+          iconName: 'network',
+          title: t('noNodesYet'),
+          description: t('addNodeToStartHosting'),
+          action: '<a href="/admin/nodes/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }).toString() + ' ' + t('createNode') + '</a>'
+        }) %>
+      <% } else { %>
+      <table class="al-table w-full" style="table-layout:auto">
+        <colgroup>
+          <col style="min-width:170px">
+          <col style="min-width:180px">
+          <col style="min-width:80px">
+          <col style="min-width:220px">
+        </colgroup>
+        <thead class="al-table-thead">
+          <tr>
+            <th scope="col" class="al-table-th"><%= t('name') %></th>
+            <th scope="col" class="al-table-th"><%= t('connection') %></th>
+            <th scope="col" class="al-table-th"><%= t('instances') %></th>
+            <th scope="col" class="al-table-th"><%= t('actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let nodeIdx = 0; nodes.forEach(function(node) { %>
+          <tr data-node-id="<%= node.id %>" data-instances="<%= node._count ? node._count.servers : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-row cursor-pointer" onclick="window.location='/admin/node/<%= node.id %>/stats'">
+            <td class="al-table-td">
+              <div class="flex items-center">
+                <div class="mr-5">
+                  <% if (node.status === "Online") { %>
+                    <span class="al-dot-online"></span>
+                  <% } else if (node.status === "Offline") { %>
+                    <span class="al-dot-offline group relative">
+                      <% if (node.error) { %>
+                      <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none z-10" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text);">
+                        <%= node.error %>
+                      </div>
+                      <% } %>
+                    </span>
+                  <% } else { %>
+                    <span class="al-dot-warning"></span>
+                  <% } %>
+                </div>
+                <div class="al-table-cell-strong"><%= node.name %></div>
+              </div>
+            </td>
+            <td class="al-table-td"><%= node.address %>:<%= node.port %>
+              <div class="mt-1 ml-2">
+                <span class="al-badge <%= node.versionRelease ? 'al-badge-online' : 'al-badge-neutral' %> font-mono">
+                  <%= node.versionRelease || t('unknown') %>
+                </span>
+              </div>
+            </td>
+            <td class="al-table-td"><%= node._count ? node._count.servers : 0 %></td>
+            <td class="al-table-td">
+              <div class="flex items-center gap-1.5">
+                <a href="/admin/node/<%= node.id %>/configure"
+                   title="<%= t('configureNode') %>" aria-label="<%= t('configureNode') %>"
+                   class="al-btn-ghost al-btn-icon-only"
+                   onclick="event.stopPropagation()">
+                  <%- icon('settings', { size: 16, class: 'shrink-0' }) %>
+                </a>
+                <a href="/admin/node/<%= node.id %>" onclick="event.stopPropagation()" title="<%= t('editNodeAria') %>" aria-label="<%= t('editNodeAria') %>"
+                   class="al-btn-ghost al-btn-icon-only">
+                  <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+                </a>
+                <button type="button"
+                   title="<%= t('deleteNodeAria') %>" aria-label="<%= t('deleteNodeAria') %>"
+                   class="al-btn-ghost al-btn-icon-only"
+                   style="color:var(--theme-danger);"
+                   data-node-id="<%= node.id %>"
+                   onclick="deleteNode(this)">
+                  <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Locations Tab -->
+  <div id="tab-panel-locations" role="tabpanel" aria-labelledby="tab-btn-locations" data-tab-panel="locations" hidden>
+    <div id="locations" class="mt-6 space-y-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="al-section-title"><%= t('locations') %></h2>
+          <p class="text-sm mt-0.5 al-text-muted"><%= t('groupNodesByRegion') %></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="al-card flex items-center gap-4">
+          <span class="al-icon-tile al-icon-tile-round al-icon-tile-accent"><%- icon('map-pin', { class: 'size-5' }) %></span>
+          <div>
+            <p class="text-2xl font-semibold leading-none al-text-strong" id="totalLocationsCount"><%= locations.length %></p>
+            <p class="text-xs mt-1.5 al-text-muted"><%= t('locations') %></p>
+          </div>
+        </div>
+        <div class="al-card flex items-center gap-4">
+          <span class="al-icon-tile al-icon-tile-round al-icon-tile-info"><%- icon('server', { class: 'size-5' }) %></span>
+          <div>
+            <p class="text-2xl font-semibold leading-none al-text-strong" id="nodesAssignedTotal"><%= nodes.filter(n => n.locationId).length %></p>
+            <p class="text-xs mt-1.5 al-text-muted"><%= t('nodesAssigned') %></p>
+          </div>
+        </div>
+        <div class="al-card flex items-center gap-4">
+          <span class="al-icon-tile al-icon-tile-round al-icon-tile-warning"><%- icon('network', { class: 'size-5' }) %></span>
+          <div>
+            <p class="text-2xl font-semibold leading-none al-text-strong" id="nodesUnassignedTotal"><%= nodes.filter(n => !n.locationId).length %></p>
+            <p class="text-xs mt-1.5 al-text-muted"><%= t('nodesWithoutLocation') %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create location form -->
+      <div class="al-card">
+        <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('createLocation') %></h3>
+        <div class="al-card-body">
+          <div id="admin-locations-status"></div>
+          <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div>
+              <label class="al-label" for="locName"><%= t('name') %></label>
+              <input id="locName" name="name" type="text" placeholder="<%= t('locationNamePlaceholder') %>" class="al-input" required>
+            </div>
+            <div>
+              <label class="al-label" for="locCode"><%= t('shortCode') %></label>
+              <input id="locCode" name="shortCode" type="text" placeholder="<%= t('locationCodePlaceholder') %>" class="al-input" autocapitalize="off" spellcheck="false" required>
+            </div>
+            <div class="lg:col-span-2 flex items-end">
+              <button type="button" id="submitLocationBtn" class="al-btn-primary w-full sm:w-auto">
+                <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+                <span id="locationBtnLabel"><%= t('createLocation') %></span>
+                <span id="locationBtnSaving" class="hidden"><%= t('creating') %></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Locations list -->
+      <div class="al-card">
+        <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('allLocations') %></h3>
+        <div class="al-card-body">
+          <div id="admin-locations-list">
+            <% if (locations.length === 0) { %>
+            <%- include('../../partials/empty-state', {
+              iconName: 'map-pin',
+              title: t('noLocationsYet'),
+              description: t('noLocationsYetDesc')
+            }) %>
+            <% } else { %>
+              <% const byRegion = new Map(); locations.forEach(loc => {
+                const region = loc.shortCode.split('-')[0] || 'Other';
+                if (!byRegion.has(region)) byRegion.set(region, []);
+                byRegion.get(region).push(loc);
+              }); %>
+              <% for (const [region, regionLocs] of byRegion) { %>
+              <div class="mb-6 last:mb-0" data-region="<%= region %>">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="al-section-label mb-0"><%= region %></span>
+                  <span class="h-px flex-1" style="background:var(--theme-border);"></span>
+                  <span class="text-xs al-text-muted"><%= regionLocs.length %></span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <% regionLocs.forEach(loc => { %>
+                  <div class="al-card !p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm cursor-pointer" data-location-id="<%= loc.id %>" onclick="showLocationNodes('<%= loc.id %>')">
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= (loc._count && loc._count.nodes > 0) ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
+                        <p class="font-medium text-sm truncate al-text-strong"><%= loc.name %></p>
+                      </div>
+                      <p class="text-xs mt-1.5 font-mono al-text-muted"><%= loc.shortCode %></p>
+                      <p class="text-xs mt-1 al-text-muted"><%= (loc._count && loc._count.nodes) || 0 %> <%= (loc._count && loc._count.nodes) === 1 ? t('nodeCountOne') : t('nodeCountOther') %></p>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <button type="button"
+                         class="al-btn-ghost al-btn-icon-only"
+                         aria-label="<%= t('ariaEditLocation', { name: loc.name }) %>"
+                         onclick="event.stopPropagation(); openLocationEdit(<%= loc.id %>, '<%= loc.name.replace(/'/g, "\\'") %>', '<%= loc.shortCode %>')">
+                        <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
+                      </button>
+                      <button type="button"
+                         class="al-btn-ghost al-btn-icon-only"
+                         style="color:var(--theme-danger);"
+                         aria-label="<%= t('ariaDeleteLocation', { name: loc.name }) %>"
+                         data-location-id="<%= loc.id %>"
+                         data-location-name="<%= loc.name.replace(/'/g, "\\'") %>"
+                         onclick="event.stopPropagation(); deleteLocation(this)">
+                        <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
+                      </button>
+                    </div>
+                  </div>
+                  <% }) %>
+                </div>
+              </div>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location nodes drill-down panel -->
+      <div id="location-nodes-panel" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <button type="button" id="back-to-locations" aria-label="<%= t('backToLocations') %>" class="al-btn-ghost al-btn-icon-only">
+              <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
+            </button>
+            <div>
+              <p class="text-sm font-semibold al-text-strong" id="loc-nodes-name"></p>
+              <p class="text-xs al-text-muted" id="loc-nodes-info"></p>
+            </div>
+          </div>
+        </div>
+        <div id="loc-nodes-list" class="space-y-2"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="page-data" style="display:none"></div>
+<script nonce="<%- nonce %>">
+  document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status || "Unknown" }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
+</script>
+<script nonce="<%- nonce %>">
+  window.__locationNodes = {
+    <% locations.forEach(function(loc) { %>
+      '<%= loc.id %>': [
+        <% nodes.filter(function(n) { return n.locationId === loc.id; }).forEach(function(n) { %>
+          { id: '<%= n.id %>', name: '<%= n.name.replace(/'/g, "\\'") %>', address: '<%= n.address %>', port: <%= n.port %>, status: '<%= n.status || "Unknown" %>', servers: <%= n._count ? n._count.servers : 0 %> },
+        <% }); %>
+      ],
+    <% }); %>
+  };
+</script>
+<script nonce="<%- nonce %>">
+function handleRowClick(event, url) {
+  if (!event.target.closest('button, a')) {
+    window.location.href = url;
+  }
+}
+
+function configure(nodeId) {
+  fetch('/admin/node/' + nodeId + '/configure')
+    .then(function(response) {
+      if (!response.ok) throw new Error('Failed to fetch configure command');
+      return response.json();
+    })
+    .then(function(data) {
+      var popup = document.createElement('div');
+      popup.style.display = 'none';
+      popup.innerHTML =
+        '<div class="flex justify-center items-center mb-6">' +
+          '<span class="al-icon-tile al-icon-tile-lg al-icon-tile-round al-icon-tile-success"><%- icon("badge-check", { class: "size-6" }) %></span>' +
+        '</div>' +
+        '<p class="mb-4 al-text-muted text-center">' + (window.__i18n.runCommandDaemonHint || 'Run this command on the daemon machine to connect it to this panel:') + '</p>' +
+        '<div class="al-code-wrap mb-4"><pre class="al-code"><code id="commandCode">' + data + '</code></pre></div>' +
+        '<div class="flex justify-end gap-2">' +
+          '<button id="copyBtn" class="al-btn-secondary">' + (window.__i18n.copy || 'Copy') + '</button>' +
+          '<button id="doneBtn" class="al-btn-primary">' + (window.__i18n.close || 'Close') + '</button>' +
+        '</div>';
+
+      window.modal.show({
+        title: window.__i18n.nodeConfigured || 'Node Configured',
+        bodyNode: popup,
+        panelClass: 'max-w-xl',
+      });
+
+      var command = data;
+      document.getElementById('copyBtn').addEventListener('click', function() {
+        var copyBtn = this;
+        navigator.clipboard.writeText(command)
+          .then(function() {
+            copyBtn.textContent = window.__i18n.copied || 'Copied!';
+            setTimeout(function() { copyBtn.textContent = window.__i18n.copy || 'Copy'; }, 2000);
+          });
+      });
+      document.getElementById('doneBtn').addEventListener('click', function() { window.modal.close(); });
+    })
+    .catch(function(error) {
+      console.error(error);
+      showToast(window.__i18n.failedToFetchConfigureCommand || 'Failed to fetch configure command.', 'error');
+    });
+}
+
+var csrfToken = '<%= csrfToken %>';
+
+function deleteNode(btn) {
+  var id = btn.dataset.nodeId;
+  modal.confirm({
+    title: window.__i18n.deleteNodeTitle || 'Delete Node',
+    body: window.__i18n.deleteNodeBody || 'Are you sure you want to delete this node?',
+    danger: true,
+    confirmLabel: window.__i18n.delete || 'Delete',
+    onConfirm: async function() {
+      var loader = showProgressToast(window.__i18n.deletingNode || 'Deleting node...');
+      try {
+        var res = await fetch('/admin/node/' + id, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }
+        });
+        var data = await res.json();
+        if (data.success !== false) {
+          loader.complete(true, window.__i18n.nodeDeleted || 'Node deleted.');
+          window.location.reload();
+        } else {
+          loader.close();
+          showToast(data.error || (window.__i18n.failedToDeleteNode || 'Failed to delete node.'), 'error');
+        }
+      } catch(e) {
+        loader.close();
+        showToast(window.__i18n.failedToDeleteNode || 'Failed to delete node.', 'error');
+      }
+    }
+  });
+}
+
+document.getElementById('submitLocationBtn').addEventListener('click', async function() {
+  var name = document.getElementById('locName').value.trim();
+  var shortCode = document.getElementById('locCode').value.trim();
+  if (!name || !shortCode) return;
+  var btn = this;
+  var label = document.getElementById('locationBtnLabel');
+  var saving = document.getElementById('locationBtnSaving');
+  btn.disabled = true;
+  label.classList.add('hidden');
+  saving.classList.remove('hidden');
+  try {
+    var res = await fetch('/api/v2/admin/locations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: JSON.stringify({ name: name, shortCode: shortCode }),
+    });
+    var data = await res.json();
+    if (res.ok) {
+      showToast(window.__i18n.locationCreated || 'Location created.', 'success');
+      window.location.reload();
+    } else {
+      showToast((data.error && data.error.message) || (window.__i18n.failedToCreateLocation || 'Failed to create location.'), 'error');
+    }
+  } catch (e) { showToast(window.__i18n.failedToCreateLocation || 'Failed to create location.', 'error'); }
+  btn.disabled = false;
+  label.classList.remove('hidden');
+  saving.classList.add('hidden');
+});
+
+function openLocationEdit(id, name, shortCode) {
+  var body = document.createElement('div');
+  body.innerHTML =
+    '<form id="editLocationForm" class="flex flex-col gap-4">' +
+      '<div>' +
+        '<label class="al-label" for="editLocName">' + (window.__i18n.name || 'Name') + '</label>' +
+        '<input id="editLocName" name="name" type="text" value="' + name.replace(/"/g, '&quot;') + '" class="al-input" required>' +
+      '</div>' +
+      '<div>' +
+        '<label class="al-label" for="editLocCode">' + (window.__i18n.shortCode || 'Short code') + '</label>' +
+        '<input id="editLocCode" name="shortCode" type="text" value="' + shortCode.replace(/"/g, '&quot;') + '" class="al-input" autocapitalize="off" spellcheck="false" required>' +
+      '</div>' +
+      '<div class="flex justify-end gap-2 pt-1">' +
+        '<button type="button" onclick="window.modal.close()" class="al-btn-secondary px-4 py-2 text-sm font-medium">' + (window.__i18n.cancel || 'Cancel') + '</button>' +
+        '<button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium">' + (window.__i18n.save || 'Save') + '</button>' +
+      '</div>' +
+    '</form>';
+
+  window.modal.show({
+    title: window.__i18n.editLocationTitle || 'Edit Location',
+    bodyNode: body,
+    panelClass: 'max-w-md',
+  });
+
+  body.querySelector('form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var nameVal = body.querySelector('#editLocName').value.trim();
+    var codeVal = body.querySelector('#editLocCode').value.trim().toLowerCase();
+    try {
+      var res = await fetch('/api/v2/admin/locations/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ name: nameVal, shortCode: codeVal }),
+      });
+      var data = await res.json();
+      if (res.ok) {
+        showToast(window.__i18n.locationUpdated || 'Location updated.', 'success');
+        window.modal.close();
+        window.location.reload();
+      } else {
+        showToast(data.message || (window.__i18n.updateFailed || 'Update failed.'), 'error');
+      }
+    } catch(err) {
+      showToast(window.__i18n.updateFailed || 'Update failed.', 'error');
+    }
+  });
+}
+
+function deleteLocation(btn) {
+  var id = btn.dataset.locationId;
+  var name = btn.dataset.locationName;
+  modal.confirm({
+    title: window.__i18n.deleteLocationTitle || 'Delete location',
+    body: (window.__i18n.deleteLocationConfirm || 'Delete "{name}"? Servers in it will lose their grouping.').replace('{name}', name),
+    danger: true,
+    confirmLabel: window.__i18n.delete || 'Delete',
+    onConfirm: async function() {
+      var loader = showProgressToast(window.__i18n.deletingLocation || 'Deleting location...');
+      try {
+        var res = await fetch('/api/v2/admin/locations/' + id, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }
+        });
+        var data = await res.json();
+        if (data.success !== false) {
+          loader.complete(true, window.__i18n.locationDeleted || 'Location deleted.');
+          var card = btn.closest('[data-location-id]');
+          if (card) card.remove();
+        } else {
+          loader.close();
+          showToast(data.error || (window.__i18n.failedToDeleteLocation || 'Failed to delete location.'), 'error');
+        }
+      } catch(e) {
+        loader.close();
+        showToast(window.__i18n.failedToDeleteLocation || 'Failed to delete location.', 'error');
+      }
+    }
+  });
+}
+</script>
+<script nonce="<%- nonce %>">
+(function () {
+  document.addEventListener('al:tabs-change', function (e) {
+    if (e.detail && e.detail.name === 'locations') {
+      var locEl = document.getElementById('locations');
+      if (locEl) locEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+})();
+</script>
+<script nonce="<%- nonce %>">
+(function () {
+  var panel = document.getElementById('location-nodes-panel');
+  var locList = document.getElementById('admin-locations-list');
+  var locStats = document.querySelector('#locations .grid');
+  var locHeader = document.querySelector('#locations > .flex.items-center.justify-between');
+  var createForm = document.querySelector('#createLocationForm')
+    ? document.querySelector('#createLocationForm').closest('.al-card')
+    : null;
+  var backBtn = document.getElementById('back-to-locations');
+  var locNodesName = document.getElementById('loc-nodes-name');
+  var locNodesInfo = document.getElementById('loc-nodes-info');
+  var locNodesList = document.getElementById('loc-nodes-list');
+
+  function findLocationById(id) {
+    var cards = locList.querySelectorAll('[data-location-id]');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].dataset.locationId === id) return cards[i];
+    }
+    return null;
+  }
+
+  window.showLocationNodes = function (locId) {
+    var card = findLocationById(locId);
+    if (!card) return;
+
+    var nameEl = card.querySelector('.font-medium');
+    var codeEl = card.querySelector('.font-mono');
+    var locName = nameEl ? nameEl.textContent.trim() : '';
+    var locCode = codeEl ? codeEl.textContent.trim() : '';
+    var nodes = window.__locationNodes[locId] || [];
+
+    locNodesName.textContent = locName + ' (' + locCode + ')';
+    locNodesInfo.textContent = nodes.length + ' ' + (nodes.length === 1 ? (window.__i18n.nodeCountOne || 'node') : (window.__i18n.nodeCountOther || 'nodes'));
+
+    if (nodes.length === 0) {
+      locNodesList.innerHTML =
+        '<div class="flex flex-col items-center justify-center py-16 text-center">' +
+          '<div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">' +
+            '<%- icon("network", { class: "w-5 h-5", style: "color:var(--theme-text-muted)" }) %>' +
+          '</div>' +
+          '<h3 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">' + (window.__i18n.noNodesInThisLocation || 'No nodes in this location') + '</h3>' +
+          '<p class="text-[13px] mt-1 max-w-xs" style="color:var(--theme-text-muted)">' + (window.__i18n.assignNodesHereDesc || 'Assign a node to this location to see it here.') + '</p>' +
+        '</div>';
+    } else {
+      var html = '';
+      nodes.forEach(function (n) {
+        var dotClass = n.status === 'Online' ? 'al-dot-online' : (n.status === 'Offline' ? 'al-dot-offline' : 'al-dot-warning');
+        var badgeClass = n.status === 'Online' ? 'al-badge-online' : (n.status === 'Offline' ? 'al-badge-offline' : 'al-badge-warning');
+        html +=
+          '<a href="/admin/nodes/edit/' + n.id + '" class="al-card !p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="text-decoration:none;">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+              '<span class="' + dotClass + '"></span>' +
+              '<div class="min-w-0">' +
+                '<p class="font-medium text-sm truncate al-text-strong">' + n.name + '</p>' +
+                '<p class="text-xs mt-0.5 font-mono al-text-muted">' + n.address + ':' + n.port + '</p>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex items-center gap-2 shrink-0">' +
+              '<span class="al-badge ' + badgeClass + '">' + n.status + '</span>' +
+              '<span class="text-xs al-text-muted">' + n.servers + ' ' + (n.servers === 1 ? (window.__i18n.serverCountOne || 'server') : (window.__i18n.serverCountOther || 'servers')) + '</span>' +
+            '</div>' +
+          '</a>';
+      });
+      locNodesList.innerHTML = html;
+    }
+
+    if (locStats) locStats.classList.add('hidden');
+    if (locHeader) locHeader.classList.add('hidden');
+    if (createForm) createForm.classList.add('hidden');
+    locList.classList.add('hidden');
+    panel.classList.remove('hidden');
+  };
+
+  backBtn.addEventListener('click', function () {
+    panel.classList.add('hidden');
+    locList.classList.remove('hidden');
+    if (locStats) locStats.classList.remove('hidden');
+    if (locHeader) locHeader.classList.remove('hidden');
+    if (createForm) createForm.classList.remove('hidden');
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

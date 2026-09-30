@@ -1,4 +1,4 @@
-import prisma from "../db";
+import prisma from '../db';
 
 export interface SubUserResponse {
   id: number;
@@ -9,7 +9,7 @@ export interface SubUserResponse {
 
 function parsePermissions(raw: unknown): string[] {
   if (Array.isArray(raw)) {
-    return raw.filter((p: unknown): p is string => typeof p === "string");
+    return raw.filter((p: unknown): p is string => typeof p === 'string');
   }
   return [];
 }
@@ -22,7 +22,7 @@ export async function listSubUsers(
     include: {
       user: { select: { id: true, username: true, email: true } },
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: 'asc' },
   });
 
   return subUsers.map((s) => ({
@@ -48,7 +48,7 @@ export async function addSubUser(
     where: { email: email.trim().toLowerCase() },
   });
   if (!target) {
-    throw new SubUserError(404, "No user found with that email.");
+    throw new SubUserError(404, 'No user found with that email.');
   }
 
   const existing = await prisma.subUser.findUnique({
@@ -59,7 +59,7 @@ export async function addSubUser(
   if (existing) {
     throw new SubUserError(
       409,
-      "That user is already a subuser of this server.",
+      'That user is already a subuser of this server.',
     );
   }
 
@@ -88,7 +88,7 @@ export async function updateSubUser(
     where: { id, serverId },
   });
   if (!subUser) {
-    throw new SubUserError(404, "Subuser not found");
+    throw new SubUserError(404, 'Subuser not found');
   }
 
   await prisma.subUser.update({
@@ -104,7 +104,7 @@ export async function deleteSubUser(id: number, serverId: string) {
     where: { id, serverId },
   });
   if (!subUser) {
-    throw new SubUserError(404, "Subuser not found");
+    throw new SubUserError(404, 'Subuser not found');
   }
 
   await prisma.subUser.delete({ where: { id: subUser.id } });
@@ -117,6 +117,6 @@ export class SubUserError extends Error {
     message: string,
   ) {
     super(message);
-    this.name = "SubUserError";
+    this.name = 'SubUserError';
   }
 }

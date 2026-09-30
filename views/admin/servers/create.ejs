@@ -1,8 +1,10 @@
-<%- include('../../components/header', { title: t('adminServersTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminCreateServerTitle') }) %>
 
-  <script nonce="<%- nonce %>">
+<%- include('../../partials/flash-messages') %>
+
+<script nonce="<%- nonce %>">
 const serverCreateNames = {
-  listA: ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing","Cursed","Frozen","Swift","Ancient","Wicked","Luminous","Vengeful","Radiant","Thunderous","Shadow","Frost","Vibrant","Spectral","Nether","Ender","Caving","Toxic","Haunted","Radiant","Ghostly"],
+  listA: ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing","Cursed","Frozen","Swift","Ancient","Wicked","Luminous","Vengeful","Radiant","Thunderous","Shadow","Frost","Vibrant","Spectral","Nether","Ender","Caving","Toxic","Haunted","Ghostly"],
   listB: ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither","Magma Cube","Blaze","Witch","Slime","Spider","Phantom","Villager","Pillager","Vindicator","Drowned","Illager","Ender Dragon","Husk","Stray","Ravager","Piglin","Hoglin","Shulker","Warden"],
   generate() {
     let a, b;
@@ -10,482 +12,428 @@ const serverCreateNames = {
     return a + ' ' + b;
   }
 };
-function serverCreatePage() {
-  return {
-    allowStartupEdit: false,
-    submitting: false,
-    generateName() { document.getElementById('serverName').value = serverCreateNames.generate(); }
-  };
-}
+function generateName() { document.getElementById('serverName').value = serverCreateNames.generate(); }
 </script>
 
-<div x-data="serverCreatePage()">
-  <main class="min-h-screen">
-    <div class="flex min-h-screen">
-      <div class="hidden lg:block w-60 shrink-0">
-        <%- include('../../components/sidebar') %>
-      </div>
-      <%- include('../../components/template') %>
-        <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-          <%- include('../../components/ui/breadcrumb', { items: [ { label: t('admin') }, { label: t('breadcrumbServers') ,
-            href: '/admin/servers' }, { label: t('create') } ] }) %>
-            <div class="al-page-header flex items-start justify-between gap-4">
-              <div>
-                <h1 class="al-page-title">
-                  <%= t('adminCreateServerTitle') %>
-                </h1>
-                <p class="al-page-desc">
-                  <%= t('adminCreateServerText') %>
-                </p>
-              </div>
-              <div class="flex gap-2 shrink-0 items-center">
-                <%- include('../../components/ui/save-button', { formId: 'createServerForm', label: t('create'), iconName: 'plus' }) %>
-                <a href="/admin/servers" class="al-btn-secondary"><%= t('backToServers') %></a>
-              </div>
-            </div>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin' },
+    { label: t('breadcrumbServers'), url: '/admin/servers' },
+    { label: t('create') }
+  ] }) %>
+</div>
 
-            <div class="al-page-body space-y-5">
-              <form id="createServerForm" @submit.prevent class="space-y-5">
-                <div class="al-card">
-                  <h2 class="al-card-header"><%= t('general') %></h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label for="serverName" class="al-label">
-                        <%= t('name') %>:
-                      </label>
-                      <div class="flex items-center gap-2">
-                        <input id="serverName" name="name" class="al-input flex-1"
-                          placeholder="<%= user.username %>'s server">
-                        <button type="button" @click="generateName()"
-                          class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]"
-                          style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
-                          <%- icon('dices', { size: 15 }) %>
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label for="serverDescription" class="al-label">
-                        <%= t('description') %>:
-                      </label>
-                      <input id="serverDescription" name="description" class="al-input"
-                        placeholder="<%= user.username %>'s server description">
-                    </div>
-                    <div>
-                      <label class="al-label" for="serverUser">
-                        <%= t('user') %>:
-                      </label>
-                      <select id="serverUser" name="ownerId" class="hidden">
-                        <% users.forEach(user=> { %>
-                          <option value="<%= user.id %>">
-                            <%= user.username %>
-                          </option>
-                          <% }); %>
-                      </select>
-                      <div class="custom-select mt-2" data-for="serverUser"></div>
-                    </div>
-                    <div>
-                      <label class="al-label" for="serverNode">
-                        <%= t('Node') %>:
-                      </label>
-                      <select id="serverNode" name="nodeId" class="hidden">
-                        <% if (nodes.length> 0) { %>
-                          <% nodes.forEach(node=> { %>
-                            <option value="<%= node.id %>">
-                              <%= node.name %>
-                            </option>
-                            <% }); %>
-                              <% } else { %>
-                                <option value="" disabled selected><%= t('noNodesAvailable') %></option>
-                                <% } %>
-                      </select>
-                      <div class="custom-select mt-2" data-for="serverNode"></div>
-                    </div>
-                  </div>
-                </div>
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title"><%= t('adminCreateServerTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminCreateServerText') %></p>
+  </div>
+  <div class="flex gap-2 shrink-0 items-center">
+    <button type="submit" form="createServerForm" class="al-btn al-btn-primary inline-flex items-center gap-1.5">
+      <%- icon('plus', { size: 16, class: 'shrink-0' }) %>
+      <%= t('create') %>
+    </button>
+    <a href="/admin/servers" class="al-btn al-btn-secondary"><%= t('backToServers') %></a>
+  </div>
+</div>
 
-                <div class="al-card">
-                  <h2 class="al-card-header"><%= t('resources') %></h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label class="al-label">
-                        <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('cpu') %>:
-                      </label>
-                      <input type="hidden" id="serverCPU" name="Cpu" value="100">
-                      <div class="flex items-stretch mt-2 mb-1 gap-0">
-                        <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
-                          class="al-input rounded-l-xl flex-1 border-r-0">
-                        <button type="button" class="al-format-switcher" data-format-switcher
-                          data-display="serverCPUDisplay" data-hidden="serverCPU" data-units="100:Cores,1:%"
-                          data-default-unit="Cores"><%= t('cores') %></button>
-                      </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
-                    </div>
-                    <div>
-                      <label class="al-label">
-                        <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('memory') %>:
-                      </label>
-                      <input type="hidden" id="serverMemory" name="Memory" value="1024">
-                      <div class="flex items-stretch mt-2 mb-1 gap-0">
-                        <input id="serverMemoryDisplay" type="number" min="1" value="1024"
-                          class="al-input rounded-l-xl flex-1 border-r-0">
-                        <button type="button" class="al-format-switcher" data-format-switcher
-                          data-display="serverMemoryDisplay" data-hidden="serverMemory" data-units="1:MB,1024:GB"
-                          data-default-unit="MB"><%= t('mb') %></button>
-                      </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minMemory') %></p>
-                    </div>
-                    <div>
-                      <label class="al-label">
-                        <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('swap') %>:
-                      </label>
-                      <input type="hidden" id="serverSwap" name="Swap" value="0">
-                      <div class="flex items-stretch mt-2 mb-1 gap-0">
-                        <input id="serverSwapDisplay" type="number" min="-1" value="0"
-                          class="al-input rounded-l-xl flex-1 border-r-0">
-                        <button type="button" class="al-format-switcher" data-format-switcher
-                          data-display="serverSwapDisplay" data-hidden="serverSwap" data-units="1:MB,1024:GB"
-                          data-default-unit="MB"><%= t('mb') %></button>
-                      </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('swapHint') %></p>
-                    </div>
-                    <div>
-                      <label class="al-label">
-                        <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('storage') %>:
-                      </label>
-                      <input type="hidden" id="serverStorage" name="Storage" value="<%= settings.defaultMaxStorage ?? 20480 %>">
-                      <div class="flex items-stretch mt-2 mb-1 gap-0">
-                        <input id="serverStorageDisplay" type="number" min="1" value="<%= Math.round((settings.defaultMaxStorage ?? 20480) / 1024) %>"
-                          class="al-input rounded-l-xl flex-1 border-r-0">
-                        <button type="button" class="al-format-switcher" data-format-switcher
-                          data-display="serverStorageDisplay" data-hidden="serverStorage" data-units="1:MB,1024:GB"
-                          data-default-unit="MB"><%= t('mb') %></button>
-                      </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minStorage') %></p>
-                    </div>
-                    <div>
-                      <label class="al-label">
-                        <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('databaseLimit') %>:
-                      </label>
-                      <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= settings.defaultDatabaseLimit ?? 5 %>"
-                        class="al-input mt-2 mb-1">
-                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('databaseLimitHint') %></p>
-                    </div>
-                  </div>
-                </div>
+<div class="al-page-body space-y-5">
+  <form id="createServerForm" class="space-y-5" method="POST" action="/admin/servers/create">
+    <%- include('../../partials/csrf') %>
 
-                <div class="al-card">
-                  <h2 class="al-card-header"><%= t('startup') %></h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label class="al-label" for="serverImage">
-                        <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('Image') %>:</label>
-                      <select id="serverImage" name="imageId" class="hidden">
-                        <% images.forEach(image=> { %>
-                          <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages || "[]" %>'
-                            data-variables='<%= image.variables || "[]" %>'
-                            data-port-requirements='<%= image.portRequirements || "[]" %>'>
-                            <%= image.name %>
-                          </option>
-                          <% }); %>
-                      </select>
-                      <div class="custom-select mt-2" data-for="serverImage"></div>
-                    </div>
-                    <div>
-                      <label class="al-label" for="dockerImage">
-                        <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('DockerImage') %>:</label>
-                      <select id="dockerImage" name="dockerImage" class="hidden">
-                        <option value="" disabled selected><%= t('selectDockerImage') %></option>
-                      </select>
-                      <div class="custom-select mt-2" data-for="dockerImage"></div>
-                    </div>
-                    <div>
-                      <label class="al-label">
-                        <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('Ports') %>:</label>
-                      <input type="hidden" id="serverPorts" name="Ports">
-                      <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
-                        <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                          <%= t('assignPorts') %>
-                      </button>
-                    </div>
-                    <div
-                      class="rounded-lg p-4 border mt-4" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-                      <div class="flex flex-col md:flex-row md:items-center justify-between">
-                        <div class="flex items-center mb-2 md:mb-0">
-                          <div class="flex-shrink-0 mr-3">
-                            <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
-                          </div>
-                          <div>
-                            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %>
-                            </h3>
-                            <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandPermissionsDesc') %></p>
-                          </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" x-model="allowStartupEdit">
-                          <div class="al-toggle-track">
-                            <div class="al-toggle-dot"></div>
-                          </div>
-                          <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"><%= t('disabled') %></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="al-card">
-                  <div class="collapsible-row no-anim" id="variablesSectionRow">
-                    <div>
-                      <div id="variablesSection">
-                        <h2 class="al-card-header flex items-center gap-1.5">
-                          <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
-                            <%= t('variables') %>
-                        </h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="variablesContainer"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </form>
-            </div>
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('general') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="serverName" class="al-label"><%= t('name') %>:</label>
+          <div class="flex items-center gap-2">
+            <input id="serverName" name="name" class="al-input flex-1"
+              placeholder="<%= t('serverNamePlaceholder', { username: user.username }) %>">
+            <button type="button" onclick="generateName()"
+              class="al-btn-ghost al-btn-icon-only shrink-0"
+              aria-label="<%= t('generateServerName') %>" title="<%= t('generateServerName') %>">
+              <%- icon('dices', { size: 16 }) %>
+            </button>
+          </div>
         </div>
+        <div>
+          <label for="serverDescription" class="al-label"><%= t('description') %>:</label>
+          <input id="serverDescription" name="description" class="al-input"
+            placeholder="<%= t('serverDescriptionPlaceholder') %>">
+        </div>
+        <div>
+          <label class="al-label" for="serverUser"><%= t('user') %>:</label>
+          <select id="serverUser" name="ownerId" class="hidden">
+            <% users.forEach(function(u) { %>
+              <option value="<%= u.id %>"><%= u.username %></option>
+            <% }); %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverUser"></div>
+        </div>
+        <div>
+          <label class="al-label" for="serverNode"><%= t('Node') %>:</label>
+          <select id="serverNode" name="nodeId" class="hidden">
+            <% if (nodes.length > 0) { %>
+              <% nodes.forEach(function(node) { %>
+                <option value="<%= node.id %>"><%= node.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected><%= t('noNodesAvailable') %></option>
+            <% } %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverNode"></div>
+        </div>
+      </div>
     </div>
-  </main>
-</div><!-- /x-data -->
 
-  <%- include('../../components/portsAllocator') %>
-    <%- include('../../components/loading-popup') %>
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('resources') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="al-label">
+            <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
+            <%= t('cpu') %>:
+          </label>
+          <input type="hidden" id="serverCPU" name="Cpu" value="100">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverCPUDisplay" data-hidden="serverCPU" data-units="100:Cores,1:%"
+              data-default-unit="Cores"><%= t('cores') %></button>
+          </div>
+          <p class="al-form-help"><%= t('coreHint') %></p>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+            <%= t('memory') %>:
+          </label>
+          <input type="hidden" id="serverMemory" name="Memory" value="1024">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverMemoryDisplay" type="number" min="1" value="1024"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverMemoryDisplay" data-hidden="serverMemory" data-units="1:MB,1024:GB"
+              data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('minMemory') %></p>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+            <%= t('swap') %>:
+          </label>
+          <input type="hidden" id="serverSwap" name="Swap" value="0">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverSwapDisplay" type="number" min="-1" value="0"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverSwapDisplay" data-hidden="serverSwap" data-units="1:MB,1024:GB"
+              data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('swapHint') %></p>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('database', { size: 14, class: 'shrink-0' }) %>
+            <%= t('storage') %>:
+          </label>
+          <input type="hidden" id="serverStorage" name="Storage" value="<%= settings.defaultMaxStorage ?? 20480 %>">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverStorageDisplay" type="number" min="1" value="<%= Math.round((settings.defaultMaxStorage ?? 20480) / 1024) %>"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverStorageDisplay" data-hidden="serverStorage" data-units="1:MB,1024:GB"
+              data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('minStorage') %></p>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
+            <%= t('databaseLimit') %>:
+          </label>
+          <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= settings.defaultDatabaseLimit ?? 5 %>"
+            class="al-input mt-2 mb-1">
+          <p class="al-form-help"><%= t('databaseLimitHint') %></p>
+        </div>
+      </div>
+    </div>
 
-      <script nonce="<%- nonce %>">
-        const serverImageSelect = document.getElementById('serverImage');
-        const dockerImageSelect = document.getElementById('dockerImage');
-        const serverNodeSelect = document.getElementById('serverNode');
-        const serverPortsInput = document.getElementById('serverPorts');
-        const variablesContainer = document.getElementById('variablesContainer');
-        const form = document.getElementById('createServerForm');
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('startup') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="al-label" for="serverImage">
+            <%- icon('box', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Image') %>:
+          </label>
+          <select id="serverImage" name="imageId" class="hidden">
+            <% images.forEach(function(image) { %>
+              <option value="<%= image.id %>"
+                data-docker-images='<%= image.dockerImages || "[]" %>'
+                data-variables='<%= image.variables || "[]" %>'
+                data-port-requirements='<%= image.portRequirements || "[]" %>'>
+                <%= image.name %>
+              </option>
+            <% }); %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverImage"></div>
+        </div>
+        <div>
+          <label class="al-label" for="dockerImage">
+            <%- icon('box', { size: 14, class: 'shrink-0' }) %>
+            <%= t('DockerImage') %>:
+          </label>
+          <select id="dockerImage" name="dockerImage" class="hidden">
+            <option value="" disabled selected><%= t('selectDockerImage') %></option>
+          </select>
+          <div class="custom-select mt-2" data-for="dockerImage"></div>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Ports') %>:
+          </label>
+          <input type="hidden" id="serverPorts" name="Ports">
+          <button type="button" id="assignPortsBtn" class="al-btn al-btn-secondary mt-2 w-full">
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+            <%= t('assignPorts') %>
+          </button>
+        </div>
+        <div class="al-panel">
+          <div class="flex flex-col md:flex-row md:items-center justify-between">
+            <div class="flex items-center mb-2 md:mb-0">
+              <div class="flex-shrink-0 mr-3">
+                <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+              </div>
+              <div>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %></h3>
+                <p class="al-form-help"><%= t('startupCommandPermissionsDesc') %></p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
+              <div class="al-toggle-track">
+                <div class="al-toggle-dot"></div>
+              </div>
+              <span id="allowStartupEditLabel" class="ms-3 al-form-check-label"><%= t('disabled') %></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        let nodesData = {};
-        let availablePorts = [];
-        let assignedPorts = [];
+    <div class="al-card">
+      <div class="collapsible-row no-anim" id="variablesSectionRow">
+        <div>
+          <div id="variablesSection">
+            <h2 class="al-card-header flex items-center gap-1.5">
+              <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
+              <%= t('variables') %>
+            </h2>
+            <div class="al-card-body">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="variablesContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        function parseJson(raw, fallback) {
-          if (!raw) return fallback;
-          let value;
-          try { value = JSON.parse(raw); } catch { return fallback; }
-          for (let depth = 0; depth < 2 && typeof value === 'string'; depth++) {
-            try { value = JSON.parse(value); } catch { break; }
-          }
-          return value;
-        }
+  </form>
+</div>
 
-        async function fetchNodesData() {
-          try {
-            const response = await fetch('/api/v2/admin/nodes/list');
-            const nodes = await response.json();
-            nodes.forEach(node => {
-              let ports = [];
-              try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {
-                console.warn('[servers/create] Failed to parse allocated ports for node', node.id, e);
-              }
-              nodesData[node.id] = { ...node, parsedPorts: ports };
+<%- include('../../layouts/admin-footer') %>
+
+<script nonce="<%- nonce %>">
+  const serverImageSelect = document.getElementById('serverImage');
+  const dockerImageSelect = document.getElementById('dockerImage');
+  const serverPortsInput = document.getElementById('serverPorts');
+  const variablesContainer = document.getElementById('variablesContainer');
+  const form = document.getElementById('createServerForm');
+
+  let nodesData = {};
+  let availablePorts = [];
+  let assignedPorts = [];
+
+  function parseJson(raw, fallback) {
+    if (!raw) return fallback;
+    let value;
+    try { value = JSON.parse(raw); } catch { return fallback; }
+    for (let depth = 0; depth < 2 && typeof value === 'string'; depth++) {
+      try { value = JSON.parse(value); } catch { break; }
+    }
+    return value;
+  }
+
+  async function fetchNodesData() {
+    try {
+      const response = await fetch('/api/v2/admin/nodes/list');
+      const result = await response.json();
+      const nodes = result.data || result;
+      (Array.isArray(nodes) ? nodes : []).forEach(node => {
+        let ports = [];
+        try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {}
+        nodesData[node.id] = { ...node, parsedPorts: ports };
+      });
+      updatePortsForSelectedNode();
+    } catch (error) { console.error('[servers/create] Error fetching nodes:', error); }
+  }
+
+  function updatePortsForSelectedNode() {
+    const serverNodeSelect = document.getElementById('serverNode');
+    const selectedNodeId = serverNodeSelect.value;
+    availablePorts = [];
+    if (!selectedNodeId || !nodesData[selectedNodeId]) { syncPortsButton(); return; }
+    const node = nodesData[selectedNodeId];
+    const nodeAddress = node.address;
+    if (!node.parsedPorts || node.parsedPorts.length === 0) { syncPortsButton(); return; }
+    const usedPorts = new Set();
+    if (node.servers && node.servers.length > 0) {
+      node.servers.forEach(server => {
+        try {
+          if (server.Ports) {
+            JSON.parse(server.Ports).forEach(portInfo => {
+              const port = parseInt(portInfo.Port.split(':')[0]);
+              if (!isNaN(port)) usedPorts.add(port);
             });
-            updatePortsForSelectedNode();
-          } catch (error) { console.error('[servers/create] Error fetching nodes:', error); }
-        }
-
-        function updatePortsForSelectedNode() {
-          const selectedNodeId = serverNodeSelect.value;
-          availablePorts = [];
-          if (!selectedNodeId || !nodesData[selectedNodeId]) { syncPortsButton(); return; }
-          const node = nodesData[selectedNodeId];
-          const nodeAddress = node.address;
-          if (!node.parsedPorts || node.parsedPorts.length === 0) { syncPortsButton(); return; }
-          const usedPorts = new Set();
-          if (node.servers && node.servers.length > 0) {
-            node.servers.forEach(server => {
-              try {
-                if (server.Ports) {
-                  const ports = JSON.parse(server.Ports);
-                  ports.forEach(portInfo => {
-                    const port = parseInt(portInfo.Port.split(':')[0]);
-                    if (!isNaN(port)) usedPorts.add(port);
-                  });
-                }
-              } catch (e) {
-                console.warn('[servers/create] Failed to parse used ports for server', server.id, e);
-              }
-            });
           }
-          availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: `${nodeAddress}:${port}` }));
-          assignedPorts = assignedPorts.filter(port => availablePorts.some(item => item.port === Number(port.externalPort)));
-          ensureMinimumPortRows();
-          syncPortsButton();
-        }
+        } catch (e) {}
+      });
+    }
+    availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: nodeAddress + ':' + port }));
+    assignedPorts = assignedPorts.filter(port => availablePorts.some(item => item.port === Number(port.externalPort)));
+    ensureMinimumPortRows();
+    syncPortsButton();
+  }
 
-        function getPortRequirements() {
-          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-          return parseJson(selectedOption?.getAttribute('data-port-requirements'), []);
-        }
+  function getPortRequirements() {
+    const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+    return parseJson(selectedOption?.getAttribute('data-port-requirements'), []);
+  }
 
-        function ensureMinimumPortRows() {
-          const requirements = getPortRequirements();
-          const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
-          const min = Math.max(1, requirements.length);
-          while (assignedPorts.length < min) {
-            const req = requirements[assignedPorts.length] || {};
-            assignedPorts.push({
-              name: req.name || `Port ${assignedPorts.length + 1}`,
-              internalPort: req.internalPort || DEFAULT_PORT,
-              externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
-              primary: assignedPorts.length === 0
-            });
-          }
-          serverPortsInput.value = JSON.stringify(assignedPorts);
-        }
+  function ensureMinimumPortRows() {
+    const requirements = getPortRequirements();
+    const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
+    const min = Math.max(1, requirements.length);
+    while (assignedPorts.length < min) {
+      const req = requirements[assignedPorts.length] || {};
+      assignedPorts.push({
+        name: req.name || 'Port ' + (assignedPorts.length + 1),
+        internalPort: req.internalPort || DEFAULT_PORT,
+        externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
+        primary: assignedPorts.length === 0
+      });
+    }
+    serverPortsInput.value = JSON.stringify(assignedPorts);
+  }
 
-        function syncPortsButton() {
-          serverPortsInput.value = JSON.stringify(assignedPorts);
-          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
-        }
+  function syncPortsButton() {
+    serverPortsInput.value = JSON.stringify(assignedPorts);
+    document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (window.__i18n.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (window.__i18n.assignPorts || 'Assign ports');
+  }
 
-        function renderPortRows() {
-          if (!window.PortsAllocator) return;
-          PortsAllocator.open({
-            title: (req.translations.assignPorts || 'Assign ports'),
-            requirements: getPortRequirements(),
-            assignedPorts: assignedPorts,
-            availablePorts: availablePorts,
-            onSave: function (rows) {
-              assignedPorts = rows;
-              syncPortsButton();
-            }
-          });
-        }
+  function renderPortRows() {
+    if (!window.PortsAllocator) return;
+    PortsAllocator.open({
+      title: window.__i18n.assignPorts || 'Assign ports',
+      requirements: getPortRequirements(),
+      assignedPorts: assignedPorts,
+      availablePorts: availablePorts,
+      onSave: function (rows) {
+        assignedPorts = rows;
+        syncPortsButton();
+      }
+    });
+  }
 
-        document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
+  document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
 
-        function updateDockerImages() {
-          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-          const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
-          dockerImageSelect.innerHTML = '<option value="" disabled selected>' + (req.translations.selectDockerImage || 'Select a Docker image') + '</option>';
-          dockerImages.forEach(imageObj => {
-            Object.entries(imageObj).forEach(([key, value]) => {
-              const option = document.createElement('option');
-              option.value = key;
-              option.textContent = key;
-              dockerImageSelect.appendChild(option);
-            });
-          });
-        }
+  function updateDockerImages() {
+    const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+    const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
+    dockerImageSelect.innerHTML = '<option value="" disabled selected>' + (window.__i18n.selectDockerImage || 'Select a Docker image') + '</option>';
+    dockerImages.forEach(imageObj => {
+      Object.entries(imageObj).forEach(([key, value]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        dockerImageSelect.appendChild(option);
+      });
+    });
+  }
 
-        function updateVariables() {
-          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-          const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
-          variablesContainer.innerHTML = '';
-          if (variables.length === 0) {
-            document.getElementById('variablesSectionRow').classList.remove('open');
-            return;
-          }
-          document.getElementById('variablesSectionRow').classList.add('open');
-          variables.forEach(variable => {
-            const envKey = variable.env_variable || variable.env || '';
-            const fieldType = variable.field_type || variable.type || 'text';
-            const defaultVal = variable.default_value ?? variable.value ?? '';
-            const isRequired = variable.rules ? variable.rules.includes('required') : !!variable.required;
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('flex', 'flex-col', 'gap-1.5');
-            const label = document.createElement('label');
-            label.setAttribute('for', envKey);
-            label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight');
-            label.textContent = variable.name + (isRequired ? ' *' : '');
-            if (variable.description) {
-              const desc = document.createElement('p');
-              desc.classList.add('text-xs', 'text-neutral-500');
-              desc.textContent = variable.description;
-              wrapper.appendChild(label);
-              wrapper.appendChild(desc);
-            } else { wrapper.appendChild(label); }
-            let input;
-            if (fieldType === 'number') {
-              input = document.createElement('input');
-              input.type = 'number';
-              input.placeholder = defaultVal || `Enter ${variable.name}`;
-            } else {
-              input = document.createElement('input');
-              input.type = 'text';
-              input.placeholder = defaultVal || `Enter ${variable.name}`;
-            }
-            input.classList.add('rounded-xl', 'focus:ring', 'focus:ring-neutral-800/10', 'focus:border-neutral-800/20', 'text-neutral-800', 'dark:text-white', 'text-sm', 'w-full', 'hover:bg-neutral-200', 'dark:hover:bg-white/5', 'px-4', 'py-2', 'bg-neutral-100', 'dark:bg-neutral-600/20', 'border', 'border-neutral-800/10', 'dark:border-white/5');
-            input.id = envKey;
-            input.name = envKey;
-            input.value = defaultVal;
-            if (isRequired) input.required = true;
-            wrapper.appendChild(input);
-            variablesContainer.appendChild(wrapper);
-          });
-        }
+  function updateVariables() {
+    const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+    const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
+    variablesContainer.innerHTML = '';
+    if (variables.length === 0) {
+      document.getElementById('variablesSectionRow').classList.remove('open');
+      return;
+    }
+    document.getElementById('variablesSectionRow').classList.add('open');
+    variables.forEach(variable => {
+      const envKey = variable.env_variable || variable.env || '';
+      const fieldType = variable.field_type || variable.type || 'text';
+      const defaultVal = variable.default_value ?? variable.value ?? '';
+      const isRequired = variable.rules ? variable.rules.includes('required') : !!variable.required;
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('al-form-field');
+      const label = document.createElement('label');
+      label.setAttribute('for', envKey);
+      label.classList.add('al-label');
+      label.textContent = variable.name + (isRequired ? ' *' : '');
+      if (variable.description) {
+        const desc = document.createElement('p');
+        desc.classList.add('al-form-help');
+        desc.textContent = variable.description;
+        wrapper.appendChild(label);
+        wrapper.appendChild(desc);
+      } else { wrapper.appendChild(label); }
+      let input = document.createElement('input');
+      input.type = fieldType === 'number' ? 'number' : 'text';
+      input.placeholder = defaultVal || (window.__i18n.enterVariableValue || 'Enter {{name}}').replace('{{name}}', variable.name);
+      input.classList.add('al-input', 'mt-1');
+      input.id = envKey;
+      input.name = envKey;
+      input.value = defaultVal;
+      if (isRequired) input.required = true;
+      wrapper.appendChild(input);
+      variablesContainer.appendChild(wrapper);
+    });
+  }
 
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const formData = new FormData(form);
-          const variablesArray = [];
-          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-          const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
-          variables.forEach(variable => {
-            const envKey = variable.env_variable || variable.env || '';
-            const fieldType = variable.field_type || variable.type || 'text';
-            let value = formData.get(envKey);
-            if (fieldType === 'number') value = parseInt(value);
-            if (value !== null) {
-              variablesArray.push({
-                env_variable: envKey, env: envKey, name: variable.name, value: value, field_type: fieldType,
-              });
-            }
-          });
-          const data = Object.fromEntries(formData);
-          data.variables = variablesArray;
-          data.ports = assignedPorts;
-          const loader = showLoadingPopup(req.translations.creatingServer || 'Creating Server', req.translations.initializingServerCreation || 'Initializing server creation...');
-          loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
-          fetch('/api/v2/admin/servers', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
-          })
-            .then(response => {
-              if (!response.ok) throw new Error('Server creation failed');
-              return response;
-            })
-            .then(data => {
-              loader.updateProgress(100, req.translations.serverCreatedSuccessfully || 'Server created successfully!');
-              setTimeout(() => { loader.close(); showToast(req.translations.serverDeployed || 'Server deployed. Go make something cool.', 'success'); setTimeout(() => { Turbo.visit('/admin/servers'); }, 1000); }, 500);
-            })
-            .catch(error => { loader.close(); console.error('Error:', error); showToast((req.translations.failedToCreateServer || 'Failed to create server: ') + error.message, 'error'); });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const variablesArray = [];
+    const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+    const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
+    variables.forEach(variable => {
+      const envKey = variable.env_variable || variable.env || '';
+      const fieldType = variable.field_type || variable.type || 'text';
+      let value = formData.get(envKey);
+      if (fieldType === 'number') value = parseInt(value);
+      if (value !== null) {
+        variablesArray.push({
+          env_variable: envKey, env: envKey, name: variable.name, value: value, field_type: fieldType,
         });
+      }
+    });
+    const data = Object.fromEntries(formData);
+    data.variables = variablesArray;
+    data.ports = assignedPorts;
+    form.submit();
+  });
 
-        fetchNodesData();
-        updateDockerImages();
-        updateVariables();
+  fetchNodesData();
+  updateDockerImages();
+  updateVariables();
 
-        serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
-        serverNodeSelect.addEventListener('change', () => { updatePortsForSelectedNode(); });
-      </script>
-      <style>
-        #createServerForm .al-card {
-          overflow: visible;
-        }
-
-        #createServerForm .al-card-header {
-          border-radius: 12px 12px 0 0;
-          overflow: hidden;
-          margin-bottom: 16px;
-        }
-      </style>
-
-      <%- include('../../components/footer') %>
+  serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
+  document.getElementById('serverNode')?.addEventListener('change', () => { updatePortsForSelectedNode(); });
+  document.getElementById('allowStartupEdit').addEventListener('change', function() {
+    document.getElementById('allowStartupEditLabel').textContent = this.checked ? (window.__i18n.enabled || 'Enabled') : (window.__i18n.disabled || 'Disabled');
+  });
+</script>

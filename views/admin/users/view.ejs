@@ -1,0 +1,85 @@
+<%- include('../../layouts/admin', { title: t('adminUserTitle') }) %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbUsers'), url: '/admin/users' },
+    { label: t('adminUserTitle') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminUserTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminUserText') %></p>
+  </div>
+  <div>
+    <a href="/admin/users/edit/<%= dataUser.id %>" class="al-btn-primary">
+      <%- icon('pencil', { size: 16 }) %>
+      <span><%= t('editUser') %></span>
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body">
+  <%
+    var roleLabel = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user');
+    var roleText = roleLabel === 'owner' ? t('owner')
+      : roleLabel === 'admin' ? t('adminRole')
+      : roleLabel === 'privileged' ? t('roleDisplayNamePrivileged')
+      : t('userRole');
+    var roleCls = (roleLabel === 'owner' || roleLabel === 'admin') ? 'al-badge-online'
+      : roleLabel === 'privileged' ? 'al-badge-info'
+      : 'al-badge-neutral';
+  %>
+  <div class="al-card">
+    <div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color:var(--theme-border)">
+      <img class="h-16 w-16 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
+      <div class="min-w-0">
+        <p class="text-base font-semibold al-text-strong truncate"><%= dataUser.username %></p>
+        <p class="text-sm al-text-muted truncate"><%= dataUser.email %></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section>
+        <h2 class="al-section-title border-b pb-2 mb-4" style="border-color:var(--theme-border)">
+          <%= t('userInformation') %>
+        </h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm al-text-muted"><%= t('username') %></dt>
+            <dd class="mt-1 text-base font-medium al-text-strong"><%= dataUser.username %></dd>
+          </div>
+          <div>
+            <dt class="text-sm al-text-muted"><%= t('email') %></dt>
+            <dd class="mt-1 text-base font-medium al-text-strong"><%= dataUser.email %></dd>
+          </div>
+          <div>
+            <dt class="text-sm al-text-muted"><%= t('role') %></dt>
+            <dd class="mt-1">
+              <span class="<%= roleCls %>"><%= roleText %></span>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm al-text-muted"><%= t('description') %></dt>
+            <dd class="mt-1 text-base font-medium al-text-strong"><%= dataUser.description || t('noDescriptionProvided') %></dd>
+          </div>
+        </dl>
+      </section>
+      <section>
+        <h2 class="al-section-title border-b pb-2 mb-4" style="border-color:var(--theme-border)">
+          <%= t('serverInformation') %>
+        </h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm al-text-muted"><%= t('totalServers') %></dt>
+            <dd class="mt-1 text-base font-medium al-text-strong"><%= dataUser._count ? dataUser._count.servers : 0 %></dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</div>
+
+<%- include('../../layouts/admin-footer') %>

@@ -1,0 +1,216 @@
+<!-- Mobile top bar -->
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-12 flex items-center justify-between px-3.5 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <a href="/" class="flex items-center gap-2 min-w-0">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>" class="h-7 w-7 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
+    <div class="font-medium text-[13px] truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></div>
+  </a>
+  <div class="flex items-center gap-1">
+    <% /* Phone chrome: below lg the desktop topbar does not render, so the
+           search entry point and the light/dark switch live here instead.
+           Both are bound by attribute (search.js / theme-init.js) and both
+           are hidden again at lg where the topbar takes over. */ %>
+    <button type="button" data-search-trigger
+      class="al-topbar-search al-btn-icon-only shrink-0 lg:hidden"
+      aria-haspopup="dialog" aria-expanded="false" aria-controls="searchOverlay"
+      aria-label="<%= t('navSearch') %>">
+      <%- icon('search', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %>
+    </button>
+    <button type="button" data-theme-toggle role="switch" aria-checked="false"
+      class="al-theme-switch shrink-0 min-h-11 lg:hidden"
+      aria-label="<%= t('darkMode') %>">
+      <span class="al-theme-switch-track" aria-hidden="true"></span>
+      <span class="al-theme-switch-thumb" aria-hidden="true"></span>
+    </button>
+    <% if (typeof user !== 'undefined' && user != null) { %>
+    <a href="/account" class="rounded-lg transition-colors min-w-11 min-h-11 flex items-center justify-center" style="color:var(--theme-text-muted);">
+      <img loading="lazy" decoding="async" class="w-5.5 h-5.5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= t('userAvatarAlt') %>">
+    </a>
+    <% } %>
+  </div>
+</div>
+
+<!-- Mobile bottom navigation -->
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="<%= t('mobileNavigation') %>" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <div class="flex items-stretch h-[52px] px-1.5">
+    <%
+    const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+    const navToShow = (bottomNavItems || []).slice(0, 4);
+    const mT = (typeof req !== 'undefined' && req && req.translations) || {};
+    %>
+
+    <% navToShow.forEach(function(item) { %>
+    <a href="<%= item.url %>" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <%- item.icon %>
+      <span class="truncate max-w-[3.5rem]"><%= item.label %></span>
+    </a>
+    <% }); %>
+
+    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="<%= t('moreNavigationOptions') %>" aria-expanded="false" aria-controls="mobile-more-sheet">
+      <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
+      <span><%= t('more') %></span>
+    </button>
+  </div>
+</nav>
+
+<!-- More sheet -->
+<div id="mobile-more-sheet" class="mobile-more-sheet fixed left-0 right-0 bottom-[60px] z-50 lg:hidden opacity-0 pointer-events-none will-change-transform" role="dialog" aria-label="<%= t('additionalNavigation') %>" aria-modal="true" inert style="top: auto; max-height: calc(100vh - 80px);">
+  <style>
+    #mobile-more-sheet {
+      translate: none;
+      transform: translateY(16px);
+      transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #mobile-more-sheet.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    #mobile-more-sheet.closing { transform: translateY(16px); opacity: 0; transition: transform 180ms cubic-bezier(0.4, 0, 1, 1), opacity 180ms cubic-bezier(0.4, 0, 1, 1); }
+    .sheet-pill { width: 36px; height: 4px; border-radius: 2px; background: var(--theme-text-muted); opacity: 0.35; margin: 0 auto; }
+    .sheet-pill:active, #mobile-more-sheet.dragging .sheet-pill { opacity: 0.55; transform: scaleX(1.25); }
+    .sheet-scroll { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none; max-height: calc(100vh - 130px); }
+    .sheet-scroll::-webkit-scrollbar { display: none; }
+    #mobile-more-sheet .sheet-item { transition: background-color 150ms, color 150ms; }
+    #mobile-more-sheet .sheet-item.sheet-active { background: var(--theme-accent); color: var(--theme-text-on-accent, #fff); }
+  </style>
+  <div class="rounded-t-2xl border-t shadow-xl flex flex-col" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+    <div id="mobile-sheet-pill" class="flex items-center justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none select-none" role="separator" aria-label="<%= t('dragToResize') %>">
+      <div class="sheet-pill"></div>
+    </div>
+    <div class="sheet-scroll flex flex-col px-2 pb-3" id="mobile-more-main">
+      <% (bottomNavItems || []).slice(4).forEach(function(item, i) { %>
+      <a href="<%= item.url %>" role="menuitem" class="sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
+        <%- item.icon %>
+        <span class="text-[13px]"><%= item.label %></span>
+      </a>
+      <% }); %>
+      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+        <% if (typeof user !== 'undefined' && user != null) { %>
+        <a href="/account" role="menuitem" class="sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <img loading="lazy" decoding="async" class="w-5 h-5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="">
+          <span class="text-[13px]"><%= t('account') %></span>
+        </a>
+        <a href="/logout" role="menuitem" class="sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <%- icon('log-out', { class: 'w-4 h-4' }) %>
+          <span class="text-[13px]"><%= t('logout') %></span>
+        </a>
+        <% } %>
+        <% if (typeof user !== 'undefined' && user != null && user.isAdmin === true) { %>
+        <% const admGroups = adminSidebarGroups || []; %>
+        <% if (admGroups.length > 0) { %>
+        <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+          <% admGroups.forEach(function(group) { %>
+          <% group.items.forEach(function(item) { %>
+          <a href="<%= item.url %>" role="menuitem" class="sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+            <%- item.icon %>
+            <span class="text-[13px]"><%= item.label %></span>
+          </a>
+          <% }); %>
+          <% }); %>
+        </div>
+        <% } %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function () {
+  const btn = document.getElementById('mobile-more-btn');
+  const sheet = document.getElementById('mobile-more-sheet');
+  let lastFocus = null;
+
+  function openSheet() {
+    sheet.classList.remove('closing');
+    sheet.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    sheet.removeAttribute('inert');
+    lastFocus = document.activeElement;
+    markActiveSheetItems();
+    const focusable = sheet.querySelector('a[href], button:not([disabled])');
+    if (focusable) focusable.focus();
+  }
+
+  function closeSheet() {
+    sheet.classList.remove('open');
+    sheet.classList.add('closing');
+    btn.setAttribute('aria-expanded', 'false');
+    sheet.setAttribute('inert', '');
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
+
+  if (sheet) {
+    sheet.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSheet(); return; }
+      if (e.key !== 'Tab') return;
+      const focusables = sheet.querySelectorAll('a[href], button:not([disabled])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  if (btn) btn.addEventListener('click', function() {
+    if (sheet.classList.contains('open')) { closeSheet(); } else { openSheet(); }
+  });
+
+  document.querySelectorAll('.mobile-more-link').forEach(function(link) {
+    link.addEventListener('click', closeSheet);
+  });
+
+  const pill = document.getElementById('mobile-sheet-pill');
+  let dragStartY = 0;
+  let dragStartSheetH = 0;
+  let dragging = false;
+
+  if (pill && sheet) {
+    pill.addEventListener('touchstart', function(e) {
+      if (sheet.classList.contains('open')) {
+        dragging = true;
+        dragStartY = e.touches[0].clientY;
+        dragStartSheetH = sheet.scrollHeight;
+        sheet.classList.add('dragging');
+        sheet.style.transition = 'none';
+        e.preventDefault();
+      }
+    }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      const dy = e.touches[0].clientY - dragStartY;
+      sheet.style.maxHeight = Math.max(0, Math.min(dragStartSheetH, dragStartSheetH + dy)) + 'px';
+    }, { passive: true });
+    document.addEventListener('touchend', function() {
+      if (!dragging) return;
+      dragging = false;
+      sheet.classList.remove('dragging');
+      sheet.style.transition = '';
+      const curH = parseFloat(getComputedStyle(sheet).maxHeight);
+      sheet.style.maxHeight = '';
+      if (curH < 80) closeSheet();
+    }, { passive: true });
+  }
+
+  function markActiveSheetItems() {
+    const path = window.location.pathname;
+    document.querySelectorAll('#mobile-more-sheet .sheet-item[data-match-prefix]').forEach(function(item) {
+      const prefix = item.getAttribute('data-match-prefix');
+      if (prefix && path.startsWith(prefix)) item.classList.add('sheet-active');
+      else item.classList.remove('sheet-active');
+    });
+  }
+
+  function markActiveMobile(path) {
+    document.querySelectorAll('.mobile-nav-link[data-match-prefix]').forEach(function(link) {
+      const prefix = link.getAttribute('data-match-prefix');
+      if (prefix && path.startsWith(prefix)) {
+        link.classList.add('active-mobile');
+        link.style.color = 'var(--theme-nav-text-active)';
+      } else {
+        link.classList.remove('active-mobile');
+        link.style.color = '';
+      }
+    });
+  }
+
+  markActiveMobile(window.location.pathname);
+})();
+</script>

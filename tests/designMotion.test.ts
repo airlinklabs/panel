@@ -1,38 +1,72 @@
-import { describe, it, expect } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-const root = join(__dirname, "..");
-const css = readFileSync(join(root, "public", "styles", "tw.css"), "utf8");
-const motionBlock = (() => {
-  const start = css.indexOf("@media (prefers-reduced-motion: reduce)");
-  if (start === -1) return "";
-  const end = css.indexOf("@media", start + 8);
-  return end === -1 ? css.slice(start) : css.slice(start, end);
-})();
+const root = join(__dirname, '..');
+const stylesDir = join(root, 'views', 'styles');
+
+function walkCss(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {out.push(...walkCss(full));}
+    else if (entry.name.endsWith('.css')) {out.push(full);}
+  }
+  return out;
+}
+
+const cssFiles = walkCss(stylesDir);
+const css = cssFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
+
+/* Extract every @media (prefers-reduced-motion: reduce) block with a brace
+   matcher so nesting and comments cannot truncate the slice. */
+function reducedMotionBlocks(src: string): string {
+  const marker = '@media (prefers-reduced-motion: reduce)';
+  let out = '';
+  let i = src.indexOf(marker);
+  while (i !== -1) {
+    let depth = 0;
+    let j = src.indexOf('{', i);
+    if (j === -1) {break;}
+    for (; j < src.length; j++) {
+      if (src[j] === '{') {depth++;}
+      else if (src[j] === '}') {
+        depth--;
+        if (depth === 0) {break;}
+      }
+    }
+    out += `${src.slice(i, j + 1)  }\n`;
+    i = src.indexOf(marker, j + 1);
+  }
+  return out;
+}
+
+const motionBlock = cssFiles
+  .map((f) => reducedMotionBlocks(readFileSync(f, 'utf8')))
+  .join('\n');
 
 /* Phase 3 motion contract: central motion tokens, reduced-motion must not
    use a global 0.01ms !important kill switch (that would also erase focus
    visibility and state feedback), and travel/scale/stagger must collapse to
    a fast opacity/state change. */
 
-describe("motion tokens", () => {
-  it("defines duration and easing tokens centrally", () => {
+describe('motion tokens', () => {
+  it('defines duration and easing tokens centrally', () => {
     for (const token of [
-      "--dur-quick",
-      "--dur-enter",
-      "--dur-exit",
-      "--ease-out",
+      '--dur-quick',
+      '--dur-enter',
+      '--dur-exit',
+      '--ease-out',
     ]) {
-      expect(css.includes(token + ":") || css.includes("--" + token)).toBe(
+      expect(css.includes(`${token  }:`) || css.includes(`--${  token}`)).toBe(
         true,
       );
     }
   });
 });
 
-describe("prefers-reduced-motion block", () => {
-  it("does NOT kill transitions globally (state feedback + focus survive)", () => {
+describe('prefers-reduced-motion block', () => {
+  it('does NOT kill transitions globally (state feedback + focus survive)', () => {
     expect(motionBlock).not.toMatch(
       /transition-duration:\s*0\.01ms\s*!important/,
     );
@@ -42,21 +76,21 @@ describe("prefers-reduced-motion block", () => {
     );
   });
 
-  it("collapses travel/scale/stagger animations to their end state", () => {
+  it('collapses travel/scale/stagger animations to their end state', () => {
     expect(motionBlock).toMatch(/animation-duration:\s*0\.01ms\s*!important/);
     expect(motionBlock).toMatch(/animation-iteration-count:\s*1\s*!important/);
     expect(motionBlock).toMatch(/scroll-behavior:\s*auto\s*!important/);
   });
 
-  it("keeps opacity as the allowed reduced-motion channel", () => {
+  it('keeps opacity as the allowed reduced-motion channel', () => {
     expect(motionBlock).toMatch(/opacity/);
   });
 
-  it("targets the traveling entrances instead of every element", () => {
+  it('targets the traveling entrances instead of every element', () => {
     for (const sel of [
-      "dialog.al-dialog[open]",
-      ".al-sheet-panel",
-      ".pa-row",
+      'dialog.al-dialog[open]',
+      '.al-sheet-panel',
+      '.pa-row',
     ]) {
       expect(motionBlock).toContain(sel);
     }
@@ -66,15 +100,15 @@ describe("prefers-reduced-motion block", () => {
 /* Theme token contrast: every shipped theme must keep text and surface
    readable (WCAG AA-ish floor for body text tokens). */
 
-describe("theme token contrast", () => {
-  const themesDir = join(root, "storage", "themes");
+describe('theme token contrast', () => {
+  const themesDir = join(root, 'storage', 'themes');
   const files = readdirSync(themesDir)
-    .filter((f) => f.endsWith(".css"))
+    .filter((f) => f.endsWith('.css'))
     .map((f) => join(themesDir, f));
 
   function hexToRgb(hex) {
     const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
-    if (!m) return null;
+    if (!m) {return null;}
     const v = parseInt(m[1], 16);
     return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
   }
@@ -91,9 +125,9 @@ describe("theme token contrast", () => {
     return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
   }
 
-  it("every theme defines a text token at 4.5:1 against its card surface", () => {
+  it('every theme defines a text token at 4.5:1 against its card surface', () => {
     for (const file of files) {
-      const src = readFileSync(file, "utf8");
+      const src = readFileSync(file, 'utf8');
       const bg = /--theme-bg-card:\s*([^;]+);/.exec(src);
       const text = /--theme-text:\s*([^;]+);/.exec(src);
       const textStrong = /--theme-text-strong:\s*([^;]+);/.exec(src);

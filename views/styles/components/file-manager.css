@@ -1,0 +1,150 @@
+@layer components {
+  /* ── File manager ─────────────────────────────────────────────────
+     Path strip → filter row → file table → selection action bar.
+     Used by: views/user/server/files.ejs, views/user/server/files-rows.ejs */
+
+  /* Bordered, scrollable shell that keeps the radius on every child. */
+  .al-file-panel {
+    contain: layout paint;
+    overflow: auto;
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+    border-radius: 0.75rem;
+  }
+
+  .al-file-pathbar {
+    @apply flex items-center gap-1;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+  }
+  .al-file-path {
+    @apply text-[11px] transition-colors;
+    color: var(--theme-text-muted);
+    white-space: nowrap;
+  }
+  .al-file-path:hover {
+    color: var(--theme-text);
+  }
+  .al-file-path-current {
+    @apply text-[11px] font-medium;
+    color: var(--theme-text-strong);
+    white-space: nowrap;
+  }
+  .al-file-path-sep {
+    @apply text-[11px] select-none;
+    color: var(--theme-text-muted);
+  }
+
+  .al-file-search {
+    @apply flex items-center gap-2;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--theme-border);
+    color: var(--theme-text-muted);
+  }
+  .al-file-search-input {
+    @apply flex-1 text-[13px];
+    min-width: 0;
+    background: transparent;
+    color: var(--theme-text-strong);
+    outline: none;
+    border: 0;
+  }
+  .al-file-search-input::placeholder {
+    color: var(--theme-text-placeholder);
+  }
+  .al-file-search-clear {
+    @apply inline-flex shrink-0 items-center justify-center rounded transition;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    color: var(--theme-text-muted);
+  }
+  .al-file-search-clear:hover {
+    color: var(--theme-text-strong);
+    background: var(--theme-bg-hover);
+  }
+
+  .al-file-row {
+    cursor: pointer;
+  }
+  .al-file-row.is-selected,
+  .al-file-row.is-selected:hover {
+    background: var(--theme-bg-secondary);
+  }
+  .dark .al-file-row.is-selected,
+  .dark .al-file-row.is-selected:hover {
+    background: var(--theme-bg-hover);
+  }
+
+  .al-file-icon {
+    @apply inline-flex shrink-0 transition;
+    color: var(--theme-text-muted);
+  }
+  .al-file-row:hover .al-file-icon {
+    transform: translateY(-1px);
+  }
+
+  .al-file-link {
+    @apply flex items-center gap-2.5 text-sm font-medium transition-colors;
+    color: var(--theme-text-strong);
+    min-width: 0;
+  }
+  .al-file-link:hover {
+    color: var(--theme-text);
+  }
+
+  /* Selection action bar — fixed above the mobile bottom nav / desktop
+     sidebar rail, hidden until rows are selected. */
+  .al-file-actions {
+    @apply fixed bottom-14 right-0 left-0 z-40 flex items-center justify-between gap-4 px-6 py-3.5 transition-transform duration-300 ease-out;
+    background: var(--theme-bg-card);
+    border-top: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+  }
+  @media (min-width: 1024px) {
+    .al-file-actions {
+      bottom: 0;
+      left: 15rem;
+    }
+  }
+
+  /* ── File editor ───────────────────────────────────────────────
+     Used by: views/user/server/file.ejs */
+  .al-editor-shell {
+    min-height: calc(100dvh - 15rem);
+  }
+  .al-editor-toolbar {
+    gap: 0.75rem;
+  }
+  .al-editor-path {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+  }
+  .al-editor-frame {
+    overflow: hidden;
+    border: 1px solid var(--theme-border);
+    border-radius: 0.75rem;
+  }
+  .al-editor-status {
+    gap: 0.5rem 1rem;
+    scrollbar-width: thin;
+  }
+  .al-editor-status button,
+  .al-editor-status [data-kbd],
+  .al-editor-stat {
+    min-height: 1.5rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: var(--theme-bg-card);
+    color: var(--theme-text-muted);
+    transition: color 150ms ease;
+  }
+  .al-editor-status button:hover {
+    color: var(--theme-text-strong);
+  }
+  @media (max-width: 1023px) {
+    .al-editor-shell {
+      min-height: 60dvh;
+    }
+  }
+}

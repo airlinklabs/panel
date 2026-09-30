@@ -1,230 +1,74 @@
-<%- include('../../components/header', { title: t('serverLogs') }) %>
+<%- include('../../layouts/user', { title: t('logs') }) %>
 
-<main class="h-screen m-auto" style="color:var(--theme-text)">
-  <div class="flex h-full">
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/sidebar') %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name, url: '/server/' + server.UUID },
+    { label: t('logs') }
+  ] }) %>
+</div>
+
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('logs') %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('box', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="truncate max-w-[140px]"><%= server.image?.name %></span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('server', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="truncate max-w-[100px]"><%= server.node?.name %></span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <%- icon('hash', { class: 'h-3.5 w-3.5 shrink-0' }) %>
+        <span class="font-mono"><%= server.UUID.split('-')[0] %></span>
+      </span>
+    </p>
+  </div>
+  <div>
+    <a href="/server/<%= server.UUID %>" class="al-btn-ghost">
+      <%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= t('backToConsole') %>
+    </a>
+    <button id="logsRefreshBtn" type="button" class="al-btn-primary">
+      <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= t('refresh') %>
+    </button>
+  </div>
+</header>
+
+<div class="al-page-body">
+  <!-- Recent output viewer -->
+  <div class="al-card mb-6">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('recentOutput') %></h2>
+        <p class="al-card-subtitle"><%= t('recentOutputDesc') %></p>
+      </div>
     </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('dashboard'), href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: t('logs') }
-      ] }) %>
-      <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/server-header') %>
-            <!-- Server meta: image · node · id -->
-            <%- include('../../components/server-meta') %>
-          </div>
-          <div class="flex gap-2 shrink-0">
-            <a href="/server/<%= server.UUID %>" class="al-btn-ghost inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-center text-sm font-medium transition duration-300">
-              <%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>
-              <%= t('backToConsole') %>
-            </a>
-            <button id="logsRefreshBtn" type="button"
-                class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
-                <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                <%= t('refresh') %>
-            </button>
-          </div>
-        </div>
+    <div class="al-card-body">
+      <div id="logsViewer" class="al-code h-96 overflow-y-auto whitespace-pre-wrap break-words"></div>
+    </div>
+  </div>
+
+  <!-- Saved logs -->
+  <div class="al-card">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('savedLogs') %></h2>
+        <p class="al-card-subtitle"><%= t('savedLogsDesc') %></p>
       </div>
-
-      <%- include('../../components/installHeader') %>
-
-      <!-- Server Template -->
-      <%- include('../../components/server-template') %>
-
-      <div id="server-page-body">
-
-      <!-- Server Logs -->
-      <div class="px-6 mt-8 space-y-6">
-        <!-- Recent output viewer -->
-        <div class="al-card rounded-lg shadow overflow-hidden">
-          <div class="al-card-header">
-            <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('recentOutput') %></h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('recentOutputDesc') %></p>
-            </div>
-          </div>
-          <div id="logsViewer" class="h-96 overflow-y-auto p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap break-words"
-               style="background:var(--theme-bg-card);border:1px solid var(--theme-border);color:var(--theme-text-strong)"></div>
-        </div>
-
-        <!-- Saved logs -->
-        <div class="al-card rounded-lg shadow overflow-hidden">
-          <div class="al-card-header">
-            <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('savedLogs') %></h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('savedLogsDesc') %></p>
-            </div>
-          </div>
-          <ul id="logsArchiveList" class="divide-y" style="border-color:var(--theme-border)"></ul>
-        </div>
-      </div>
-
-      </div><!-- /server-page-body -->
-
-      </div>
-</main>
-
-<%- include('../../components/loading-popup') %>
+    </div>
+    <div class="al-card-body">
+      <ul id="logsArchiveList" class="divide-y -mx-5" style="border-color:var(--theme-table-divide)"></ul>
+    </div>
+  </div>
+</div>
 
 <script nonce="<%- nonce %>">
-(function () {
-const serverId = window.location.pathname.split('/')[2];
-
-const logsViewer = document.getElementById('logsViewer');
-const logsArchiveList = document.getElementById('logsArchiveList');
-const logsRefreshBtn = document.getElementById('logsRefreshBtn');
-
-function notify(type, message) {
-  if (typeof window.showToast === 'function') window.showToast(message, type);
-}
-
-function setViewerError(message) {
-  if (!logsViewer) return;
-  logsViewer.textContent = '<%= req.translations.failedToLoadLogs || "Failed to load logs" %>' + ': ' + message;
-}
-
-async function loadRecent() {
-  if (!logsViewer) return;
-  logsViewer.textContent = '<%= req.translations.loadingRecentOutput || "Loading recent output\u2026" %>';
-  try {
-    const r = await fetch('/api/v2/servers/' + encodeURIComponent(serverId) + '/logs/history', { credentials: 'same-origin' });
-    const d = await r.json().catch(() => null);
-    if (!r.ok) throw new Error((d && d.error) || '<%= req.translations.requestFailed || "request failed" %>');
-    const lines = (d && Array.isArray(d.logs)) ? d.logs : [];
-    logsViewer.textContent = lines.length > 0 ? lines.join('\n') : '<%= req.translations.noRecentOutput || "No recent output saved to disk yet." %>';
-  } catch (err) {
-    setViewerError((err && err.message) || '<%= req.translations.requestFailed || "request failed" %>');
-    notify('error', '<%= req.translations.failedToLoadRecentOutput || "Failed to load recent output." %>');
-  }
-}
-
-function formatBytes(bytes) {
-  if (bytes === undefined || bytes === null || isNaN(bytes)) return '<%= req.translations.unknown || "Unknown" %>';
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', '<%= req.translations.kilobytes || "KB" %>', '<%= req.translations.megabytes || "MB" %>', '<%= req.translations.gigabytes || "GB" %>', '<%= req.translations.terabytes || "TB" %>'];
-  const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes) / Math.log(k)));
-  return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
-}
-
-function renderArchives(logs) {
-  if (!logsArchiveList) return;
-  logsArchiveList.textContent = '';
-
-  if (!logs || logs.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'p-8 text-center';
-    li.style.color = 'var(--theme-text-muted)';
-    li.textContent = '<%= req.translations.noSavedLogs || "No saved logs yet." %>';
-    logsArchiveList.appendChild(li);
-    return;
-  }
-
-  logs.forEach((log) => {
-    const name = String((log && log.fileName) || '');
-    const li = document.createElement('li');
-    li.className = 'flex flex-wrap items-center gap-x-3 gap-y-2 px-6 py-3';
-
-    const nameWrap = document.createElement('div');
-    nameWrap.className = 'flex items-center gap-2 min-w-0 flex-1';
-    nameWrap.innerHTML = (typeof window.alIcon === 'function') ? alIcon('file-text', 'size-3.5 shrink-0') : '<svg class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>';
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'truncate text-sm font-medium';
-    nameSpan.style.color = 'var(--theme-text-strong)';
-    nameSpan.title = name;
-    nameSpan.textContent = name;
-    nameWrap.appendChild(nameSpan);
-    li.appendChild(nameWrap);
-
-    const sizeSpan = document.createElement('span');
-    sizeSpan.className = 'text-xs whitespace-nowrap';
-    sizeSpan.style.color = 'var(--theme-text-muted)';
-    sizeSpan.textContent = formatBytes(log.size);
-    li.appendChild(sizeSpan);
-
-    const createdSpan = document.createElement('span');
-    createdSpan.className = 'text-xs whitespace-nowrap';
-    createdSpan.style.color = 'var(--theme-text-muted)';
-    let createdText = 'Unknown';
-    if (log && log.createdAt) {
-      const date = new Date(log.createdAt);
-      if (!isNaN(date.getTime())) createdText = date.toLocaleString();
-    }
-    createdSpan.textContent = createdText;
-    li.appendChild(createdSpan);
-
-    const actions = document.createElement('div');
-    actions.className = 'flex items-center gap-2 shrink-0';
-
-    const viewBtn = document.createElement('button');
-    viewBtn.type = 'button';
-    viewBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-    viewBtn.style.cssText = 'color:var(--theme-accent);background:var(--theme-accent-subtle)';
-    viewBtn.textContent = '<%= req.translations.view || "View" %>';
-    viewBtn.addEventListener('click', function () { loadArchiveFile(name); });
-    actions.appendChild(viewBtn);
-
-    const downloadLink = document.createElement('a');
-    downloadLink.href = '/server/' + encodeURIComponent(serverId) + '/logs/archives/download?file=' + encodeURIComponent(name);
-    downloadLink.download = name;
-    downloadLink.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-    downloadLink.style.cssText = 'color:var(--theme-success);background:var(--theme-success-bg)';
-    downloadLink.textContent = '<%= req.translations.download || "Download" %>';
-    actions.appendChild(downloadLink);
-
-    li.appendChild(actions);
-    logsArchiveList.appendChild(li);
-  });
-}
-
-async function loadArchives() {
-  try {
-    const r = await fetch('/api/v2/servers/' + encodeURIComponent(serverId) + '/logs/archives', { credentials: 'same-origin' });
-    const d = await r.json().catch(() => null);
-    if (!r.ok) throw new Error((d && d.error) || '<%= req.translations.requestFailed || "request failed" %>');
-    renderArchives((d && d.logs) || []);
-  } catch (err) {
-    renderArchives([]);
-    setViewerError((err && err.message) || '<%= req.translations.requestFailed || "request failed" %>');
-    notify('error', '<%= req.translations.failedToLoadSavedLogs || "Failed to load saved logs." %>');
-  }
-}
-
-async function loadArchiveFile(file) {
-  if (!logsViewer) return;
-  logsViewer.textContent = '<%= req.translations.loading || "Loading" %> ' + file + '\u2026';
-  try {
-    const r = await fetch('/api/v2/servers/' + encodeURIComponent(serverId) + '/logs/archives/read?file=' + encodeURIComponent(file), { credentials: 'same-origin' });
-    const d = await r.json().catch(() => null);
-    if (!r.ok) throw new Error((d && d.error) || '<%= req.translations.requestFailed || "request failed" %>');
-    const lines = (d && Array.isArray(d.lines)) ? d.lines : [];
-    logsViewer.textContent = lines.length > 0 ? lines.join('\n') : '<%= req.translations.archiveEmpty || "(archive is empty)" %>';
-  } catch (err) {
-    setViewerError((err && err.message) || '<%= req.translations.requestFailed || "request failed" %>');
-    notify('error', '<%= req.translations.failedToReadArchive || "Failed to read archive." %>');
-  }
-}
-
-function refreshLogs() {
-  return Promise.all([loadRecent(), loadArchives()]);
-}
-
-if (logsRefreshBtn) {
-  logsRefreshBtn.addEventListener('click', function () {
-    refreshLogs().catch(function () {});
-  });
-}
-
-refreshLogs().catch(function () {});
-})();
+  window.__serverUUID = '<%= server.UUID %>';
 </script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/user/server/logs.js') %>"></script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/user-footer') %>

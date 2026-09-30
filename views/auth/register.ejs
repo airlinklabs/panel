@@ -1,157 +1,148 @@
-<%- include('../components/auth-header', { title: 'Create account' }) %>
+<%- include('../layouts/auth', { title: t('register') }) %>
 
-<%- include('../components/auth-styles') %>
-<style>
-  .auth-image {
-    background: url('<%= settings.registerWallpaper || assetUrl('/assets/wallpapers/register.jpeg') %>') center/cover no-repeat;
-  }
-</style>
+<div class="al-auth">
+  <div class="al-auth-form">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <img class="al-auth-logo"
+          src="<%= (settings && settings.logo && settings.logo.startsWith('/')) ? settings.logo : '/' + ((settings && settings.logo) || 'favicon.ico') %>"
+          alt="<%= (settings && settings.title) || 'Airlink' %>" width="48" height="48">
+        <h1 class="al-auth-title mt-6"><%= t('registerTitle') %></h1>
+        <p class="al-auth-subtitle"><%= t('registerSubtitle') %></p>
+      </div>
 
-<div class="auth-split">
-  <div class="auth-panel" id="authPanel">
-
-    <div class="mb-8">
-      <% if (settings.logo) { %>
-      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
+      <% if (req.query.err) { %>
+      <div class="al-auth-error mt-6" role="alert" aria-live="assertive">
+        <span class="mt-0.5 shrink-0"><%- icon('alert-triangle', { class: 'h-5 w-5', style: 'color:var(--theme-danger)' }) %></span>
+        <div>
+          <p class="al-auth-error-title">
+            <% if (req.query.err === 'missing_credentials') { %><%= t('errorTitleAllFieldsRequired') %>
+            <% } else if (req.query.err === 'invalid_username') { %><%= t('errorTitleInvalidUsername') %>
+            <% } else if (req.query.err === 'user_already_exists') { %><%= t('errorTitleUserAlreadyExists') %>
+            <% } else if (req.query.err === 'weak_password') { %><%= t('errorTitleWeakPassword') %>
+            <% } else if (req.query.err === 'invalid_input') { %><%= t('errorTitleInvalidInput') %>
+            <% } else { %><%= t('errorTitleGeneric') %><% } %>
+          </p>
+          <p class="al-auth-error-body">
+            <% if (req.query.err === 'missing_credentials') { %><%= t('errorAllFieldsRequired') %>
+            <% } else if (req.query.err === 'invalid_username') { %><%= t('errorInvalidUsername') %>
+            <% } else if (req.query.err === 'user_already_exists') { %><%= t('errorUserAlreadyExists') %>
+            <% } else if (req.query.err === 'weak_password') { %><%= t('errorWeakPassword') %>
+            <% } else if (req.query.err === 'invalid_input') { %><%= t('errorInvalidInput') %>
+            <% } else { %><%= t('errorGeneric') %><% } %>
+          </p>
+        </div>
+      </div>
       <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)"><%= t('registerTitle') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= settings.title %></p>
-    </div>
 
-    <% if (req.query.err) { %>
-    <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)">
-      <p class="text-sm font-medium" style="color:var(--theme-danger)">
-        <% if (req.query.err === 'missing_credentials') { %>All fields are required.
-        <% } else if (req.query.err === 'invalid_username') { %>Username must be 3–32 characters, letters and numbers only.
-        <% } else if (req.query.err === 'user_already_exists') { %>That username or email is already taken.
-        <% } else if (req.query.err === 'weak_password') { %>Password needs 8+ chars, at least one letter and one number.
-        <% } else { %>Something went wrong. Try again.<% } %>
+      <form method="POST" action="/register" class="mt-8 space-y-6">
+        <%- include('../partials/csrf') %>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'text',
+          name: 'username',
+          label: t('fieldUsername'),
+          id: 'register-username',
+          placeholder: t('fieldUsernamePlaceholder'),
+          required: true,
+          autocomplete: 'username'
+        }) %>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'email',
+          name: 'email',
+          label: t('fieldEmail'),
+          id: 'register-email',
+          placeholder: t('fieldEmailPlaceholder'),
+          required: true,
+          autocomplete: 'email'
+        }) %>
+
+        <div>
+          <%- include('../partials/ui/form-field', {
+            type: 'password',
+            name: 'password',
+            label: t('fieldPassword'),
+            id: 'register-password',
+            placeholder: t('fieldPasswordPlaceholder'),
+            required: true,
+            autocomplete: 'new-password',
+            helpText: t('passwordHelp')
+          }) %>
+          <ul class="al-pw-criteria" id="password-criteria">
+            <li data-met="false" data-criterion="length">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaLength') %></span>
+            </li>
+            <li data-met="false" data-criterion="letter">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaLetter') %></span>
+            </li>
+            <li data-met="false" data-criterion="number">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaNumber') %></span>
+            </li>
+          </ul>
+        </div>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'password',
+          name: 'passwordConfirm',
+          label: t('fieldConfirmPassword'),
+          id: 'register-password-confirm',
+          placeholder: t('fieldConfirmPasswordPlaceholder'),
+          required: true,
+          autocomplete: 'new-password'
+        }) %>
+
+        <% if (settings.registerEmailConfirmation) { %>
+        <p class="al-form-help flex items-start gap-1.5">
+          <%- icon('mail', { class: 'mt-0.5 h-4 w-4 shrink-0', 'aria-hidden': 'true' }) %>
+          <span><%= t('registerEmailNote') %></span>
+        </p>
+        <% } %>
+
+        <%- include('../partials/ui/button', {
+          type: 'submit',
+          label: t('register'),
+          variant: 'primary',
+          size: 'lg',
+          cls: 'w-full'
+        }) %>
+      </form>
+
+      <p class="mt-6 text-sm" style="color:var(--theme-text-muted);">
+        <%= t('hasAccount') %>
+        <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary); text-underline-offset:3px;">
+          <%= t('login') %>
+        </a>
       </p>
     </div>
-    <% } %>
-
-    <form id="registerForm" method="POST" action="/register" autocomplete="on" novalidate>
-      <%- include('../components/csrf') %>
-      <div class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="auth-label" for="username"><%= t('username') %></label>
-            <input id="username" name="username" type="text" autocomplete="username"
-              required spellcheck="false" autocapitalize="none" maxlength="32"
-              class="auth-input" placeholder="johndoe" aria-describedby="username-error">
-            <p id="username-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
-          </div>
-          <div>
-            <label class="auth-label" for="email"><%= t('email') %></label>
-            <input id="email" name="email" type="email" autocomplete="email"
-              required class="auth-input" placeholder="you@example.com" aria-describedby="email-error">
-            <p id="email-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
-          </div>
-        </div>
-        <div>
-            <label class="auth-label" for="password"><%= t('password') %></label>
-          <div class="pw-wrapper">
-            <input id="password" name="password" type="password" autocomplete="new-password"
-              required class="auth-input" placeholder="••••••••" style="padding-right:40px" aria-describedby="pwHint password-error">
-            <p id="password-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
-            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
-              <span id="eyeIcon"><%- icon('eye', { width: 16, height: 16 }) %></span>
-            </button>
-          </div>
-          <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
-          <p class="pw-hint" id="pwHint">8+ characters, one letter, one number.</p>
-        </div>
-        <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
-          <%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span class="btn-label"><%= t('registerBtn') %></span>
-          <span class="spinner"></span>
-        </button>
-      </div>
-    </form>
-
-    <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
-      <%= t('hasAccount') %>
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('login') %></a>
-    </p>
-
   </div>
-  <div class="auth-image"></div>
+
+  <%- include('../partials/auth-visual', { wallpaper: settings.registerWallpaper, fallback: '/assets/auth/register.jpg' }) %>
 </div>
 
 <script nonce="<%- nonce %>">
-(function () {
-  requestAnimationFrame(function () {
-    requestAnimationFrame(function () {
-      document.getElementById('authPanel').classList.add('visible');
-    });
-  });
-
-  const pwToggle = document.getElementById('pwToggle');
-  const pwInput  = document.getElementById('password');
-  pwToggle.addEventListener('click', function () {
-    const show = pwInput.type === 'password';
-    pwInput.type = show ? 'text' : 'password';
-    document.getElementById('eyeIcon').innerHTML = show
-      ? '<path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" clip-rule="evenodd"/><path d="M10.748 13.93l2.523 2.524a10.065 10.065 0 0 1-5.27 0l-1.978-1.978a4 4 0 0 0 .005-5.53l-.738-.738A8.003 8.003 0 0 0 1.834 9.587a1.651 1.651 0 0 0 0 1.186A10.004 10.004 0 0 0 10 17c1.09 0 2.14-.175 3.124-.497l-2.376-2.573Z"/>'
-      : '<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/>';
-  });
-
-  pwInput.addEventListener('input', function () {
-    const v = pwInput.value;
-    const score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
-    const colors = ['var(--theme-danger)','var(--theme-warning)','var(--theme-info)','var(--theme-success)'];
-    const labels = ['<%= req.translations.pwStrengthTooShort || "Too short" %>','<%= req.translations.pwStrengthWeak || "Weak" %>','<%= req.translations.pwStrengthFair || "Fair" %>','<%= req.translations.pwStrengthStrong || "Strong" %>'];
-    const bar  = document.getElementById('pwBar');
-    const hint = document.getElementById('pwHint');
-    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '<%= req.translations.pwHint || "8+ characters, one letter, one number." %>'; hint.style.color = ''; return; }
-    const idx = Math.max(0, score - 1);
-    bar.style.transform = 'scaleX(' + (['0.25','0.5','0.75','1'][idx]) + ')'; bar.style.background = colors[idx];
-    hint.textContent = labels[idx]; hint.style.color = colors[idx];
-  });
-
-  document.getElementById('registerForm').addEventListener('submit', function (e) {
-    const username = document.getElementById('username').value.trim();
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    let ok = true;
-    ['username','email','password'].forEach(function (id) {
-      document.getElementById(id).classList.remove('invalid');
-      document.getElementById(id).removeAttribute('aria-invalid');
-      var err = document.getElementById(id + '-error');
-      if (err) { err.textContent = ''; err.classList.add('hidden'); }
-    });
-    if (username.length < 3 || !/^[A-Za-z0-9]+$/.test(username)) {
-      document.getElementById('username').classList.add('invalid');
-      document.getElementById('username').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('username-error'); e.textContent = '<%= req.translations.registerUsernameError || "Username must be 3+ alphanumeric characters." %>'; e.classList.remove('hidden');
-      ok = false;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-      document.getElementById('email').classList.add('invalid');
-      document.getElementById('email').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('email-error'); e.textContent = '<%= req.translations.registerEmailError || "Please enter a valid email address." %>'; e.classList.remove('hidden');
-      ok = false;
-    }
-    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      document.getElementById('password').classList.add('invalid');
-      document.getElementById('password').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('password-error'); e.textContent = '<%= req.translations.registerPasswordError || "Password must be 8+ characters with at least one letter and one number." %>'; e.classList.remove('hidden');
-      ok = false;
-    }
-    if (!ok) { e.preventDefault(); return; }
-    document.getElementById('submitBtn').classList.add('loading');
-    document.getElementById('submitBtn').disabled = true;
-  });
-
-  ['username','email','password'].forEach(function (id) {
-    document.getElementById(id).addEventListener('input', function () {
-      this.classList.remove('invalid');
-      this.removeAttribute('aria-invalid');
-      var err = document.getElementById(id + '-error');
-      if (err) { err.textContent = ''; err.classList.add('hidden'); }
-    });
-  });
-})();
+  (function () {
+    var input = document.getElementById('register-password');
+    var list = document.getElementById('password-criteria');
+    if (!input || !list) { return; }
+    var checks = {
+      length: function (v) { return v.length >= 8; },
+      letter: function (v) { return /[A-Za-z]/.test(v); },
+      number: function (v) { return /\d/.test(v); }
+    };
+    var items = list.querySelectorAll('li');
+    var update = function () {
+      var value = input.value;
+      items.forEach(function (li) {
+        li.dataset.met = checks[li.dataset.criterion](value) ? 'true' : 'false';
+      });
+    };
+    input.addEventListener('input', update);
+    update();
+  })();
 </script>
 
-<%- include('../components/footer') %>
+<%- include('../layouts/auth-footer') %>

@@ -1,52 +1,85 @@
-<!-- Server settings form fragment — Alpine auto-save -->
-<div id="server-settings-form" class="al-card p-5"
-  x-data="{
-    saving: false,
-    lastSaved: null,
-    name: '<%= server.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>',
-    description: '<%= (server.description || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>',
-    async save() {
-      this.saving = true;
-      try {
-        const res = await fetch('/api/v2/servers/<%= server.UUID %>/settings', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: this.name, description: this.description }),
-        });
-        const data = await res.json();
-        if (data.success || res.ok) {
-          this.lastSaved = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-          showToast('Server settings saved.', 'success');
-        } else {
-          showToast(data.error || 'Failed to save settings.', 'error');
-        }
-      } catch (e) { showToast('Failed to save settings.', 'error'); }
-      this.saving = false;
-    }
-  }">
+<!-- Server settings form fragment — vanilla JS auto-save -->
+<div id="server-settings-form" class="al-card p-5">
   <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.serverSettings || 'Server Settings' %></h2>
   <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
 
-  <form @submit.prevent="save()">
+  <form id="serverSettingsFormEl">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
         <label for="serverName" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.serverName || 'Server Name' %></label>
-        <input type="text" id="serverName" name="name" x-model="name" class="al-input"
-          @input.debounce.500ms="save()">
+        <input type="text" id="serverName" name="name" class="al-input">
       </div>
       <div>
         <label for="serverDescription" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)">Description</label>
-        <input type="text" id="serverDescription" name="description" x-model="description" class="al-input"
-          @input.debounce.500ms="save()">
+        <input type="text" id="serverDescription" name="description" class="al-input">
       </div>
     </div>
     <div class="mt-5 flex items-center gap-3">
-      <button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2" :disabled="saving">
+      <button type="submit" id="settingsSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
         <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <span x-show="!saving"><%= req.translations.saveSettings || 'Save Settings' %></span>
-        <span x-show="saving">Saving...</span>
+        <span id="settingsSaveLabel"><%= req.translations.saveSettings || 'Save Settings' %></span>
+        <span id="settingsSavingLabel" style="display:none">Saving...</span>
       </button>
-      <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-xs" style="color:var(--theme-success)"></span>
+      <span id="settingsSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
     </div>
   </form>
 </div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var form = document.getElementById('serverSettingsFormEl');
+  var nameInput = document.getElementById('serverName');
+  var descInput = document.getElementById('serverDescription');
+  var submitBtn = document.getElementById('settingsSubmit');
+  var saveLabel = document.getElementById('settingsSaveLabel');
+  var savingLabel = document.getElementById('settingsSavingLabel');
+  var savedSpan = document.getElementById('settingsSaved');
+  var saving = false;
+  var debounceTimer = null;
+
+  nameInput.value = '<%= server.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>';
+  descInput.value = '<%= (server.description || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>';
+
+  function updateSaved() {
+    var now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    savedSpan.textContent = 'Saved ' + now;
+    savedSpan.style.display = '';
+    setTimeout(function() { savedSpan.style.display = 'none'; }, 3000);
+  }
+
+  function save() {
+    if (saving) return;
+    saving = true;
+    submitBtn.disabled = true;
+    saveLabel.style.display = 'none';
+    savingLabel.style.display = '';
+    fetch('/api/v2/servers/<%= server.UUID %>/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nameInput.value, description: descInput.value }),
+    }).then(function(res) { return res.json(); }).then(function(data) {
+      if (data.success || res.ok) {
+        updateSaved();
+        showToast('Server settings saved.', 'success');
+      } else {
+        showToast(data.error || 'Failed to save settings.', 'error');
+      }
+    }).catch(function() { showToast('Failed to save settings.', 'error'); })
+    .finally(function() {
+      saving = false;
+      submitBtn.disabled = false;
+      saveLabel.style.display = '';
+      savingLabel.style.display = 'none';
+    });
+  }
+
+  form.addEventListener('submit', function(e) { e.preventDefault(); save(); });
+
+  function debounceSave() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(save, 500);
+  }
+  nameInput.addEventListener('input', debounceSave);
+  descInput.addEventListener('input', debounceSave);
+})();
+</script>

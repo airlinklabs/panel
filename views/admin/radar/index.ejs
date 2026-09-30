@@ -1,0 +1,173 @@
+<%- include('../../layouts/admin', { title: 'Radar' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<%- include('../../partials/ui/breadcrumb', { items: [
+  { label: t('admin'), url: '/admin' },
+  { label: 'Radar' }
+] }) %>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">Radar</h1>
+    <p class="al-page-desc">Security scanning and VirusTotal integration for server files.</p>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">
+      <%- icon('file-code', { class: 'size-4', strokeWidth: 1.5 }) %> Scripts
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body" data-al-tabs data-tabs-default="scans" data-tabs-hash>
+
+  <div role="tablist" class="flex gap-1 mb-6">
+    <button type="button" role="tab" aria-selected="true" aria-controls="panel-scans" id="tab-scans" data-tab="scans" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('scan', { class: 'size-4', strokeWidth: 1.5 }) %> Scans</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-virustotal" id="tab-virustotal" data-tab="virustotal" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('bug', { class: 'size-4', strokeWidth: 1.5 }) %> VirusTotal</button>
+  </div>
+
+  <!-- Scans Tab -->
+  <div id="panel-scans" role="tabpanel" aria-labelledby="tab-scans" data-tab-panel="scans" class="tab-panel space-y-5">
+    <div class="al-card">
+      <h2 class="al-card-header">Server Scan</h2>
+      <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Scan a server's files for malicious content using configured scripts.</p>
+      <div class="p-4">
+        <div class="flex gap-3">
+          <input type="text" id="scanServerId" placeholder="Enter Server ID" class="al-input flex-1 max-w-xs">
+          <button type="button" id="scanBtn" class="al-btn-primary inline-flex items-center gap-1.5">
+            <%- icon('scan', { class: 'size-4', strokeWidth: 1.5 }) %> Scan
+          </button>
+        </div>
+        <div id="scanResult" class="mt-4 hidden"></div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header">Scan History</h2>
+      <div class="p-4">
+        <div id="scanHistory" class="text-sm" style="color:var(--theme-text-muted)">No recent scans.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VirusTotal Tab -->
+  <div id="panel-virustotal" role="tabpanel" aria-labelledby="tab-virustotal" data-tab-panel="virustotal" class="tab-panel space-y-5" hidden>
+    <div class="al-card">
+      <div class="relative">
+        <h2 class="al-card-header">VirusTotal Settings</h2>
+      </div>
+      <div class="p-4 space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Enable VirusTotal Scanning</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Automatically scan uploaded files with VirusTotal.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="vtEnabled" class="sr-only peer" <%= settings.virusTotalApiKey ? 'checked' : '' %>>
+            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          </label>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">API Key</label>
+          <div class="relative max-w-sm">
+            <input type="password" id="vtApiKey" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your VirusTotal API key" autocomplete="off" class="al-input pr-16 font-mono">
+            <button type="button" onclick="var inp=document.getElementById('vtApiKey');var btn=this;if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}else{inp.type='password';btn.textContent='Show';}" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Show</button>
+          </div>
+          <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs" style="color:var(--theme-success)">API key is configured.</p><% } %>
+        </div>
+        <button type="button" id="vtSaveBtn" class="al-btn-primary inline-flex items-center gap-1.5">
+          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Settings
+        </button>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header">VT Hash Scan</h2>
+      <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Look up a file hash on VirusTotal.</p>
+      <div class="p-4">
+        <div class="flex gap-3">
+          <input type="text" id="vtHashInput" placeholder="SHA-256, SHA-1, or MD5 hash" class="al-input flex-1 max-w-md font-mono">
+          <button type="button" id="vtScanBtn" class="al-btn-primary inline-flex items-center gap-1.5">
+            <%- icon('search', { class: 'size-4', strokeWidth: 1.5 }) %> Look Up
+          </button>
+        </div>
+        <div id="vtScanResult" class="mt-4 hidden"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+
+  // Scan server
+  var scanBtn = document.getElementById('scanBtn');
+  if (scanBtn) {
+    scanBtn.addEventListener('click', function() {
+      var serverId = document.getElementById('scanServerId')?.value?.trim();
+      if (!serverId) { showToast('Enter a server ID.', 'error'); return; }
+      var resultEl = document.getElementById('scanResult');
+      resultEl.classList.remove('hidden');
+      resultEl.innerHTML = '<p style="color:var(--theme-text-muted)">Scanning...</p>';
+      fetch('/admin/radar/scan/' + serverId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+          resultEl.innerHTML = '<p style="color:var(--theme-success)">Scan complete. No threats detected.</p>';
+        } else {
+          resultEl.innerHTML = '<p style="color:var(--theme-danger)">' + (res.message || 'Scan failed.') + '</p>';
+        }
+      }).catch(function() {
+        resultEl.innerHTML = '<p style="color:var(--theme-danger)">Scan request failed.</p>';
+      });
+    });
+  }
+
+  // VT settings save
+  var vtSaveBtn = document.getElementById('vtSaveBtn');
+  if (vtSaveBtn) {
+    vtSaveBtn.addEventListener('click', function() {
+      fetch('/admin/radar/virustotal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({
+          enabled: document.getElementById('vtEnabled')?.checked || false,
+          apiKey: document.getElementById('vtApiKey')?.value || '',
+        }),
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) { showToast('VirusTotal settings saved.', 'success'); }
+        else { showToast(res.message || 'Failed to save.', 'error'); }
+      }).catch(function() { showToast('Failed to save.', 'error'); });
+    });
+  }
+
+  // VT hash scan
+  var vtScanBtn = document.getElementById('vtScanBtn');
+  if (vtScanBtn) {
+    vtScanBtn.addEventListener('click', function() {
+      var hash = document.getElementById('vtHashInput')?.value?.trim();
+      if (!hash) { showToast('Enter a file hash.', 'error'); return; }
+      var resultEl = document.getElementById('vtScanResult');
+      resultEl.classList.remove('hidden');
+      resultEl.innerHTML = '<p style="color:var(--theme-text-muted)">Looking up...</p>';
+      fetch('/admin/radar/virustotal/scan/' + encodeURIComponent(hash), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.malicious) {
+          resultEl.innerHTML = '<div class="rounded-xl p-4" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"><p class="font-medium">Malicious detected</p><p class="text-xs mt-1">' + (data.message || 'File flagged by VirusTotal.') + '</p></div>';
+        } else {
+          resultEl.innerHTML = '<div class="rounded-xl p-4" style="background:var(--theme-success-bg);border:1px solid color-mix(in srgb, var(--theme-success) 25%, transparent);color:var(--theme-success)"><p class="font-medium">Clean</p><p class="text-xs mt-1">' + (data.message || 'No threats found.') + '</p></div>';
+        }
+      }).catch(function() {
+        resultEl.innerHTML = '<p style="color:var(--theme-danger)">Lookup failed.</p>';
+      });
+    });
+  }
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

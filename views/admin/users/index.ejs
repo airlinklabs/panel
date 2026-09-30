@@ -1,0 +1,175 @@
+<%- include('../../layouts/admin', { title: t('adminUsersTitle') }) %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbUsers') }
+  ] }) %>
+</div>
+
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminUsersTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminUsersText') %></p>
+  </div>
+  <div>
+    <a href="/admin/users/create" class="al-btn-primary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <span><%= t('createNewUser') %></span>
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body space-y-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="al-card">
+      <p class="al-section-label"><%= t('totalUsers') %></p>
+      <p class="text-2xl font-semibold tabular-nums al-text-strong"><%= users.length %></p>
+    </div>
+    <div class="al-card">
+      <p class="al-section-label"><%= t('admins') %></p>
+      <p class="text-2xl font-semibold tabular-nums al-text-strong"><%= users.filter(function(u) { return u.isAdmin; }).length %></p>
+    </div>
+  </div>
+
+  <% if (typeof req !== 'undefined' && req.query && req.query.err === 'none') { %>
+    <div class="al-alert-success" role="status">
+      <%- icon('check', { class: 'w-4 h-4 shrink-0 mt-0.5', strokeWidth: 2 }) %>
+      <div>
+        <p class="al-alert-title"><%= t('success') %></p>
+        <p class="al-alert-body"><%= t('actionCompleted') %></p>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (users.length === 0) { %>
+    <%- include('../../partials/empty-state', {
+      iconName: 'users',
+      title: t('noUsersYet'),
+      description: t('createYourFirstUser'),
+      action: '<a href="/admin/users/create" class="al-btn-primary">' + icon('plus', { class: 'w-3.5 h-3.5' }).toString() + ' ' + t('createUserBtn') + '</a>'
+    }) %>
+  <% } else { %>
+
+  <div class="lg:hidden space-y-2">
+    <% users.forEach(function(u) { %>
+    <div class="al-card flex items-center gap-3">
+      <div class="relative shrink-0">
+        <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium truncate al-text-strong"><%= u.username %></p>
+        <p class="text-xs truncate al-text-muted mt-1">
+          <span class="<%= u.role === 'owner' ? 'al-badge-warning' : u.isAdmin ? 'al-badge-online' : 'al-badge-neutral' %>">
+            <% if (u.role === 'owner') { %><%- icon('crown', { size: 10, class: 'shrink-0' }) %><% } %>
+            <%= u.role === 'owner' ? t('ownerRole') : u.isAdmin ? t('adminRole') : t('userRole') %>
+          </span>
+        </p>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <a href="/admin/users/view/<%= u.id %>" class="al-btn-ghost al-btn-icon-only" aria-label="<%= t('viewUser') %>">
+          <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
+        </a>
+        <a href="/admin/users/edit/<%= u.id %>" class="al-btn-ghost al-btn-icon-only" aria-label="<%= t('editUserBtn') %>">
+          <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+        </a>
+        <button onclick="deleteUser('<%= u.id %>')" type="button" class="al-btn-ghost al-btn-icon-only" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>">
+          <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+        </button>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+
+  <div class="al-table-wrapper hidden lg:block" id="userTable">
+    <table class="al-table">
+      <colgroup>
+        <col style="min-width:220px">
+        <col style="min-width:100px">
+        <col style="min-width:80px">
+        <col style="min-width:200px">
+      </colgroup>
+      <thead class="al-table-thead">
+        <tr>
+          <th scope="col" class="al-table-th"><%= t('name') %></th>
+          <th scope="col" class="al-table-th"><%= t('role') %></th>
+          <th scope="col" class="al-table-th"><%= t('servers') %></th>
+          <th scope="col" class="al-table-th"><%= t('actions') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(u, idx) { %>
+          <tr style="--i:<%= idx %>" class="al-table-tr cursor-pointer" tabindex="0" role="link"
+            data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>"
+            onclick="handleRowClick(event, '/admin/users/view/<%= u.id %>/')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= u.id %>/');}">
+            <td class="al-table-td">
+              <div class="flex items-center gap-3">
+                <img loading="lazy" decoding="async" class="h-7 w-7 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
+                <span class="al-table-cell-strong"><%= u.username %></span>
+              </div>
+            </td>
+            <td class="al-table-td">
+              <span class="<%= u.role === 'owner' ? 'al-badge-warning' : u.isAdmin ? 'al-badge-online' : 'al-badge-neutral' %>">
+                <% if (u.role === 'owner') { %><%- icon('crown', { size: 10, class: 'shrink-0' }) %><% } %>
+                <%= u.role === 'owner' ? t('owner') : u.isAdmin ? t('adminRole') : t('userRole') %>
+              </span>
+            </td>
+            <td class="al-table-td"><%= u._count ? u._count.servers : 0 %></td>
+            <td class="al-table-td">
+              <div class="flex items-center gap-1">
+                <a href="/admin/users/view/<%= u.id %>/" onclick="event.stopPropagation()" title="<%= t('viewUser') %>" aria-label="<%= t('viewUser') %>"
+                  class="al-btn-ghost min-w-[36px] min-h-[36px]">
+                  <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
+                </a>
+                <a href="/admin/users/edit/<%= u.id %>/" onclick="event.stopPropagation()" title="<%= t('editUserBtn') %>" aria-label="<%= t('editUserBtn') %>"
+                  class="al-btn-ghost min-w-[36px] min-h-[36px]">
+                  <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+                </a>
+                <button onclick="event.stopPropagation(); deleteUser('<%= u.id %>')" type="button" title="<%= t('deleteUserBtn') %>" aria-label="<%= t('deleteUserBtn') %>"
+                  class="al-btn-ghost min-w-[36px] min-h-[36px]" style="color:var(--theme-danger);">
+                  <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+                </button>
+              </div>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  window.handleRowClick = function(event, url) {
+    if (!event.target.closest('button, a')) window.location.href = url;
+  };
+
+  window.deleteUser = function(userId) {
+    window.modal.confirm({
+      title: '<%= t('deleteUser') %>',
+      body: '<%= t('areYouSureDeleteUser') %>',
+      danger: true,
+      confirmLabel: '<%= t('yeahDeleteIt') %>',
+      onConfirm: function() {
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        fetch('/admin/users/delete/' + userId, {
+          method: 'DELETE',
+          headers: { 'x-csrf-token': csrfToken }
+        }).then(function(response) {
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            showToast('<%= t('failedToDeleteUser') %>', 'error');
+          }
+        }).catch(function() {
+          showToast('<%= t('failedToDeleteUser') %>', 'error');
+        });
+      }
+    });
+  };
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

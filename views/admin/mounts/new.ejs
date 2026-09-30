@@ -1,0 +1,125 @@
+<%- include('../../layouts/admin', { title: 'New Mount' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <span style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/admin/overview" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/admin/mounts" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Mounts</a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);">New Mount</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">New Mount</h1>
+    <p class="al-page-desc">Create a shared directory mount for servers.</p>
+  </div>
+  <div class="flex gap-2 shrink-0 items-center">
+    <a href="/admin/mounts" class="al-btn-secondary">Back to Mounts</a>
+  </div>
+</div>
+
+<div class="al-page-body space-y-5">
+  <div id="mountError" class="rounded-xl px-4 py-3 text-sm hidden" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
+
+  <form id="mountForm" class="al-card space-y-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="md:col-span-2">
+        <label for="mountName" class="al-label flex items-center gap-1.5">
+          <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Name
+        </label>
+        <input id="mountName" name="name" class="al-input w-full" placeholder="Shared plugins" required>
+      </div>
+      <div>
+        <label for="mountSource" class="al-label flex items-center gap-1.5">
+          <%- icon('hard-drive', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Source Path
+        </label>
+        <input id="mountSource" name="source" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins" required>
+        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Path on the host machine</p>
+      </div>
+      <div>
+        <label for="mountTarget" class="al-label flex items-center gap-1.5">
+          <%- icon('folder', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Container Path
+        </label>
+        <input id="mountTarget" name="target" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins" required>
+        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Path inside the container</p>
+      </div>
+    </div>
+    <label class="flex items-center gap-2.5 text-sm cursor-pointer select-none" style="color:var(--theme-text-strong)">
+      <input id="mountReadOnly" name="readOnly" type="checkbox" class="h-4 w-4 rounded" style="border-color:var(--theme-border-input);accent-color:var(--theme-accent);">
+      Read only
+    </label>
+    <div class="flex justify-end gap-2 pt-2">
+      <a href="/admin/mounts" class="al-btn-secondary px-4 py-2 text-sm font-medium">Cancel</a>
+      <button type="submit" id="mountSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span id="mountSubmitText">Create Mount</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script nonce="<%- nonce %>">
+var csrfToken = '<%= csrfToken %>';
+(function() {
+  var form = document.getElementById('mountForm');
+  var errEl = document.getElementById('mountError');
+  var submitBtn = document.getElementById('mountSubmit');
+  var submitText = document.getElementById('mountSubmitText');
+  var saving = false;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (saving) return;
+    var name = form.elements.name.value.trim();
+    var source = form.elements.source.value.trim();
+    var target = form.elements.target.value.trim();
+    if (!name || !source || !target) {
+      errEl.textContent = 'All fields are required.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    errEl.classList.add('hidden');
+    saving = true;
+    submitBtn.disabled = true;
+    submitText.textContent = 'Creating...';
+    fetch('/admin/mounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: JSON.stringify({ name: name, source: source, target: target, readOnly: form.elements.readOnly.checked }),
+    }).then(function(res) {
+      if (res.ok) {
+        showToast('Mount created.', 'success');
+        window.location.href = '/admin/mounts';
+      } else {
+        return res.json().catch(function() { return { error: 'Failed to create mount.' }; }).then(function(data) {
+          errEl.textContent = data.error || data.message || 'Failed to create mount.';
+          errEl.classList.remove('hidden');
+        });
+      }
+    }).catch(function() {
+      errEl.textContent = 'Network error. Try again.';
+      errEl.classList.remove('hidden');
+    }).finally(function() {
+      saving = false;
+      submitBtn.disabled = false;
+      submitText.textContent = 'Create Mount';
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

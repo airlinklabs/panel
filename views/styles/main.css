@@ -1,0 +1,59 @@
+/* ── Cascade layer order (must be declared before any @layer).
+   Without this, first-appearance order wins and the custom
+   components layer (declared after Tailwind's utilities) overrides
+   utilities like .hidden — leaving every sheet/modal overlay stuck
+   open. Utilities must stay highest. ─────────────────────────── */
+@layer properties, theme, base, components, utilities;
+
+/* ── All imports must precede other CSS statements ──────────── */
+@import "./tokens/colors.css";
+@import "./tokens/spacing-radius-shadow.css";
+@import "./tokens/z-index.css";
+@import "./base/reset.css";
+@import "./base/typography.css";
+@import "./base/forms.css";
+@import "./components/button.css";
+@import "./components/card.css";
+@import "./components/table.css";
+@import "./components/badge.css";
+@import "./components/modal.css";
+@import "./components/toast.css";
+@import "./components/sheet.css";
+@import "./components/custom-select.css";
+@import "./components/field.css";
+@import "./components/state.css";
+@import "./components/tab.css";
+@import "./components/format-switcher.css";
+@import "./components/schedule.css";
+@import "./components/nav-settings.css";
+@import "./components/sidebar.css";
+@import "./components/topbar.css";
+@import "./components/ports-allocator.css";
+@import "./components/empty-state.css";
+@import "./components/breadcrumb.css";
+@import "./components/pagination.css";
+@import "./components/server-header.css";
+@import "./components/sftp-panel.css";
+@import "./components/panel.css";
+@import "./components/progress.css";
+@import "./components/icon-tile.css";
+@import "./components/avatar.css";
+@import "./components/chip.css";
+@import "./components/code.css";
+@import "./components/form-card.css";
+@import "./components/setting-row.css";
+@import "./components/criteria.css";
+@import "./components/activity.css";
+@import "./components/console-panel.css";
+@import "./components/credits-bg.css";
+@import "./pages/wallpaper.css";
+@import "./pages/auth.css";
+@import "./pages/console.css";
+@import "./pages/page-layout.css";
+@import "./pages/loading.css";
+@import "./pages/motion.css";
+
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+@custom-variant dark (&:where(.dark, .dark *));

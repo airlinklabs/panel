@@ -1,0 +1,29 @@
+@layer components {
+  /* ── Wallpaper layer ──────────────────────────────────────────
+     Set via body.al-wallpaper + --al-wallpaper-image. The layer is a
+     fixed full-viewport div behind all surfaces so cards, tables,
+     sheets and headers stay opaque and readable on any image.
+     Overview and Credits never get the class — they own their own bg. */
+  #al-wallpaper-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--al-wallpaper-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  #al-wallpaper-layer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--al-wallpaper-scrim, rgba(0, 0, 0, 0.35));
+  }
+  html {
+    --al-wallpaper-scrim: var(--scrim-light);
+  }
+  html.dark {
+    --al-wallpaper-scrim: var(--scrim-dark);
+  }
+}

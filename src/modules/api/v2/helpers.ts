@@ -22,13 +22,14 @@
  * formatting used by every V2 endpoint file.
  */
 
-import type { Request, Response } from "express";
-import prisma from "../../../db";
-import logger from "../../../handlers/logger";
+import type { Request, Response } from 'express';
+import prisma from '../../../db';
+import logger from '../../../handlers/logger';
 import {
   subUserHasPermission as _subUserHasPermission,
   parsePermissions as _parsePermissions,
-} from "../../../handlers/utils/auth/authorization";
+} from '../../../handlers/utils/auth/authorization';
+import type { SubUserPermission as AuthSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 
 // Infer types from the Prisma client instance
 type Users = Awaited<ReturnType<typeof prisma.users.findUnique>> &
@@ -75,6 +76,34 @@ export interface PaginationMeta {
  */
 export function jsonOk<T>(res: Response, data: T, meta?: PaginationMeta): void {
   const body: V2SuccessResponse<T> = { success: true, data };
+  if (meta) {
+    body.meta = meta;
+  }
+  res.json(body);
+}
+
+/**
+ * Send a success response with the V2 envelope AND mirror every payload field
+ * at the top level.
+ *
+ * Shape: `{ ...data, success: true, data: T, meta?: PaginationMeta }`
+ *
+ * Two kinds of consumer read the same endpoint:
+ *   - page controllers, which go through `internalApiClient` and unwrap
+ *     `{ success: true, data }`;
+ *   - browser JS that fetches `/api/v2/...` directly (`logs.js`, `files.js`)
+ *     and reads non-enveloped fields such as `d.logs` or `d.html`.
+ *
+ * Mirroring keeps the envelope contract intact while making the payload
+ * readable by both. Only use this for endpoints with a direct browser caller.
+ */
+export function jsonOkFlat<T extends Record<string, unknown>>(
+  res: Response,
+  data: T,
+  meta?: PaginationMeta,
+): void {
+  const body = { ...data, success: true as const, data } as V2SuccessResponse<T> &
+    T;
   if (meta) {
     body.meta = meta;
   }
@@ -149,12 +178,12 @@ export async function paginateQuery<T>(
 }
 
 export function parsePage(query: unknown): number {
-  const raw = typeof query === "string" ? parseInt(query, 10) : 1;
+  const raw = typeof query === 'string' ? parseInt(query, 10) : 1;
   return Number.isFinite(raw) && raw > 0 ? raw : 1;
 }
 
 export function parsePerPage(query: unknown, defaultVal = 25): number {
-  const raw = typeof query === "string" ? parseInt(query, 10) : defaultVal;
+  const raw = typeof query === 'string' ? parseInt(query, 10) : defaultVal;
   return Number.isFinite(raw) && raw > 0 ? Math.min(raw, 100) : defaultVal;
 }
 
@@ -170,7 +199,7 @@ export function getSessionUserId(req: Request): number | undefined {
   try {
     // Access through the Express app's session middleware — the session
     // object is always present when isAuthenticated middleware runs.
-    const session = req["session"] as { user?: { id?: number } } | undefined;
+    const session = req['session'] as { user?: { id?: number } } | undefined;
     return session?.user?.id;
   } catch {
     return undefined;
@@ -189,7 +218,7 @@ export function getAuthenticatedUserId(req: Request): number | undefined {
 
 /** Get the daemon protocol based on the app environment. */
 export function getAppProtocol(req: Request): string {
-  return req.app?.get("env") === "production" ? "https" : "http";
+  return req.app?.get('env') === 'production' ? 'https' : 'http';
 }
 
 // ---------------------------------------------------------------------------
@@ -202,30 +231,30 @@ export function getAppProtocol(req: Request): string {
  * Wildcard forms (e.g. "servers.*") grant all sub-capabilities.
  */
 export const ApiCapabilities = {
-  SERVERS_READ: "servers.read",
-  SERVERS_WRITE: "servers.write",
-  SERVERS_ALL: "servers.*",
-  FILES_READ: "files.read",
-  FILES_WRITE: "files.write",
-  FILES_ALL: "files.*",
-  DATABASES_READ: "databases.read",
-  DATABASES_WRITE: "databases.write",
-  DATABASES_ALL: "databases.*",
-  BACKUPS_READ: "backups.read",
-  BACKUPS_WRITE: "backups.write",
-  BACKUPS_ALL: "backups.*",
-  SCHEDULES_READ: "schedules.read",
-  SCHEDULES_WRITE: "schedules.write",
-  SCHEDULES_ALL: "schedules.*",
-  SUBUSERS_READ: "subusers.read",
-  SUBUSERS_WRITE: "subusers.write",
-  SUBUSERS_ALL: "subusers.*",
-  STARTUP_READ: "startup.read",
-  STARTUP_WRITE: "startup.write",
-  STARTUP_ALL: "startup.*",
-  ACCOUNT_READ: "account.read",
-  ACCOUNT_WRITE: "account.write",
-  ADMIN: "admin.*",
+  SERVERS_READ: 'servers.read',
+  SERVERS_WRITE: 'servers.write',
+  SERVERS_ALL: 'servers.*',
+  FILES_READ: 'files.read',
+  FILES_WRITE: 'files.write',
+  FILES_ALL: 'files.*',
+  DATABASES_READ: 'databases.read',
+  DATABASES_WRITE: 'databases.write',
+  DATABASES_ALL: 'databases.*',
+  BACKUPS_READ: 'backups.read',
+  BACKUPS_WRITE: 'backups.write',
+  BACKUPS_ALL: 'backups.*',
+  SCHEDULES_READ: 'schedules.read',
+  SCHEDULES_WRITE: 'schedules.write',
+  SCHEDULES_ALL: 'schedules.*',
+  SUBUSERS_READ: 'subusers.read',
+  SUBUSERS_WRITE: 'subusers.write',
+  SUBUSERS_ALL: 'subusers.*',
+  STARTUP_READ: 'startup.read',
+  STARTUP_WRITE: 'startup.write',
+  STARTUP_ALL: 'startup.*',
+  ACCOUNT_READ: 'account.read',
+  ACCOUNT_WRITE: 'account.write',
+  ADMIN: 'admin.*',
 } as const;
 
 export type ApiCapability =
@@ -238,12 +267,12 @@ export async function requireUser(
 ): Promise<Users | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     return null;
   }
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {
-    jsonError(res, "UNAUTHORIZED", "User not found", 401);
+    jsonError(res, 'UNAUTHORIZED', 'User not found', 401);
     return null;
   }
   return user;
@@ -259,7 +288,7 @@ export async function requireAdmin(
     return null;
   }
   if (!user.isAdmin) {
-    jsonError(res, "FORBIDDEN", "Admin access required", 403);
+    jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
     return null;
   }
   return user;
@@ -272,6 +301,8 @@ export async function requireAdmin(
 export interface ResolvedServer {
   server: Server;
   isOwner: boolean;
+  /** True when the requester is an admin acting on a server they don't own. */
+  isAdmin: boolean;
   subUser: SubUser | null;
 }
 
@@ -282,17 +313,17 @@ export interface ResolvedServer {
 export async function resolveServer(
   req: Request,
   res: Response,
-  serverIdParam = "id",
+  serverIdParam = 'id',
 ): Promise<ResolvedServer | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     return null;
   }
 
-  const serverUUID = String(req.params[serverIdParam] ?? "");
+  const serverUUID = String(req.params[serverIdParam] ?? '');
   if (!serverUUID) {
-    jsonError(res, "BAD_REQUEST", "Server ID is required", 400);
+    jsonError(res, 'BAD_REQUEST', 'Server ID is required', 400);
     return null;
   }
 
@@ -300,19 +331,19 @@ export async function resolveServer(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    jsonError(res, "NOT_FOUND", "Server not found", 404);
+    jsonError(res, 'NOT_FOUND', 'Server not found', 404);
     return null;
   }
 
   // Admin bypasses ownership check
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (user?.isAdmin) {
-    return { server, isOwner: false, subUser: null };
+    return { server, isOwner: false, isAdmin: true, subUser: null };
   }
 
   // Owner check
   if (server.ownerId === userId) {
-    return { server, isOwner: true, subUser: null };
+    return { server, isOwner: true, isAdmin: false, subUser: null };
   }
 
   // Subuser check
@@ -320,11 +351,11 @@ export async function resolveServer(
     where: { serverId_userId: { serverId: server.UUID, userId } },
   });
   if (!subUser) {
-    jsonError(res, "FORBIDDEN", "You do not have access to this server", 403);
+    jsonError(res, 'FORBIDDEN', 'You do not have access to this server', 403);
     return null;
   }
 
-  return { server, isOwner: false, subUser };
+  return { server, isOwner: false, isAdmin: false, subUser };
 }
 
 /** Check if a resolved server is suspended. Sends error and returns true if so. */
@@ -333,7 +364,7 @@ export function checkSuspended(
   resolved: ResolvedServer,
 ): boolean {
   if (resolved.server.Suspended) {
-    jsonError(res, "FORBIDDEN", "Server is suspended", 403);
+    jsonError(res, 'FORBIDDEN', 'Server is suspended', 403);
     return true;
   }
   return false;
@@ -343,27 +374,35 @@ export function checkSuspended(
 // SubUser permission check
 // ---------------------------------------------------------------------------
 
+/**
+ * Permission strings accepted by `requireSubUserPermission`.
+ *
+ * Union of the canonical `SUBUSER_PERMISSIONS` list (so `settings`,
+ * `files.sftp`, `startup`, `control.start`, … type-check) with the legacy
+ * aliases some handlers already pass (`start`, `databases`, `schedule.read`).
+ */
 export type SubUserPermission =
-  | "console"
-  | "console.send"
-  | "files"
-  | "files.read"
-  | "files.write"
-  | "backups"
-  | "backups.create"
-  | "backups.delete"
-  | "schedule.read"
-  | "schedule.create"
-  | "schedule.delete"
-  | "databases"
-  | "databases.create"
-  | "databases.delete"
-  | "start"
-  | "stop"
-  | "restart"
-  | "kill"
-  | "reinstall"
-  | "websocket.connect";
+  | AuthSubUserPermission
+  | 'console'
+  | 'console.send'
+  | 'files'
+  | 'files.read'
+  | 'files.write'
+  | 'backups'
+  | 'backups.create'
+  | 'backups.delete'
+  | 'schedule.read'
+  | 'schedule.create'
+  | 'schedule.delete'
+  | 'databases'
+  | 'databases.create'
+  | 'databases.delete'
+  | 'start'
+  | 'stop'
+  | 'restart'
+  | 'kill'
+  | 'reinstall'
+  | 'websocket.connect';
 
 /** Parse the permissions JSON string from a SubUser record. */
 export const parsePermissions = _parsePermissions;
@@ -380,7 +419,7 @@ export function requireSubUserPermission(
   resolved: ResolvedServer,
   permission: SubUserPermission,
 ): boolean {
-  if (resolved.isOwner) {
+  if (resolved.isOwner || resolved.isAdmin) {
     return true;
   }
   if (
@@ -392,7 +431,7 @@ export function requireSubUserPermission(
   ) {
     return true;
   }
-  jsonError(res, "FORBIDDEN", `Missing permission: ${permission}`, 403);
+  jsonError(res, 'FORBIDDEN', `Missing permission: ${permission}`, 403);
   return false;
 }
 
@@ -415,13 +454,13 @@ export async function logActivity(
         actorId: actorId ?? null,
         serverId: serverId ?? null,
         event,
-        category: category ?? "user_action",
-        severity: severity ?? "info",
+        category: category ?? 'user_action',
+        severity: severity ?? 'info',
         metadata: metadata ? JSON.stringify(metadata) : null,
         ip: ip ?? null,
       },
     });
   } catch (err) {
-    logger.error("Failed to log activity:", err);
+    logger.error('Failed to log activity:', err);
   }
 }

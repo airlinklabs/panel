@@ -50,7 +50,7 @@ Airlink Panel is a web-based control panel for deploying, monitoring, and managi
 - Web UI for admins and users (EJS templates, Tailwind CSS, Alpine.js, HTMX)
 - Node-based architecture: one panel controlling many daemons
 - Addon system for extending functionality without touching core files
-- REST API (v1 + v2 legacy) with scoped API keys and HMAC-signed daemon communication
+- REST API (v2) with scoped API keys and HMAC-signed daemon communication
 - Real-time console, file manager, backups, and SFTP
 - Server creation, power controls, and resource management
 - User management with 2FA and WebAuthn passkey support

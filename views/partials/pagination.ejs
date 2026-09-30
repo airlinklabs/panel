@@ -1,0 +1,122 @@
+<% if (typeof total !== 'undefined' && typeof pageSize !== 'undefined' && total > pageSize) { %>
+<div data-pagination class="flex items-center justify-between gap-3 px-4 py-3" data-total="<%= total %>" data-page-size="<%= pageSize %>">
+  <p class="text-xs shrink-0" data-pagination-count style="color:var(--theme-text-muted)"></p>
+  <div class="flex items-center gap-1" role="navigation" aria-label="<%= t('pagination') %>">
+    <button type="button" data-page="prev" class="p-2 rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted)" aria-label="<%= t('previousPage') %>">
+      <%- icon('chevron-left', { class: 'w-4 h-4' }) %>
+    </button>
+    <span class="flex items-center gap-1" data-pagination-window></span>
+    <button type="button" data-page="next" class="p-2 rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted)" aria-label="<%= t('nextPage') %>">
+      <%- icon('chevron-right', { class: 'w-4 h-4' }) %>
+    </button>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function () {
+  const instances = [];
+
+  function initPager(root) {
+    let table = root.previousElementSibling;
+    let tbody = null;
+    while (table && !tbody) {
+      if (table.tagName === 'TABLE') {
+        tbody = table.querySelector('tbody');
+        if (!tbody) break;
+      }
+      table = table.previousElementSibling;
+    }
+    if (!tbody) return;
+
+    const rows = Array.prototype.filter.call(tbody.children, function (r) {
+      return r.classList.contains('al-file-row');
+    });
+    const pageSize = parseInt(root.dataset.pageSize || '50', 10);
+    let page = 1;
+    let filtered = rows;
+    const countEl = root.querySelector('[data-pagination-count]');
+    const windowEl = root.querySelector('[data-pagination-window]');
+
+    function setFilter(predicate) {
+      filtered = predicate ? rows.filter(predicate) : rows;
+      page = 1;
+      render();
+    }
+
+    function pageCount() {
+      return Math.max(1, Math.ceil(filtered.length / pageSize));
+    }
+
+    function render() {
+      const total = filtered.length;
+      const pages = pageCount();
+      page = Math.min(page, pages);
+
+      const start = (page - 1) * pageSize;
+      const end = Math.min(start + pageSize, total);
+      rows.forEach(function (row) {
+        const idx = filtered.indexOf(row);
+        row.style.display = (idx >= start && idx < end) ? '' : 'none';
+      });
+
+      if (countEl) countEl.textContent = total > 0 ? (start + 1) + '\u2013' + end + ' of ' + total : '0 of 0';
+
+      if (!windowEl) return;
+      windowEl.innerHTML = '';
+      const MAX_BUTTONS = 5;
+      let lo = Math.max(1, page - 2);
+      let hi = Math.min(pages, lo + MAX_BUTTONS - 1);
+      lo = Math.max(1, hi - MAX_BUTTONS + 1);
+
+      function addBtn(label, target, active) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = label;
+        b.dataset.page = target;
+        b.className = 'min-w-[40px] h-10 px-1.5 rounded-lg text-xs font-medium transition-colors' +
+          (active ? '' : ' hover:bg-[var(--theme-bg-hover)]');
+        b.style.color = active ? 'var(--theme-accent-text)' : 'var(--theme-text-muted)';
+        if (active) b.style.background = 'var(--theme-accent)';
+        if (active) b.setAttribute('aria-current', 'page');
+        windowEl.appendChild(b);
+      }
+
+      if (lo > 1) addBtn('1', 1, false);
+      if (lo > 2) { const e = document.createElement('span'); e.textContent = '\u2026'; e.className = 'px-1 text-xs'; e.style.color = 'var(--theme-text-muted)'; windowEl.appendChild(e); }
+      for (let p = lo; p <= hi; p++) addBtn(String(p), p, p === page);
+      if (hi < pages - 1) { const e = document.createElement('span'); e.textContent = '\u2026'; e.className = 'px-1 text-xs'; e.style.color = 'var(--theme-text-muted)'; windowEl.appendChild(e); }
+      if (hi < pages) addBtn(String(pages), pages, false);
+    }
+
+    function go(target) {
+      const pages = pageCount();
+      if (target === 'prev') page = Math.max(1, page - 1);
+      else if (target === 'next') page = Math.min(pages, page + 1);
+      else page = Math.max(1, Math.min(pages, parseInt(target, 10) || 1));
+      render();
+      if (tbody && tbody.scrollIntoView) tbody.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    root.addEventListener('click', function (e) {
+      const btn = e.target.closest ? e.target.closest('[data-page]') : null;
+      if (btn) go(btn.dataset.page);
+    });
+
+    render();
+    instances.push({ setFilter: setFilter, render: render });
+  }
+
+  function boot() {
+    document.querySelectorAll('[data-pagination]').forEach(initPager);
+    if (instances.length) {
+      window.__alPagination = {
+        setFilter: function (predicate) { instances.forEach(function (i) { i.setFilter(predicate); }); },
+        refresh: function () { instances.forEach(function (i) { i.render(); }); },
+      };
+    }
+  }
+
+  boot();
+})();
+</script>
+<% } %>

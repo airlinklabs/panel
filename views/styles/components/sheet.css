@@ -1,0 +1,78 @@
+/* ── Unified popup system (sheets) ────────────────────────────────
+   Every popup uses .al-sheet-overlay (fixed wrapper) + .al-sheet-panel
+   (card): centered dialog on >=640px, full-width bottom sheet below.
+   One shared scrim — no inline rgba() backdrops anywhere. Wrappers are
+   hidden via the `hidden` class or Animate's .open/.al-modal-overlay.
+   Lives in @layer components so the `hidden`/`flex` display utilities
+   can toggle it. */
+@layer components {
+  .al-sheet-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: var(--overlay-bg-heavy);
+  }
+
+  /* Every sheet panel keeps its border themed. Tailwind v4's `border`
+   utility defaults to currentColor, which renders as a stray light/white
+   edge on any popup that forgets to theme it — this single rule removes
+   that class of bug (B-050 stray white border). Inline border-color (the
+   common case) still wins. */
+  .al-sheet-panel {
+    border-color: var(--theme-border);
+  }
+
+  /* Shared sheet regions. Popups that use these get one compact, touch-
+   friendly header/footer treatment across every surface instead of each
+   page inventing its own paddings. */
+  .al-sheet-header {
+    @apply flex items-center justify-between gap-3 px-5 py-3 border-b shrink-0;
+  }
+  .al-sheet-footer {
+    @apply flex items-center gap-2 px-5 py-3 border-t shrink-0;
+  }
+
+  @media (max-width: 639px) {
+    .al-sheet-overlay {
+      z-index: var(--z-overlay) !important;
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+    .al-sheet-panel {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      max-height: 92dvh;
+      overflow-y: auto;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .al-sheet-overlay.open .al-sheet-panel {
+        animation: none;
+      }
+      .al-sheet-overlay .al-sheet-panel.closing {
+        animation: none;
+      }
+    }
+    /* Compact sheet regions on phones: tight horizontal padding, smaller
+     vertical rhythm, and 44px touch targets for the header/footer
+     controls (B-044, B-045). */
+    .al-sheet-header,
+    .al-sheet-footer {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .al-sheet-header {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .al-sheet-footer {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .al-sheet-header button,
+    .al-sheet-footer button,
+    .al-sheet-header a,
+    .al-sheet-footer a {
+      min-height: 2.75rem;
+    }
+  }
+}

@@ -33,31 +33,26 @@
                 <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= (loc._count && loc._count.nodes) || 0 %> <%= (loc._count && loc._count.nodes) === 1 ? t('nodeSingular') : t('nodePlural') %></p>
               </div>
               <div class="flex items-center gap-1 shrink-0">
-                <button
-                  @click="openLocationNodes(<%= loc.id %>, '<%= loc.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>')"
-                  type="button"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                  style="color:var(--theme-text-muted);"
-                  aria-label="<%= t('viewNodesIn', { name: loc.name }) %>">
+                <a href="/admin/nodes?location=<%= loc.id %>"
+                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                   style="color:var(--theme-text-muted);"
+                   aria-label="<%= t('viewNodesIn', { name: loc.name }) %>">
                   <%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>
-                </button>
-                <button
-                  @click="openLocationEdit(<%= loc.id %>, '<%= loc.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>', '<%= loc.shortCode %>')"
-                  type="button"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                  style="color:var(--theme-text-muted);"
-                  aria-label="<%= t('editLocation', { name: loc.name }) %>">
+                </a>
+                <a href="/admin/nodes?location=<%= loc.id %>"
+                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                   style="color:var(--theme-text-muted);"
+                   aria-label="<%= t('editLocation', { name: loc.name }) %>">
                   <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
-                </button>
-                <button
-                  hx-delete="/api/v2/admin/locations/<%= loc.id %>"
-                  hx-target="#admin-locations-list"
-                  hx-swap="outerHTML"
-                  hx-confirm="<%= t('deleteLocationConfirm', { name: loc.name }) %>"
-                  type="button"
+                </a>
+                <button type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                  aria-label="<%= t('deleteLocation', { name: loc.name }) %>">
-                  <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
+                  style="color:var(--theme-danger);"
+                  aria-label="<%= t('deleteLocation', { name: loc.name }) %>"
+                  data-location-id="<%= loc.id %>"
+                  data-location-name="<%= loc.name %>"
+                  onclick="deleteLocation(this)">
+                  <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </button>
               </div>
             </div>

@@ -1,0 +1,32 @@
+/* ── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* Collapse decorative travel/scale/stagger keyframes to their end state
+     so layout and focus are stable. Opacity/color transitions are kept:
+     they carry state feedback (success/error, focus visibility, busy) and
+     must not be zeroed out. */
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Traveling entrances (dialogs, sheets, cards) land at their final state
+     via a fast fade instead of sliding/scaling. */
+  dialog.al-dialog[open],
+  .al-dialog-panel,
+  .al-sheet-panel,
+  .al-card,
+  .pa-row {
+    animation: none !important;
+    transition: opacity var(--dur-quick, 150ms) ease !important;
+  }
+  .al-sheet-overlay.open .al-sheet-panel {
+    transform: none !important;
+  }
+  .al-sheet-overlay .al-sheet-panel.closing {
+    transform: none !important;
+    opacity: 0;
+  }
+}

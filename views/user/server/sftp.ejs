@@ -1,0 +1,202 @@
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + t('navSFTP') }) %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name, url: '/server/' + server.UUID },
+    { label: t('navSFTP') }
+  ] }) %>
+</div>
+
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('navSFTP') %></h1>
+    <p class="al-page-desc"><%= t('sftpPageDesc') %></p>
+  </div>
+</header>
+
+<div class="al-page-body" data-server-uuid="<%= server.UUID %>">
+
+  <!-- Connection Info Card -->
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('globe', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('connectionInformation') %></h2>
+      </div>
+    </div>
+    <div class="al-card-body">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="al-form-label"><%= t('host') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-host" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-host"><%= t('copy') %></button>
+          </div>
+        </div>
+        <div>
+          <p class="al-form-label"><%= t('port') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-port" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-port"><%= t('copy') %></button>
+          </div>
+        </div>
+        <div>
+          <p class="al-form-label"><%= t('username') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-username" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-username"><%= t('copy') %></button>
+          </div>
+        </div>
+        <div>
+          <p class="al-form-label"><%= t('password') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-password" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-password"><%= t('copy') %></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions Card -->
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('key', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('sftpCredentials') %></h2>
+      </div>
+    </div>
+    <div class="al-card-body">
+      <div class="flex flex-wrap gap-2">
+        <button id="generatePasswordBtn" type="button" class="al-btn-primary min-h-11">
+          <%- icon('key', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('generatePassword') %>
+        </button>
+        <button id="deletePasswordBtn" type="button" class="al-btn-danger min-h-11">
+          <%- icon('trash-2', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('deletePassword') %>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Card -->
+  <div class="al-card">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('activity', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('recentActivity') %></h2>
+      </div>
+    </div>
+    <div class="al-card-body">
+      <div id="sftp-activity">
+        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('loadingActivity') %></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
+  const copyLabel = <%- JSON.stringify(t('copy')) %>;
+  const copiedLabel = <%- JSON.stringify(t('copied')) %>;
+  const noActivityLabel = <%- JSON.stringify(t('noRecentActivity')) %>;
+
+  // Load credentials
+  async function loadCredentials() {
+    try {
+      const res = await fetch(`/server/${serverUUID}/sftp/credentials`);
+      const data = await res.json();
+      const d = data.data || data;
+      document.getElementById('sftp-host').textContent = d.host || '—';
+      document.getElementById('sftp-port').textContent = d.port || '22';
+      document.getElementById('sftp-username').textContent = d.username || '—';
+      document.getElementById('sftp-password').textContent = d.password || '—';
+    } catch (e) {
+      console.error('Failed to load SFTP credentials', e);
+    }
+  }
+
+  // Load activity
+  function renderNoActivity(el) {
+    const p = document.createElement('p');
+    p.className = 'text-xs';
+    p.style.color = 'var(--theme-text-muted)';
+    p.textContent = noActivityLabel;
+    el.replaceChildren(p);
+  }
+
+  async function loadActivity() {
+    try {
+      const el = document.getElementById('sftp-activity');
+      const res = await fetch(`/server/${serverUUID}/sftp/activity`);
+      if (!res.ok) { renderNoActivity(el); return; }
+      const data = await res.json();
+      const activities = data.data || data || [];
+      if (!activities.length) { renderNoActivity(el); return; }
+      el.innerHTML = activities.slice(0, 10).map(a => `
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:var(--theme-border);">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs shrink-0" style="color:var(--theme-text-strong);">${a.action || '—'}</span>
+            <span class="text-xs truncate" style="color:var(--theme-text-muted);">${a.path || ''}</span>
+          </div>
+          <span class="text-[10px] shrink-0" style="color:var(--theme-text-muted);">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error('Failed to load SFTP activity', e);
+    }
+  }
+
+  // Generate password
+  document.getElementById('generatePasswordBtn')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`/server/${serverUUID}/sftp/credentials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      });
+      const data = await res.json();
+      if (data.success !== false) {
+        loadCredentials();
+        if (window.showToast) window.showToast(<%- JSON.stringify(t('passwordGenerated')) %>, 'success');
+      }
+    } catch (e) {
+      console.error('Failed to generate password', e);
+    }
+  });
+
+  // Delete password
+  document.getElementById('deletePasswordBtn')?.addEventListener('click', async () => {
+    if (!confirm(<%- JSON.stringify(t('confirmDeleteSftpPassword')) %>)) return;
+    try {
+      const res = await fetch(`/server/${serverUUID}/sftp/credentials`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success !== false) {
+        loadCredentials();
+        if (window.showToast) window.showToast(<%- JSON.stringify(t('passwordDeleted')) %>, 'success');
+      }
+    } catch (e) {
+      console.error('Failed to delete password', e);
+    }
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.querySelector(btn.dataset.copyFrom);
+      if (target) {
+        navigator.clipboard.writeText(target.textContent);
+        btn.textContent = copiedLabel;
+        setTimeout(() => { btn.textContent = copyLabel; }, 1500);
+      }
+    });
+  });
+
+  loadCredentials();
+  loadActivity();
+</script>
+
+<%- include('../../layouts/user-footer') %>

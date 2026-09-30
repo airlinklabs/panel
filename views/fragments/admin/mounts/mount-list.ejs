@@ -9,9 +9,9 @@
       <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noMountsYet') %></h3>
       <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);"><%= t('noMountsYetDesc') %></p>
       <div class="mt-5">
-        <button type="button" class="al-btn-primary" hx-get="/api/v2/admin/mounts/new" hx-target="#admin-mounts-dialog" hx-swap="innerHTML">
+        <a href="/api/v2/admin/mounts/new" class="al-btn-primary">
           <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('newMount') %></span>
-        </button>
+        </a>
       </div>
     </div>
   <% } else { %>
@@ -53,12 +53,10 @@
             <td class="al-table-td">
               <div class="flex gap-3">
                 <button
-                  x-data="{ deleting: false }"
-                  @click="if(!deleting && confirm('<%= (req.translations && req.translations.deleteMountConfirmList) || 'Delete this mount? Servers using it will no longer be able to attach it.' %>')) { deleting = true; fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('<%= (req.translations && req.translations.mountDeleted) || 'Mount deleted.', %>', 'success'); Turbo.visit(window.location.href); } else { showToast('<%= (req.translations && req.translations.failedToDeleteMount) || 'Failed to delete.', %>', 'error'); deleting = false; } }).catch(() => { showToast('<%= (req.translations && req.translations.networkError) || 'Network error.', %>', 'error'); deleting = false; }); }"
+                  onclick="if(confirm('<%= (req.translations && req.translations.deleteMountConfirmList) || 'Delete this mount? Servers using it will no longer be able to attach it.' %>')) { fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('<%= (req.translations && req.translations.mountDeleted) || 'Mount deleted.', %>', 'success'); window.location.reload(); } else { showToast('<%= (req.translations && req.translations.failedToDeleteMount) || 'Failed to delete.', %>', 'error'); } }).catch(() => { showToast('<%= (req.translations && req.translations.networkError) || 'Network error.', %>', 'error'); }); }"
                   type="button"
                   class="al-btn-ghost"
                   style="color:var(--theme-danger);"
-                  :disabled="deleting"
                   aria-label="<%= t('ariaDeleteMount') %>">
                   <%- icon('trash-2', { size: 16 }) %>
                 </button>

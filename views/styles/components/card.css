@@ -1,0 +1,92 @@
+@layer components {
+  /* ── Cards ───────────────────────────────────────────────────────────
+     One card surface. The call site picks a size (`--al-card-pad`) and
+     optionally a header/body/footer; it never re-declares padding with
+     utilities, because the component layer wins and the utility is dead.
+
+     Sizes:  default 1.25rem · flush 0 (media, tables, code) · lg 2rem (centred) */
+
+  .al-card {
+    --al-card-pad: 1.25rem;
+    @apply overflow-hidden;
+    padding: var(--al-card-pad);
+    border-radius: 0.75rem;
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+  }
+  .al-card-flush {
+    --al-card-pad: 0;
+    padding: 0;
+  }
+  .al-card-lg {
+    --al-card-pad: 2rem;
+  }
+  .al-card-accent {
+    border-color: var(--theme-primary, var(--theme-border));
+  }
+
+  /* Interactive card: the whole surface is the target. */
+  a.al-card,
+  [role="link"].al-card,
+  button.al-card {
+    @apply block transition-colors;
+  }
+  a.al-card:hover,
+  [role="link"].al-card:hover {
+    border-color: var(--theme-border-accent);
+    box-shadow: var(--theme-shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.12));
+  }
+
+  /* ── Header / body / footer ──────────────────────────────────────── */
+  .al-card-header {
+    margin: calc(var(--al-card-pad) * -1);
+    margin-bottom: 0;
+    padding: 0.75rem var(--al-card-pad);
+    @apply flex items-center justify-between gap-3 text-sm font-medium border-b;
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-muted);
+  }
+  .al-card-header-title,
+  .al-card-title {
+    @apply text-sm font-semibold truncate;
+    color: var(--theme-text-strong);
+  }
+  .al-card-header-desc,
+  .al-card-subtitle {
+    @apply text-[13px] mt-0.5;
+    color: var(--theme-text-muted);
+  }
+  .al-card-header-actions {
+    @apply flex items-center gap-2 shrink-0;
+  }
+  .al-card-body {
+    padding-top: var(--al-card-pad);
+  }
+  .al-card-footer {
+    margin: calc(var(--al-card-pad) * -1);
+    margin-top: 0;
+    padding: 0.75rem var(--al-card-pad);
+    @apply flex items-center justify-end gap-2 text-sm border-t;
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border);
+  }
+
+  /* A card whose header is present puts its body directly under it. */
+  .al-card:has(> .al-card-header) > .al-card-body {
+    padding-top: var(--al-card-pad);
+  }
+
+  /* ── Section: a heading plus a panel, without the nested card ─────── */
+  .al-section {
+    @apply flex flex-col gap-3;
+  }
+  .al-section-head {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+  .al-section-desc {
+    @apply text-[13px] mt-0.5;
+    color: var(--theme-text-muted);
+  }
+}

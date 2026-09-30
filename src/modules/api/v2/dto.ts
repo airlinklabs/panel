@@ -8,8 +8,8 @@
  * from our own database/daemon).
  */
 
-import { z } from "zod";
-import { SUBUSER_PERMISSIONS } from "../../../handlers/utils/auth/serverAuthUtil";
+import { z } from 'zod';
+import { SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -19,18 +19,18 @@ const safePath = z
   .string()
   .min(1)
   .max(4096)
-  .refine((v) => !v.includes("\0"), "path contains null byte")
-  .refine((v) => !v.includes(".."), "path contains traversal");
+  .refine((v) => !v.includes('\0'), 'path contains null byte')
+  .refine((v) => !v.includes('..'), 'path contains traversal');
 
 const safeFilename = z
   .string()
   .min(1)
   .max(255)
-  .refine((v) => !v.includes("\0"), "filename contains null byte")
-  .refine((v) => !v.includes(".."), "filename contains traversal")
+  .refine((v) => !v.includes('\0'), 'filename contains null byte')
+  .refine((v) => !v.includes('..'), 'filename contains traversal')
   .refine(
-    (v) => !v.includes("/") && !v.includes("\\"),
-    "must be a filename, not a path",
+    (v) => !v.includes('/') && !v.includes('\\'),
+    'must be a filename, not a path',
   );
 
 const VALID_PERMISSIONS = new Set<string>(SUBUSER_PERMISSIONS);
@@ -43,7 +43,7 @@ export const permissionSchema = z.array(z.string()).refine(
         return true;
       }
       // Wildcard: "files.*" → check group exists with read or create
-      if (p.endsWith(".*")) {
+      if (p.endsWith('.*')) {
         const group = p.slice(0, -2);
         return (
           VALID_PERMISSIONS.has(`${group}.read`) ||
@@ -53,7 +53,7 @@ export const permissionSchema = z.array(z.string()).refine(
       // Parent: "files" → check any "files.*" exists
       return [...VALID_PERMISSIONS].some((v) => v.startsWith(`${p}.`));
     }),
-  { message: "Invalid permission string" },
+  { message: 'Invalid permission string' },
 );
 
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ export type UpdateServerBody = z.infer<typeof updateServerBody>;
 // Power
 // ---------------------------------------------------------------------------
 
-export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
+export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
 export const powerBody = z.object({ action: z.enum(POWER_ACTIONS) });
 export type PowerBody = z.infer<typeof powerBody>;
 
@@ -125,7 +125,8 @@ export type UnzipBody = z.infer<typeof unzipBody>;
 // ---------------------------------------------------------------------------
 
 export const createDatabaseBody = z.object({
-  hostId: z.number().int().positive(),
+  // The host picker submits the <select>'s string value.
+  hostId: z.coerce.number().int().positive(),
 });
 export type CreateDatabaseBody = z.infer<typeof createDatabaseBody>;
 
@@ -134,7 +135,9 @@ export type CreateDatabaseBody = z.infer<typeof createDatabaseBody>;
 // ---------------------------------------------------------------------------
 
 export const createBackupBody = z.object({
-  name: z.string().min(1).max(100),
+  // Optional — the UI's one-click "Create backup" sends no name, so the
+  // handler stamps a timestamped default.
+  name: z.string().min(1).max(100).optional(),
 });
 export type CreateBackupBody = z.infer<typeof createBackupBody>;
 
@@ -142,13 +145,15 @@ export type CreateBackupBody = z.infer<typeof createBackupBody>;
 // Schedules
 // ---------------------------------------------------------------------------
 
-export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
+export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
 
 export const createScheduleBody = z.object({
   name: z.string().min(1).max(100),
   cron: z.string().min(1).max(100),
   enabled: z.boolean().optional().default(false),
-  action: z.enum(SCHEDULE_ACTIONS),
+  // Optional: the UI creates a bare schedule and attaches tasks afterwards,
+  // so the initial task only rides along for direct API clients.
+  action: z.enum(SCHEDULE_ACTIONS).optional(),
   payload: z.string().max(8192).optional(),
   timeOffset: z.number().int().min(0).optional().default(0),
 });
@@ -164,7 +169,7 @@ export type UpdateScheduleBody = z.infer<typeof updateScheduleBody>;
 
 export const createScheduleTaskBody = z.object({
   action: z.string().min(1).max(50),
-  payload: z.string().max(8192).optional().default("{}"),
+  payload: z.string().max(8192).optional().default('{}'),
   order: z.number().int().min(0).optional().default(0),
   timeOffset: z.number().int().min(0).optional().default(0),
 });
@@ -174,10 +179,23 @@ export type CreateScheduleTaskBody = z.infer<typeof createScheduleTaskBody>;
 // Sub-users
 // ---------------------------------------------------------------------------
 
-export const createSubUserBody = z.object({
-  userId: z.number().int().positive(),
-  permissions: permissionSchema.optional().default([]),
-});
+/**
+ * Create body accepts either identity form:
+ *   - `{ email }` — the subusers UI posts the target's email; the handler
+ *     resolves it to a user exactly like the legacy route did.
+ *   - `{ userId }` — direct API callers target an id.
+ * At least one must be present.
+ */
+export const createSubUserBody = z
+  .object({
+    email: z.string().trim().min(1).max(255).optional(),
+    userId: z.number().int().positive().optional(),
+    permissions: permissionSchema.optional().default([]),
+  })
+  .refine((body) => Boolean(body.email) || body.userId !== undefined, {
+    message: 'Either email or userId is required',
+    path: ['email'],
+  });
 export type CreateSubUserBody = z.infer<typeof createSubUserBody>;
 
 export const updateSubUserBody = z.object({
@@ -190,7 +208,9 @@ export type UpdateSubUserBody = z.infer<typeof updateSubUserBody>;
 // ---------------------------------------------------------------------------
 
 export const saveStartupCommandBody = z.object({
-  command: z.string().max(2048).nullable(),
+  /** Client-facing field (startup.ejs + save-all both use `startCommand`). */
+  startCommand: z.string().max(2048).optional(),
+  command: z.string().max(2048).nullable().optional(),
 });
 export type SaveStartupCommandBody = z.infer<typeof saveStartupCommandBody>;
 
@@ -200,14 +220,9 @@ export const saveDockerImageBody = z.object({
 export type SaveDockerImageBody = z.infer<typeof saveDockerImageBody>;
 
 export const saveVariablesBody = z.object({
-  variables: z.array(
-    z.object({
-      key: z.string().min(1).max(255),
-      value: z.string().max(8192),
-      editable: z.boolean().optional().default(true),
-      rules: z.string().optional(),
-    }),
-  ),
+  /** Stored verbatim on `server.Variables`; the image defines the shape —
+   * same contract as save-all's `variables` field. */
+  variables: z.array(z.record(z.string(), z.unknown())),
 });
 export type SaveVariablesBody = z.infer<typeof saveVariablesBody>;
 
@@ -220,7 +235,7 @@ export const updateUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
 });
 export type UpdateUsernameBody = z.infer<typeof updateUsernameBody>;
 
@@ -259,7 +274,7 @@ export const checkUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
 });
 export type CheckUsernameBody = z.infer<typeof checkUsernameBody>;
 
@@ -308,15 +323,19 @@ export const adminCreateUserBody = z.object({
     .optional(),
   password: z.string().min(8).max(128),
   role: z
-    .enum(["owner", "admin", "privileged", "user"])
+    .enum(['owner', 'admin', 'privileged', 'user'])
     .optional()
-    .default("user"),
+    .default('user'),
   isAdmin: z.boolean().optional().default(false),
-  serverLimit: z.number().int().min(0).optional(),
-  maxMemory: z.number().int().min(0).optional(),
-  maxCpu: z.number().int().min(0).optional(),
-  maxStorage: z.number().int().min(0).optional(),
-  maxDatabases: z.number().int().min(0).optional(),
+  // The create form sends `null` for untouched limit fields — that means
+  // "inherit the global default", which the DB columns (nullable) and the
+  // runtime limit checks both treat as unset. `.optional()` alone rejects
+  // `null`, so these must be `.nullish()`.
+  serverLimit: z.number().int().min(0).nullish(),
+  maxMemory: z.number().int().min(0).nullish(),
+  maxCpu: z.number().int().min(0).nullish(),
+  maxStorage: z.number().int().min(0).nullish(),
+  maxDatabases: z.number().int().min(0).nullish(),
 });
 export type AdminCreateUserBody = z.infer<typeof adminCreateUserBody>;
 
@@ -329,13 +348,14 @@ export const adminUpdateUserBody = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/)
     .optional(),
   password: z.string().min(8).max(128).optional(),
-  role: z.enum(["owner", "admin", "privileged", "user"]).optional(),
+  role: z.enum(['owner', 'admin', 'privileged', 'user']).optional(),
   isAdmin: z.boolean().optional(),
-  serverLimit: z.number().int().min(0).optional(),
-  maxMemory: z.number().int().min(0).optional(),
-  maxCpu: z.number().int().min(0).optional(),
-  maxStorage: z.number().int().min(0).optional(),
-  maxDatabases: z.number().int().min(0).optional(),
+  // `null` clears the override back to the global default (see create body).
+  serverLimit: z.number().int().min(0).nullish(),
+  maxMemory: z.number().int().min(0).nullish(),
+  maxCpu: z.number().int().min(0).nullish(),
+  maxStorage: z.number().int().min(0).nullish(),
+  maxDatabases: z.number().int().min(0).nullish(),
 });
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBody>;
 
@@ -431,6 +451,16 @@ export const adminSettingsGeneralBody = z.object({
   language: z.string().optional(),
   allowRegistration: z.boolean().optional(),
   uploadLimit: z.number().int().min(1).optional(),
+  // Legacy POST /admin/settings/general persisted this key; the settings page
+  // fan-out posts it with every save. `''` and whitespace clear the key.
+  virusTotalApiKey: z
+    .string()
+    .max(512)
+    .nullable()
+    .optional()
+    .transform((value) =>
+      typeof value === 'string' ? value.trim() || null : value,
+    ),
 });
 export type AdminSettingsGeneralBody = z.infer<typeof adminSettingsGeneralBody>;
 
@@ -443,6 +473,16 @@ export const adminSettingsSecurityBody = z.object({
   require2faForAdmins: z.boolean().optional(),
   behindReverseProxy: z.boolean().optional(),
   hashApiKeys: z.boolean().optional(),
+  // Legacy POST /admin/settings/security persisted the VT key alongside the
+  // other security toggles (the radar tab reads it from settings).
+  virusTotalApiKey: z
+    .string()
+    .max(512)
+    .nullable()
+    .optional()
+    .transform((value) =>
+      typeof value === 'string' ? value.trim() || null : value,
+    ),
 });
 export type AdminSettingsSecurityBody = z.infer<
   typeof adminSettingsSecurityBody
@@ -451,6 +491,15 @@ export type AdminSettingsSecurityBody = z.infer<
 export const adminSettingsServerPolicyBody = z.object({
   allowUserCreateServer: z.boolean().optional(),
   allowUserDeleteServer: z.boolean().optional(),
+  // Legacy POST /admin/settings/server-policy treated this as the image
+  // submission toggle (`true`/`'true'`). Read back through getSettings().
+  allowUserCreateImages: z
+    .preprocess(
+      (value) =>
+        value === 'true' ? true : value === 'false' ? false : value,
+      z.boolean(),
+    )
+    .optional(),
   defaultServerLimit: z.number().int().min(0).optional(),
   defaultMaxMemory: z.number().int().min(0).optional(),
   defaultMaxCpu: z.number().int().min(0).optional(),
@@ -685,3 +734,229 @@ export const adminTransferOwnerBody = z.object({
   newOwnerId: z.number().int().positive(),
 });
 export type AdminTransferOwnerBody = z.infer<typeof adminTransferOwnerBody>;
+
+// ---------------------------------------------------------------------------
+// Admin — Radar scripts (net-new: scripts are JSON files in storage/radar)
+// ---------------------------------------------------------------------------
+
+/**
+ * Script ids are also the on-disk filename (`<id>.json`), so they are pinned
+ * to a traversal-safe charset.
+ */
+export const RADAR_SCRIPT_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+
+export const radarScriptPatternBody = z.looseObject({
+  type: z.string().min(1).max(50),
+  pattern: z.string().min(1),
+  severity: z.string().max(30).optional(),
+  description: z.string().max(500).optional(),
+  content: z.string().optional(),
+});
+export type RadarScriptPatternBody = z.infer<typeof radarScriptPatternBody>;
+
+/**
+ * Loose object: scripts may carry extra top-level keys that the scanner
+ * understands but this schema does not — they must survive the round trip.
+ */
+export const adminRadarScriptBody = z.looseObject({
+  id: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(RADAR_SCRIPT_ID_RE, 'Invalid script ID')
+    .optional(),
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional().default(''),
+  version: z.string().min(1).max(32).optional().default('1.0.0'),
+  patterns: z.array(radarScriptPatternBody).optional().default([]),
+});
+export type AdminRadarScriptBody = z.infer<typeof adminRadarScriptBody>;
+
+export const adminRadarScriptUpdateBody = z.looseObject({
+  id: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(RADAR_SCRIPT_ID_RE, 'Invalid script ID')
+    .optional(),
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional(),
+  version: z.string().min(1).max(32).optional(),
+  patterns: z.array(radarScriptPatternBody).optional(),
+});
+export type AdminRadarScriptUpdateBody = z.infer<
+  typeof adminRadarScriptUpdateBody
+>;
+
+// ---------------------------------------------------------------------------
+// Admin — VirusTotal config vs. hash lookup on POST /admin/radar/virustotal
+// ---------------------------------------------------------------------------
+
+export const adminRadarVtSettingsBody = z.object({
+  enabled: z.boolean(),
+  apiKey: z.string().max(512).optional(),
+  virusTotalApiKey: z.string().max(512).optional(),
+});
+export type AdminRadarVtSettingsBody = z.infer<typeof adminRadarVtSettingsBody>;
+
+export const adminRadarVtLookupBody = z.object({
+  hash: z
+    .string()
+    .regex(
+      /^[a-fA-F0-9]{32,64}$/,
+      'A valid MD5, SHA1, or SHA256 hash is required',
+    ),
+});
+export type AdminRadarVtLookupBody = z.infer<typeof adminRadarVtLookupBody>;
+
+/** Dual-mode body: VT settings save, or a hash lookup (legacy behaviour). */
+export const adminRadarVtPostBody = z.union([
+  adminRadarVtSettingsBody,
+  adminRadarVtLookupBody,
+]);
+export type AdminRadarVtPostBody = z.infer<typeof adminRadarVtPostBody>;
+
+// ---------------------------------------------------------------------------
+// Admin — Addon capabilities / settings / commands
+// ---------------------------------------------------------------------------
+
+export const ADDON_CAPABILITIES = [
+  'wrapsDashboard',
+  'wrapsAdminLayout',
+  'runsRawSql',
+  'registersSchedules',
+] as const;
+
+export const adminAddonCapabilityBody = z.object({
+  capability: z.enum(ADDON_CAPABILITIES),
+  enabled: z.boolean().default(true),
+});
+export type AdminAddonCapabilityBody = z.infer<typeof adminAddonCapabilityBody>;
+
+/**
+ * Addon settings are a free-form key/value bag defined per-addon by its
+ * manifest `settingsSchema`; only the "is it an object?" edge is validated
+ * here, the manifest schema is applied in the handler.
+ */
+export const adminAddonSettingsBody = z.preprocess(
+  (value) => (value !== null && typeof value === 'object' ? value : {}),
+  z.looseObject({}),
+);
+
+/** Commands are posted with no body at all — args are optional. */
+export const adminAddonCommandBody = z.preprocess(
+  (value) => (value !== null && typeof value === 'object' ? value : {}),
+  z.looseObject({ args: z.unknown().optional() }),
+);
+export interface AdminAddonCommandBody {
+  args?: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Server creation (user flow)
+// ---------------------------------------------------------------------------
+
+/** The create-server form posts every field as a string; resource columns are
+ * capitalized to match the form input `name`s (`Memory`, `Cpu`, `Storage`,
+ * `Swap`). Accept both string and number so JSON callers work too. */
+const numericish = z.union([z.string(), z.number()]);
+
+export const createServerBody = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional().nullable(),
+  nodeId: numericish,
+  imageId: numericish,
+  dockerImage: z.string().min(1).max(255),
+  Memory: numericish,
+  Cpu: numericish,
+  Storage: numericish,
+  Swap: numericish.optional(),
+  /** Multi-port flow: users pick internal ports, external ports are assigned
+   * from the node pool. Falls back to the image's port requirements. */
+  ports: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(64),
+        internalPort: z.number().int().optional(),
+        port: z.number().int().optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
+  /** Rendered by `partials/csrf` in the form; harmless here. */
+  _csrf: z.string().optional(),
+});
+export type CreateServerBody = z.infer<typeof createServerBody>;
+
+// ---------------------------------------------------------------------------
+// Server settings
+// ---------------------------------------------------------------------------
+
+export const updateServerSettingsBody = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional().nullable(),
+});
+export type UpdateServerSettingsBody = z.infer<
+  typeof updateServerSettingsBody
+>;
+
+// ---------------------------------------------------------------------------
+// Startup — save-all
+// ---------------------------------------------------------------------------
+
+export const saveStartupBody = z.object({
+  startCommand: z.string().max(2048).optional(),
+  command: z.string().max(2048).optional().nullable(),
+  dockerImage: z.string().min(1).max(255).optional(),
+  /** Stored verbatim on `server.Variables`; the image defines the shape. */
+  variables: z.array(z.record(z.string(), z.unknown())).optional(),
+});
+export type SaveStartupBody = z.infer<typeof saveStartupBody>;
+
+// ---------------------------------------------------------------------------
+// Files — detail / generic action / upload
+// ---------------------------------------------------------------------------
+
+export const pullFileBody = z.object({
+  url: z.string().min(1).max(2048),
+  path: z.string().max(4096).optional(),
+});
+export type PullFileBody = z.infer<typeof pullFileBody>;
+
+/**
+ * Generic file dispatcher. `POST /files/action` receives
+ * `{ action: 'delete', ...body }` from the page controller; the action list
+ * mirrors the operations the file manager exposes.
+ */
+export const fileActionBody = z.object({
+  action: z.string().min(1).max(32),
+  file: safePath.optional(),
+  path: z.string().max(4096).optional(),
+  target: z.string().max(4096).optional(),
+  name: z.string().min(1).max(255).optional(),
+  newname: z.string().min(1).max(255).optional(),
+  newName: z.string().min(1).max(255).optional(),
+  files: z.array(safePath).max(100).optional(),
+  content: z.string().optional(),
+  zipname: z.string().min(1).max(255).optional(),
+  relativePath: z.string().max(4096).optional(),
+  url: z.string().max(2048).optional(),
+});
+export type FileActionBody = z.infer<typeof fileActionBody>;
+
+/** JSON upload body (the page route has no multer). */
+export const uploadFileBody = z
+  .object({
+    path: z.string().max(4096).optional(),
+    fileName: z.string().min(1).max(255).optional(),
+    fileContent: z.string().optional(),
+    file: z.string().min(1).max(255).optional(),
+    content: z.string().optional(),
+  })
+  .refine(
+    (d) =>
+      (d.fileName !== undefined && d.fileContent !== undefined) ||
+      (d.file !== undefined && d.content !== undefined),
+    { message: 'fileName and fileContent are required' },
+  );
+export type UploadFileBody = z.infer<typeof uploadFileBody>;

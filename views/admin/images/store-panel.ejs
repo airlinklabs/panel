@@ -1,14 +1,3 @@
-<%- /*
- * store-panel.ejs — the image store body, shared by the full store page
- * (store.ejs) and the lazy "Store" tab on /admin/images (loaded via
- * data-tab-src on the store tab panel).
- *
- * Includes the search row, loading/error/empty/list states and the group
- * and egg templates the store's modal drill-downs clone into the shared
- * #globalModalContent shell. No page chrome here — the host owns the
- * sidebar, header, breadcrumb and tablist.
- */ %>
-
 <style>
   .modal-sheet { display: flex; flex-direction: column; }
   .modal-two-col { display: flex; flex: 1; overflow: hidden; min-height: 0; }
@@ -78,15 +67,14 @@
   html.dark #listEl thead th { background: var(--theme-table-header-bg,#1a1a1a); }
   #listBody td:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  @media (max-width: 640px) {
-    .modal-two-col { flex-direction: column; }
-    .modal-left { width: 100%; border-right: none; border-bottom: 1px solid var(--theme-border,#e5e5e5); }
-    .search-row { flex-wrap: wrap; }
-  }
+  .err-box { background: var(--theme-danger-bg); border: 1px solid var(--theme-danger-border, color-mix(in srgb, var(--theme-danger) 20%, transparent)); border-radius: 10px; padding: 10px 14px; }
+  .err-txt { font-size: 11.5px; color: var(--theme-btn-danger-bg); }
+  html.dark .err-txt { color: var(--theme-danger); }
+  @media (max-width: 640px) { .col-hide { display: none; } }
 </style>
 
 <!-- Search + Refresh -->
-<div class="flex items-center gap-3 mt-5 mb-2 search-row">
+<div class="flex items-center gap-3 mt-5 mb-2">
   <div class="relative flex-1 max-w-xs min-w-0">
     <input id="image-store-search-input" type="text" placeholder="Search images&hellip;" aria-label="Search images" class="al-input w-full pl-3 pr-3" autocomplete="off">
   </div>
@@ -101,10 +89,10 @@
 <div id="loadingEl" class="overflow-hidden rounded-xl mt-3 border" style="border-color:var(--theme-border)">
   <% for(var i=0;i<8;i++){%>
   <div class="flex items-center gap-4 px-6 py-4" style="border-bottom:1px solid var(--theme-border)">
-    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] flex-1 max-w-[30%]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
-    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-16" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
-    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-24 ml-auto" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
-    <div class="h-8 w-20 rounded-lg bg-[var(--theme-bg-secondary)]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] flex-1 max-w-[30%]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);"></div></div>
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-16" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%)"></div></div>
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-24 ml-auto" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%)"></div></div>
+    <div class="h-8 w-20 rounded-lg bg-[var(--theme-bg-secondary)]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%)"></div></div>
   </div>
   <% } %>
 </div>
@@ -161,11 +149,7 @@
   </table>
 </div>
 
-<!-- Group drill-down content — staged via a <template> so the 2-step
-     popup never has to move DOM nodes back and forth. openGroup() clones
-     this into #globalModalContent (the shared window.modal body) and
-     populates it there, so getElementById always resolves against fresh,
-     unattached-free nodes. -->
+<!-- Group drill-down -->
 <template id="groupTpl">
   <div class="modal-sheet" style="height:540px;">
     <div class="flex items-center gap-2 mb-3">
@@ -184,7 +168,7 @@
   </div>
 </template>
 
-<!-- Image detail / install step — same treatment: cloned into the modal -->
+<!-- Image detail / install -->
 <template id="eggTpl">
   <div class="modal-sheet" style="height:480px;">
     <div class="space-y-1 mb-3">
@@ -202,14 +186,3 @@
     </div>
   </div>
 </template>
-
-<style>
-  @keyframes al-shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  .err-box { background: var(--theme-danger-bg); border: 1px solid var(--theme-danger-border, color-mix(in srgb, var(--theme-danger) 20%, transparent)); border-radius: 10px; padding: 10px 14px; }
-  .err-txt { font-size: 11.5px; color: var(--theme-btn-danger-bg); }
-  html.dark .err-txt { color: var(--theme-danger); }
-  @media (max-width: 640px) { .col-hide { display: none; } }
-</style>

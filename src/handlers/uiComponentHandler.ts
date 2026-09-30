@@ -28,6 +28,7 @@ export interface ServerMenuItem {
   isDefault?: boolean;
   ownerOnly?: boolean;
   group?: string;
+  visible?: boolean;
 }
 
 export interface ServerSection {
@@ -174,6 +175,38 @@ export class UIComponentStore {
     this.serverMenuItems = this.serverMenuItems.filter(
       (item) => item.id !== id,
     );
+  }
+
+  public updateServerMenuItem(
+    id: string,
+    updates: {
+      label?: string;
+      url?: string;
+      group?: string;
+      priority?: number;
+      feature?: string;
+      visible?: boolean;
+    },
+  ): void {
+    const idx = this.serverMenuItems.findIndex((item) => item.id === id);
+    if (idx !== -1) {
+      const existing = this.serverMenuItems[idx] as ServerMenuItem;
+      this.serverMenuItems[idx] = {
+        id: existing.id,
+        label: updates.label ?? existing.label,
+        icon: existing.icon,
+        url: updates.url ?? existing.url,
+        priority: updates.priority ?? existing.priority,
+        feature: updates.feature ?? existing.feature,
+        permissions: existing.permissions,
+        isAdminItem: existing.isAdminItem,
+        isActive: existing.isActive,
+        isDefault: existing.isDefault,
+        ownerOnly: existing.ownerOnly,
+        group: updates.group ?? existing.group,
+        visible: updates.visible ?? existing.visible,
+      };
+    }
   }
 
   public getServerMenuItems(

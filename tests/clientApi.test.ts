@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { AddressInfo } from "node:net";
-import express from "express";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import express from 'express';
 
 // Mock prisma before importing the module
-vi.mock("../src/db", () => ({
+vi.mock('../src/db', () => ({
   default: {
     server: { findUnique: vi.fn(), findMany: vi.fn() },
     users: { findUnique: vi.fn() },
@@ -25,25 +25,25 @@ vi.mock("../src/db", () => ({
   },
 }));
 
-vi.mock("../src/handlers/logger", () => ({
+vi.mock('../src/handlers/logger', () => ({
   default: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
-vi.mock("../src/handlers/utils/core/daemonRequest", () => ({
+vi.mock('../src/handlers/utils/core/daemonRequest', () => ({
   daemonRequest: vi.fn(),
 }));
 
-vi.mock("../src/handlers/utils/activity/activityLogger", () => ({
+vi.mock('../src/handlers/utils/activity/activityLogger', () => ({
   logActivity: vi.fn(),
 }));
 
-vi.mock("../src/handlers/utils/api/apiValidator", () => ({
+vi.mock('../src/handlers/utils/api/apiValidator', () => ({
   apiValidator: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-import clientApiModule from "../src/modules/api/client/clientApi";
-import prisma from "../src/db";
-import { daemonRequest } from "../src/handlers/utils/core/daemonRequest";
+import clientApiModule from '../src/modules/api/client/clientApi';
+import prisma from '../src/db';
+import { daemonRequest } from '../src/handlers/utils/core/daemonRequest';
 
 const mockPrisma = vi.mocked(prisma);
 
@@ -63,7 +63,7 @@ async function withServer(
   fn: (base: string) => Promise<void>,
 ) {
   const server = app.listen(0);
-  await new Promise<void>((resolve) => server.once("listening", resolve));
+  await new Promise<void>((resolve) => server.once('listening', resolve));
   const { port } = server.address() as AddressInfo;
   try {
     await fn(`http://127.0.0.1:${port}`);
@@ -72,15 +72,15 @@ async function withServer(
   }
 }
 
-describe("Client API Module", () => {
+describe('Client API Module', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.server.findUnique.mockResolvedValue({
-      UUID: "test-uuid",
-      name: "Test",
+      UUID: 'test-uuid',
+      name: 'Test',
       description: null,
       ownerId: 1,
-      node: { address: "1.2.3.4", port: 3002, key: "abc" },
+      node: { address: '1.2.3.4', port: 3002, key: 'abc' },
     } as any);
   });
 
@@ -88,60 +88,60 @@ describe("Client API Module", () => {
     vi.restoreAllMocks();
   });
 
-  it("exports correct module info", () => {
-    expect(clientApiModule.info.name).toBe("Client API Module");
-    expect(clientApiModule.info.version).toBe("2.0.0");
-    expect(clientApiModule.info.author).toBe("AirLinkLab");
+  it('exports correct module info', () => {
+    expect(clientApiModule.info.name).toBe('Client API Module');
+    expect(clientApiModule.info.version).toBe('2.0.0');
+    expect(clientApiModule.info.author).toBe('AirLinkLab');
   });
 
-  it("exports a router function", () => {
-    expect(typeof clientApiModule.router).toBe("function");
+  it('exports a router function', () => {
+    expect(typeof clientApiModule.router).toBe('function');
   });
 
-  it("router returns an Express router", () => {
+  it('router returns an Express router', () => {
     const router = clientApiModule.router();
     expect(router).toBeDefined();
-    expect(typeof router).toBe("function");
+    expect(typeof router).toBe('function');
   });
 
-  describe("server ownership resolution", () => {
-    it("finds server by UUID and checks ownerId", async () => {
+  describe('server ownership resolution', () => {
+    it('finds server by UUID and checks ownerId', async () => {
       const mockServer = {
-        UUID: "test-uuid",
-        name: "Test",
+        UUID: 'test-uuid',
+        name: 'Test',
         ownerId: 1,
-        node: { address: "1.2.3.4", port: 3002, key: "abc" },
+        node: { address: '1.2.3.4', port: 3002, key: 'abc' },
       };
       mockPrisma.server.findUnique.mockResolvedValue(mockServer as any);
 
       const server = await prisma.server.findUnique({
-        where: { UUID: "test-uuid" },
+        where: { UUID: 'test-uuid' },
         include: { node: true },
       });
       expect(server).toEqual(mockServer);
       expect(server!.ownerId).toBe(1);
     });
 
-    it("returns null for non-existent server", async () => {
+    it('returns null for non-existent server', async () => {
       mockPrisma.server.findUnique.mockResolvedValue(null);
 
       const server = await prisma.server.findUnique({
-        where: { UUID: "nonexistent" },
+        where: { UUID: 'nonexistent' },
         include: { node: true },
       });
       expect(server).toBeNull();
     });
 
-    it("allows subusers on servers they do not own (B-2)", async () => {
+    it('allows subusers on servers they do not own (B-2)', async () => {
       mockPrisma.server.findUnique.mockResolvedValue({
-        UUID: "test-uuid",
-        name: "Test",
+        UUID: 'test-uuid',
+        name: 'Test',
         ownerId: 999,
-        node: { address: "1.2.3.4", port: 3002, key: "abc" },
+        node: { address: '1.2.3.4', port: 3002, key: 'abc' },
       } as any);
       mockPrisma.subUser.findUnique.mockResolvedValue({
         id: 1,
-        serverId: "test-uuid",
+        serverId: 'test-uuid',
         userId: 1,
       } as any);
 
@@ -149,17 +149,17 @@ describe("Client API Module", () => {
         const res = await fetch(`${base}/api/client/servers/test-uuid`);
         expect(res.status).toBe(200);
         expect(mockPrisma.subUser.findUnique).toHaveBeenCalledWith({
-          where: { serverId_userId: { serverId: "test-uuid", userId: 1 } },
+          where: { serverId_userId: { serverId: 'test-uuid', userId: 1 } },
         });
       });
     });
 
-    it("returns 404 for users with neither owner nor subuser access (B-2)", async () => {
+    it('returns 404 for users with neither owner nor subuser access (B-2)', async () => {
       mockPrisma.server.findUnique.mockResolvedValue({
-        UUID: "test-uuid",
-        name: "Test",
+        UUID: 'test-uuid',
+        name: 'Test',
         ownerId: 999,
-        node: { address: "1.2.3.4", port: 3002, key: "abc" },
+        node: { address: '1.2.3.4', port: 3002, key: 'abc' },
       } as any);
       mockPrisma.subUser.findUnique.mockResolvedValue(null);
 
@@ -170,46 +170,46 @@ describe("Client API Module", () => {
     });
   });
 
-  describe("backup operations", () => {
-    it("counts existing backups against limit", async () => {
+  describe('backup operations', () => {
+    it('counts existing backups against limit', async () => {
       mockPrisma.backup.count.mockResolvedValue(3);
 
       const count = await prisma.backup.count({
-        where: { serverId: "test-uuid" },
+        where: { serverId: 'test-uuid' },
       });
       expect(count).toBe(3);
     });
 
-    it("creates backup with daemon response data", async () => {
+    it('creates backup with daemon response data', async () => {
       const mockBackup = {
-        UUID: "backup-uuid",
-        name: "test",
-        serverId: "test-uuid",
-        filePath: "/path",
+        UUID: 'backup-uuid',
+        name: 'test',
+        serverId: 'test-uuid',
+        filePath: '/path',
         size: BigInt(1024),
       };
       mockPrisma.backup.create.mockResolvedValue(mockBackup as any);
 
       const backup = await prisma.backup.create({
         data: {
-          UUID: "backup-uuid",
-          name: "test",
-          serverId: "test-uuid",
-          filePath: "/path",
+          UUID: 'backup-uuid',
+          name: 'test',
+          serverId: 'test-uuid',
+          filePath: '/path',
           size: BigInt(1024),
         },
       });
-      expect(backup.UUID).toBe("backup-uuid");
+      expect(backup.UUID).toBe('backup-uuid');
     });
   });
 
-  describe("schedule operations", () => {
-    it("creates schedule with cron and action", async () => {
+  describe('schedule operations', () => {
+    it('creates schedule with cron and action', async () => {
       const mockSchedule = {
         id: 1,
-        name: "test",
-        cron: "0 * * * *",
-        serverId: "test-uuid",
+        name: 'test',
+        cron: '0 * * * *',
+        serverId: 'test-uuid',
         enabled: true,
         nextRunAt: new Date(),
       };
@@ -217,36 +217,36 @@ describe("Client API Module", () => {
 
       const schedule = await prisma.schedule.create({
         data: {
-          name: "test",
-          cron: "0 * * * *",
-          serverId: "test-uuid",
+          name: 'test',
+          cron: '0 * * * *',
+          serverId: 'test-uuid',
           enabled: true,
         },
       });
-      expect(schedule.name).toBe("test");
-      expect(schedule.cron).toBe("0 * * * *");
+      expect(schedule.name).toBe('test');
+      expect(schedule.cron).toBe('0 * * * *');
     });
 
-    it("finds schedule by id and serverId", async () => {
-      const mockSchedule = { id: 1, name: "test", serverId: "test-uuid" };
+    it('finds schedule by id and serverId', async () => {
+      const mockSchedule = { id: 1, name: 'test', serverId: 'test-uuid' };
       mockPrisma.schedule.findFirst.mockResolvedValue(mockSchedule as any);
 
       const schedule = await prisma.schedule.findFirst({
-        where: { id: 1, serverId: "test-uuid" },
+        where: { id: 1, serverId: 'test-uuid' },
       });
       expect(schedule).toEqual(mockSchedule);
     });
 
-    it("creates schedule + task with nextRunAt set (B-1/B-4)", async () => {
+    it('creates schedule + task with nextRunAt set (B-1/B-4)', async () => {
       mockPrisma.schedule.create.mockResolvedValue({
         id: 7,
-        name: "daily",
-        cron: "0 4 * * *",
+        name: 'daily',
+        cron: '0 4 * * *',
         enabled: true,
-        serverId: "test-uuid",
+        serverId: 'test-uuid',
         nextRunAt: new Date(),
         tasks: [
-          { id: 1, order: 0, action: "power", payload: { action: "restart" } },
+          { id: 1, order: 0, action: 'power', payload: { action: 'restart' } },
         ],
       } as any);
 
@@ -254,13 +254,13 @@ describe("Client API Module", () => {
         const res = await fetch(
           `${base}/api/client/servers/test-uuid/schedules`,
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              name: "daily",
-              cron: "0 4 * * *",
-              action: "power",
-              payload: { action: "restart" },
+              name: 'daily',
+              cron: '0 4 * * *',
+              action: 'power',
+              payload: { action: 'restart' },
             }),
           },
         );
@@ -273,23 +273,23 @@ describe("Client API Module", () => {
         expect(createCall.data.nextRunAt).toBeInstanceOf(Date);
         expect(createCall.data.tasks.create).toEqual({
           order: 0,
-          action: "power",
-          payload: { action: "restart" },
+          action: 'power',
+          payload: { action: 'restart' },
         });
       });
     });
 
-    it("rejects schedule creation with invalid power payload (B-1)", async () => {
+    it('rejects schedule creation with invalid power payload (B-1)', async () => {
       await withServer(buildApp(), async (base) => {
         const res = await fetch(
           `${base}/api/client/servers/test-uuid/schedules`,
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              name: "daily",
-              cron: "0 4 * * *",
-              action: "power",
+              name: 'daily',
+              cron: '0 4 * * *',
+              action: 'power',
               payload: '{"action":"explode"}',
             }),
           },
@@ -300,12 +300,12 @@ describe("Client API Module", () => {
       });
     });
 
-    it("lists schedules with tasks included (B-1)", async () => {
+    it('lists schedules with tasks included (B-1)', async () => {
       mockPrisma.schedule.findMany.mockResolvedValue([
         {
           id: 1,
-          name: "daily",
-          cron: "0 4 * * *",
+          name: 'daily',
+          cron: '0 4 * * *',
           enabled: true,
           nextRunAt: null,
           lastRunAt: null,
@@ -326,8 +326,8 @@ describe("Client API Module", () => {
     });
   });
 
-  describe("introspection", () => {
-    it("provides endpoint documentation", () => {
+  describe('introspection', () => {
+    it('provides endpoint documentation', () => {
       const router = clientApiModule.router();
       expect(router).toBeDefined();
     });

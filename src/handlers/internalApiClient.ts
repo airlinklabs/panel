@@ -1,0 +1,350 @@
+/**
+ * Internal API Client — used by page controllers to call v2 endpoints
+ * without directly accessing Prisma, daemon, or business services.
+ *
+ * Auth strategy (preferred → fallback):
+ *   1. API key via INTERNAL_API_KEY env var → Bearer header → CSRF exempt,
+ *      no session cookie needed. Recommended for server-to-server calls.
+ *   2. Session cookie forwarding (no API key) → CSRF token forwarded when
+ *      available on req. Requires doubleCsrf cookie for token validation.
+ *
+ * Base URL resolves from panelConfig (http://127.0.0.1:<port>) so it works
+ * behind TLS/reverse-proxy where the public URL may not be loopback-accessible.
+ */
+
+import type { Request } from 'express';
+import { getConfig } from '../config';
+import logger from './logger';
+import { getRequestCsrfToken } from './utils/security/csrfProtection';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export class InternalApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly body?: unknown,
+  ) {
+    super(message);
+    this.name = 'InternalApiError';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Base URL resolution
+// ---------------------------------------------------------------------------
+
+let cachedBaseUrl: string | undefined;
+
+function getBaseUrl(): string {
+  if (cachedBaseUrl !== undefined) {
+    return cachedBaseUrl;
+  }
+  const cfg = getConfig();
+  // Always use loopback for internal calls — public URL may be behind TLS/proxy
+  // and not reachable from the same process via its external hostname.
+  cachedBaseUrl = `http://127.0.0.1:${cfg.port}`;
+  return cachedBaseUrl;
+}
+
+/**
+ * Reset cached base URL (for testing or when port changes at runtime).
+ */
+export function resetBaseUrl(): void {
+  cachedBaseUrl = undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Internal API key
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the internal API key from environment, or undefined if not set.
+ * When set, internal calls use Bearer auth which bypasses CSRF entirely.
+ */
+function getInternalApiKey(): string | undefined {
+  return process.env.INTERNAL_API_KEY || undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Cookie extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds a Cookie header string from the incoming request's parsed cookies.
+ * Used for session-auth fallback when no API key is configured.
+ */
+function buildCookieHeader(req: Request): string | undefined {
+  const cookies = (req as unknown as Record<string, unknown>).cookies as
+    Record<string, string> | undefined;
+  if (!cookies || typeof cookies !== 'object') {
+    return undefined;
+  }
+  const entries = Object.entries(cookies);
+  if (entries.length === 0) {
+    return undefined;
+  }
+  return entries.map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+// ---------------------------------------------------------------------------
+// CSRF token extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Attempts to retrieve the CSRF token from the incoming request.
+ *
+ * The browser-side clients send this header under several spellings —
+ * `x-csrf-token` (inline page scripts), `csrf-token` (islands reading the
+ * meta tag) and `CSRF-Token` (the global fetch patch). The external CSRF
+ * middleware accepts all of them via `getRequestCsrfToken`; this extractor
+ * must forward exactly the same set, otherwise the internal hop validates a
+ * different contract than the external one and rejects its own requests.
+ *
+ *   1. `req.csrfToken` — set by a middleware that copies from res.locals
+ *   2. `getRequestCsrfToken(req)` — canonical header/body lookup
+ */
+function extractCsrfToken(req: Request): string | undefined {
+  // Check if a middleware stored it on req
+  const reqWithCsrf = req as unknown as Record<string, unknown>;
+  if (typeof reqWithCsrf.csrfToken === 'string') {
+    return reqWithCsrf.csrfToken;
+  }
+
+  return getRequestCsrfToken(req);
+}
+
+// ---------------------------------------------------------------------------
+// Core request function
+// ---------------------------------------------------------------------------
+
+const DEFAULT_TIMEOUT_MS = 10_000;
+
+async function apiRequest(
+  req: Request,
+  method: string,
+  path: string,
+  body?: unknown,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+
+  // Callers pass either a v2-relative path (`/servers`) or the full path
+  // (`/api/v2/servers`). Normalise here so neither convention can produce
+  // `/api/v2/api/v2/...` and 404 at the not-found handler.
+  const scopedPath = path.startsWith('/api/v2')
+    ? path
+    : `/api/v2${path.startsWith('/') ? path : `/${path}`}`;
+  const url = `${getBaseUrl()}${scopedPath}`;
+
+  // Build headers
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  };
+
+  const apiKey = getInternalApiKey();
+
+  if (apiKey) {
+    // API key auth → CSRF exempt, no cookies needed
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  } else {
+    // Session auth → forward cookies from incoming request
+    const cookieHeader = buildCookieHeader(req);
+    if (cookieHeader) {
+      headers['Cookie'] = cookieHeader;
+    }
+    // Forward CSRF token for mutations
+    if (method !== 'GET' && method !== 'HEAD') {
+      const csrfToken = extractCsrfToken(req);
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken;
+      }
+    }
+  }
+
+  // Set content type for bodies
+  if (body !== undefined && method !== 'GET' && method !== 'HEAD') {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers,
+      body:
+        body !== undefined && method !== 'GET' && method !== 'HEAD'
+          ? JSON.stringify(body)
+          : undefined,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    // Parse response
+    const contentType = response.headers.get('content-type') ?? '';
+    let responseBody: unknown;
+    if (contentType.includes('application/json')) {
+      responseBody = await response.json();
+    } else {
+      responseBody = await response.text();
+    }
+
+    if (!response.ok) {
+      const message =
+        typeof responseBody === 'object' && responseBody !== null
+          ? (responseBody as Record<string, unknown>).error ||
+            (responseBody as Record<string, unknown>).message ||
+            `v2 API error: ${response.status}`
+          : `v2 API error: ${response.status}`;
+
+      logger.warn(`Internal API ${method} ${path} failed`, {
+        status: response.status,
+        message: String(message),
+      });
+
+      throw new InternalApiError(
+        String(message),
+        response.status,
+        responseBody,
+      );
+    }
+
+    // v2 wraps success payloads as `{ success: true, data, meta? }`. Page
+    // controllers hand this result straight to the view layer as locals, so
+    // the envelope is unwrapped here — once — instead of at every call site.
+    // Pagination `meta` rides along as a non-enumerable property: list
+    // callers can still read `result.meta`, but spreading the result into
+    // view locals never leaks it.
+    if (typeof responseBody === 'object' && responseBody !== null) {
+      const envelope = responseBody as {
+        success?: unknown;
+        data?: unknown;
+        meta?: unknown;
+      };
+      if (envelope.success === true && 'data' in envelope) {
+        const payload = envelope.data;
+        if (
+          envelope.meta !== undefined &&
+          typeof payload === 'object' &&
+          payload !== null
+        ) {
+          Object.defineProperty(payload, 'meta', {
+            value: envelope.meta,
+            enumerable: false,
+            writable: true,
+            configurable: true,
+          });
+        }
+        return payload;
+      }
+      if (envelope.success === false) {
+        const message = envelope.data || envelope.success;
+        throw new InternalApiError(String(message || 'v2 API error'), response.status, responseBody);
+      }
+    }
+
+    return responseBody;
+  } catch (error: unknown) {
+    clearTimeout(timer);
+
+    // AbortError = timeout
+    if (
+      error instanceof Error &&
+      (error.name === 'AbortError' || error.message?.includes('abort'))
+    ) {
+      logger.error(
+        `Internal API ${method} ${path} timed out after ${timeoutMs}ms`,
+      );
+      throw new InternalApiError(
+        `Internal API request timed out after ${timeoutMs}ms`,
+        408,
+      );
+    }
+
+    // Already an InternalApiError — rethrow
+    if (error instanceof InternalApiError) {
+      throw error;
+    }
+
+    // Network or other error
+    const errObj = error as { code?: string; message?: string };
+    logger.error(`Internal API ${method} ${path} network error`, error, {
+      code: errObj?.code,
+    });
+    throw new InternalApiError(
+      errObj?.message ?? 'Internal API request failed',
+      0,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public helpers — one per HTTP method
+// ---------------------------------------------------------------------------
+
+/**
+ * GET request to a v2 endpoint.
+ *
+ * @param req  Incoming Express request (for session cookie forwarding)
+ * @param path v2 path (e.g. '/servers', '/servers/123/status')
+ * @returns Parsed JSON response
+ */
+export async function apiGet(
+  req: Request,
+  path: string,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  return apiRequest(req, 'GET', path, undefined, options);
+}
+
+/**
+ * POST request to a v2 endpoint.
+ */
+export async function apiPost(
+  req: Request,
+  path: string,
+  body?: unknown,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  return apiRequest(req, 'POST', path, body, options);
+}
+
+/**
+ * PUT request to a v2 endpoint.
+ */
+export async function apiPut(
+  req: Request,
+  path: string,
+  body?: unknown,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  return apiRequest(req, 'PUT', path, body, options);
+}
+
+/**
+ * PATCH request to a v2 endpoint.
+ */
+export async function apiPatch(
+  req: Request,
+  path: string,
+  body?: unknown,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  return apiRequest(req, 'PATCH', path, body, options);
+}
+
+/**
+ * DELETE request to a v2 endpoint.
+ */
+export async function apiDelete(
+  req: Request,
+  path: string,
+  options?: { timeoutMs?: number },
+): Promise<unknown> {
+  return apiRequest(req, 'DELETE', path, undefined, options);
+}

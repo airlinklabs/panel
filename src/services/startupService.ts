@@ -1,13 +1,13 @@
-import prisma from "../db";
-import { validateVariableRules } from "../modules/user/server/startup";
-import type { ServerVariable } from "../modules/user/server/shared";
+import prisma from '../db';
+import { validateVariableRules } from '../modules/user/server/startup';
+import type { ServerVariable } from '../modules/user/server/shared';
 
 /**
  * Parse dockerImage JSON from a server record, returning the first value or null.
  */
 function parseDockerImage(raw: unknown): string | null {
   try {
-    const d = (raw && typeof raw === "object" ? raw : {}) as Record<
+    const d = (raw && typeof raw === 'object' ? raw : {}) as Record<
       string,
       string
     >;
@@ -79,7 +79,7 @@ export async function updateStartup(
     include: { node: true, image: true },
   });
   if (!server) {
-    return { error: "Server not found" };
+    return { error: 'Server not found' };
   }
 
   const updateData: Record<string, unknown> = {};
@@ -108,14 +108,14 @@ export async function updateStartup(
       // invalid docker images config
     }
     if (!valid) {
-      return { error: "Invalid Docker image selected" };
+      return { error: 'Invalid Docker image selected' };
     }
     updateData.dockerImage = imageObj;
   }
 
   if (data.variables !== undefined) {
     if (!Array.isArray(data.variables)) {
-      return { error: "Variables must be an array" };
+      return { error: 'Variables must be an array' };
     }
 
     let defs: { env?: string; rules?: string; rulesMessage?: string }[];
@@ -137,11 +137,11 @@ export async function updateStartup(
         : v;
       const err = validateVariableRules(
         rulesSource as ServerVariable,
-        String(v.value ?? ""),
+        String(v.value ?? ''),
       );
       if (err) {
         return {
-          error: "Variable validation failed.",
+          error: 'Variable validation failed.',
           fields: [{ key: String(v.env), error: err }],
         };
       }

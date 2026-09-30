@@ -7,9 +7,9 @@
  * DELETE /api/v2/servers/:id/subusers/:subId       — Remove sub-user
  */
 
-import { Router } from "express";
-import prisma from "../../../db";
-import { parseBody } from "../../../utils/validation";
+import { Router } from 'express';
+import prisma from '../../../db';
+import { parseBody } from '../../../utils/validation';
 import {
   jsonOk,
   jsonError,
@@ -19,15 +19,15 @@ import {
   paginateQuery,
   parsePage,
   parsePerPage,
-} from "./helpers";
-import { createSubUserBody, updateSubUserBody } from "./dto";
+} from './helpers';
+import { createSubUserBody, updateSubUserBody } from './dto';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/subusers — List sub-users
 // ---------------------------------------------------------------------------
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -43,8 +43,8 @@ router.get("/", async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can manage sub-users",
+        'FORBIDDEN',
+        'Only the server owner can manage sub-users',
         403,
       );
     }
@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
             select: { id: true, username: true, email: true, avatar: true },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       }),
     () => prisma.subUser.count({ where }),
     page,
@@ -77,7 +77,7 @@ router.get("/", async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/subusers — Add sub-user
 // ---------------------------------------------------------------------------
-router.post("/", parseBody(createSubUserBody), async (req, res) => {
+router.post('/', parseBody(createSubUserBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -93,44 +93,82 @@ router.post("/", parseBody(createSubUserBody), async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can add sub-users",
+        'FORBIDDEN',
+        'Only the server owner can add sub-users',
         403,
       );
     }
   }
 
-  const { userId, permissions } = req.validatedBody as {
-    userId: number;
+  const { email, userId, permissions } = req.validatedBody as {
+    email?: string;
+    userId?: number;
     permissions: string[];
   };
 
-  // Check target user exists
-  const targetUser = await prisma.users.findUnique({ where: { id: userId } });
-  if (!targetUser) {
-    return jsonError(res, "NOT_FOUND", "User not found", 404);
-  }
-
-  // Can't add yourself as sub-user
   const callerId = getAuthenticatedUserId(req);
-  if (userId === callerId) {
-    return jsonError(
-      res,
-      "BAD_REQUEST",
-      "Cannot add yourself as a sub-user",
-      400,
-    );
+
+  // Resolve the target user: the subusers UI posts `{ email, permissions }`
+  // (legacy `POST /server/:id/subusers`), API callers post `{ userId }`.
+  let targetUser: {
+    id: number;
+    username: string | null;
+    email: string | null;
+  } | null;
+  if (email) {
+    targetUser = await prisma.users.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+    if (!targetUser) {
+      return jsonError(res, 'NOT_FOUND', 'No user found with that email.', 404);
+    }
+    if (targetUser.id === callerId) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'You cannot add yourself as a subuser.',
+        400,
+      );
+    }
+    if (resolved.server.ownerId === targetUser.id) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'The server owner is already in full control.',
+        400,
+      );
+    }
+  } else {
+    targetUser = await prisma.users.findUnique({ where: { id: userId! } });
+    if (!targetUser) {
+      return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    }
+    if (userId === callerId) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'Cannot add yourself as a sub-user',
+        400,
+      );
+    }
   }
 
   // Check not already a sub-user
   const existing = await prisma.subUser.findUnique({
-    where: { serverId_userId: { serverId: resolved.server.UUID, userId } },
+    where: {
+      serverId_userId: {
+        serverId: resolved.server.UUID,
+        userId: targetUser.id,
+      },
+    },
   });
   if (existing) {
     return jsonError(
       res,
-      "CONFLICT",
-      "User is already a sub-user of this server",
+      'CONFLICT',
+      email
+        ? 'That user is already a subuser of this server.'
+        : 'User is already a sub-user of this server',
       409,
     );
   }
@@ -138,7 +176,7 @@ router.post("/", parseBody(createSubUserBody), async (req, res) => {
   const subUser = await prisma.subUser.create({
     data: {
       serverId: resolved.server.UUID,
-      userId,
+      userId: targetUser.id,
       permissions,
     },
     include: {
@@ -148,9 +186,9 @@ router.post("/", parseBody(createSubUserBody), async (req, res) => {
 
   logActivity(
     callerId,
-    "subuser.created",
+    'subuser.created',
     resolved.server.UUID,
-    { targetUserId: userId, permissions },
+    { targetUserId: targetUser.id, permissions },
     req.ip,
   );
 
@@ -160,7 +198,7 @@ router.post("/", parseBody(createSubUserBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // PUT /api/v2/servers/:id/subusers/:subId — Update sub-user
 // ---------------------------------------------------------------------------
-router.put("/:subId", parseBody(updateSubUserBody), async (req, res) => {
+router.put('/:subId', parseBody(updateSubUserBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -175,8 +213,8 @@ router.put("/:subId", parseBody(updateSubUserBody), async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can update sub-users",
+        'FORBIDDEN',
+        'Only the server owner can update sub-users',
         403,
       );
     }
@@ -184,12 +222,12 @@ router.put("/:subId", parseBody(updateSubUserBody), async (req, res) => {
 
   const subId = parseInt(String(req.params.subId), 10);
   if (isNaN(subId)) {
-    return jsonError(res, "BAD_REQUEST", "Invalid sub-user ID", 400);
+    return jsonError(res, 'BAD_REQUEST', 'Invalid sub-user ID', 400);
   }
 
   const subUser = await prisma.subUser.findUnique({ where: { id: subId } });
   if (!subUser || subUser.serverId !== resolved.server.UUID) {
-    return jsonError(res, "NOT_FOUND", "Sub-user not found", 404);
+    return jsonError(res, 'NOT_FOUND', 'Sub-user not found', 404);
   }
 
   const { permissions } = req.validatedBody as { permissions: string[] };
@@ -204,7 +242,7 @@ router.put("/:subId", parseBody(updateSubUserBody), async (req, res) => {
 
   logActivity(
     getAuthenticatedUserId(req),
-    "subuser.updated",
+    'subuser.updated',
     resolved.server.UUID,
     { subUserId: subId, permissions },
     req.ip,
@@ -216,7 +254,7 @@ router.put("/:subId", parseBody(updateSubUserBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id/subusers/:subId — Remove sub-user
 // ---------------------------------------------------------------------------
-router.delete("/:subId", async (req, res) => {
+router.delete('/:subId', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -231,8 +269,8 @@ router.delete("/:subId", async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can remove sub-users",
+        'FORBIDDEN',
+        'Only the server owner can remove sub-users',
         403,
       );
     }
@@ -240,19 +278,19 @@ router.delete("/:subId", async (req, res) => {
 
   const subId = parseInt(String(req.params.subId), 10);
   if (isNaN(subId)) {
-    return jsonError(res, "BAD_REQUEST", "Invalid sub-user ID", 400);
+    return jsonError(res, 'BAD_REQUEST', 'Invalid sub-user ID', 400);
   }
 
   const subUser = await prisma.subUser.findUnique({ where: { id: subId } });
   if (!subUser || subUser.serverId !== resolved.server.UUID) {
-    return jsonError(res, "NOT_FOUND", "Sub-user not found", 404);
+    return jsonError(res, 'NOT_FOUND', 'Sub-user not found', 404);
   }
 
   await prisma.subUser.delete({ where: { id: subId } });
 
   logActivity(
     getAuthenticatedUserId(req),
-    "subuser.deleted",
+    'subuser.deleted',
     resolved.server.UUID,
     { subUserId: subId, targetUserId: subUser.userId },
     req.ip,

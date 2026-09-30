@@ -25,19 +25,43 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
 }
 
+/**
+ * Accepts both shapes: native Prisma `Json` values (arrays/objects) and JSON
+ * strings. Callers still hand us encoded strings in a few places (legacy rows,
+ * hand-built payloads), and those used to parse to `[]` and silently drop
+ * every port.
+ */
+function toJsonArray(raw: unknown): unknown[] {
+  if (Array.isArray(raw)) {
+    return raw;
+  }
+  if (typeof raw === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export function parseImagePortRequirements(
   raw: unknown,
 ): ImagePortRequirement[] {
   try {
-    const arr = Array.isArray(raw) ? raw : [];
+    const arr = toJsonArray(raw);
     if (!arr.length) {
       return [];
     }
     return arr
-      .map((port, index) => ({
-        name: String(port?.name || `Port ${index + 1}`),
-        internalPort: Number(port?.internalPort || port?.port),
-      }))
+      .map((entry, index) => {
+        const port = (entry ?? {}) as Record<string, unknown>;
+        return {
+          name: String(port.name || `Port ${index + 1}`),
+          internalPort: Number(port.internalPort || port.port),
+        };
+      })
       .filter((port) => port.name.trim() && isValidPort(port.internalPort));
   } catch {
     return [];
@@ -45,12 +69,12 @@ export function parseImagePortRequirements(
 }
 
 function isServerPortRecord(value: unknown): value is ServerPortRecord {
-  return typeof value === "object" && value !== null;
+  return typeof value === 'object' && value !== null;
 }
 
 export function parseServerPorts(raw: unknown): ServerPortAssignment[] {
   try {
-    const arr = Array.isArray(raw) ? raw : [];
+    const arr = toJsonArray(raw);
     if (!arr.length) {
       return [];
     }
@@ -58,7 +82,7 @@ export function parseServerPorts(raw: unknown): ServerPortAssignment[] {
       .filter(isServerPortRecord)
       .map((port, index) => {
         const legacyParts =
-          typeof port.Port === "string" ? port.Port.split(":") : [];
+          typeof port.Port === 'string' ? port.Port.split(':') : [];
         const externalPort = Number(
           port.externalPort ?? legacyParts[0] ?? port.Port,
         );
@@ -106,7 +130,7 @@ export function serializeServerPorts(
 export function portsToDaemonString(raw: unknown): string {
   return parseServerPorts(raw)
     .map((port) => `${port.externalPort}:${port.internalPort}`)
-    .join(",");
+    .join(',');
 }
 
 export function getPrimaryExternalPort(raw: unknown): number | undefined {
@@ -155,7 +179,7 @@ export function validatePortAssignments(
   const seen = new Set<number>();
   for (const port of ports) {
     if (!port.name.trim()) {
-      return "Each port needs a name.";
+      return 'Each port needs a name.';
     }
     if (!isValidPort(port.internalPort)) {
       return `Internal port ${port.internalPort} is invalid.`;

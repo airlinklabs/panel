@@ -1,0 +1,84 @@
+<%- include('../../layouts/admin', { title: 'Menu Manager' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: 'Menu Manager' }
+  ] }) %>
+
+  <div class="flex items-start justify-between gap-4 mt-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Menu Manager</h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Manage the server navigation menu items visible to users.</p>
+    </div>
+  </div>
+
+  <div class="al-card mt-5 overflow-hidden">
+    <h2 class="al-card-header">Server Menu Items</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
+        <thead style="background:var(--theme-bg-secondary)">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Item</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">URL</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Group</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Priority</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Default</th>
+          </tr>
+        </thead>
+        <tbody id="menuTableBody" class="divide-y divide-[var(--theme-border)]">
+          <% if (Array.isArray(items) && items.length > 0) { %>
+            <% items.forEach(function(item) { %>
+              <tr class="hover:bg-[var(--theme-bg-secondary)] transition">
+                <td class="px-5 py-3 font-medium" style="color:var(--theme-text-strong)"><%= item.label %></td>
+                <td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-muted)"><%= item.url %></td>
+                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)"><%= item.group || '—' %></td>
+                <td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)"><%= item.priority %></td>
+                <td class="px-5 py-3">
+                  <% if (item.isDefault) { %>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Default</span>
+                  <% } else { %>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Custom</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else if (Array.isArray(items)) { %>
+            <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No menu items configured.</td></tr>
+          <% } else { %>
+            <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">Loading...</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var items = <%- JSON.stringify(items || []) %>;
+  var tbody = document.getElementById('menuTableBody');
+
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No menu items configured.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = items.map(function(item) {
+    return '<tr class="hover:bg-[var(--theme-bg-secondary)] transition">' +
+      '<td class="px-5 py-3 font-medium" style="color:var(--theme-text-strong)">' + item.label + '</td>' +
+      '<td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-muted)">' + item.url + '</td>' +
+      '<td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">' + (item.group || '—') + '</td>' +
+      '<td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)">' + item.priority + '</td>' +
+      '<td class="px-5 py-3">' +
+        (item.isDefault
+          ? '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Default</span>'
+          : '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Custom</span>') +
+      '</td></tr>';
+  }).join('');
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

@@ -1,4 +1,4 @@
-import prisma from "../../../db";
+import prisma from '../../../db';
 
 // ── Shared per-node mutex ─────────────────────────────────────────────────────
 // Serializes the "read pool → pick port → persist server → claim" sequence so
@@ -40,7 +40,7 @@ export function parseLegacyPool(raw: unknown): number[] {
     if (!arr.length) {
       return [];
     }
-    return arr.filter((p): p is number => typeof p === "number");
+    return arr.filter((p): p is number => typeof p === 'number');
   } catch {
     return [];
   }
@@ -68,7 +68,7 @@ export async function getNodePortPool(nodeId: number): Promise<number[]> {
 export async function syncNodeAllocations(
   nodeId: number,
   ports: number[],
-  ip = "",
+  ip = '',
 ): Promise<void> {
   const rows = await prisma.allocation.findMany({
     where: { nodeId },

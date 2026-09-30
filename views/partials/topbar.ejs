@@ -1,0 +1,30 @@
+<% /* topbar — desktop chrome above the page.
+   Carries the panel-wide search entry point (opens #searchOverlay) and the
+   light/dark switch. On phones the mobile bar in partials/bottom-nav.ejs
+   takes over, so this strip only renders from lg up.
+
+   Both controls are bound by attribute, not by id:
+   [data-search-trigger] -> public/javascript/shared/search.js
+   [data-theme-toggle]   -> public/javascript/shared/theme-init.js
+   so the phone bar can render the same two controls and stay in sync. */ %>
+<header id="topbar" class="al-topbar hidden lg:flex items-center gap-3 px-4 sm:px-6"
+  style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+
+  <button id="searchButton" data-search-trigger type="button"
+    class="al-topbar-search group flex h-10 min-w-0 max-w-md flex-1 items-center gap-2.5 rounded-xl border px-3.5 text-sm transition-colors"
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="searchOverlay">
+    <%- icon('search', { class: 'h-4 w-4 shrink-0', 'aria-hidden': 'true' }) %>
+    <span class="min-w-0 flex-1 truncate text-left"><%= t('navSearch') %></span>
+    <kbd class="al-kbd hidden shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium sm:inline-flex"
+      aria-hidden="true">Ctrl + K</kbd>
+  </button>
+
+  <div class="flex-1" aria-hidden="true"></div>
+
+  <button id="themeToggle" data-theme-toggle type="button" role="switch" aria-checked="false"
+    class="al-theme-switch shrink-0"
+    aria-label="<%= t('darkMode') %>">
+    <span class="al-theme-switch-track" aria-hidden="true"></span>
+    <span class="al-theme-switch-thumb" aria-hidden="true"></span>
+  </button>
+</header>

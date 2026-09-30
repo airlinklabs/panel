@@ -1,0 +1,182 @@
+<%- include('../../layouts/admin', { title: t('adminOverviewTitle') }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbOverview') }
+  ] }) %>
+</div>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title"><%= t('adminOverviewTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminOverviewText') %></p>
+  </div>
+</div>
+
+<div class="al-page-body">
+  <div class="al-stat-grid mb-5">
+    <%- include('../../partials/stat-card', { label: t('totalRegisteredUsers'), value: userCount, href: '/admin/users', iconName: 'users' }) %>
+    <%- include('../../partials/stat-card', { label: t('onlineServers'), value: instanceCount, href: '/admin/servers', iconName: 'server' }) %>
+    <%- include('../../partials/stat-card', { label: t('connectedNodes'), value: nodeCount, href: '/admin/nodes', iconName: 'network' }) %>
+    <%- include('../../partials/stat-card', { label: t('availableImages'), value: imageCount, href: '/admin/images', iconName: 'box' }) %>
+  </div>
+
+  <div class="al-card mb-5">
+    <div class="al-card-header">
+      <div class="flex min-w-0 items-center gap-2.5">
+        <img src="<%= assetUrl('/assets/logo.svg') %>" class="h-8 w-8 rounded-xl shrink-0" alt="AirLink Panel" style="background:var(--theme-logo-bg);">
+        <div class="min-w-0">
+          <p class="al-card-title">AirLink Panel <span class="font-bold"><%= airlinkCodename %></span></p>
+          <div class="mt-0.5">
+            <span class="al-badge-neutral font-mono">v<%= airlinkVersion %></span>
+          </div>
+        </div>
+      </div>
+      <div class="al-card-header-actions">
+        <button type="button" id="checkUpdateBtn" class="al-btn-secondary">
+          <%- icon('refresh-cw', { size: 14, class: 'shrink-0' }) %>
+          <%= t('checkForUpdates') %>
+        </button>
+        <button type="button" id="performUpdateBtn" class="hidden al-btn-secondary">
+          <%- icon('download', { size: 14, class: 'shrink-0' }) %>
+          <%= t('update') %>
+        </button>
+      </div>
+    </div>
+
+    <div class="al-card-body">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="al-panel">
+          <p class="text-[11px] font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('apiResponseTime') %></p>
+          <div class="flex items-center justify-between mb-1.5">
+            <span id="apiLatency" class="text-[13px] font-mono" style="color:var(--theme-text);">-- ms</span>
+          </div>
+          <div id="latencyTrack" class="al-progress">
+            <div id="latencyBar" class="al-progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="al-panel">
+          <p class="text-[11px] font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('updateStatus') %></p>
+          <div id="updateStatus" class="hidden al-alert-info" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al-stat-grid">
+    <a href="https://discord.gg/BybfXms7JZ" class="al-card">
+      <div class="flex items-center gap-2 mb-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" style="color:var(--theme-text-muted);" viewBox="0 0 127.14 96.36" fill="currentColor">
+          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+        </svg>
+        <p class="al-card-title"><%= t('discord') %></p>
+      </div>
+      <p class="al-card-subtitle"><%= t('joinOurCommunity') %></p>
+    </a>
+
+    <a href="https://airlinklabs.xyz/" target="_blank" rel="noopener noreferrer" class="al-card">
+      <div class="flex items-center gap-2 mb-1.5">
+        <%- icon('book-open', { size: 14, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+        <p class="al-card-title"><%= t('docs') %></p>
+      </div>
+      <p class="al-card-subtitle"><%= t('readTheDocumentation') %></p>
+    </a>
+
+    <a href="https://github.com/airlinklabs" class="al-card">
+      <div class="flex items-center gap-2 mb-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" style="color:var(--theme-text-muted);" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+        </svg>
+        <p class="al-card-title"><%= t('github') %></p>
+      </div>
+      <p class="al-card-subtitle"><%= t('viewSourceCode') %></p>
+    </a>
+
+    <a href="https://ko-fi.com/airlinklabs#checkoutModal" class="al-card">
+      <div class="flex items-center gap-2 mb-1.5">
+        <%- icon('credit-card', { size: 14, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+        <p class="al-card-title"><%= t('support') %></p>
+      </div>
+      <p class="al-card-subtitle"><%= t('supportTheProject') %></p>
+    </a>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+(function() {
+  var LATENCY_MAX_MS = 500;
+  var LATENCY_GOOD_MS = 100;
+  var LATENCY_WARN_MS = 300;
+
+  function setLatencyTone(track, tone) {
+    track.classList.remove('al-progress-success', 'al-progress-warning', 'al-progress-danger');
+    track.classList.add(tone);
+  }
+
+  function setUpdateStatus(tone, text) {
+    var box = document.getElementById('updateStatus');
+    box.className = 'al-alert-' + tone;
+    box.textContent = text;
+  }
+
+  async function measureApiLatency() {
+    try {
+      var start = performance.now();
+      var response = await fetch('/api/v2/system/health');
+      var latency = Math.round(performance.now() - start);
+      if (response.ok) {
+        document.getElementById('apiLatency').textContent = latency + ' ms';
+        var bar = document.getElementById('latencyBar');
+        bar.style.width = Math.min((latency / LATENCY_MAX_MS) * 100, 100) + '%';
+        var track = document.getElementById('latencyTrack');
+        if (latency < LATENCY_GOOD_MS) setLatencyTone(track, 'al-progress-success');
+        else if (latency < LATENCY_WARN_MS) setLatencyTone(track, 'al-progress-warning');
+        else setLatencyTone(track, 'al-progress-danger');
+      }
+    } catch (e) {
+      document.getElementById('apiLatency').textContent = window.__i18n.error || 'Error';
+    }
+  }
+
+  async function checkUpdate() {
+    setUpdateStatus('info', window.__i18n.checking || 'Checking...');
+    try {
+      var response = await fetch('/api/v2/admin/overview/check-update');
+      var data = await response.json();
+      if (data.updateAvailable) {
+        setUpdateStatus('warning', (window.__i18n.overviewUpdateAvailable || 'Update available: v{version}').replace('{version}', data.latestVersion));
+        document.getElementById('performUpdateBtn').classList.remove('hidden');
+      } else {
+        setUpdateStatus('success', window.__i18n.runningLatestVersion || 'Running latest version');
+      }
+    } catch (e) {
+      setUpdateStatus('danger', window.__i18n.failedToCheckUpdates || 'Failed to check for updates');
+    }
+  }
+
+  async function performUpdate() {
+    try {
+      var response = await fetch('/api/v2/admin/overview/perform-update', { method: 'POST', headers: { 'x-csrf-token': csrfToken } });
+      var data = await response.json();
+      if (data.updated) {
+        setUpdateStatus('success', window.__i18n.updateSuccessful || 'Update successful. Restarting...');
+        setTimeout(function() { window.location.reload(); }, 5000);
+      }
+    } catch (e) {
+      setUpdateStatus('danger', window.__i18n.updateFailed || 'Update failed');
+    }
+  }
+
+  measureApiLatency();
+  setInterval(measureApiLatency, 30000);
+  document.getElementById('checkUpdateBtn').addEventListener('click', checkUpdate);
+  document.getElementById('performUpdateBtn').addEventListener('click', performUpdate);
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

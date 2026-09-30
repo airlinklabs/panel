@@ -1,0 +1,28 @@
+<!-- UI Breadcrumb component -->
+<%
+// Params: items (array of {label, url})
+const crumbs = typeof items !== 'undefined' ? items : [];
+%>
+<% if (crumbs.length > 0) { %>
+  <nav aria-label="Breadcrumb" class="al-breadcrumb">
+    <ol class="flex items-center text-sm gap-1">
+      <% crumbs.forEach(function(crumb, idx) { %>
+        <li class="flex items-center">
+          <% if (idx > 0) { %>
+            <span class="mx-1.5" style="color:var(--theme-text-muted);">
+              <%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %>
+            </span>
+          <% } %>
+          <% if (crumb.url && idx < crumbs.length - 1) { %>
+            <a href="<%= crumb.url %>" class="transition-colors hover:underline"
+              style="color:var(--theme-text-muted);">
+              <%- crumb.label %>
+            </a>
+          <% } else { %>
+            <span style="color:var(--theme-text);"><%- crumb.label %></span>
+          <% } %>
+        </li>
+      <% }); %>
+    </ol>
+  </nav>
+<% } %>

@@ -8,14 +8,12 @@
       <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noDatabaseHostsYet') %></h3>
       <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);"><%= t('noDatabaseHostsYetDesc') %></p>
       <div class="mt-5">
-        <button type="button" class="al-btn-primary"
-          hx-post="/api/v2/admin/databases/auto-host"
-          hx-target="#admin-databases-list"
-          hx-swap="outerHTML"
-          hx-indicator="#auto-host-status">
+        <button type="button" class="al-btn-primary" onclick="document.getElementById('auto-host-form').submit()">
           <%- icon('zap', { size: 4, strokeWidth: 1.5 }) %> <%= t('autoGenerateHost') %>
         </button>
-        <p id="auto-host-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('adminDbWorking') %></p>
+        <form id="auto-host-form" method="POST" action="/api/v2/admin/databases/auto-host" style="display:none">
+          <%- include('../../../partials/csrf') %>
+        </form>
       </div>
     </div>
   <% } else { %>
@@ -59,19 +57,14 @@
           <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
           <td class="al-table-td">
             <div class="flex gap-3 whitespace-nowrap">
+              <form method="POST" action="/api/v2/admin/databases/<%= host.id %>/test" style="display:inline">
+                <%- include('../../../partials/csrf') %>
+                <button type="submit" class="al-btn-secondary text-xs">
+                  <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('test') %>
+                </button>
+              </form>
               <button
-                hx-post="/api/v2/admin/databases/<%= host.id %>/test"
-                hx-swap="none"
-                hx-indicator="find .htmx-indicator"
-                type="button"
-                class="al-btn-secondary text-xs">
-                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('test') %>
-              </button>
-              <button
-                hx-delete="/api/v2/admin/databases/<%= host.id %>"
-                hx-target="#admin-databases-list"
-                hx-swap="outerHTML"
-                hx-confirm="<%= t('deleteDatabaseHostConfirm') %>"
+                onclick="if(confirm('<%= t('deleteDatabaseHostConfirm') %>')) { fetch('/api/v2/admin/databases/<%= host.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) window.location.reload(); else showToast('<%= t('deleteFailed') %>', 'error'); }).catch(() => showToast('<%= t('networkError') %>', 'error')); }"
                 type="button"
                 class="al-btn-ghost"
                 style="color:var(--theme-danger);"

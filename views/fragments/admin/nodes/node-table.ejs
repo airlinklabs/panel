@@ -1,7 +1,7 @@
 <!-- Node table fragment — replaces #nodeTable on delete -->
 <div id="admin-nodes-table" class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border);">
   <% if (nodes.length === 0) { %>
-    <%- include('../../../components/ui/empty-state', {
+    <%- include('../../../partials/empty-state', {
       iconName: 'network',
       title: t('noNodesYet'),
       description: t('addNodeToStartHosting'),
@@ -25,7 +25,7 @@
     </thead>
     <tbody>
       <% let nodeIdx = 0; nodes.forEach(function(node) { %>
-        <tr data-node-id="<%= node.id %>" data-instances="<%= node.instances ? node.instances.length : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" @click="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+        <tr data-node-id="<%= node.id %>" data-instances="<%= node.instances ? node.instances.length : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="window.location='/admin/node/<%= node.id %>/stats'">
           <td class="al-table-td sm:pl-6">
             <div class="flex items-center">
               <div class="mr-5">
@@ -56,23 +56,22 @@
           <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
           <td class="al-table-td">
             <div class="flex items-center gap-1.5">
-              <button @click="configure('<%= node.id %>')" type="button" title="<%= t('configureNode') %>" aria-label="<%= t('configureNode') %>"
-                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+              <a href="/admin/node/<%= node.id %>/configure"
+                 title="<%= t('configureNode') %>" aria-label="<%= t('configureNode') %>"
+                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                 onclick="event.stopPropagation()">
                 <%- icon('settings', { size: 16, class: 'shrink-0' }) %>
-              </button>
+              </a>
               <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" title="<%= t('editNodeAria') %>" aria-label="<%= t('editNodeAria') %>"
                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                 <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
               </a>
-              <button
-                hx-delete="/api/v2/admin/nodes/<%= node.id %>"
-                hx-target="#admin-nodes-table"
-                hx-swap="outerHTML"
-                hx-confirm="<%= t('deleteNodeConfirm') %>"
-                type="button"
+              <button type="button"
                 title="<%= t('deleteNodeAria') %>" aria-label="<%= t('deleteNodeAria') %>"
                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                style="color:var(--theme-danger);">
+                style="color:var(--theme-danger);"
+                data-node-id="<%= node.id %>"
+                onclick="deleteNode(this)">
                 <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
               </button>
             </div>

@@ -1,231 +1,127 @@
-<%- include('../../components/header', { title: t('files') }) %>
-<style>
-  .al-editor-shell { min-height: calc(100dvh - 15rem); }
-  .al-editor-toolbar { gap: 0.75rem; }
-  .al-editor-path {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.35;
-  }
-  .al-editor-status {
-    gap: 0.5rem 1rem;
-    scrollbar-width: thin;
-  }
-  .al-editor-status button,
-  .al-editor-status span[data-kbd] {
-    min-height: 1.5rem;
-  }
-  @media (max-width: 1023px) {
-    .al-editor-shell { min-height: 60dvh; }
-  }
-</style>
-<main class="h-screen m-auto" style="color:var(--theme-text)">
-  <div class="flex h-full">
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('dashboard'), href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: t('files'), href: '/server/' + server.UUID + '/files' },
-        { label: file.name }
-      ] }) %>
-      <!-- Page Header: title + meta left -->
-      <div class="px-8 pt-4">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/server-header') %>
-            <!-- Server meta: image · node · id -->
-            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
-              <div class="flex items-center gap-1.5">
-                <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
-              </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
-              </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <%- include('../../components/installHeader') %>
-
-      <!-- Daemon down message removed as requested -->
-
-      <%- include('../../components/server-template') %>
-
-      <div id="server-page-body">
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + (file.name || t('files')) }) %>
 
 <%
-    const fileExtension = (file.extension || '').toString().toLowerCase();
-    const language = fileExtension === 'js' ? 'javascript'
-                       : fileExtension === 'mjs' ? 'javascript'
-                       : fileExtension === 'cjs' ? 'javascript'
-                       : fileExtension === 'jsx' ? 'javascript'
-                       : fileExtension === 'json' ? 'json'
-                       : fileExtension === 'html' ? 'html'
-                       : fileExtension === 'htm' ? 'html'
-                       : fileExtension === 'css' ? 'css'
-                       : fileExtension === 'ts' ? 'typescript'
-                       : fileExtension === 'tsx' ? 'typescript'
-                       : fileExtension === 'md' ? 'markdown'
-                       : fileExtension === 'markdown' ? 'markdown'
-                       : fileExtension === 'txt' ? 'plaintext'
-                       : fileExtension === 'py' ? 'python'
-                       : fileExtension === 'sh' ? 'shell'
-                       : fileExtension === 'bash' ? 'shell'
-                       : fileExtension === 'zsh' ? 'shell'
-                       : fileExtension === 'go' ? 'go'
-                       : fileExtension === 'php' ? 'php'
-                       : fileExtension === 'sql' ? 'sql'
-                       : fileExtension === 'c' ? 'c'
-                       : fileExtension === 'h' ? 'c'
-                       : fileExtension === 'cpp' ? 'cpp'
-                       : fileExtension === 'cs' ? 'csharp'
-                       : fileExtension === 'java' ? 'java'
-                       : fileExtension === 'rb' ? 'ruby'
-                       : fileExtension === 'rs' ? 'rust'
-                       : fileExtension === 'yml' ? 'yaml'
-                       : fileExtension === 'yaml' ? 'yaml'
-                       : fileExtension === 'xml' ? 'xml'
-                       : fileExtension === 'toml' ? 'ini'
-                       : fileExtension === 'ini' ? 'ini'
-                       : fileExtension === 'cfg' ? 'ini'
-                       : fileExtension === 'conf' ? 'ini'
-                       : fileExtension === 'properties' ? 'ini'
-                       : fileExtension === 'env' ? 'plaintext'
-                       : fileExtension === 'dockerfile' ? 'dockerfile'
-                       : fileExtension === 'gradle' ? 'groovy'
-                       : fileExtension === 'kt' ? 'kotlin'
-                       : fileExtension === 'swift' ? 'swift'
-                       : fileExtension === 'lua' ? 'lua'
-                       : fileExtension === 'r' ? 'r'
-                       : fileExtension === 'dart' ? 'dart'
-                       : fileExtension === 'ex' ? 'elixir'
-                       : fileExtension === 'exs' ? 'elixir'
-                       : fileExtension === 'hs' ? 'haskell'
-                       : fileExtension === 'scala' ? 'scala'
-                       : fileExtension === 'vue' ? 'html'
-                       : fileExtension === 'svelte' ? 'html'
-                       : 'plaintext';
-    const _initContent = file.content || '';
-    const fileContentTooLarge = _initContent.length > 1048576;
-    const fileContentInvalidUtf8 = /[\uFFFD]/.test(_initContent);
-    const fileContentSkipped = fileContentTooLarge || fileContentInvalidUtf8;
+const fileExtension = (file.extension || '').toString().toLowerCase();
+const languageMap = {
+  js: 'javascript', mjs: 'javascript', cjs: 'javascript', jsx: 'javascript',
+  json: 'json', html: 'html', htm: 'html', css: 'css',
+  ts: 'typescript', tsx: 'typescript', md: 'markdown', markdown: 'markdown',
+  txt: 'plaintext', py: 'python', sh: 'shell', bash: 'shell', zsh: 'shell',
+  go: 'go', php: 'php', sql: 'sql', c: 'c', h: 'c', cpp: 'cpp',
+  cs: 'csharp', java: 'java', rb: 'ruby', rs: 'rust', yml: 'yaml',
+  yaml: 'yaml', xml: 'xml', toml: 'ini', ini: 'ini', cfg: 'ini',
+  conf: 'ini', properties: 'ini', env: 'plaintext', dockerfile: 'dockerfile',
+  gradle: 'groovy', kt: 'kotlin', swift: 'swift', lua: 'lua', r: 'r',
+  dart: 'dart', ex: 'elixir', exs: 'elixir', hs: 'haskell', scala: 'scala',
+  vue: 'html', svelte: 'html',
+};
+const language = languageMap[fileExtension] || 'plaintext';
+const _initContent = file.content || '';
+const fileContentTooLarge = _initContent.length > 1048576;
+const fileContentInvalidUtf8 = /[\uFFFD]/.test(_initContent);
+const fileContentSkipped = fileContentTooLarge || fileContentInvalidUtf8;
+const filePath = file.path || '';
+const serverUUID = server.UUID;
 %>
-      <div id="file-editor-root" data-config="<%- JSON.stringify({
-        serverUUID: server.UUID,
-        filePath: file.path || '',
-        language: language,
-        content: fileContentSkipped ? '' : (file.content || ''),
-        tooLarge: fileContentTooLarge,
-        invalidUtf8: fileContentInvalidUtf8,
-        skipped: fileContentSkipped,
-        fileExtension: fileExtension,
-        saveUrl: '/server/' + server.UUID + '/files/' + encodeURIComponent(file.path || ''),
-      }).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') %>">
 
-      <!-- Daemon Offline Warning -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div id="daemon-offline-banner" class="mx-8 mt-8 rounded-xl p-4 flex items-center" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
-        <div class="flex-shrink-0 mr-3">
-          <%- icon('triangle-alert', { class: 'h-6 w-6', style: 'color:var(--theme-danger);' }) %>
-        </div>
-        <div>
-          <h3 class="text-sm font-medium" style="color:var(--theme-danger);"><%= t('connectionError') %></h3>
-          <p class="text-xs" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
-          <button type="button" id="retryConnectionBtn" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5">
-            <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-            <%= t('retryConnection') %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name, url: '/server/' + serverUUID },
+    { label: t('files'), url: '/server/' + serverUUID + '/files' },
+    { label: file.name }
+  ] }) %>
+</div>
+
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title break-all"><%= file.name %></h1>
+    <p class="al-page-desc break-all"><%= t('editingFileIn', { path: filePath }) %></p>
+  </div>
+  <div>
+    <a class="al-btn-secondary al-btn-sm" href="/server/<%= serverUUID %>/files">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
+      <%= t('backToFiles') %>
+    </a>
+    <% if (file.type !== 'directory') { %>
+      <a class="al-btn-primary al-btn-sm" href="/server/<%= serverUUID %>/files/download<%= filePath.split('/').map(encodeURIComponent).join('/') %>">
+        <%- icon('download', { class: 'size-4', strokeWidth: 2 }) %>
+        <%= t('download') %>
+      </a>
+    <% } %>
+  </div>
+</header>
+
+<div class="al-page-body">
+  <div id="file-editor-root" data-config="<%- JSON.stringify({
+    serverUUID: serverUUID,
+    filePath: filePath,
+    language: language,
+    content: fileContentSkipped ? '' : (file.content || ''),
+    tooLarge: fileContentTooLarge,
+    invalidUtf8: fileContentInvalidUtf8,
+    skipped: fileContentSkipped,
+    fileExtension: fileExtension,
+    saveUrl: '/server/' + serverUUID + '/files/' + encodeURIComponent(filePath),
+  }).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') %>">
+
+    <div class="al-card">
+      <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+        <h2 class="al-editor-path text-sm font-medium min-w-0" style="color:var(--theme-text-strong)">
+          <a class="hover:text-[var(--theme-text-strong)] transition" href="/server/<%= serverUUID %>/files" style="color:var(--theme-text-muted)">/home/container/</a>
+          <%
+            if (filePath) {
+              const parts = filePath.split('/');
+              let curBuild = '';
+              parts.forEach(function(part, index) {
+                curBuild += part;
+                if (index < parts.length - 1) { %>
+                  <a href="/server/<%= serverUUID %>/files?path=<%= curBuild %>" class="hover:text-[var(--theme-text-strong)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span style="color:var(--theme-text-muted)">/</span>
+                <% curBuild += '/';
+                } else { %>
+                  <span style="color:var(--theme-text-strong)"><%= part %></span>
+                <% }
+              });
+            }
+          %>
+        </h2>
+        <div class="flex shrink-0">
+          <button id="saveBtn" class="al-btn-primary al-btn-sm min-w-24" type="button">
+            <%- icon('save', { class: 'size-4', strokeWidth: 2 }) %>
+            <%= t('saveBtn') %>
           </button>
         </div>
       </div>
-      <% } %>
-
-      <div class="flex flex-col lg:flex-row px-8 mt-8">
-        <div class="al-ui-surface overflow-hidden rounded-xl w-full">
-          <!-- File Editor -->
-          <div class="p-5">
-            <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-              <h2 class="al-editor-path text-sm font-medium min-w-0" style="color:var(--theme-text-strong)">
-                <a class="hover:text-[var(--theme-text-strong)] transition" href="/server/<%= server.UUID %>/files" style="color:var(--theme-text-muted)">/home/container/</a>
-              <%
-                  if (file.path) {
-                      const parts = file.path.split('/');
-                      let currentPath = '';
-
-                      parts.forEach((part, index) => {
-                          currentPath += part;
-
-                          if (index < parts.length - 1) {
-                              %>
-                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="hover:text-[var(--theme-text-strong)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span style="color:var(--theme-text-muted)">/</span>
-                              <%
-                              currentPath += '/';
-                          } else {
-                              %>
-                              <span style="color:var(--theme-text-strong)"><%= part %></span>
-                              <%
-                          }
-                      });
-                  }
-              %>
-              </h2>
-              <div class="flex shrink-0">
-                <button id="saveBtn" class="al-ui-button-primary min-w-24" type="button">
-                  <%- icon('save', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
-                  <%= t('saveBtn') %>
-                </button>
-              </div>
+      <div class="al-editor-frame" id="editor-container-wrapper">
+        <div class="al-editor-shell" id="editor-container"></div>
+        <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
+          <div class="flex items-center gap-3 whitespace-nowrap">
+            <div id="editor-status"><%= t('editorLineColumn') %></div>
+            <div id="file-info" class="al-editor-stat"><%= t('loadingEllipsis') %></div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('wordWrap') %>:</span>
+              <button type="button" id="toggle-wordwrap"><%= t('offLabel') %></button>
             </div>
-            <div class="border rounded-xl overflow-hidden" style="border-color:var(--theme-border)" id="editor-container-wrapper">
-              <div class="al-editor-shell" id="editor-container"></div>
-              <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
-                <div class="flex items-center gap-3 whitespace-nowrap">
-                  <div id="editor-status">Line: 1, Column: 1</div>
-                  <div id="file-info" class="px-2 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('loadingEllipsis') %></div>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                  <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5"><%= t('wordWrap') %>:</span>
-                    <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
-                  </div>
-                  <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5"><%= t('minimap') %>:</span>
-                    <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
-                  </div>
-                  <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5"><%= t('theme') %>:</span>
-                    <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('autoLabel') %></button>
-                  </div>
-                  <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5"><%= t('saveBtn') %>:</span>
-                    <span data-kbd class="px-1.5 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('ctrlS') %></span>
-                  </div>
-                </div>
-              </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('minimap') %>:</span>
+              <button type="button" id="toggle-minimap"><%= t('offLabel') %></button>
+            </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('theme') %>:</span>
+              <button type="button" id="toggle-theme"><%= t('autoLabel') %></button>
+            </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('saveBtn') %>:</span>
+              <span data-kbd><%= t('ctrlS') %></span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-      </div><!-- /file-editor-root -->
-      </div><!-- /server-page-body -->
-
-      </div>
-</main>
-
+  </div>
+</div>
 
 <script nonce="<%- nonce %>" src="<%= assetUrl('/monaco/vs/loader.js') %>"></script>
 <script type="application/json" id="editor-file-data"><%- JSON.stringify({ content: file.content || '', tooLarge: fileContentTooLarge, invalidUtf8: fileContentInvalidUtf8 }).replace(/<\//g, '<\\/').replace(/&/g, '&amp;').replace(/"/g, '&quot;') %></script>
@@ -234,17 +130,10 @@
   const root = document.getElementById('file-editor-root');
   if (root) {
     const { teardown } = await mount(root, JSON.parse(root.dataset.config));
-    
-    // Call teardown before Turbo swaps the page
-    document.addEventListener('turbo:before-render', () => {
-      if (teardown) teardown();
-    }, { once: true });
-    
-    // Also call on pagehide for full browser navigation
-    window.addEventListener('pagehide', () => {
+    window.addEventListener('beforeunload', () => {
       if (teardown) teardown();
     }, { once: true });
   }
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/user-footer') %>

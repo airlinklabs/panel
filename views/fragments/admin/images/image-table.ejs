@@ -24,7 +24,7 @@
         <tr class="al-table-tr transition-colors cursor-pointer img-row"
             style="--i:<%= imgIdx++ %>"
             data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
-            @click="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+            onclick="window.location.href='/admin/images/edit/<%= image.id %>'">
           <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
           <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= image.author || '—' %></td>
           <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
@@ -33,11 +33,7 @@
               <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('imageEditBtn') %></a>
               <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('imageExportBtn') %></a>
               <button
-                hx-delete="/api/v2/admin/images/<%= image.id %>"
-                hx-target="#installedTableSection"
-                hx-swap="outerHTML"
-                hx-confirm="<%= t('imageDeleteConfirm', { name: image.name }) %>"
-                onclick="event.stopPropagation()"
+                onclick="event.stopPropagation(); if(confirm('<%= t('imageDeleteConfirm', { name: image.name }) %>')) { fetch('/api/v2/admin/images/<%= image.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) window.location.reload(); else showToast('<%= t('deleteFailed') %>', 'error'); }).catch(() => showToast('<%= t('networkError') %>', 'error')); }"
                 type="button"
                 class="al-btn-danger"
                 aria-label="<%= t('ariaDeleteImage', { name: image.name }) %>">

@@ -1,7 +1,7 @@
 {
   "name": "airlink-panel",
-  "version": "2.5.191",
-  "description": "Airlink Panel — game server management panel for Minecraft, Palworld, Rust, and more",
+  "version": "2.6.0",
+  "description": "Airlink, Open-source game server management that actually works.",
   "keywords": [
     "game-server",
     "minecraft",
@@ -9,9 +9,7 @@
     "rust",
     "management-panel",
     "prisma",
-    "express",
-    "htmx",
-    "petrodactyl-alternaitve"
+    "express"
   ],
   "homepage": "https://airlinklabs.xyz/",
   "repository": {
@@ -52,6 +50,9 @@
     "test:e2e:ui": "node scripts/executer.mjs test:e2e:ui",
     "test:docker": "node scripts/executer.mjs test:docker",
     "test:all": "node scripts/executer.mjs test:all",
+    "lingui:extract": "lingui extract --clean",
+    "lingui:compile": "lingui compile",
+    "lingui:extract:watch": "lingui extract --watch",
     "help": "node scripts/executer.mjs help"
   },
   "dependencies": {
@@ -60,18 +61,15 @@
     "@dicebear/core": "^9.4.3",
     "@dicebear/thumbs": "^9.4.2",
     "@fontsource-variable/inter": "^5.3.0",
-    "@formkit/auto-animate": "^0.9.0",
-    "@hotwired/turbo": "^8.0.23",
+    "@lingui/core": "^6.7.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.3",
-    "@tanstack/query-core": "^5.101.4",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.11.0",
     "@xterm/xterm": "^5.5.0",
     "adm-zip": "^0.6.0",
-    "alpinejs": "^3.14.9",
     "bcryptjs": "^3.0.3",
     "boxen": "^8.0.1",
     "chalk": "^5.6.2",
@@ -89,7 +87,6 @@
     "express-ws": "^5.0.2",
     "form-data": "^4.0.6",
     "helmet": "^8.2.0",
-    "htmx.org": "^2.0.4",
     "ioredis": "^5.6.1",
     "lucide": "^1.18.0",
     "monaco-editor": "^0.56.0",
@@ -108,9 +105,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@lingui/cli": "^6.7.0",
+    "@lingui/format-json": "^6.7.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/cli": "^4.3.1",
     "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/adm-zip": "^0.5.8",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",

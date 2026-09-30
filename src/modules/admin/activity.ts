@@ -146,7 +146,7 @@ const activityModule: Module = {
 
           const settings = await getSettings();
 
-          res.render('admin/activity/activity', {
+          res.render('admin/activity/index', {
             user,
             req,
             settings,

@@ -1,0 +1,291 @@
+<script nonce="<%- nonce %>">
+(function () {
+  if (window.createToastSystem) return;
+
+  const colorMap = {
+    error: 'var(--theme-danger)', success: 'var(--theme-success)',
+    warning: 'var(--theme-warning)', loading: 'var(--theme-info)', info: 'var(--theme-info)',
+  };
+  const iconMap = {
+    error: '<%- icon("circle-x", { class: "w-5 h-5" }) %>',
+    success: '<%- icon("circle-check", { class: "w-5 h-5" }) %>',
+    warning: '<%- icon("triangle-alert", { class: "w-5 h-5" }) %>',
+    loading: '<%- icon("loader-circle", { class: "w-5 h-5 animate-spin" }) %>',
+    info: '<%- icon("info", { class: "w-5 h-5" }) %>',
+    check: '<%- icon("circle-check", { class: "w-5 h-5" }) %>',
+    x: '<%- icon("x", { class: "w-5 h-5" }) %>',
+  };
+
+  let storage = null;
+  try {
+    if (window.sessionStorage) {
+      window.sessionStorage.setItem('__al_toast_probe__', '1');
+      window.sessionStorage.removeItem('__al_toast_probe__');
+      storage = window.sessionStorage;
+    }
+  } catch (e) { storage = null; }
+  const store = window.ALToastStore ? window.ALToastStore.createStore(storage) : null;
+  const uid = () => (window.ALToastStore ? window.ALToastStore.uid() : 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+  const remainingMs = (r, n) => (window.ALToastStore ? window.ALToastStore.remainingMs(r, n) : 0);
+
+  const active = new Map();
+  const pendingGroups = new Set();
+  const jobPolls = new Map();
+  const hydrated = new Set();
+  let saveTimer = null;
+
+  function scheduleSave() {
+    if (!store || saveTimer) return;
+    saveTimer = setTimeout(function () {
+      saveTimer = null;
+      const list = [];
+      active.forEach(function (entry) { list.push(entry.record); });
+      store.save(list);
+    }, 80);
+  }
+
+  function stopJobFor(id) {
+    const stop = jobPolls.get(id);
+    if (stop) { stop(); jobPolls.delete(id); }
+  }
+
+  let toastContainer = null;
+  function ensureContainer() {
+    if (!toastContainer || !toastContainer.isConnected) {
+      toastContainer = document.getElementById('toast-container');
+    }
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toast-container';
+      toastContainer.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2 max-sm:left-4 max-sm:right-4';
+      toastContainer.setAttribute('aria-live', 'polite');
+      toastContainer.setAttribute('role', 'status');
+      document.body.appendChild(toastContainer);
+    }
+    return toastContainer;
+  }
+
+  function interpretJob(data) {
+    if (!data || typeof data !== 'object') return {};
+    if (typeof data.state === 'string') {
+      const st = data.state;
+      if (st === 'installed') return { done: true, success: true, message: (window.__i18n && window.__i18n.installationComplete) || 'Installation complete.' };
+      if (st === 'failed') return { done: true, success: false, error: data.error || ((window.__i18n && window.__i18n.installationFailed) || 'Installation failed.') };
+      return { message: typeof data.error === 'string' ? data.error : undefined };
+    }
+    const done = data.done === true || data.success === true || data.success === false || !!data.error;
+    return {
+      message: typeof data.message === 'string' ? data.message : undefined,
+      done: done,
+      success: !(data.success === false || !!data.error),
+      error: data.error,
+    };
+  }
+
+  function createRecord(message, type, opts) {
+    const isActive = opts.progress === true || type === 'loading';
+    return {
+      id: uid(),
+      group: typeof opts.group === 'string' && opts.group ? opts.group : null,
+      mode: isActive ? 'active' : 'toast',
+      message: String(message),
+      type: type,
+      startedAt: Date.now(),
+      duration: isActive ? 0 : (typeof opts.duration === 'number' ? opts.duration : 5000),
+      finished: false, success: null, finishedAt: null,
+      job: opts.job && typeof opts.job === 'object' ? Object.assign({}, opts.job) : null,
+    };
+  }
+
+  function showToast(message, type, opts) {
+    opts = opts || {};
+    const isPreset = opts._record != null;
+    const rec = isPreset ? Object.assign({}, opts._record) : createRecord(message, type, opts);
+    if (isPreset && typeof opts.duration === 'number') rec.duration = opts.duration;
+
+    if (rec.group) {
+      if (pendingGroups.has(rec.group)) return noopHandle();
+      let existing = null;
+      active.forEach(function (entry) {
+        if (!existing && entry.record && entry.record.group === rec.group && !entry.record.finished) existing = entry;
+      });
+      if (existing && existing.handle) return existing.handle;
+      pendingGroups.add(rec.group);
+    }
+
+    if (rec.mode === 'active' && !rec.group) {
+      const norm = (rec.message || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+      let existing = null;
+      active.forEach(function (entry) {
+        if (!existing && entry.record && entry.record.mode === 'active' && !entry.record.finished) {
+          const eNorm = (entry.record.message || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+          if (eNorm === norm) existing = entry;
+        }
+      });
+      if (existing && existing.handle) return existing.handle;
+    }
+
+    return renderToast(rec, opts);
+  }
+
+  function renderToast(rec) {
+    const isActive = rec.mode === 'active';
+    const toast = ensureContainer();
+    const el = document.createElement('div');
+    el.className = 'al-toast px-4 py-3 rounded-xl shadow-lg flex flex-row items-start gap-3';
+    el.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border);transform:translateX(calc(100% + 1rem));opacity:0;max-width:400px;touch-action:none;cursor:grab;user-select:none;overflow-wrap:break-word;transition:transform 320ms cubic-bezier(0.16,1,0.3,1),opacity 320ms cubic-bezier(0.16,1,0.3,1);will-change:transform,opacity;color:var(--theme-text);';
+
+    const icon = document.createElement('span');
+    icon.className = 'mt-0.5 shrink-0';
+    icon.style.color = (rec.type && colorMap[rec.type]) || colorMap.info;
+    icon.innerHTML = (rec.type && iconMap[rec.type]) || iconMap.info;
+    el.appendChild(icon);
+
+    const body = document.createElement('div');
+    body.className = 'flex-1 min-w-0';
+    el.appendChild(body);
+
+    const messageSpan = document.createElement('div');
+    messageSpan.className = 'font-medium text-sm leading-relaxed';
+    messageSpan.style.color = 'var(--theme-text)';
+    messageSpan.textContent = rec.message;
+    body.appendChild(messageSpan);
+
+    const stageSpan = document.createElement('div');
+    stageSpan.className = 'text-xs mt-0.5';
+    stageSpan.style.color = 'var(--theme-text-muted)';
+    stageSpan.style.display = 'none';
+    body.appendChild(stageSpan);
+
+    if (!isActive) {
+      const dismissBtn = document.createElement('button');
+      dismissBtn.type = 'button';
+      dismissBtn.className = 'shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70 ml-1';
+      dismissBtn.style.color = 'var(--theme-text-muted)';
+      dismissBtn.innerHTML = alIcon('x', 'w-3.5 h-3.5');
+      dismissBtn.addEventListener('click', function (e) { e.stopPropagation(); removeToast(); });
+      el.appendChild(dismissBtn);
+    }
+
+    toast.appendChild(el);
+    requestAnimationFrame(function () { el.style.transform = 'translateX(0)'; el.style.opacity = '1'; });
+
+    let removed = false, dismissTimer = null, completed = false;
+
+    const removeToast = function () {
+      if (removed) return;
+      removed = true;
+      if (dismissTimer) clearTimeout(dismissTimer);
+      stopJobFor(rec.id);
+      active.delete(rec.id);
+      if (rec.group) pendingGroups.delete(rec.group);
+      scheduleSave();
+      el.style.transition = 'transform 180ms cubic-bezier(0.4,0,1,1), opacity 180ms cubic-bezier(0.4,0,1,1)';
+      el.style.transform = 'translateX(calc(100% + 1rem))';
+      el.style.opacity = '0';
+      setTimeout(function () { if (el.parentNode) toast.removeChild(el); }, 200);
+    };
+
+    const scheduleDismiss = function (ms) {
+      if (dismissTimer) clearTimeout(dismissTimer);
+      if (ms > 0) dismissTimer = setTimeout(removeToast, ms);
+    };
+
+    const setType = function (t) {
+      rec.type = t;
+      icon.style.color = colorMap[t] || colorMap.info;
+      icon.innerHTML = iconMap[t] || iconMap.info;
+    };
+
+    const setMessage = function (msg) { rec.message = String(msg); messageSpan.textContent = rec.message; scheduleSave(); };
+    const setStage = function (msg) {
+      if (typeof msg === 'string' && msg) { stageSpan.textContent = msg; stageSpan.style.display = ''; }
+      else { stageSpan.style.display = 'none'; }
+    };
+
+    const complete = function (success, msg) {
+      if (removed || completed) return;
+      completed = true;
+      if (typeof msg === 'string') setMessage(msg);
+      rec.finished = true; rec.finishedAt = Date.now(); rec.success = !!success;
+      scheduleSave();
+      if (success) setType('success'); else setType('error');
+      icon.innerHTML = success ? iconMap.check : iconMap.x;
+      setStage('');
+      scheduleDismiss(success ? 1600 : 4000);
+    };
+
+    let stopJob = function () {};
+    if (rec.job && typeof rec.job === 'object') {
+      const jobCfg = rec.job;
+      const intervalMs = typeof jobCfg.intervalMs === 'number' ? jobCfg.intervalMs : 2000;
+      let stopped = false, timer = null;
+      const tick = function () {
+        if (stopped || removed || completed) return;
+        fetch(jobCfg.url, { method: jobCfg.method || 'GET', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (data) {
+            if (stopped || removed || completed) return;
+            const view = interpretJob(data);
+            if (typeof view.message === 'string' && view.message !== rec.message) { setMessage(view.message); setStage(view.message); }
+            if (view.done) complete(view.success, view.error || view.message || 'Done.');
+          })
+          .catch(function () {})
+          .then(function () { if (!stopped && !removed && !completed) timer = setTimeout(tick, intervalMs); });
+      };
+      stopJob = function () { stopped = true; if (timer) clearTimeout(timer); };
+      jobPolls.set(rec.id, stopJob);
+      tick();
+    }
+
+    if (!isActive && !rec.finished) scheduleDismiss(typeof rec.duration === 'number' ? rec.duration : 5000);
+    if (isActive && !rec.finished) scheduleDismiss(10000);
+
+    if (rec.finished === true) {
+      const remain = remainingMs(rec, Date.now());
+      if (remain <= 0) { active.delete(rec.id); if (el.parentNode) toast.removeChild(el); return noopHandle(); }
+      icon.innerHTML = rec.success === false ? iconMap.x : iconMap.check;
+      scheduleDismiss(remain);
+    }
+
+    const handle = { setMessage, setStage, setType, complete, close: removeToast };
+    active.set(rec.id, { record: rec, handle });
+    scheduleSave();
+    return handle;
+  }
+
+  function noopHandle() { const noop = function () {}; return { setMessage: noop, setStage: noop, setType: noop, complete: noop, close: noop }; }
+
+  function hydrate() {
+    if (!store) return;
+    const records = store.load();
+    records.forEach(function (rec) {
+      if (!rec || hydrated.has(rec.id)) return;
+      hydrated.add(rec.id);
+      const now = Date.now();
+      if (rec.finished === true) {
+        const remain = remainingMs(rec, now);
+        if (remain <= 0) return;
+        showToast(rec.message, rec.success === false ? 'error' : 'success', { _record: Object.assign({}, rec, { mode: 'toast', duration: remain }) });
+        return;
+      }
+      if (rec.mode === 'active') { showToast(rec.message, 'loading', { _record: rec }); return; }
+      const remainPlain = remainingMs(rec, now);
+      if (remainPlain <= 0) return;
+      showToast(rec.message, rec.type, { _record: rec, duration: remainPlain });
+    });
+  }
+
+  function onReady() {
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', onReady); return; }
+    hydrate();
+  }
+
+  window.createToastSystem = function () { return { showToast }; };
+  window.showToast = showToast;
+  window.showProgressToast = function (message, opts) { return showToast(message, 'loading', Object.assign({}, opts || {})); };
+  window.showLoadingToast = function (message) { return showToast(message, 'loading'); };
+
+  onReady();
+})();
+</script>

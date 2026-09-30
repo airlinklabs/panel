@@ -2,8 +2,8 @@
  * Shared in-memory cache for security settings (rate limits, banned IPs).
  * Refreshed periodically from DB and also on-demand after admin changes.
  */
-import { getSettings } from "./settingsCache";
-import { DEFAULT_RATE_LIMIT_RPM } from "../config/ui";
+import { getSettings } from './settingsCache';
+import { DEFAULT_RATE_LIMIT_RPM } from '../config/ui';
 
 const securityCache = {
   bannedIps: [] as string[],

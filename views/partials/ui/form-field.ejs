@@ -1,0 +1,116 @@
+<%
+/* UI Form Field — one field anatomy for the whole panel:
+   label → control → help and/or error, wired together for screen readers.
+
+   Params: type ('text'|'email'|'password'|'number'|'tel'|'url'|'search'|
+                 'textarea'|'select'|'checkbox'|'radio'),
+           name, label, id, value, placeholder, required, disabled, readonly,
+           helpText, error, options ([{value,label,selected,disabled}]),
+           checked, min, max, step, autocomplete, inputmode, cls, describedBy */
+const fieldType = typeof type !== 'undefined' ? type : 'text';
+const fieldName = typeof name !== 'undefined' ? name : '';
+const fieldLabel = typeof label !== 'undefined' ? label : '';
+const fieldId = typeof id !== 'undefined' && id ? id : fieldName;
+const fieldValue = typeof value !== 'undefined' ? value : '';
+const fieldPlaceholder = typeof placeholder !== 'undefined' ? placeholder : '';
+const fieldRequired = typeof required !== 'undefined' ? required : false;
+const fieldDisabled = typeof disabled !== 'undefined' ? disabled : false;
+const fieldReadonly = typeof readonly !== 'undefined' ? readonly : false;
+const fieldHelp = typeof helpText !== 'undefined' ? helpText : '';
+const fieldError = typeof error !== 'undefined' ? error : '';
+const fieldCls = typeof cls !== 'undefined' ? cls : '';
+const wrapCls = typeof wrapperCls !== 'undefined' ? wrapperCls : '';
+const fieldOptions = typeof options !== 'undefined' ? options : [];
+const fieldChecked = typeof checked !== 'undefined' ? checked : false;
+const fieldMin = typeof min !== 'undefined' ? min : '';
+const fieldMax = typeof max !== 'undefined' ? max : '';
+const fieldStep = typeof step !== 'undefined' ? step : '';
+const fieldAutocomplete = typeof autocomplete !== 'undefined' ? autocomplete : '';
+const fieldInputmode = typeof inputmode !== 'undefined' ? inputmode : '';
+
+const isToggle = fieldType === 'checkbox' || fieldType === 'radio';
+const helpId = fieldId + '-help';
+const errorId = fieldId + '-error';
+const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
+  .filter(Boolean).join(' ');
+%>
+<div class="al-form-field <%= wrapCls %>">
+  <% if (fieldLabel && !isToggle) { %>
+    <label for="<%= fieldId %>" class="al-form-label">
+      <%- fieldLabel %>
+      <% if (fieldRequired) { %><span class="al-required" aria-hidden="true">*</span><% } %>
+    </label>
+  <% } %>
+
+  <% if (fieldType === 'textarea') { %>
+    <textarea id="<%= fieldId %>" name="<%= fieldName %>"
+      class="al-form-textarea <%= fieldError ? 'al-form-error' : '' %> <%= fieldCls %>"
+      placeholder="<%= fieldPlaceholder %>"
+      <% if (fieldRequired) { %> required aria-required="true"<% } %>
+      <% if (fieldDisabled) { %> disabled<% } %>
+      <% if (fieldReadonly) { %> readonly<% } %>
+      <% if (fieldAutocomplete) { %> autocomplete="<%= fieldAutocomplete %>"<% } %>
+      <% if (described) { %> aria-describedby="<%= described %>"<% } %>
+      <% if (fieldError) { %> aria-invalid="true"<% } %>
+    ><%- fieldValue %></textarea>
+
+  <% } else if (fieldType === 'select') { %>
+    <select id="<%= fieldId %>" name="<%= fieldName %>"
+      class="al-form-select <%= fieldError ? 'al-form-error' : '' %> <%= fieldCls %>"
+      <% if (fieldRequired) { %> required aria-required="true"<% } %>
+      <% if (fieldDisabled) { %> disabled<% } %>
+      <% if (described) { %> aria-describedby="<%= described %>"<% } %>
+      <% if (fieldError) { %> aria-invalid="true"<% } %>>
+      <% if (fieldPlaceholder) { %>
+        <option value="" disabled<%= !fieldValue ? ' selected' : '' %>><%= fieldPlaceholder %></option>
+      <% } %>
+      <% fieldOptions.forEach(function(opt) { %>
+        <option value="<%= opt.value %>"
+          <% if (opt.value === fieldValue || opt.selected) { %> selected<% } %>
+          <% if (typeof opt.disabled !== 'undefined' && opt.disabled) { %> disabled<% } %>>
+          <%- opt.label %>
+        </option>
+      <% }); %>
+    </select>
+
+  <% } else if (isToggle) { %>
+    <div class="al-form-check">
+      <input type="<%= fieldType %>" id="<%= fieldId %>" name="<%= fieldName %>"
+        <%= fieldType === 'checkbox' ? 'value="true"' : `value="${typeof radioValue !== 'undefined' ? radioValue : fieldValue}"` %>
+        class="al-form-<%= fieldType %>"
+        <% if (fieldChecked) { %> checked<% } %>
+        <% if (fieldRequired) { %> required aria-required="true"<% } %>
+        <% if (fieldDisabled) { %> disabled<% } %>
+        <% if (described) { %> aria-describedby="<%= described %>"<% } %>>
+      <% if (fieldLabel) { %>
+        <label for="<%= fieldId %>" class="al-form-check-label"><%- fieldLabel %></label>
+      <% } %>
+    </div>
+    <% if (fieldError) { %>
+      <p class="al-form-error-msg" id="<%= errorId %>"><%- fieldError %></p>
+    <% } %>
+
+  <% } else { %>
+    <input type="<%= fieldType %>" id="<%= fieldId %>" name="<%= fieldName %>"
+      class="al-form-input <%= fieldError ? 'al-form-error' : '' %> <%= fieldCls %>"
+      value="<%= fieldValue %>"
+      placeholder="<%= fieldPlaceholder %>"
+      <% if (fieldRequired) { %> required aria-required="true"<% } %>
+      <% if (fieldDisabled) { %> disabled<% } %>
+      <% if (fieldReadonly) { %> readonly<% } %>
+      <% if (fieldMin !== '' && typeof fieldMin !== 'undefined') { %> min="<%= fieldMin %>"<% } %>
+      <% if (fieldMax !== '' && typeof fieldMax !== 'undefined') { %> max="<%= fieldMax %>"<% } %>
+      <% if (fieldStep !== '' && typeof fieldStep !== 'undefined') { %> step="<%= fieldStep %>"<% } %>
+      <% if (fieldAutocomplete) { %> autocomplete="<%= fieldAutocomplete %>"<% } %>
+      <% if (fieldInputmode) { %> inputmode="<%= fieldInputmode %>"<% } %>
+      <% if (described) { %> aria-describedby="<%= described %>"<% } %>
+      <% if (fieldError) { %> aria-invalid="true"<% } %>>
+  <% } %>
+
+  <% if (fieldHelp) { %>
+    <p class="al-form-help" id="<%= helpId %>"><%- fieldHelp %></p>
+  <% } %>
+  <% if (fieldError && !isToggle) { %>
+    <p class="al-form-error-msg" id="<%= errorId %>" role="alert"><%- fieldError %></p>
+  <% } %>
+</div>

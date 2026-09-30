@@ -18,9 +18,9 @@
 
   function parseUnits(str) {
     return str
-      .split(",")
+      .split(',')
       .map(function (pair) {
-        const parts = pair.split(":");
+        const parts = pair.split(':');
         return { multiplier: parseFloat(parts[0]), label: parts[1].trim() };
       })
       .sort(function (a, b) {
@@ -30,27 +30,28 @@
 
   function roundDisplay(v) {
     const r = Math.round(v * ROUND_PRECISION) / ROUND_PRECISION;
-    return r === -0 ? 0 : r;
+    // `=== 0` also catches -0 and normalizes it to +0.
+    return r === 0 ? 0 : r;
   }
 
   function initSwitcher(btn) {
     const display = document.getElementById(btn.dataset.display);
     const hidden = document.getElementById(btn.dataset.hidden);
     const units = parseUnits(btn.dataset.units);
-    if (!display || !hidden || units.length === 0) return;
+    if (!display || !hidden || units.length === 0) {return;}
 
     function pickUnit() {
       const v = parseFloat(hidden.value);
       if (!isFinite(v) || v <= 0) {
         const def = btn.dataset.defaultUnit;
-        for (let i = 0; i < units.length; i++) {
-          if (units[i].label === def) return units[i];
+        for (const unit of units) {
+          if (unit.label === def) {return unit;}
         }
         return units[0];
       }
       let chosen = units[0];
       units.forEach(function (u) {
-        if (v / u.multiplier >= 1) chosen = u;
+        if (v / u.multiplier >= 1) {chosen = u;}
       });
       return chosen;
     }
@@ -60,7 +61,7 @@
     function syncDisplay() {
       const v = parseFloat(hidden.value);
       if (!isFinite(v)) {
-        display.value = "";
+        display.value = '';
         return;
       }
       display.value = roundDisplay(v / current.multiplier);
@@ -69,17 +70,17 @@
     function syncHidden() {
       const v = parseFloat(display.value);
       if (!isFinite(v)) {
-        hidden.value = "";
+        hidden.value = '';
         return;
       }
-      hidden.value = "" + Math.round(v * current.multiplier);
+      hidden.value = `${  Math.round(v * current.multiplier)}`;
     }
 
     function render() {
       btn.textContent = current.label;
     }
 
-    btn.addEventListener("click", function () {
+    btn.addEventListener('click', function () {
       syncHidden();
       const idx = units.indexOf(current);
       current = units[(idx + 1) % units.length];
@@ -87,25 +88,19 @@
       render();
     });
 
-    display.addEventListener("input", syncHidden);
+    display.addEventListener('input', syncHidden);
 
     syncDisplay();
     render();
   }
 
   function initAll() {
-    document.querySelectorAll("[data-format-switcher]").forEach(initSwitcher);
+    document.querySelectorAll('[data-format-switcher]').forEach(initSwitcher);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initAll);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
   } else {
     initAll();
   }
-
-  // Turbo swaps the body without re-firing DOMContentLoaded — rescan the
-  // fresh initialisers/selects after every navigation.
-  document.addEventListener("al:navigated", function () {
-    initAll();
-  });
 })();

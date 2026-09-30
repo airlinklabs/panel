@@ -1,8 +1,10 @@
-<%- include('../../components/header', { title: t('adminEditServerTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminEditServerTitle') }) %>
+
+<%- include('../../partials/flash-messages') %>
 
 <script nonce="<%- nonce %>">
 const serverEditNames = {
-  listA: ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing","Cursed","Frozen","Swift","Ancient","Wicked","Luminous","Vengeful","Radiant","Thunderous","Shadow","Frost","Vibrant","Spectral","Nether","Ender","Caving","Toxic","Haunted","Radiant","Ghostly"],
+  listA: ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing","Cursed","Frozen","Swift","Ancient","Wicked","Luminous","Vengeful","Radiant","Thunderous","Shadow","Frost","Vibrant","Spectral","Nether","Ender","Caving","Toxic","Haunted","Ghostly"],
   listB: ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither","Magma Cube","Blaze","Witch","Slime","Spider","Phantom","Villager","Pillager","Vindicator","Drowned","Illager","Ender Dragon","Husk","Stray","Ravager","Piglin","Hoglin","Shulker","Warden"],
   generate() {
     let a, b;
@@ -10,439 +12,404 @@ const serverEditNames = {
     return a + ' ' + b;
   }
 };
-function serverEditPage() {
-  return {
-    allowStartupEdit: <%= server.allowStartupEdit ? 'true' : 'false' %>,
-    suspended: <%= server.Suspended ? 'true' : 'false' %>,
-    generateName() { document.getElementById('serverName').value = serverEditNames.generate(); }
-  };
-}
+function generateName() { document.getElementById('serverName').value = serverEditNames.generate(); }
 </script>
 
-<div x-data="serverEditPage()">
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('breadcrumbServers'), href: '/admin/servers' },
-        { label: server.name }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= server.name %></h1>
-          <p class="al-page-desc"><%= t('adminManageServer') %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <%- include('../../components/ui/save-button', { formId: 'editServerForm' }) %>
-          <a href="/admin/servers" class="al-btn-secondary"><%= t('backToServers') %></a>
-        </div>
-      </div>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin' },
+    { label: t('breadcrumbServers'), url: '/admin/servers' },
+    { label: server.name }
+  ] }) %>
+</div>
 
-      <div class="al-page-body space-y-5">
-        <form id="editServerForm" class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('general') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="serverName" class="al-label"><%= t('name') %>:</label>
-                <div class="flex items-center gap-2">
-                  <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
-                  <button type="button" @click="generateName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
-                    <%- icon('dices', { size: 15 }) %>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label for="serverDescription" class="al-label">
-                  <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('description') %>:</label>
-                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input" placeholder="<%= t('serverDescriptionPlaceholder') %>">
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('serverConfiguration') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="serverOwner" class="al-label">
-                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('Owner') %>:</label>
-                <select id="serverOwner" name="ownerId" class="hidden">
-                  <% users.forEach(userOption => { %>
-                    <option value="<%= userOption.id %>" <%= userOption.id === server.ownerId ? 'selected' : '' %>><%= userOption.username %></option>
-                  <% }); %>
-                </select>
-                <div class="custom-select mt-2" data-for="serverOwner"></div>
-              </div>
-
-              <div>
-                <label for="serverNode" class="al-label">
-                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('Node') %>:</label>
-                <select id="serverNode" name="nodeId" class="hidden">
-                  <% nodes.forEach(node => { %>
-                    <option value="<%= node.id %>" <%= node.id === server.nodeId ? 'selected' : '' %>><%= node.name %> (<%= node.address %>)</option>
-                  <% }); %>
-                </select>
-                <div class="custom-select mt-2" data-for="serverNode"></div>
-              </div>
-
-              <div>
-                <label for="serverImage" class="al-label">
-                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('Image') %>:</label>
-                <select id="serverImage" name="imageId" class="hidden">
-                  <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %> data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
-                  <% }); %>
-                </select>
-                <div class="custom-select mt-2" data-for="serverImage"></div>
-              </div>
-
-              <div>
-                <label class="al-label">
-                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('Ports') %>:</label>
-                <input type="hidden" id="serverPorts" name="Ports">
-                <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
-                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('assignPorts') %>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="al-label">
-                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('memory') %>:
-                </label>
-                <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverMemoryDisplay" type="number" min="1"
-                    value="<%= server.Memory >= 1024 ? Math.round(server.Memory / 1024) : server.Memory %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverMemoryDisplay" data-hidden="serverMemory"
-                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
-                </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minMemory') %></p>
-              </div>
-
-              <div>
-                <label class="al-label">
-                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('swap') %>:
-                </label>
-                <input type="hidden" id="serverSwap" name="Swap" value="<%= server.Swap ?? 0 %>">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverSwapDisplay" type="number" min="-1"
-                    value="<%= server.Swap && server.Swap >= 1024 ? Math.round(server.Swap / 1024) : (server.Swap ?? 0) %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverSwapDisplay" data-hidden="serverSwap"
-                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
-                </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('swapHint') %></p>
-              </div>
-
-              <div>
-                <label class="al-label">
-                  <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('cpu') %>:
-                </label>
-                <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="<%= (server.Cpu / 100).toFixed(1) %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverCPUDisplay" data-hidden="serverCPU"
-                    data-units="100:Cores,1:%" data-default-unit="Cores"><%= t('cores') %></button>
-                </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
-              </div>
-
-              <div>
-                <label class="al-label">
-                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('storage') %>:
-                </label>
-                <input type="hidden" id="serverStorage" name="Storage" value="<%= server.Storage %>">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverStorageDisplay" type="number" min="1"
-                    value="<%= server.Storage >= 1024 ? Math.round(server.Storage / 1024) : server.Storage %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverStorageDisplay" data-hidden="serverStorage"
-                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
-                </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minStorage') %></p>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('databaseLimit') %>:
-                </label>
-                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? settings.defaultDatabaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('databaseLimitHint') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('backups') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="al-label">
-                  <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('backupLimit') %>:
-                </label>
-                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? settings.defaultBackupLimit ?? 5 %>" class="al-input mt-2">
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupLimitHint') %></p>
-              </div>
-              <div>
-                <label for="backupIgnoreList" class="al-label">
-                  <%- icon('filter', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('backupIgnoreList') %>:
-                </label>
-                <textarea id="backupIgnoreList" name="backupIgnoreList" rows="4" class="al-input mt-2" placeholder="cache/%0A*.log%0A.backup"><%-
-                  (() => {
-                    try {
-                      const raw = server.backupIgnoreList || '';
-                      if (raw.trim().startsWith('[')) {
-                        const parsed = JSON.parse(raw);
-                        return Array.isArray(parsed) ? parsed.join('\n') : raw;
-                      }
-                      return raw;
-                    } catch { return server.backupIgnoreList || ''; }
-                  })()
-                %></textarea>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupIgnoreListHint') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('mounts') %></h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('mountsDesc') %></p>
-            <div class="space-y-2">
-              <% (mounts || []).forEach(m => { %>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" name="mountIds" value="<%= m.id %>" class="al-input h-4 w-4" <%= (serverMounts||[]).some(sm => sm.mountId === m.id) ? 'checked' : '' %>>
-                  <span class="text-sm" style="color:var(--theme-text-strong)"><%= m.name %> <span class="text-xs" style="color:var(--theme-text-muted)"><%= m.source %> → <%= m.target %> (<%= m.readOnly ? 'ro' : 'rw' %>)</span></span>
-                </label>
-              <% }) %>
-            </div>
-            <% if (!(mounts || []).length) { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('noMountsAvailable') %></p>
-            <% } %>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('startupConfiguration') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="startCommand" class="al-label">
-                  <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('startupCommand') %>:</label>
-                <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
-              </div>
-              <div>
-                <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
-                  <div class="flex flex-col md:flex-row md:items-center justify-between">
-                    <div class="flex items-center mb-2 md:mb-0">
-                      <div class="flex-shrink-0 mr-3">
-                        <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
-                      </div>
-                      <div>
-                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %></h3>
-                        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandPermissionsDesc') %></p>
-                      </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" x-model="allowStartupEdit">
-                      <div class="al-toggle-track">
-                        <div class="al-toggle-dot"></div>
-                      </div>
-                      <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"><%= server.allowStartupEdit ? t('enabled') : t('disabled') %></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('serverStatus') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <span id="serverStatusCircle" class="inline-flex items-center justify-center h-8 w-8 rounded-full"
-                    style="<%= server.Suspended ? 'background:var(--theme-danger-bg);color:var(--theme-danger)' : 'background:var(--theme-success-bg);color:var(--theme-success)' %>">
-                    <% if (server.Suspended) { %>
-                      <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
-                    <% } else { %>
-                      <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
-                    <% } %>
-                  </span>
-                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('Status') %>: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? t('suspended') : t('active') %></span></p>
-                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverId') %>: <%= server.UUID %></p>
-                  </div>
-                </div>
-
-                <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
-                  <div class="flex flex-col md:flex-row md:items-center justify-between">
-                    <div class="flex items-center mb-2 md:mb-0">
-                      <div class="flex-shrink-0 mr-3">
-                        <%- icon('triangle-alert', { size: 24, style: 'color:var(--theme-warning)' }) %>
-                      </div>
-                      <div>
-                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('serverSuspension') %></h3>
-                        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverSuspensionDesc') %></p>
-                      </div>
-                    </div>
-                    <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" x-model="suspended">
-                      <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span id="suspendServerLabel" class="ms-3 text-sm font-medium" style="color:var(--theme-text)" x-text="suspended ? '<%= t('suspended') %>' : '<%= t('active') %>'"><%= server.Suspended ? t('suspended') : t('active') %></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full"
-                    style="background:var(--theme-info-bg);color:var(--theme-info)">
-                    <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
-                  </span>
-                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('created') %></p>
-                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('serverTransfer') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent)">
-                    <%- icon('arrow-right-left', { size: 20, class: 'shrink-0' }) %>
-                  </span>
-                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('transferServer') %></p>
-                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('transferServerDesc') %></p>
-                  </div>
-                </div>
-                <button type="button" id="transferServerBtn" class="al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
-                  <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('transferToAnotherNode') %>
-                </button>
-                <% if (server.Installing) { %>
-                  <p class="text-xs mt-2" style="color:var(--theme-warning)"><%= t('serverInstalling') %></p>
-                <% } %>
-              </div>
-              <div>
-                <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
-                  <div class="flex items-center gap-2">
-                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style="border-color:var(--theme-accent); border-top-color:transparent"></div>
-                    <span id="transferStatusText" class="text-sm font-medium"><%= t('transferInProgress') %></span>
-                  </div>
-                  <p id="transferStatusDetail" class="text-xs mt-2" style="color:var(--theme-text-muted)"></p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </form>
-      </div>
-    </div>
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title"><%= server.name %></h1>
+    <p class="al-page-desc"><%= t('adminManageServer') %></p>
   </div>
-</main>
-</div><!-- /x-data -->
+  <div class="flex gap-2 shrink-0 items-center">
+    <button type="submit" form="editServerForm" class="al-btn al-btn-primary">
+      <%- icon('save', { size: 16, class: 'shrink-0' }) %>
+      <%= t('save') %>
+    </button>
+    <a href="/admin/servers" class="al-btn al-btn-secondary"><%= t('backToServers') %></a>
+  </div>
+</div>
 
-<%- include('../../components/portsAllocator') %>
-<%- include('../../components/loading-popup') %>
+<div class="al-page-body space-y-5">
+  <form id="editServerForm" class="space-y-5" method="POST" action="/admin/servers/edit/<%= server.id %>">
+    <%- include('../../partials/csrf') %>
+
+    <!-- General -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('general') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="serverName" class="al-label"><%= t('name') %>:</label>
+          <div class="flex items-center gap-2">
+            <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
+            <button type="button" onclick="generateName()" class="al-btn-ghost al-btn-icon-only shrink-0"
+              aria-label="<%= t('generateServerName') %>" title="<%= t('generateServerName') %>">
+              <%- icon('dices', { size: 16 }) %>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="serverDescription" class="al-label">
+            <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
+            <%= t('description') %>:
+          </label>
+          <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input" placeholder="<%= t('serverDescriptionPlaceholder') %>">
+        </div>
+      </div>
+    </div>
+
+    <!-- Server Configuration -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('serverConfiguration') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="serverOwner" class="al-label">
+            <%- icon('user', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Owner') %>:
+          </label>
+          <select id="serverOwner" name="ownerId" class="hidden">
+            <% users.forEach(function(userOption) { %>
+              <option value="<%= userOption.id %>" <%= userOption.id === server.ownerId ? 'selected' : '' %>><%= userOption.username %></option>
+            <% }); %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverOwner"></div>
+        </div>
+
+        <div>
+          <label for="serverNode" class="al-label">
+            <%- icon('server', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Node') %>:
+          </label>
+          <select id="serverNode" name="nodeId" class="hidden">
+            <% nodes.forEach(function(node) { %>
+              <option value="<%= node.id %>" <%= node.id === server.nodeId ? 'selected' : '' %>><%= node.name %> (<%= node.address %>)</option>
+            <% }); %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverNode"></div>
+        </div>
+
+        <div>
+          <label for="serverImage" class="al-label">
+            <%- icon('box', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Image') %>:
+          </label>
+          <select id="serverImage" name="imageId" class="hidden">
+            <% images.forEach(function(image) { %>
+              <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %>
+                data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
+            <% }); %>
+          </select>
+          <div class="custom-select mt-2" data-for="serverImage"></div>
+        </div>
+
+        <div>
+          <label class="al-label">
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+            <%= t('Ports') %>:
+          </label>
+          <input type="hidden" id="serverPorts" name="Ports">
+          <button type="button" id="assignPortsBtn" class="al-btn al-btn-secondary mt-2 w-full">
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+            <%= t('assignPorts') %>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resource Allocation -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="al-label">
+            <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+            <%= t('memory') %>:
+          </label>
+          <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverMemoryDisplay" type="number" min="1"
+              value="<%= server.Memory >= 1024 ? Math.round(server.Memory / 1024) : server.Memory %>"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverMemoryDisplay" data-hidden="serverMemory"
+              data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('minMemory') %></p>
+        </div>
+
+        <div>
+          <label class="al-label">
+            <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+            <%= t('swap') %>:
+          </label>
+          <input type="hidden" id="serverSwap" name="Swap" value="<%= server.Swap ?? 0 %>">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverSwapDisplay" type="number" min="-1"
+              value="<%= server.Swap && server.Swap >= 1024 ? Math.round(server.Swap / 1024) : (server.Swap ?? 0) %>"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverSwapDisplay" data-hidden="serverSwap"
+              data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('swapHint') %></p>
+        </div>
+
+        <div>
+          <label class="al-label">
+            <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
+            <%= t('cpu') %>:
+          </label>
+          <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="<%= (server.Cpu / 100).toFixed(1) %>"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverCPUDisplay" data-hidden="serverCPU"
+              data-units="100:Cores,1:%" data-default-unit="Cores"><%= t('cores') %></button>
+          </div>
+          <p class="al-form-help"><%= t('coreHint') %></p>
+        </div>
+
+        <div>
+          <label class="al-label">
+            <%- icon('database', { size: 14, class: 'shrink-0' }) %>
+            <%= t('storage') %>:
+          </label>
+          <input type="hidden" id="serverStorage" name="Storage" value="<%= server.Storage %>">
+          <div class="flex items-stretch mt-2 mb-1 gap-0">
+            <input id="serverStorageDisplay" type="number" min="1"
+              value="<%= server.Storage >= 1024 ? Math.round(server.Storage / 1024) : server.Storage %>"
+              class="al-input rounded-l-xl flex-1 border-r-0">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="serverStorageDisplay" data-hidden="serverStorage"
+              data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
+          </div>
+          <p class="al-form-help"><%= t('minStorage') %></p>
+        </div>
+        <div>
+          <label class="al-label">
+            <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
+            <%= t('databaseLimit') %>:
+          </label>
+          <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? settings.defaultDatabaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
+          <p class="al-form-help"><%= t('databaseLimitHint') %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backups -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('backups') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="al-label">
+            <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
+            <%= t('backupLimit') %>:
+          </label>
+          <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? settings.defaultBackupLimit ?? 5 %>" class="al-input mt-2">
+          <p class="al-form-help"><%= t('backupLimitHint') %></p>
+        </div>
+        <div>
+          <label for="backupIgnoreList" class="al-label">
+            <%- icon('filter', { size: 14, class: 'shrink-0' }) %>
+            <%= t('backupIgnoreList') %>:
+          </label>
+          <textarea id="backupIgnoreList" name="backupIgnoreList" rows="4" class="al-input mt-2" placeholder="cache/%0A*.log%0A.backup"><%-
+            (() => {
+              try {
+                const raw = server.backupIgnoreList || '';
+                if (raw.trim().startsWith('[')) {
+                  const parsed = JSON.parse(raw);
+                  return Array.isArray(parsed) ? parsed.join('\n') : raw;
+                }
+                return raw;
+              } catch { return server.backupIgnoreList || ''; }
+            })()
+          %></textarea>
+          <p class="al-form-help"><%= t('backupIgnoreListHint') %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Startup Configuration -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('startupConfiguration') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="startCommand" class="al-label">
+            <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
+            <%= t('startupCommand') %>:
+          </label>
+          <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
+        </div>
+        <div>
+          <div class="al-panel">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+              <div class="flex items-center mb-2 md:mb-0">
+                <div class="flex-shrink-0 mr-3">
+                  <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+                </div>
+                <div>
+                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %></h3>
+                  <p class="al-form-help"><%= t('startupCommandPermissionsDesc') %></p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
+                <div class="al-toggle-track">
+                  <div class="al-toggle-dot"></div>
+                </div>
+                <span id="allowStartupEditLabel" class="ms-3 al-form-check-label"><%= server.allowStartupEdit ? t('enabled') : t('disabled') %></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server Status -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('serverStatus') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span id="serverStatusCircle" class="al-icon-tile al-icon-tile-sm al-icon-tile-round <%= server.Suspended ? 'al-icon-tile-danger' : 'al-icon-tile-success' %>">
+              <% if (server.Suspended) { %>
+                <%- icon('x-circle', { size: 16, class: 'shrink-0' }) %>
+              <% } else { %>
+                <%- icon('check-circle', { size: 16, class: 'shrink-0' }) %>
+              <% } %>
+            </span>
+            <div>
+              <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('Status') %>: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? t('suspended') : t('active') %></span></p>
+              <p class="al-form-help"><%= t('serverId') %>: <%= server.UUID %></p>
+            </div>
+          </div>
+
+          <div class="al-panel">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+              <div class="flex items-center mb-2 md:mb-0">
+                <div class="flex-shrink-0 mr-3">
+                  <%- icon('triangle-alert', { size: 24, style: 'color:var(--theme-warning)' }) %>
+                </div>
+                <div>
+                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('serverSuspension') %></h3>
+                  <p class="al-form-help"><%= t('serverSuspensionDesc') %></p>
+                </div>
+              </div>
+              <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="Suspended" id="suspendServer" aria-label="<%= t('serverSuspension') %>" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                <span id="suspendServerLabel" class="ms-3 al-form-check-label font-medium"><%= server.Suspended ? t('suspended') : t('active') %></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="al-icon-tile al-icon-tile-sm al-icon-tile-round al-icon-tile-info">
+              <%- icon('calendar', { size: 16, class: 'shrink-0' }) %>
+            </span>
+            <div>
+              <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('created') %></p>
+              <p class="al-form-help"><%= new Date(server.createdAt).toLocaleString() %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server Transfer -->
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('serverTransfer') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="al-icon-tile al-icon-tile-sm al-icon-tile-round al-icon-tile-accent">
+              <%- icon('arrow-right-left', { size: 16, class: 'shrink-0' }) %>
+            </span>
+            <div>
+              <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('transferServer') %></p>
+              <p class="al-form-help"><%= t('transferServerDesc') %></p>
+            </div>
+          </div>
+          <button type="button" id="transferServerBtn" class="al-btn al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
+            <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
+            <%= t('transferToAnotherNode') %>
+          </button>
+          <% if (server.Installing) { %>
+            <p class="text-xs mt-2" style="color:var(--theme-warning)"><%= t('serverInstalling') %></p>
+          <% } %>
+        </div>
+        <div>
+          <div id="transferStatus" class="hidden al-panel">
+            <div class="flex items-center gap-2">
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style="border-color:var(--theme-accent); border-top-color:transparent"></div>
+              <span id="transferStatusText" class="text-sm font-medium"><%= t('transferInProgress') %></span>
+            </div>
+            <p id="transferStatusDetail" class="text-xs mt-2" style="color:var(--theme-text-muted)"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
 
 <!-- Transfer Modal -->
 <div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
   <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
     <div class="fixed inset-0" id="transferModalBackdrop"></div>
-    <div id="transferModalPanel" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div id="transferModalPanel" role="dialog" aria-modal="true" aria-label="<%= t('transferServer') %>" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
-      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+      <div class="al-sheet-header" style="border-color:var(--theme-border);">
         <div>
           <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('transferServer') %></h3>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('transferServerModalDesc') %></p>
+          <p class="al-card-subtitle"><%= t('transferServerModalDesc') %></p>
         </div>
-        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
 
-      <div class="px-6 py-4 overflow-y-auto max-h-[70vh]">
+      <div class="px-5 py-4 overflow-y-auto max-h-[70vh]">
         <div class="space-y-4">
           <div>
             <label class="al-label">
-              <%- icon('server', { size: 14, class: 'shrink-0' }) %>
-              <%= t('destinationNode') %>:
+              <%- icon('user', { size: 14, class: 'shrink-0' }) %>
+              <%= t('newOwner') %>:
             </label>
-            <select id="transferTargetNode" class="al-input w-full">
-              <option value=""><%= t('selectNode') %></option>
-              <% nodes.forEach(node => { %>
-                <% if (node.id !== server.nodeId) { %>
-                  <option value="<%= node.id %>" data-address="<%= node.address %>"><%= node.name %> (<%= node.address %>)</option>
+            <select id="transferTargetUser" class="al-input w-full">
+              <option value=""><%= t('selectUser') %></option>
+              <% users.forEach(function(u) { %>
+                <% if (u.id !== server.ownerId) { %>
+                  <option value="<%= u.id %>"><%= u.username %> (<%= u.email %>)</option>
                 <% } %>
               <% }); %>
             </select>
           </div>
 
-          <div>
-            <label class="al-label">
-              <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-              <%= t('Ports') %>:
-            </label>
-            <div id="transferPortsContainer" class="space-y-2">
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('selectNodeFirst') %></p>
-            </div>
-            <button type="button" id="addTransferPortBtn" class="al-btn-secondary mt-2 w-full hidden">
-              <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
-              <%= t('addPort') %>
-            </button>
-          </div>
-
-          <div class="rounded-lg p-3" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+          <div class="al-panel">
             <div class="flex items-start gap-2">
               <%- icon('info', { size: 16, class: 'shrink-0 mt-0.5', style: 'color:var(--theme-accent)' }) %>
               <div>
                 <p class="text-xs font-medium" style="color:var(--theme-text-strong);"><%= t('transferWhatHappens') %></p>
-                <ul class="text-xs mt-1 space-y-1" style="color:var(--theme-text-muted);">
-                  <li><%= t('transferStep1') %></li>
-                  <li><%= t('transferStep2') %></li>
-                  <li><%= t('transferStep3') %></li>
-                  <li><%= t('transferStep4') %></li>
-                </ul>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= t('transferOwnershipDesc') %></p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+      <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border);">
         <button type="button" onclick="closeTransferModal()" class="al-btn-secondary"><%= t('cancel') %></button>
         <button type="button" id="confirmTransferBtn" class="al-btn-primary" disabled>
           <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
@@ -453,455 +420,290 @@ function serverEditPage() {
   </div>
 </div>
 
-<style>
-#editServerForm .al-card { overflow: visible; }
-#editServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
+<%- include('../../layouts/admin-footer') %>
 
 <script nonce="<%- nonce %>">
   const form = document.getElementById('editServerForm');
-    const suspendServerToggle    = document.getElementById('suspendServer');
-    const suspendServerLabel     = document.getElementById('suspendServerLabel');
-    const serverNodeSelect = document.getElementById('serverNode');
-    const serverImageSelect = document.getElementById('serverImage');
-    const serverPortsInput = document.getElementById('serverPorts');
-    let nodesData = {};
-    let availablePorts = [];
-    let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>.map((port, index) => {
-      const portStr = port.Port || '';
-      const parts = portStr.split(':');
-      return {
-        name: port.name || `Port ${index + 1}`,
-        internalPort: port.internalPort || parseInt(parts[1]) || parseInt(parts[0]) || 0,
-        externalPort: port.externalPort || parseInt(parts[0]) || 0,
-        primary: Boolean(port.primary || index === 0),
-      };
-    });
+  const suspendServerToggle = document.getElementById('suspendServer');
+  const suspendServerLabel = document.getElementById('suspendServerLabel');
+  const allowStartupEditToggle = document.getElementById('allowStartupEdit');
+  const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
+  const serverNodeSelect = document.getElementById('serverNode');
+  const serverImageSelect = document.getElementById('serverImage');
+  const serverPortsInput = document.getElementById('serverPorts');
+  let nodesData = {};
+  let availablePorts = [];
+  let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>.map((port, index) => {
+    const portStr = port.Port || '';
+    const parts = portStr.split(':');
+    return {
+      name: port.name || 'Port ' + (index + 1),
+      internalPort: port.internalPort || parseInt(parts[1]) || parseInt(parts[0]) || 0,
+      externalPort: port.externalPort || parseInt(parts[0]) || 0,
+      primary: Boolean(port.primary || index === 0),
+    };
+  });
 
-    async function fetchNodesData() {
+  async function fetchNodesData() {
+    try {
       const response = await fetch('/api/v2/admin/nodes/list');
-      const nodes = await response.json();
-      nodes.forEach(node => {
+      const result = await response.json();
+      const nodes = result.data || result;
+      (Array.isArray(nodes) ? nodes : []).forEach(node => {
         let ports = [];
-        try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch (e) {
-          console.warn('[servers/edit] Failed to parse allocated ports for node', node.id, e);
-        }
+        try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch (e) {}
         nodesData[node.id] = { ...node, parsedPorts: ports };
       });
       updatePortsForSelectedNode();
-    }
+    } catch (err) { console.error('[servers/edit] Failed to fetch nodes:', err); }
+  }
 
-    function updatePortsForSelectedNode() {
-      const node = nodesData[serverNodeSelect.value];
-      if (!node) return;
-      const usedPorts = new Set();
-      (node.servers || []).forEach(server => {
-        if (server.id === <%= server.id %>) return;
-        try {
-          JSON.parse(server.Ports || '[]').forEach(portInfo => {
-            const external = portInfo.externalPort || parseInt(String(portInfo.Port || '').split(':')[0]);
-            if (!isNaN(external)) usedPorts.add(external);
-          });
-        } catch (e) {
-          console.warn('[servers/edit] Failed to parse used ports for server', server.id, e);
-        }
-      });
-      availablePorts = (node.parsedPorts || [])
-        .filter(port => !usedPorts.has(port) || assignedPorts.some(item => Number(item.externalPort) === port))
-        .map(port => ({ port, label: `${node.address}:${port}` }));
-      ensureMinimumPortRows();
-      syncPortsButton();
-    }
-
-    function getPortRequirements() {
-      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      try { return JSON.parse(selectedOption.getAttribute('data-port-requirements') || '[]'); } catch { return []; }
-    }
-
-    function ensureMinimumPortRows() {
-      const requirements = getPortRequirements();
-      const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
-      while (assignedPorts.length < requirements.length) {
-        const req = requirements[assignedPorts.length] || {};
-        assignedPorts.push({
-          name: req.name || `Port ${assignedPorts.length + 1}`,
-          internalPort: req.internalPort || DEFAULT_PORT,
-          externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
-          primary: assignedPorts.length === 0
+  function updatePortsForSelectedNode() {
+    const node = nodesData[serverNodeSelect.value];
+    if (!node) return;
+    const usedPorts = new Set();
+    (node.servers || []).forEach(srv => {
+      if (srv.id === <%= server.id %>) return;
+      try {
+        JSON.parse(srv.Ports || '[]').forEach(portInfo => {
+          const external = portInfo.externalPort || parseInt(String(portInfo.Port || '').split(':')[0]);
+          if (!isNaN(external)) usedPorts.add(external);
         });
-      }
-      serverPortsInput.value = JSON.stringify(assignedPorts);
-    }
+      } catch (e) {}
+    });
+    availablePorts = (node.parsedPorts || [])
+      .filter(port => !usedPorts.has(port) || assignedPorts.some(item => Number(item.externalPort) === port))
+      .map(port => ({ port, label: node.address + ':' + port }));
+    ensureMinimumPortRows();
+    syncPortsButton();
+  }
 
-    function syncPortsButton() {
-      serverPortsInput.value = JSON.stringify(assignedPorts);
-      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
-    }
+  function getPortRequirements() {
+    const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+    try { return JSON.parse(selectedOption.getAttribute('data-port-requirements') || '[]'); } catch { return []; }
+  }
 
-    function renderPortRows() {
-      if (!window.PortsAllocator) return;
-      PortsAllocator.open({
-        requirements: getPortRequirements(),
-        assignedPorts: assignedPorts,
-        availablePorts: availablePorts,
-        onSave: function (rows) {
-          assignedPorts = rows;
-          syncPortsButton();
-        }
+  function ensureMinimumPortRows() {
+    const requirements = getPortRequirements();
+    const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
+    while (assignedPorts.length < requirements.length) {
+      const req = requirements[assignedPorts.length] || {};
+      assignedPorts.push({
+        name: req.name || 'Port ' + (assignedPorts.length + 1),
+        internalPort: req.internalPort || DEFAULT_PORT,
+        externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
+        primary: assignedPorts.length === 0
       });
     }
-    document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
-    serverNodeSelect.addEventListener('change', updatePortsForSelectedNode);
-    serverImageSelect.addEventListener('change', () => { ensureMinimumPortRows(); syncPortsButton(); });
-    fetchNodesData();
+    serverPortsInput.value = JSON.stringify(assignedPorts);
+  }
 
-    suspendServerToggle.addEventListener('change', function() {
-      const checked = this.checked;
-      const action = checked ? 'suspend' : 'unsuspend';
+  function syncPortsButton() {
+    serverPortsInput.value = JSON.stringify(assignedPorts);
+    document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (window.__i18n.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (window.__i18n.assignPorts || 'Assign ports');
+  }
 
-      // Suspending stops the server and blocks the owner — confirm first.
-      // Unsuspending is a safe reversal, so it goes through immediately.
-      if (!checked) return doSuspend(action, this);
+  function renderPortRows() {
+    if (!window.PortsAllocator) return;
+    PortsAllocator.open({
+      requirements: getPortRequirements(),
+      assignedPorts: assignedPorts,
+      availablePorts: availablePorts,
+      onSave: function (rows) {
+        assignedPorts = rows;
+        syncPortsButton();
+      }
+    });
+  }
+  document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
+  serverNodeSelect.addEventListener('change', updatePortsForSelectedNode);
+  serverImageSelect.addEventListener('change', () => { ensureMinimumPortRows(); syncPortsButton(); });
+  fetchNodesData();
 
-      // Optimistically revert the toggle; only flip it back on confirm.
-      this.checked = false;
-      window.modal.confirm({
-        title: req.translations.suspendServer || 'Suspend server?',
-        body: req.translations.suspendServerConfirm || 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
-        danger: true, confirmLabel: req.translations.suspend || 'Suspend',
-        onConfirm: function () {
-          suspendServerToggle.checked = true;
-          doSuspend('suspend', suspendServerToggle);
+  allowStartupEditToggle.addEventListener('change', function() {
+    allowStartupEditLabel.textContent = this.checked ? (window.__i18n.enabled || 'Enabled') : (window.__i18n.disabled || 'Disabled');
+  });
+
+  suspendServerToggle.addEventListener('change', function() {
+    const checked = this.checked;
+    const action = checked ? 'suspend' : 'unsuspend';
+
+    if (!checked) return doSuspend(action, this);
+
+    this.checked = false;
+    window.modal.confirm({
+      title: window.__i18n.suspendServer || 'Suspend server?',
+      body: window.__i18n.suspendServerConfirm || 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
+      danger: true, confirmLabel: window.__i18n.suspend || 'Suspend',
+      onConfirm: function () {
+        suspendServerToggle.checked = true;
+        doSuspend('suspend', suspendServerToggle);
+      },
+    });
+  });
+
+  async function doSuspend(action, toggle) {
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      const response = await fetch('/admin/servers/<%= server.id %>/' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error((await response.json()).error || 'Request failed');
+      }
+
+      window.location.reload();
+    } catch (err) {
+      toggle.checked = action === 'unsuspend';
+      suspendServerLabel.textContent = action === 'suspend' ? (window.__i18n.active || 'Active') : (window.__i18n.suspended || 'Suspended');
+      showToast((window.__i18n.failedTo || 'Failed to ') + action + (window.__i18n.serverLowercase || ' server: ') + (err.message || (window.__i18n.unknownError || 'unknown error')), 'error');
+    }
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    data.ports = assignedPorts;
+
+    if (!formData.has('allowStartupEdit')) {
+      data.allowStartupEdit = 'false';
+    }
+
+    if (!formData.has('Suspended')) {
+      data.Suspended = 'false';
+    }
+
+    const loader = showProgressToast(window.__i18n.processingServerUpdate || 'Processing server update...');
+    loader.setStage(window.__i18n.sendingServerConfig || 'Sending server configuration...');
+
+    try {
+      const response = await fetch('/api/v2/admin/servers/<%= server.id %>', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
+        body: JSON.stringify(data),
       });
-    });
 
-    async function doSuspend(action, toggle) {
-      try {
-        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/' + action, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-          body: JSON.stringify({}),
-        });
+      const result = await response.json();
 
-        if (!response.ok) {
-          throw new Error((await response.json()).error || 'Request failed');
-        }
-
-        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
-        const statusText = document.getElementById('serverStatusText');
-        if (statusText) {
-          statusText.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
-          statusText.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
-        }
-        const statusCircle = document.getElementById('serverStatusCircle');
-        if (statusCircle) {
-          statusCircle.className = 'inline-flex items-center justify-center h-8 w-8 rounded-full';
-          statusCircle.style.background = action === 'suspend' ? 'var(--theme-danger-bg)' : 'var(--theme-success-bg)';
-          statusCircle.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
-          statusCircle.innerHTML = window.alIcon ? (action === 'suspend' ? window.alIcon('x-circle', 'size-5 shrink-0') : window.alIcon('check-circle', 'size-5 shrink-0')) : '';
-        }
-      } catch (err) {
-        toggle.checked = action === 'unsuspend';
-        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.active || 'Active') : (req.translations.suspended || 'Suspended');
-        showToast((req.translations.failedTo || 'Failed to ') + action + (req.translations.serverLowercase || ' server: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
-      }
-    }
-
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      data.ports = assignedPorts;
-      data.mountIds = formData.getAll('mountIds').map(v => parseInt(v, 10));
-
-      // Handle checkbox values
-      if (!formData.has('allowStartupEdit')) {
-        data.allowStartupEdit = 'false';
-      }
-
-      if (!formData.has('Suspended')) {
-        data.Suspended = 'false';
-      }
-
-      const loader = showLoadingPopup(req.translations.updatingServer || 'Updating Server', req.translations.processingServerUpdate || 'Processing server update...');
-      loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
-
-      try {
-        const response = await fetch('/api/v2/admin/servers/<%= server.id %>', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '',
-          },
-          body: JSON.stringify(data),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          loader.updateProgress(100, req.translations.serverUpdatedSuccessfully || 'Server updated successfully!');
-          setTimeout(() => {
-            loader.close();
-            showToast(req.translations.serverUpdatedSuccessfully || 'Server updated successfully!', 'success');
-            setTimeout(() => {
-              Turbo.visit('/admin/servers');
-            }, 1000);
-          }, 500);
-        } else {
-          loader.close();
-          showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + (result.error || (req.translations.unknownError || 'Unknown error')), 'error');
-        }
-      } catch (error) {
+      if (response.ok) {
+        loader.complete(true, window.__i18n.serverUpdatedSuccessfully || 'Server updated successfully!');
+        setTimeout(() => { window.location.href = '/admin/servers'; }, 1000);
+      } else {
         loader.close();
-        showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + error.message, 'error');
+        showToast((window.__i18n.failedToUpdateServer || 'Failed to update server: ') + (result.error || (window.__i18n.unknownError || 'Unknown error')), 'error');
       }
-    });
+    } catch (error) {
+      loader.close();
+      showToast((window.__i18n.failedToUpdateServer || 'Failed to update server: ') + error.message, 'error');
+    }
+  });
 </script>
 
 <script nonce="<%- nonce %>">
-  // ── Transfer Logic ─────────────────────────────────────────────────────
+  // Transfer Logic
   (function() {
     const transferBtn = document.getElementById('transferServerBtn');
     const transferModal = document.getElementById('transferModal');
-    const transferModalBackdrop = document.getElementById('transferModalBackdrop');
-    const transferModalPanel = document.getElementById('transferModalPanel');
-    const transferTargetNode = document.getElementById('transferTargetNode');
-    const transferPortsContainer = document.getElementById('transferPortsContainer');
-    const addTransferPortBtn = document.getElementById('addTransferPortBtn');
+    const transferTargetUser = document.getElementById('transferTargetUser');
     const confirmTransferBtn = document.getElementById('confirmTransferBtn');
     const transferStatusDiv = document.getElementById('transferStatus');
     const transferStatusText = document.getElementById('transferStatusText');
     const transferStatusDetail = document.getElementById('transferStatusDetail');
-
-    let transferPorts = [];
-    let nodesData = {};
     let pollInterval = null;
 
-    const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
-
     const statusSteps = {
-      'pending': { text: req.translations.queued || 'Queued...' },
-      'stopping': { text: req.translations.stoppingServerOnSource || 'Stopping server on source node...' },
-      'archiving': { text: req.translations.archivingServerFiles || 'Archiving server files...' },
-      'transferring': { text: req.translations.streamingDataToDestination || 'Streaming data to destination...' },
-      'restoring': { text: req.translations.restoringFilesOnDestination || 'Restoring files on destination...' },
-      'installing': { text: req.translations.installingServerOnDestination || 'Installing server on destination...' },
-      'updating-db': { text: req.translations.updatingDatabaseRecords || 'Updating database records...' },
-      'starting': { text: req.translations.startingServerOnDestination || 'Starting server on destination...' },
-      'completed': { text: req.translations.transferComplete || 'Transfer complete!' },
-      'failed': { text: req.translations.transferFailed || 'Transfer failed' },
+      'pending': { text: window.__i18n.queued || 'Queued...' },
+      'stopping': { text: window.__i18n.stoppingServerOnSource || 'Stopping server on source node...' },
+      'archiving': { text: window.__i18n.archivingServerFiles || 'Archiving server files...' },
+      'transferring': { text: window.__i18n.streamingDataToDestination || 'Streaming data to destination...' },
+      'restoring': { text: window.__i18n.restoringFilesOnDestination || 'Restoring files on destination...' },
+      'installing': { text: window.__i18n.installingServerOnDestination || 'Installing server on destination...' },
+      'updating-db': { text: window.__i18n.updatingDatabaseRecords || 'Updating database records...' },
+      'starting': { text: window.__i18n.startingServerOnDestination || 'Starting server on destination...' },
+      'completed': { text: window.__i18n.transferComplete || 'Transfer complete!' },
+      'failed': { text: window.__i18n.transferFailed || 'Transfer failed' },
     };
-
-    async function fetchNodesData() {
-      try {
-      const response = await fetch('/api/v2/admin/nodes/list');
-        const nodes = await response.json();
-        nodes.forEach(node => {
-          let ports = [];
-          try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch (e) {
-            console.warn('[servers/edit] Failed to parse allocated ports for node', node.id, e);
-          }
-          // Also include ports from allocation table
-          if (node.allocations && Array.isArray(node.allocations)) {
-            node.allocations.forEach(a => {
-              if (!ports.includes(a.port)) ports.push(a.port);
-            });
-          }
-          nodesData[node.id] = { ...node, parsedPorts: ports.sort((a,b) => a-b) };
-        });
-      } catch (err) {
-        console.error('[servers/edit] Failed to fetch nodes:', err);
-      }
-    }
-
-    function getUsedPortsForNode(nodeId) {
-      const node = nodesData[nodeId];
-      if (!node) return new Set();
-      const used = new Set();
-      (node.servers || []).forEach(server => {
-        // Skip the current server being transferred
-        if (server.id === <%= server.id %>) return;
-        try {
-          JSON.parse(server.Ports || '[]').forEach(portInfo => {
-            const external = portInfo.externalPort || parseInt(String(portInfo.Port || '').split(':')[0]);
-            if (!isNaN(external)) used.add(external);
-          });
-        } catch (e) {
-          console.warn('[servers/edit] Failed to parse used ports for server', server.id, e);
-        }
-      });
-      return used;
-    }
-
-    function renderTransferPorts() {
-      const nodeId = transferTargetNode.value;
-      if (!nodeId) return;
-      const node = nodesData[nodeId];
-      if (!node) return;
-
-      const usedPorts = getUsedPortsForNode(parseInt(nodeId));
-      const availablePorts = (node.parsedPorts || [])
-        .filter(port => !usedPorts.has(port) || transferPorts.some(p => p.externalPort === port));
-
-      if (transferPorts.length === 0) {
-        // Initialize with current server ports
-        try {
-          transferPorts = JSON.parse(<%- JSON.stringify(server.Ports || '[]') %>).map((p, i) => ({
-            name: p.name || 'Port ' + (i + 1),
-            internalPort: p.internalPort || parseInt(String(p.Port || '').split(':')[1]) || parseInt(String(p.Port || '').split(':')[0]) || DEFAULT_PORT,
-            externalPort: p.externalPort || parseInt(String(p.Port || '').split(':')[0]) || DEFAULT_PORT,
-            primary: Boolean(p.primary || i === 0),
-          }));
-        } catch {
-          transferPorts = [{ name: 'Port 1', internalPort: DEFAULT_PORT, externalPort: DEFAULT_PORT, primary: true }];
-        }
-      }
-
-      function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-      }
-
-      let html = '';
-      transferPorts.forEach((port, idx) => {
-        const portOptions = availablePorts.map(p =>
-          `<option value="${p}" ${p === port.externalPort ? 'selected' : ''}>${escapeHtml(node.address)}:${p}</option>`
-        ).join('');
-
-        html += `
-          <div class="flex items-center gap-2 transfer-port-row" data-idx="${idx}">
-            <select class="al-input flex-1 transfer-port-select" data-idx="${idx}">
-              ${portOptions}
-            </select>
-            <input type="number" class="al-input w-20 transfer-port-internal" data-idx="${idx}" value="${port.internalPort}" placeholder="Internal">
-            <label class="flex items-center gap-1 text-xs shrink-0">
-              <input type="checkbox" class="transfer-port-primary" data-idx="${idx}" ${port.primary ? 'checked' : ''}> Primary
-            </label>
-            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-2 shrink-0" style="color:var(--theme-danger);" aria-label="Remove port">
-              <%- icon('x', { size: 14 }) %>
-            </button>
-          </div>
-        `;
-      });
-
-      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">' + (req.translations.noPortsConfigured || 'No ports configured.') + '</p>';
-      addTransferPortBtn.classList.toggle('hidden', transferPorts.length === 0);
-      updateConfirmButton();
-    }
-
-    window.removeTransferPort = function(idx) {
-      transferPorts.splice(idx, 1);
-      renderTransferPorts();
-    };
-
-    function collectPortsFromUI() {
-      const selects = document.querySelectorAll('.transfer-port-select');
-      const internals = document.querySelectorAll('.transfer-port-internal');
-      const primaries = document.querySelectorAll('.transfer-port-primary');
-      transferPorts = [];
-      selects.forEach((sel, i) => {
-        transferPorts.push({
-          name: 'Port ' + (i + 1),
-          externalPort: parseInt(sel.value) || 0,
-          internalPort: parseInt(internals[i]?.value) || parseInt(sel.value) || DEFAULT_PORT,
-          primary: primaries[i]?.checked || false,
-        });
-      });
-    }
 
     function updateConfirmButton() {
-      const nodeId = transferTargetNode.value;
-      const hasPorts = transferPorts.length > 0 && transferPorts.every(p => p.externalPort > 0);
-      confirmTransferBtn.disabled = !nodeId || !hasPorts;
+      confirmTransferBtn.disabled = !transferTargetUser.value;
     }
 
-    // Event listeners
     transferBtn.addEventListener('click', function() {
       transferModal.classList.remove('hidden');
       transferModal.classList.add('flex');
-      if (typeof Animate !== 'undefined') Animate.openModal(transferModal, transferModalPanel);
+      transferModal.classList.add('open');
+      document.getElementById('transferModalPanel').classList.add('open');
     });
 
     window.closeTransferModal = function() {
-      if (typeof Animate !== 'undefined') {
-        Animate.closeModal(transferModal, transferModalPanel, () => {
-          transferModal.classList.add('hidden');
-          transferModal.classList.remove('flex');
-        });
-      } else {
-        transferModal.classList.add('hidden');
-        transferModal.classList.remove('flex');
-      }
+      transferModal.classList.remove('open');
+      document.getElementById('transferModalPanel').classList.remove('open');
+      transferModal.classList.add('hidden');
+      transferModal.classList.remove('flex');
     };
 
-    transferTargetNode.addEventListener('change', function() {
-      transferPorts = []; // Reset ports when node changes
-      renderTransferPorts();
-      updateConfirmButton();
-    });
+    transferTargetUser.addEventListener('change', updateConfirmButton);
 
-    addTransferPortBtn.addEventListener('click', function() {
-      collectPortsFromUI();
-      const nodeId = transferTargetNode.value;
-      const node = nodesData[nodeId];
-      if (!node) return;
-      const usedPorts = getUsedPortsForNode(parseInt(nodeId));
-      const usedByTransfer = new Set(transferPorts.map(p => p.externalPort));
-      const nextPort = (node.parsedPorts || []).find(p => !usedPorts.has(p) && !usedByTransfer.has(p));
-      transferPorts.push({
-        name: 'Port ' + (transferPorts.length + 1),
-        externalPort: nextPort || DEFAULT_PORT,
-        internalPort: nextPort || DEFAULT_PORT,
-        primary: false,
-      });
-      renderTransferPorts();
-    });
+    document.getElementById('transferModalBackdrop').addEventListener('click', window.closeTransferModal);
 
     confirmTransferBtn.addEventListener('click', async function() {
-      collectPortsFromUI();
-      const nodeId = transferTargetNode.value;
-      if (!nodeId || transferPorts.length === 0) return;
+      const ownerId = transferTargetUser.value;
+      if (!ownerId) return;
 
       confirmTransferBtn.disabled = true;
-      confirmTransferBtn.textContent = req.translations.startingTransfer || 'Starting transfer...';
+      confirmTransferBtn.textContent = window.__i18n.startingTransfer || 'Starting transfer...';
 
       try {
-        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer', {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const response = await fetch('/admin/servers/<%= server.id %>/transfer', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-          body: JSON.stringify({ targetNodeId: parseInt(nodeId), ports: transferPorts }),
+          headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+          body: JSON.stringify({ ownerId: parseInt(ownerId) }),
         });
 
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || (req.translations.failedToStartTransfer || 'Failed to start transfer'));
+          throw new Error(result.error || (window.__i18n.failedToStartTransfer || 'Failed to start transfer'));
         }
 
-        closeTransferModal();
-        startTransferPolling();
-        showToast(req.translations.transferStarted || 'Transfer started!', 'success');
+        window.closeTransferModal();
+        showToast(window.__i18n.transferComplete || 'Ownership transferred!', 'success');
+        setTimeout(() => { window.location.reload(); }, 1000);
       } catch (err) {
-        showToast((req.translations.failedToStartTransfer || 'Failed to start transfer: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
+        showToast((window.__i18n.failedToStartTransfer || 'Failed to transfer: ') + (err.message || (window.__i18n.unknownError || 'unknown error')), 'error');
         confirmTransferBtn.disabled = false;
-        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>' + (req.translations.transferServer || 'Transfer Server');
+        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>' + (window.__i18n.transferServer || 'Transfer Server');
       }
     });
 
-    function startTransferPolling() {
-      transferStatusDiv.classList.remove('hidden');
-      if (pollInterval) clearInterval(pollInterval);
-      pollInterval = setInterval(pollTransferStatus, 3000);
-      pollTransferStatus();
-    }
+    // Check on page load if a transfer is in progress
+    fetch('/admin/servers/<%= server.id %>/transfer/status')
+      .then(r => r.json())
+      .then(state => {
+        const s = state.data || state;
+        if (s.status && s.status !== 'idle' && s.status !== 'completed' && s.status !== 'failed') {
+          transferStatusDiv.classList.remove('hidden');
+          if (!pollInterval) pollInterval = setInterval(pollTransferStatus, 3000);
+          pollTransferStatus();
+        }
+      })
+      .catch(err => console.warn('[servers/edit] Failed to check transfer status:', err));
 
     async function pollTransferStatus() {
       try {
-        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer/status');
-        const state = await response.json();
+        const response = await fetch('/admin/servers/<%= server.id %>/transfer/status');
+        const envelope = await response.json();
+        const state = envelope.data || envelope;
 
         if (state.status === 'idle') {
           transferStatusDiv.classList.add('hidden');
@@ -915,9 +717,9 @@ function serverEditPage() {
 
         if (state.status === 'completed') {
           clearInterval(pollInterval);
-          transferStatusText.textContent = req.translations.transferComplete || 'Transfer complete!';
+          transferStatusText.textContent = window.__i18n.transferComplete || 'Transfer complete!';
           transferStatusDetail.textContent = '';
-          showToast(req.translations.transferComplete || 'Transfer complete!', 'success');
+          showToast(window.__i18n.transferComplete || 'Transfer complete!', 'success');
         } else if (state.status === 'failed') {
           clearInterval(pollInterval);
         }
@@ -925,20 +727,5 @@ function serverEditPage() {
         console.warn('[servers/edit] Transfer poll failed:', err);
       }
     }
-
-    // Check on page load if a transfer is in progress
-    fetch('/api/v2/admin/servers/<%= server.id %>/transfer/status')
-      .then(r => r.json())
-      .then(state => {
-        if (state.status && state.status !== 'idle' && state.status !== 'completed' && state.status !== 'failed') {
-          startTransferPolling();
-        }
-      })
-      .catch(err => console.warn('[servers/edit] Failed to check transfer status:', err));
-
-    fetchNodesData();
   })();
 </script>
-
-
-<%- include('../../components/footer') %>

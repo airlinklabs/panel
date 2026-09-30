@@ -20,10 +20,10 @@
  *   <%= tn('serverCount', servers.length) %>
  */
 
-import fs from "fs";
-import path from "path";
-import type { Request, Response, NextFunction } from "express";
-import logger from "../handlers/logger";
+import fs from 'fs';
+import path from 'path';
+import type { Request, Response, NextFunction } from 'express';
+import logger from '../handlers/logger';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -40,7 +40,7 @@ interface LangBundle {
 const bundleCache = new Map<string, LangBundle>();
 let initialized = false;
 
-const LANG_DIR = path.join(__dirname, "../../storage/lang");
+const LANG_DIR = path.join(__dirname, '../../storage/lang');
 
 // ─── Loading ──────────────────────────────────────────────────
 
@@ -49,26 +49,32 @@ function loadBundle(lang: string): LangBundle {
     return bundleCache.get(lang)!;
   }
 
-  const langPath = path.join(LANG_DIR, lang, "lang.json");
-  const fallbackPath = path.join(LANG_DIR, "en", "lang.json");
+  const langPath = path.join(LANG_DIR, lang, 'lang.json');
+  const fallbackPath = path.join(LANG_DIR, 'en', 'lang.json');
 
-  const raw = readJson(langPath) ?? readJson(fallbackPath) ?? {};
+  // English is the base for every locale: a locale only ships ~700 of the
+  // ~2350 keys, and without this merge each untranslated key would render
+  // as its raw camelCase identifier in the UI.
+  const raw = {
+    ...(readJson(fallbackPath) ?? {}),
+    ...(lang === 'en' ? {} : readJson(langPath) ?? {}),
+  };
 
   const strings: TranslationMap = {};
   const plurals: PluralMap = {};
 
   for (const [key, value] of Object.entries(raw)) {
-    if (key.startsWith("_")) {
+    if (key.startsWith('_')) {
       continue;
     } // skip commentary keys
     if (
-      typeof value === "object" &&
+      typeof value === 'object' &&
       value !== null &&
-      "one" in value &&
-      "other" in value
+      'one' in value &&
+      'other' in value
     ) {
       plurals[key] = value as { one: string; other: string };
-    } else if (typeof value === "string") {
+    } else if (typeof value === 'string') {
       strings[key] = value;
     }
   }
@@ -83,7 +89,7 @@ function readJson(filePath: string): Record<string, unknown> | null {
     if (!fs.existsSync(filePath)) {
       return null;
     }
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch {
     return null;
   }
@@ -111,14 +117,14 @@ export function initI18n(): void {
     }
 
     logger.info(
-      logT("log.i18nLoadedLanguages", {
+      logT('log.i18nLoadedLanguages', {
         count: bundleCache.size,
-        langs: langs.join(", "),
+        langs: langs.join(', '),
       }),
     );
   } catch (error) {
-    logger.error(logT("log.i18nFailedToInitialize"), error);
-    loadBundle("en"); // ensure at least English works
+    logger.error(logT('log.i18nFailedToInitialize'), error);
+    loadBundle('en'); // ensure at least English works
   }
 
   initialized = true;
@@ -188,7 +194,7 @@ export function tn(
  * Get the log language from env (independent of UI language).
  */
 export function getLogLang(): string {
-  return process.env.LOG_LANG || "en";
+  return process.env.LOG_LANG || 'en';
 }
 
 /**
@@ -216,7 +222,7 @@ export function i18nMiddleware(
   res: Response,
   next: NextFunction,
 ): void {
-  const lang = (req.cookies?.lang as string) || "en";
+  const lang = (req.cookies?.lang as string) || 'en';
   (req as any).lang = lang;
 
   // Bind req.t / req.tn with user's language
@@ -242,6 +248,11 @@ export function i18nMiddleware(
   res.locals.t = (req as any).t;
   res.locals.tn = (req as any).tn;
   res.locals.lang = lang;
+
+  // EJS templates use `window.__i18n.X` inside <%%= %> tags — but EJS runs
+  // server-side where `window` doesn't exist.  Expose a stub so every
+  // `<%%= window.__i18n.foo || "fallback" %>` resolves without crashing.
+  (res.locals as any).window = { __i18n: req.translations || {} };
 
   next();
 }

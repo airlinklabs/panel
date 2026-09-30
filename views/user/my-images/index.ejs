@@ -1,0 +1,118 @@
+<%- include('../../layouts/user', { title: 'My Images' }) %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('myImages') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('manageYourImages') %></p>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <button type="button" onclick="showImportModal()" class="al-btn al-btn-secondary text-[12px]">
+        <%- icon('download', { class: 'w-3.5 h-3.5' }) %> Import URL
+      </button>
+      <a href="/my-images/new" class="al-btn al-btn-primary text-[12px]">
+        <%- icon('plus', { class: 'w-3.5 h-3.5' }) %> New Image
+      </a>
+    </div>
+  </div>
+
+  <% if (!Array.isArray(images) || images.length === 0) { %>
+    <%- include('../../partials/empty-state', {
+      iconName: 'box',
+      title: t('noImagesYet'),
+      description: t('submitYourFirstImage')
+    }) %>
+  <% } else { %>
+  <div class="overflow-x-auto rounded-xl border mt-4" style="border-color:var(--theme-border)">
+    <table class="al-table">
+      <thead class="al-table-head">
+        <tr>
+          <th class="al-table-th"><%= t('name') %></th>
+          <th class="al-table-th"><%= t('status') %></th>
+          <th class="al-table-th"><%= t('author') %></th>
+          <th class="al-table-th"><%= t('createdAt') %></th>
+          <th class="al-table-th"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% images.forEach(function(img) { %>
+        <tr class="al-table-tr">
+          <td class="al-table-td">
+            <div>
+              <p class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= img.name %></p>
+              <% if (img.description) { %>
+              <p class="text-[11px] mt-0.5 truncate max-w-[200px]" style="color:var(--theme-text-muted)"><%= img.description %></p>
+              <% } %>
+            </div>
+          </td>
+          <td class="al-table-td">
+            <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
+              style="<%= img.status === 'approved' ? 'background:var(--theme-success-bg);color:var(--theme-success)' : img.status === 'pending' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : 'background:var(--theme-danger-bg);color:var(--theme-danger)' %>">
+              <%= img.status %>
+            </span>
+            <% if (img.rejectionReason) { %>
+            <p class="text-[10px] mt-1" style="color:var(--theme-danger)"><%= img.rejectionReason %></p>
+            <% } %>
+          </td>
+          <td class="al-table-td">
+            <span class="text-[12px]" style="color:var(--theme-text-muted)"><%= img.author || '-' %></span>
+          </td>
+          <td class="al-table-td">
+            <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= img.createdAt ? new Date(img.createdAt).toLocaleDateString() : '-' %></span>
+          </td>
+          <td class="al-table-td">
+            <div class="flex items-center gap-1">
+              <a href="/my-images/edit/<%= img.id %>" class="al-btn al-btn-ghost p-1.5" title="<%= t('edit') %>">
+                <%- icon('pencil', { class: 'w-3.5 h-3.5' }) %>
+              </a>
+              <button type="button" onclick="deleteImage(<%= img.id %>, '<%= img.name %>')"
+                class="al-btn al-btn-ghost p-1.5" style="color:var(--theme-danger)" title="<%= t('delete') %>">
+                <%- icon('trash-2', { class: 'w-3.5 h-3.5' }) %>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  window.deleteImage = function(id, name) {
+    window.modal.confirm({
+      title: '<%= t("deleteImage") %>',
+      body: '<%= t("deleteImageConfirm") %> "' + name + '"?',
+      danger: true,
+      confirmLabel: '<%= t("delete") %>',
+      onConfirm: async function() {
+        try {
+          var r = await fetch('/my-images/' + id, { method: 'DELETE', headers: { 'x-csrf-token': csrfToken } });
+          if (r.ok) { showToast('<%= t("imageDeleted") %>', 'success'); window.location.reload(); }
+          else { showToast('<%= t("failedToDelete") %>', 'error'); }
+        } catch(err) { showToast('<%= t("failedToDelete") %>', 'error'); }
+      }
+    });
+  };
+
+  window.showImportModal = function() {
+    var url = prompt('Enter egg/image URL:');
+    if (url && url.trim()) {
+      fetch('/my-images/import-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ url: url.trim() })
+      }).then(function(r) {
+        if (r.ok) { showToast('Image imported!', 'success'); window.location.reload(); }
+        else { showToast('Import failed', 'error'); }
+      }).catch(function() { showToast('Import failed', 'error'); });
+    }
+  };
+})();
+</script>
+
+<%- include('../../layouts/user-footer') %>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html class="h-full" lang="<%= (req && req.lang) || 'en' %>">
+<%
+const wallpaperExcluded = req && req.path && (
+  req.path.startsWith('/admin/overview') ||
+  req.path.startsWith('/credits')
+);
+%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <title><%= settings.title %> - <%= typeof title !== 'undefined' ? title : 'Panel' %></title>
+    <script nonce="<%- nonce %>">
+      (function(){
+        <% const isLightTheme = settings.theme === 'light' || (settings.theme && settings.theme.includes('light')); %>
+        <% if (!isLightTheme) { %>
+        document.documentElement.classList.add('dark');
+        <% } %>
+      })();
+    </script>
+    <link rel="stylesheet" href="<%= assetUrl('/fonts/general-sans.css') %>">
+    <link rel="stylesheet" href="<%= assetUrl('views/styles/main.css') %>">
+    <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
+    <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
+    <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-light.css') %>">
+    <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-dark.css') %>">
+    <% if (settings.theme && settings.theme !== 'default' && settings.theme !== 'light' && settings.theme !== 'dark') { %>
+    <link rel="stylesheet" href="<%= assetUrl(settings.theme) %>" id="theme-css">
+    <% } %>
+    <link rel="stylesheet" href="<%= assetUrl('/vendor/@fontsource-variable/inter/index.css') %>">
+    <% if (Array.isArray(typeof extraStyles !== 'undefined' ? extraStyles : undefined)) { %>
+      <% for (const stylesheet of extraStyles) { %>
+    <link rel="stylesheet" href="<%= stylesheet %>">
+      <% } %>
+    <% } %>
+    <% if (typeof csrfToken !== 'undefined') { %>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <% } %>
+    <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/csrf.js') %>?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/al-icon.js') %>?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/vendor/reconnecting-websocket/dist/reconnecting-websocket-iife.min.js') %>"></script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/format-switcher.js') %>?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/al-tabs.js') %>?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/custom-select.js') %>?v=8"></script>
+
+    <style>
+      * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      html, body { background: var(--theme-bg); color: var(--theme-text); }
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+      @media (max-width: 1023px) {
+        /* The mobile bar is fixed to the top edge — keep content clear of it. */
+        #page-content, #server-page-body { padding-bottom: 64px; padding-top: 48px; }
+      }
+    </style>
+    <% if (process.env.NODE_ENV !== 'production') { %>
+    <script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script nonce="<%- nonce %>">eruda.init();</script>
+    <% } %>
+    <script nonce="<%- nonce %>">
+    (function () {
+      var v = '<%= panel.version %>', c = '<%= panel.codename %>';
+      console.log(
+        '%c  /$$$$$$ /$$         /$$/$$         /$$\n' +
+        ' /$$__  $|__/        | $|__/        | $$\n' +
+        '| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$\n' +
+        '| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/\n' +
+        '| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/\n' +
+        '| $$  | $| $| $$     | $| $| $$  | $| $$_  $$\n' +
+        '| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$\n' +
+        '|__/  |__|__|__/     |__|__|__/  |__|__/  __/',
+        'color:#00d4ff;font-family:monospace;font-size:11px;font-weight:bold'
+      );
+      console.log(
+        '%c  Airlink Panel %cv' + v + ' %c' + c,
+        'color:#00d4ff;font-size:14px;font-weight:bold',
+        'color:#888;font-size:12px',
+        'color:#666;font-size:11px;font-style:italic'
+      );
+      console.log('%c  Airlinklabs \u00b7 MIT License \u00a9 2025', 'color:#555;font-size:11px');
+      console.log(
+        '%c  GitHub:%c https://github.com/AirlinkLabs   %cDiscord:%c https://discord.gg/ujXyxwwMHc   %cWeb:%c https://airlinklabs.xyz',
+        'color:#00d4ff;font-weight:bold', 'color:#999',
+        'color:#00d4ff;font-weight:bold', 'color:#999',
+        'color:#00d4ff;font-weight:bold', 'color:#999'
+      );
+    })();
+    </script>
+</head>
+<body style="font-family:'General Sans','Inter Variable',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
+<% if (settings.panelWallpaper && !wallpaperExcluded) { %>
+<div id="al-wallpaper-layer" aria-hidden="true"></div>
+<% } %>
+
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--theme-text-strong)] focus:text-[var(--theme-bg)] focus:text-sm focus:font-medium focus:shadow-lg"><%= t('skipToMainContent') %></a>
+
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/theme-init.js') %>?v=2"></script>
+<script nonce="<%- nonce %>">window.__i18n = <%- JSON.stringify(req.translations || {}) %>;</script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/escape.js') %>?v=1"></script>
+
+<%- include('../partials/flash-messages') %>
+<%- include('../partials/bottom-nav') %>
+<%- include('../partials/global-modal') %>
+<%- include('../partials/toast') %>

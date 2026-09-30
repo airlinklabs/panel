@@ -55,19 +55,29 @@
  *                   `destroy()`.
  */
 (function (root, factory) {
-  var api = factory(root);
-  if (typeof window !== "undefined") window.ALTabSystem = api;
-  if (typeof module !== "undefined" && module.exports) module.exports = api;
-})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
-  "use strict";
+  const api = factory(root);
+  if (typeof window !== 'undefined') {window.ALTabSystem = api;}
+  if (typeof module !== 'undefined' && module.exports) {module.exports = api;}
+  /* Auto-scan in the browser: deferred scripts run after parsing, so a
+     readyState check covers both defer execution and late/dynamic loads. */
+  if (typeof document !== 'undefined') {
+    const boot = function () {
+      api.scan();
+    };
+    if (document.readyState === 'loading')
+    {document.addEventListener('DOMContentLoaded', boot);}
+    else {boot();}
+  }
+})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
+  'use strict';
 
   /* The root scope (window in the browser) is read from `currentScope` at
      call time so tests can inject a shim via `ALTabSystem.setScope()`; in the
      browser it stays window, which is also where the global `document` and
      `fetch` live. */
-  var currentScope = rootScope;
-  var doc = (currentScope && currentScope.document) || null;
-  var hist = (currentScope && currentScope.history) || null;
+  let currentScope = rootScope;
+  let doc = (currentScope && currentScope.document) || null;
+  let hist = (currentScope && currentScope.history) || null;
 
   function setScope(s) {
     currentScope = s || null;
@@ -75,10 +85,10 @@
     hist = (currentScope && currentScope.history) || null;
   }
 
-  var registered = []; // every live controller, in mount order
+  const registered = []; // every live controller, in mount order
 
   function tabName(btn) {
-    return btn ? btn.getAttribute("data-tab") : null;
+    return btn ? btn.getAttribute('data-tab') : null;
   }
 
   function readTabButtons(root) {
@@ -94,37 +104,37 @@
   }
 
   function currentHashName() {
-    if (!currentScope || typeof currentScope.location === "undefined")
-      return null;
-    var h = String(currentScope.location.hash || "");
-    return h ? h.replace(/^#/, "") : null;
+    if (!currentScope || typeof currentScope.location === 'undefined')
+    {return null;}
+    const h = String(currentScope.location.hash || '');
+    return h ? h.replace(/^#/, '') : null;
   }
 
   function setHash(name, method) {
-    if (!hist || !currentScope || typeof currentScope.location === "undefined")
-      return;
-    var url =
-      currentScope.location.pathname +
-      currentScope.location.search +
-      "#" +
-      name;
+    if (!hist || !currentScope || typeof currentScope.location === 'undefined')
+    {return;}
+    const url =
+      `${currentScope.location.pathname +
+      currentScope.location.search 
+      }#${ 
+        name}`;
     try {
-      if (method === "replace") hist.replaceState(null, "", url);
-      else hist.pushState(null, "", url);
+      if (method === 'replace') {hist.replaceState(null, '', url);}
+      else {hist.pushState(null, '', url);}
     } catch (e) {
       /* some sandboxes block history; local tab state still works */
     }
   }
 
   function controller(root) {
-    var defaultName = root.getAttribute("data-tabs-default") || "";
-    var hashMode = root.hasAttribute("data-tabs-hash");
-    var current = defaultName;
-    var buttons = readTabButtons(root);
-    var panels = readTabPanels(root);
-    var lazy = {}; // name -> AbortController while a lazy load is in flight
-    var loaded = {}; // name -> true once content has been fetched
-    var destroyed = false;
+    const defaultName = root.getAttribute('data-tabs-default') || '';
+    const hashMode = root.hasAttribute('data-tabs-hash');
+    let current = defaultName;
+    const buttons = readTabButtons(root);
+    const panels = readTabPanels(root);
+    let lazy = {}; // name -> AbortController while a lazy load is in flight
+    const loaded = {}; // name -> true once content has been fetched
+    let destroyed = false;
 
     function knownName(name) {
       return buttons.some(function (b) {
@@ -133,45 +143,45 @@
     }
 
     function panelFor(name) {
-      for (var i = 0; i < panels.length; i++) {
-        if (panels[i].getAttribute("data-tab-panel") === name) return panels[i];
+      for (const p of panels) {
+        if (p.getAttribute('data-tab-panel') === name) {return p;}
       }
       return null;
     }
 
     function applySelection(name, source) {
-      if (destroyed) return;
-      if (!knownName(name)) name = defaultName;
-      if (!knownName(name)) return; // empty tablist
+      if (destroyed) {return;}
+      if (!knownName(name)) {name = defaultName;}
+      if (!knownName(name)) {return;} // empty tablist
       current = name;
       buttons.forEach(function (btn) {
-        var on = tabName(btn) === name;
-        btn.setAttribute("aria-selected", on ? "true" : "false");
-        btn.setAttribute("tabindex", on ? "0" : "-1");
+        const on = tabName(btn) === name;
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.setAttribute('tabindex', on ? '0' : '-1');
       });
       panels.forEach(function (p) {
-        var on = p.getAttribute("data-tab-panel") === name;
+        const on = p.getAttribute('data-tab-panel') === name;
         if (on) {
-          p.removeAttribute("hidden");
+          p.removeAttribute('hidden');
           if (p.classList) {
-            p.classList.remove("tab-panel");
+            p.classList.remove('tab-panel');
             void p.offsetHeight;
-            p.classList.add("tab-panel");
+            p.classList.add('tab-panel');
           }
         } else {
-          p.setAttribute("hidden", "");
+          p.setAttribute('hidden', '');
         }
       });
       if (hashMode) {
-        if (source === "user") setHash(name, "push");
-        else if (source === "corrective") setHash(name, "replace");
+        if (source === 'user') {setHash(name, 'push');}
+        else if (source === 'corrective') {setHash(name, 'replace');}
       }
       activateLazy(name);
       emit(name);
     }
 
     function select(name, source) {
-      applySelection(name, source || "user");
+      applySelection(name, source || 'user');
     }
 
     function currentName() {
@@ -179,28 +189,28 @@
     }
 
     function selectFromHash(notify) {
-      var name = currentHashName();
+      const name = currentHashName();
       if (name && knownName(name)) {
-        applySelection(name, notify ? "hash" : "hash");
+        applySelection(name, notify ? 'hash' : 'hash');
       } else if (hashMode) {
-        applySelection(defaultName, "corrective");
+        applySelection(defaultName, 'corrective');
       }
     }
 
     function emit(name) {
-      if (!currentScope || !currentScope.CustomEvent) return;
-      var panel = panelFor(name);
-      var detail = { root: root, name: name, panel: panel };
+      if (!currentScope || !currentScope.CustomEvent) {return;}
+      const panel = panelFor(name);
+      const detail = { root, name, panel };
       try {
         root.dispatchEvent(
-          new currentScope.CustomEvent("al:tabs-change", {
+          new currentScope.CustomEvent('al:tabs-change', {
             bubbles: true,
-            detail: detail,
+            detail,
           }),
         );
         if (currentScope.document && currentScope.document.dispatchEvent) {
           currentScope.document.dispatchEvent(
-            new currentScope.CustomEvent("al:tabs-change", { detail: detail }),
+            new currentScope.CustomEvent('al:tabs-change', { detail }),
           );
         }
       } catch (e) {
@@ -209,117 +219,119 @@
     }
 
     function activateLazy(name) {
-      var panel = panelFor(name);
-      if (!panel) return;
-      var src = panel.getAttribute("data-tab-src");
-      if (!src || loaded[name] || lazy[name]) return;
+      const panel = panelFor(name);
+      if (!panel) {return;}
+      const src = panel.getAttribute('data-tab-src');
+      if (!src || loaded[name] || lazy[name]) {return;}
       loaded[name] = true;
-      var controller = new AbortController();
+      const controller = new AbortController();
       lazy[name] = controller;
 
-      var loading = (
+      const loading = (
         doc ||
         (currentScope && currentScope.document)
-      ).createElement("div");
-      loading.className = "al-tab-loading";
-      loading.setAttribute("aria-busy", "true");
-      loading.textContent = "Loading\u2026";
-      panel.textContent = "";
+      ).createElement('div');
+      loading.className = 'al-tab-loading';
+      loading.setAttribute('aria-busy', 'true');
+      loading.textContent = 'Loading\u2026';
+      panel.textContent = '';
       panel.appendChild(loading);
 
-      var fetcher = (currentScope && currentScope.fetch) || fetch;
+      const fetcher = (currentScope && currentScope.fetch) || fetch;
       fetcher(src, {
         signal: controller.signal,
-        credentials: "same-origin",
-        headers: { Accept: "text/html" },
+        credentials: 'same-origin',
+        headers: { Accept: 'text/html' },
       })
         .then(function (res) {
-          if (!res.ok) throw new Error("HTTP " + res.status);
+          if (!res.ok) {throw new Error(`HTTP ${  res.status}`);}
           return res.text();
         })
         .then(function (html) {
-          if (destroyed || controller.signal.aborted) return;
+          if (destroyed || controller.signal.aborted) {return;}
           panel.innerHTML = html;
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- plain cache map
           delete lazy[name];
           if (currentScope && currentScope.CustomEvent) {
             root.dispatchEvent(
-              new currentScope.CustomEvent("al:tabs-loaded", {
+              new currentScope.CustomEvent('al:tabs-loaded', {
                 bubbles: true,
-                detail: { root: root, name: name, panel: panel },
+                detail: { root, name, panel },
               }),
             );
           }
         })
         .catch(function (err) {
-          if (destroyed) return;
-          if (err && err.name === "AbortError") return;
-          panel.textContent = "";
-          var msg = (
+          if (destroyed) {return;}
+          if (err && err.name === 'AbortError') {return;}
+          panel.textContent = '';
+          const msg = (
             doc ||
             (currentScope && currentScope.document)
-          ).createElement("p");
-          msg.className = "al-tab-error";
-          msg.textContent = "Could not load this section.";
+          ).createElement('p');
+          msg.className = 'al-tab-error';
+          msg.textContent = 'Could not load this section.';
           panel.appendChild(msg);
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- plain cache map
           delete lazy[name];
           loaded[name] = false; // allow retry
         });
     }
 
     function onClick(e) {
-      var btn =
+      const btn =
         e.target && e.target.closest
           ? e.target.closest('[role="tab"][data-tab]')
           : null;
-      if (!btn || !root.contains(btn)) return;
-      var list = root.querySelector('[role="tablist"]');
-      if (list && !list.contains(btn)) return;
-      var name = tabName(btn);
-      if (!name || !knownName(name)) return;
+      if (!btn || !root.contains(btn)) {return;}
+      const list = root.querySelector('[role="tablist"]');
+      if (list && !list.contains(btn)) {return;}
+      const name = tabName(btn);
+      if (!name || !knownName(name)) {return;}
       e.preventDefault();
-      applySelection(name, "user");
+      applySelection(name, 'user');
       btn.focus();
     }
 
     function onKeydown(e) {
-      var tablist = root.querySelector('[role="tablist"]');
-      if (!tablist || !tablist.contains(e.target)) return;
-      var btn = e.target.closest
+      const tablist = root.querySelector('[role="tablist"]');
+      if (!tablist || !tablist.contains(e.target)) {return;}
+      const btn = e.target.closest
         ? e.target.closest('[role="tab"][data-tab]')
         : null;
-      var idx = buttons.indexOf(btn);
-      if (idx === -1) return;
-      var next = null;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      const idx = buttons.indexOf(btn);
+      if (idx === -1) {return;}
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault();
         next = buttons[(idx + 1) % buttons.length];
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
         next = buttons[(idx - 1 + buttons.length) % buttons.length];
-      } else if (e.key === "Home") {
+      } else if (e.key === 'Home') {
         e.preventDefault();
         next = buttons[0];
-      } else if (e.key === "End") {
+      } else if (e.key === 'End') {
         e.preventDefault();
         next = buttons[buttons.length - 1];
       }
       if (next) {
-        applySelection(tabName(next), "user");
+        applySelection(tabName(next), 'user');
         next.focus();
       }
     }
 
     function onHashChange() {
-      if (!hashMode || destroyed) return;
+      if (!hashMode || destroyed) {return;}
       selectFromHash(false);
     }
 
     function destroy() {
       destroyed = true;
-      root.removeEventListener("click", onClick, true);
-      root.removeEventListener("keydown", onKeydown, true);
-      if (hashMode && typeof currentScope.removeEventListener === "function") {
-        currentScope.removeEventListener("hashchange", onHashChange);
+      root.removeEventListener('click', onClick, true);
+      root.removeEventListener('keydown', onKeydown, true);
+      if (hashMode && typeof currentScope.removeEventListener === 'function') {
+        currentScope.removeEventListener('hashchange', onHashChange);
       }
       Object.keys(lazy).forEach(function (name) {
         try {
@@ -329,15 +341,15 @@
         }
       });
       lazy = {};
-      var idx = registered.indexOf(ctrl);
-      if (idx !== -1) registered.splice(idx, 1);
+      const idx = registered.indexOf(ctrl);
+      if (idx !== -1) {registered.splice(idx, 1);}
     }
 
-    var ctrl = {
-      root: root,
-      select: select,
+    const ctrl = {
+      root,
+      select,
       current: currentName,
-      destroy: destroy,
+      destroy,
       get defaultName() {
         return defaultName;
       },
@@ -347,10 +359,10 @@
     registered.push(ctrl);
 
     function bind() {
-      root.addEventListener("click", onClick, true);
-      root.addEventListener("keydown", onKeydown, true);
-      if (hashMode && typeof currentScope.addEventListener === "function") {
-        currentScope.addEventListener("hashchange", onHashChange);
+      root.addEventListener('click', onClick, true);
+      root.addEventListener('keydown', onKeydown, true);
+      if (hashMode && typeof currentScope.addEventListener === 'function') {
+        currentScope.addEventListener('hashchange', onHashChange);
       }
     }
 
@@ -365,12 +377,12 @@
      inner tablist nested inside another `[data-al-tabs]` is owned by the
      outer controller, not scanned twice. */
   function insideTabsRoot(el) {
-    var n =
+    let n =
       el &&
       (el.parentElement ||
         (el.parentNode && el.parentNode.nodeType === 1 ? el.parentNode : null));
     while (n) {
-      if (n.hasAttribute && n.hasAttribute("data-al-tabs")) return n;
+      if (n.hasAttribute && n.hasAttribute('data-al-tabs')) {return n;}
       n = n.parentElement;
     }
     return null;
@@ -380,24 +392,24 @@
      The root must have data-tabs-default; hash mode is opt-in via
      data-tabs-hash so nested/editor tablists never fight the page hash. */
   function mount(root, options) {
-    if (!root) return null;
-    if (insideTabsRoot(root)) return null; // inner tablist: parent owns it
-    var c = controller(root);
-    if (options && typeof options.onReady === "function") options.onReady(c);
+    if (!root) {return null;}
+    if (insideTabsRoot(root)) {return null;} // inner tablist: parent owns it
+    const c = controller(root);
+    if (options && typeof options.onReady === 'function') {options.onReady(c);}
     return c;
   }
 
   /* Scan the document for top-level tab containers and mount them. */
   function scan(options) {
-    if (!doc) return [];
-    var roots = doc.querySelectorAll("[data-al-tabs]");
-    var out = [];
-    for (var i = 0; i < roots.length; i++) {
-      if (insideTabsRoot(roots[i])) continue; // nested root: parent owns it
-      var c = controller(roots[i]);
+    if (!doc) {return [];}
+    const roots = doc.querySelectorAll('[data-al-tabs]');
+    const out = [];
+    for (const rootEl of roots) {
+      if (insideTabsRoot(rootEl)) {continue;} // nested root: parent owns it
+      const c = controller(rootEl);
       if (c) {
-        if (options && typeof options.onReady === "function")
-          options.onReady(c);
+        if (options && typeof options.onReady === 'function')
+        {options.onReady(c);}
         out.push(c);
       }
     }
@@ -411,10 +423,10 @@
   }
 
   return {
-    mount: mount,
-    scan: scan,
-    destroyAll: destroyAll,
-    setScope: setScope,
+    mount,
+    scan,
+    destroyAll,
+    setScope,
     VERSION: 1,
   };
 });

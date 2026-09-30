@@ -1,0 +1,100 @@
+<%- include('../../layouts/user', { title: 'New Image' }) %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <div class="flex items-start gap-4">
+    <a href="/my-images" class="al-btn al-btn-ghost p-2 shrink-0">
+      <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
+    </a>
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('newImage') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('submitNewImage') %></p>
+    </div>
+  </div>
+
+  <form id="newImageForm" class="mt-5 max-w-2xl">
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('basicInfo') %></h3>
+      <div class="al-form-field">
+        <label class="al-form-label"><%= t('imageName') %> <span class="text-red-500">*</span></label>
+        <input type="text" name="name" class="al-form-input" required maxlength="100"
+          placeholder="My Custom Image">
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('author') %></label>
+        <input type="text" name="author" class="al-form-input" maxlength="100">
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('description') %></label>
+        <textarea name="description" class="al-form-textarea" rows="2" maxlength="500"></textarea>
+      </div>
+    </div>
+
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('dockerConfig') %></h3>
+      <div class="al-form-field">
+        <label class="al-form-label"><%= t('dockerImages') %> (JSON) <span class="text-red-500">*</span></label>
+        <textarea name="dockerImages" class="al-form-textarea font-mono text-[12px]" rows="3"
+          placeholder='[{"java": "docker.io/itzg/minecraft-server"}]' required></textarea>
+        <p class="text-[10px] mt-1" style="color:var(--theme-text-muted)">JSON array of {name: image} objects</p>
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('startupCommand') %> <span class="text-red-500">*</span></label>
+        <input type="text" name="startup" class="al-form-input font-mono text-[12px]"
+          placeholder="java -Xmx$MEMORY -jar server.jar" required>
+      </div>
+      <div class="al-form-field mt-3">
+        <label class="al-form-label"><%= t('stopCommand') %></label>
+        <input type="text" name="stop" class="al-form-input font-mono text-[12px]"
+          placeholder="stop">
+      </div>
+    </div>
+
+    <div class="al-card p-4 mb-4">
+      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('variables') %> (JSON)</h3>
+      <div class="al-form-field">
+        <textarea name="variables" class="al-form-textarea font-mono text-[12px]" rows="5"
+          placeholder='[{"name":"MEMORY","description":"RAM allocation","default_value":"1024","type":"text","user_editable":true}]'></textarea>
+        <p class="text-[10px] mt-1" style="color:var(--theme-text-muted)">JSON array of variable definitions</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" id="submitBtn" class="al-btn al-btn-primary">
+        <%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('submitImage') %>
+      </button>
+      <a href="/my-images" class="al-btn al-btn-ghost"><%= t('cancel') %></a>
+    </div>
+  </form>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  document.getElementById('newImageForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+
+    try {
+      var fd = new FormData(e.target);
+      var data = {};
+      fd.forEach(function(val, key) { data[key] = val; });
+
+      var r = await fetch('/my-images/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify(data)
+      });
+
+      if (r.ok) { showToast('Image submitted for review!', 'success'); window.location.href = '/my-images'; }
+      else { var err = await r.text(); showToast(err, 'error'); btn.disabled = false; }
+    } catch(err) {
+      showToast('Failed to submit image', 'error');
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+
+<%- include('../../layouts/user-footer') %>

@@ -1,324 +1,233 @@
-<%- include('../../components/header', { title: t('adminEditUserTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminEditUserTitle') }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('breadcrumbUsers'), href: '/admin/users' },
-        { label: t('edit') }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= t('adminEditUserTitle') %></h1>
-          <p class="al-page-desc"><%= t('adminEditUserText') %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <a href="/admin/users" class="al-btn-secondary"><%= t('backToUsers') %></a>
-          <%- include('../../components/ui/save-button', { formId: 'editUserForm' }) %>
-        </div>
-      </div>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbUsers'), url: '/admin/users' },
+    { label: t('edit') }
+  ] }) %>
+</div>
 
-      <div class="al-page-body space-y-5" x-data="adminUserEdit()" x-init="init()">
-        <template x-if="error">
-          <div class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)" x-text="error"></div>
-        </template>
-        <form id="editUserForm" @submit.prevent="submit()" class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('userInformation') %></h2>
-            <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--theme-border)">
-              <img class="h-12 w-12 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
-              <div>
-                <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= dataUser.username %></p>
-                <p class="text-xs" style="color:var(--theme-text-muted)"><%= dataUser.email %></p>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="username" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('username') %>
-                </label>
-                <input type="text" x-model="form.username" class="al-input" required>
-              </div>
-
-              <div>
-                <label for="email" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('email') %>
-                </label>
-                <input type="email" x-model="form.email" class="al-input" required>
-              </div>
-
-              <div class="md:col-span-2">
-                <label for="description" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= t('description') %>
-                </label>
-                <textarea x-model="form.description" rows="3" class="al-input"><%= dataUser.description || '' %></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('security') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="password" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('newPassword') %> <span class="text-xs" style="color:var(--theme-text-muted)">(<%= t('leaveBlankToKeep') %>)</span>
-                </label>
-                <input type="password" x-model="form.password" class="al-input">
-              </div>
-
-              <div>
-                <label for="confirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= t('confirmPassword') %>
-                </label>
-                <input type="password" x-model="form.confirmPassword" class="al-input">
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= t('role') %>
-                      </h3>
-                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= t('roleDescription') %>
-                      </p>
-                    </div>
-                    <select x-model="form.role" class="al-input w-44" :disabled="form.role === 'owner'">
-                      <template x-for="r in roles" :key="r.name">
-                        <option :value="r.name" x-text="r.displayName" :selected="r.name === form.role" :disabled="r.name === 'owner' && form.role !== 'owner'"></option>
-                      </template>
-                    </select>
-                    <% if (dataUser.role === 'owner') { %>
-                      <p class="text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('ownerRoleCannotBeChanged') %></p>
-                    <% } %>
-                  </div>
-                </div>
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= t('adminStatus') %>
-                      </h3>
-                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= t('adminDescription') %>
-                      </p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="<%= t('adminDescription') %>"<% } %>>
-                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer" <% if (dataUser.role === 'owner') { %>disabled<% } %>>
-                      <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('serverLimits') %></h2>
-            <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('leaveBlankForDefaults') %></p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> <%= t('serverLimit') %></label>
-                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('maxServersThisUserCanCreate') %></p>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> <%= t('maxMemory') %></label>
-                <input type="hidden" :value="form.maxMemory">
-                <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="maxMemoryDisplay" data-hidden="maxMemory"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> <%= t('maxCpu') %> <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
-                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> <%= t('maxStorage') %></label>
-                <input type="hidden" :value="form.maxStorage">
-                <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="maxStorageDisplay" data-hidden="maxStorage"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> <%= t('maxDatabases') %></label>
-                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('totalDatabasesAcrossAllServers') %></p>
-              </div>
-            </div>
-          </div>
-
-          <% if (canTransferOwner) { %>
-          <div class="al-card border-red-600/20">
-            <h2 class="al-card-header" style="color:#ef4444"><%= t('transferOwnership') %></h2>
-            <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('transferOwnershipDesc', { name: dataUser.username }) %></p>
-            <div class="flex items-center gap-3">
-              <button type="button" @click="transferOwner()" class="al-btn-danger">
-                <%- icon('shield-alert', { size: 16 }) %>
-                <%= t('transferOwnershipTo', { name: dataUser.username }) %>
-              </button>
-              <span class="text-xs" style="color:var(--theme-text-muted)"><%= t('cannotBeUndoneWithoutTransferringBack') %></span>
-            </div>
-          </div>
-          <% } %>
-        </form>
-      </div>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminEditUserTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminEditUserText') %></p>
   </div>
-</main>
+  <div>
+    <a href="/admin/users" class="al-btn-secondary"><%= t('backToUsers') %></a>
+    <button type="submit" form="editUserForm" class="al-btn-primary">
+      <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <span><%= t('save') %></span>
+    </button>
+  </div>
+</div>
 
-<%- include('../../components/loading-popup') %>
+<div class="al-page-body space-y-5">
+  <div id="editUserError" class="hidden al-alert-danger" role="alert" aria-live="assertive">
+    <%- icon('alert-triangle', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+    <p id="editUserErrorText" class="al-alert-title"></p>
+  </div>
 
-<style>
-#editUserForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
+  <form id="editUserForm" onsubmit="event.preventDefault(); submitUserEdit()" class="space-y-5">
+    <%- include('../../partials/csrf') %>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('userInformation') %></span></h2>
+      <div class="al-card-body">
+        <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--theme-border)">
+          <img class="h-12 w-12 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold al-text-strong truncate"><%= dataUser.username %></p>
+            <p class="text-xs al-text-muted truncate"><%= dataUser.email %></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="editUsername" class="al-form-label"><%= t('username') %></label>
+            <input type="text" id="editUsername" name="username" value="<%= dataUser.username %>" class="al-form-input" required>
+          </div>
+          <div class="al-form-field">
+            <label for="editEmail" class="al-form-label"><%= t('email') %></label>
+            <input type="email" id="editEmail" name="email" value="<%= dataUser.email %>" class="al-form-input" required>
+          </div>
+          <div class="al-form-field md:col-span-2">
+            <label for="editDescription" class="al-form-label"><%= t('description') %></label>
+            <textarea id="editDescription" name="description" rows="3" class="al-form-textarea"><%= dataUser.description || '' %></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('security') %></span></h2>
+      <div class="al-card-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="editPassword" class="al-form-label"><%= t('newPassword') %> <span class="al-form-help">(<%= t('leaveBlankToKeep') %>)</span></label>
+            <input type="password" id="editPassword" name="password" class="al-form-input">
+          </div>
+          <div class="al-form-field">
+            <label for="editConfirmPassword" class="al-form-label"><%= t('confirmPassword') %></label>
+            <input type="password" id="editConfirmPassword" name="confirmPassword" class="al-form-input">
+          </div>
+        </div>
+
+        <div class="al-setting-row">
+          <div class="al-setting-copy">
+            <h3 class="al-setting-title"><%= t('role') %></h3>
+            <p class="al-setting-desc"><%= t('roleDescription') %></p>
+            <% if (dataUser.role === 'owner') { %>
+              <p class="al-setting-desc"><%= t('ownerRoleCannotBeChanged') %></p>
+            <% } %>
+          </div>
+          <div class="al-setting-control">
+            <select id="editRole" name="role" class="al-form-select" aria-label="<%= t('role') %>" <%= dataUser.role === 'owner' ? 'disabled' : '' %>>
+              <option value="user" <%= dataUser.role === 'user' ? 'selected' : '' %>><%= t('roleDisplayNameUser') %></option>
+              <option value="privileged" <%= dataUser.role === 'privileged' ? 'selected' : '' %>><%= t('roleDisplayNamePrivileged') %></option>
+              <option value="admin" <%= dataUser.role === 'admin' ? 'selected' : '' %>><%= t('roleDisplayNameAdmin') %></option>
+              <option value="owner" <%= dataUser.role === 'owner' ? 'selected' : '' %> disabled><%= t('roleDisplayNameOwner') %></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="al-setting-row">
+          <div class="al-setting-copy">
+            <h3 class="al-setting-title"><%= t('adminStatus') %></h3>
+            <p class="al-setting-desc"><%= t('adminDescription') %></p>
+          </div>
+          <div class="al-setting-control">
+            <label class="relative inline-flex items-center cursor-pointer gap-3">
+              <input type="checkbox" id="editIsAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %> <% if (dataUser.role === 'owner') { %>disabled<% } %>>
+              <span class="al-toggle-track"><span class="al-toggle-dot"></span></span>
+              <span id="editIsAdminLabel" class="text-sm font-medium al-text-strong"><%= dataUser.isAdmin ? t('enabled') : t('disabled') %></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('serverLimits') %></span></h2>
+      <div class="al-card-body">
+        <p class="al-form-help mb-4"><%= t('leaveBlankForDefaults') %></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="editServerLimit" class="al-form-label"><%= t('serverLimit') %></label>
+            <input type="number" id="editServerLimit" name="serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input" value="<%= dataUser.serverLimit ?? '' %>">
+            <p class="al-form-help"><%= t('maxServersThisUserCanCreate') %></p>
+          </div>
+          <div class="al-form-field">
+            <label for="editMaxMemoryDisplay" class="al-form-label"><%= t('maxMemory') %></label>
+            <input type="hidden" id="editMaxMemory" name="maxMemory" value="<%= dataUser.maxMemory ?? '' %>">
+            <div class="flex items-stretch gap-0">
+              <input type="number" id="editMaxMemoryDisplay" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input rounded-l-xl flex-1 border-r-0" value="<%= dataUser.maxMemory ?? '' %>">
+              <button type="button" class="al-format-switcher" data-format-switcher data-display="editMaxMemoryDisplay" data-hidden="editMaxMemory" data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+            </div>
+          </div>
+          <div class="al-form-field">
+            <label for="editMaxCpu" class="al-form-label"><%= t('maxCpu') %> <span class="al-form-help">(%)</span></label>
+            <input type="number" id="editMaxCpu" name="maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input" value="<%= dataUser.maxCpu ?? '' %>">
+          </div>
+          <div class="al-form-field">
+            <label for="editMaxStorageDisplay" class="al-form-label"><%= t('maxStorage') %></label>
+            <input type="hidden" id="editMaxStorage" name="maxStorage" value="<%= dataUser.maxStorage ?? '' %>">
+            <div class="flex items-stretch gap-0">
+              <input type="number" id="editMaxStorageDisplay" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input rounded-l-xl flex-1 border-r-0" value="<%= dataUser.maxStorage ?? '' %>">
+              <button type="button" class="al-format-switcher" data-format-switcher data-display="editMaxStorageDisplay" data-hidden="editMaxStorage" data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+            </div>
+          </div>
+          <div class="al-form-field">
+            <label for="editMaxDatabases" class="al-form-label"><%= t('maxDatabases') %></label>
+            <input type="number" id="editMaxDatabases" name="maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input" value="<%= dataUser.maxDatabases ?? '' %>">
+            <p class="al-form-help"><%= t('totalDatabasesAcrossAllServers') %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <a href="/admin/users" class="al-btn-secondary"><%= t('cancel') %></a>
+      <button type="submit" id="editUserSubmitBtn" class="al-btn-primary">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span id="editUserSubmitText"><%= t('save') %></span>
+      </button>
+    </div>
+  </form>
+</div>
 
 <script nonce="<%- nonce %>">
-function adminUserEdit() {
-  return {
-    saving: false,
-    error: '',
-    roles: [],
-    userId: <%= dataUser.id %>,
-    form: {
-      username: '<%= dataUser.username %>',
-      email: '<%= dataUser.email %>',
-      description: '<%= (dataUser.description || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>',
-      password: '',
-      confirmPassword: '',
-      role: '<%= dataUser.role || (dataUser.isAdmin ? "admin" : "user") %>',
-      isAdmin: <%= dataUser.isAdmin ? 'true' : 'false' %>,
-      serverLimit: <%= dataUser.serverLimit ?? 'null' %>,
-      maxMemory: <%= dataUser.maxMemory ?? 'null' %>,
-      maxMemoryDisplay: null,
-      maxCpu: <%= dataUser.maxCpu ?? 'null' %>,
-      maxStorage: <%= dataUser.maxStorage ?? 'null' %>,
-      maxStorageDisplay: null,
-      maxDatabases: <%= dataUser.maxDatabases ?? 'null' %>,
-    },
-    async init() {
-      try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const res = await fetch('/api/v2/admin/roles', { headers: { 'CSRF-Token': csrfToken } });
-        if (res.ok) {
-          const result = await res.json();
-          this.roles = result.data || result;
-        }
-      } catch (e) {
-        this.roles = [
-          { name: 'user', displayName: '<%= t('roleDisplayNameUser') %>' },
-          { name: 'privileged', displayName: '<%= t('roleDisplayNamePrivileged') %>' },
-          { name: 'admin', displayName: '<%= t('roleDisplayNameAdmin') %>' },
-          { name: 'owner', displayName: '<%= t('roleDisplayNameOwner') %>' },
-        ];
-      }
-    },
-    async submit() {
-      if (this.saving) return;
-      this.error = '';
+(function() {
+  var userId = <%= dataUser.id %>;
+  var saving = false;
+  var errorEl = document.getElementById('editUserError');
+  var errorText = document.getElementById('editUserErrorText');
+  var isAdminToggle = document.getElementById('editIsAdmin');
+  var isAdminLabel = document.getElementById('editIsAdminLabel');
 
-      if (this.form.password && this.form.password !== this.form.confirmPassword) {
-        this.error = '<%= req.translations.passwordsDoNotMatch || 'Passwords do not match' %>';
-        return;
-      }
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
 
-      this.saving = true;
-      const loader = showLoadingPopup('<%= req.translations.updatingUser || 'Updating User' %>', '<%= req.translations.processingUserUpdate || 'Processing user update...' %>');
-      loader.updateProgress(20, '<%= req.translations.sendingUserInformation || 'Sending user information...' %>');
+  isAdminToggle.addEventListener('change', function() {
+    isAdminLabel.textContent = this.checked ? '<%= t('enabled') %>' : '<%= t('disabled') %>';
+  });
 
-      try {
-        const data = {
-          username: this.form.username,
-          email: this.form.email,
-          description: this.form.description,
-          role: this.form.role,
-          isAdmin: this.form.isAdmin,
-          password: this.form.password || undefined,
-          serverLimit: this.form.serverLimit,
-          maxMemory: this.form.maxMemoryDisplay !== null && this.form.maxMemoryDisplay !== '' ? parseInt(this.form.maxMemoryDisplay, 10) : this.form.maxMemory,
-          maxCpu: this.form.maxCpu,
-          maxStorage: this.form.maxStorageDisplay !== null && this.form.maxStorageDisplay !== '' ? parseInt(this.form.maxStorageDisplay, 10) : this.form.maxStorage,
-          maxDatabases: this.form.maxDatabases,
-        };
+  window.submitUserEdit = async function() {
+    if (saving) return;
+    errorEl.classList.add('hidden');
+    errorText.textContent = '';
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const res = await fetch('/api/v2/admin/users/' + this.userId, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-          body: JSON.stringify(data),
-        });
+    var password = document.getElementById('editPassword').value;
+    var confirmPassword = document.getElementById('editConfirmPassword').value;
 
-        const result = await res.json();
-        if (result.error) {
-          loader.close();
-          this.error = result.error;
-        } else {
-          loader.updateProgress(100, '<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>');
-          setTimeout(() => {
-            loader.close();
-            showToast(result.message || '<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>', 'success');
-            setTimeout(() => { Turbo.visit('/admin/users'); }, 1000);
-          }, 500);
-        }
-      } catch (e) {
-        loader.close();
-        this.error = '<%= req.translations.errorUpdatingUser || 'Error updating user' %>';
-      } finally {
-        this.saving = false;
-      }
-    },
-    async transferOwner() {
-      window.modal.confirm({
-        title: '<%= req.translations.transferOwnerTitle || 'Transfer ownership?' %>',
-        body: '<%= req.translations.transferOwnerConfirm || 'This will make the current owner an admin. Continue?' %>',
-        danger: true,
-        confirmLabel: 'Transfer',
-        onConfirm: async () => {
-          const loader = showLoadingPopup('<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', '');
-          try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const res = await fetch('/api/v2/admin/users/' + this.userId + '/transfer', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-            });
-            const result = await res.json();
-            loader.close();
-            if (result.error) {
-              showToast(result.error, 'error');
-            } else {
-              showToast(result.message || '<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', 'success');
-              setTimeout(() => { Turbo.visit('/admin/users'); }, 1000);
-            }
-          } catch (e) {
-            loader.close();
-            showToast('<%= req.translations.errorUpdatingUser || 'Error updating user' %>', 'error');
-          }
-        }
+    if (password && password !== confirmPassword) {
+      showError('<%= t('passwordsDoNotMatch') %>');
+      return;
+    }
+
+    saving = true;
+
+    try {
+      var maxMemoryDisplay = document.getElementById('editMaxMemoryDisplay').value;
+      var maxMemoryHidden = document.getElementById('editMaxMemory').value;
+      var maxStorageDisplay = document.getElementById('editMaxStorageDisplay').value;
+      var maxStorageHidden = document.getElementById('editMaxStorage').value;
+
+      var data = {
+        username: document.getElementById('editUsername').value,
+        email: document.getElementById('editEmail').value,
+        description: document.getElementById('editDescription').value,
+        role: document.getElementById('editRole').value,
+        isAdmin: isAdminToggle.checked,
+        password: password || undefined,
+        serverLimit: parseInt(document.getElementById('editServerLimit').value) || null,
+        maxMemory: maxMemoryDisplay !== '' ? parseInt(maxMemoryDisplay, 10) : (maxMemoryHidden !== '' ? parseInt(maxMemoryHidden, 10) : null),
+        maxCpu: parseInt(document.getElementById('editMaxCpu').value) || null,
+        maxStorage: maxStorageDisplay !== '' ? parseInt(maxStorageDisplay, 10) : (maxStorageHidden !== '' ? parseInt(maxStorageHidden, 10) : null),
+        maxDatabases: parseInt(document.getElementById('editMaxDatabases').value) || null,
+      };
+
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var res = await fetch('/admin/users/update/' + userId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify(data),
       });
+
+      var result = await res.json();
+      if (!res.ok || result.error) {
+        showError(result.error || result.message || '<%= t('errorUpdatingUser') %>');
+      } else {
+        window.location.href = '/admin/users';
+      }
+    } catch (e) {
+      showError('<%= t('errorUpdatingUser') %>');
+    } finally {
+      saving = false;
     }
   };
-}
+})();
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/admin-footer') %>

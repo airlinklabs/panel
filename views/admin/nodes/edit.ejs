@@ -1,448 +1,335 @@
-<%- include('../../components/header', { title: t('adminEditNodeTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminEditNodeTitle') }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
-<%- include('../../components/template') %>
-    <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeEditor()">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('navNodes'), href: '/admin/nodes' },
-        { label: node.name }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= t('adminEditNodeTitle') %></h1>
-          <p class="al-page-desc"><%= t('adminEditNodeText') %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <%- include('../../components/ui/save-button', { onclick: 'updateNode()' }) %>
-          <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
-        </div>
-      </div>
+<%- include('../../partials/flash-messages') %>
 
-      <div id="nodeForm" class="al-page-body space-y-5">
-        <form class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('general') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="nodeName" class="al-label flex items-center gap-1.5">
-                  <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('name') %>
-                </label>
-                <input id="nodeName" value="<%= node.name %>" class="al-input" placeholder="My node">
-              </div>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbNodes'), url: '/admin/nodes' },
+    { label: node.name }
+  ] }) %>
+</div>
 
-              <div>
-                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
-                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('addressIP') %>
-                </label>
-                <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="localhost">
-              </div>
-
-              <div>
-                <label for="nodePort" class="al-label flex items-center gap-1.5">
-                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('daemonPort') %>
-                </label>
-                <input id="nodePort" value="<%= node.port %>" class="al-input" placeholder="3002">
-              </div>
-
-              <div>
-                <label for="nodeKey" class="al-label"><%= t('daemonKey') %></label>
-                <input id="nodeKey" value="" class="al-input" placeholder="<%= t('useCliToRetrieveKey') %>" disabled>
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('keyRedactedDesc') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <label for="nodeRam" class="al-label flex items-center gap-1.5">
-                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('ram') %>
-                </label>
-                <% if (node.ram && isNaN(parseFloat(node.ram))) { %>
-                  <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
-                <% } else { %>
-                  <input type="hidden" id="nodeRamValue" value="<%= node.ram ? Math.round(parseFloat(node.ram) * 1024) : '' %>">
-                  <div class="flex items-stretch gap-0">
-                    <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                    <button type="button" class="al-format-switcher" data-format-switcher
-                      data-display="nodeRam" data-hidden="nodeRamValue"
-                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
-                  </div>
-                <% } %>
-              </div>
-
-              <div>
-                <label for="nodeDisk" class="al-label flex items-center gap-1.5">
-                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('disk') %>
-                </label>
-                <% if (node.disk && isNaN(parseFloat(node.disk))) { %>
-                  <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
-                <% } else { %>
-                  <input type="hidden" id="nodeDiskValue" value="<%= node.disk ? Math.round(parseFloat(node.disk) * 1024) : '' %>">
-                  <div class="flex items-stretch gap-0">
-                    <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                    <button type="button" class="al-format-switcher" data-format-switcher
-                      data-display="nodeDisk" data-hidden="nodeDiskValue"
-                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
-                  </div>
-                <% } %>
-              </div>
-
-              <div>
-                <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
-                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('cpu') %>
-                </label>
-                <input type="hidden" id="nodeCpuValue" value="<%= node.cpu %>">
-                <div class="flex items-stretch gap-0">
-                  <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="nodeProcessor" data-hidden="nodeCpuValue"
-                    data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
-                </div>
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('overallocation') %></h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('overallocationDesc') %></p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
-                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('memory') %> %
-                </label>
-                <input id="nodeOverallocateMemory" type="number" min="0" value="<%= node.overallocateMemory || 0 %>" class="al-input">
-              </div>
-              <div>
-                <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
-                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('disk') %> %
-                </label>
-                <input id="nodeOverallocateDisk" type="number" min="0" value="<%= node.overallocateDisk || 0 %>" class="al-input">
-              </div>
-              <div>
-                <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
-                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('cpu') %> %
-                </label>
-                <input id="nodeOverallocateCpu" type="number" min="0" value="<%= node.overallocateCpu || 0 %>" class="al-input">
-              </div>
-            </div>
-            <div class="mt-4">
-              <label for="nodeLocation" class="al-label flex items-center gap-1.5">
-                <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                <%= t('location') %>
-              </label>
-              <select id="nodeLocation" class="al-input">
-                <option value=""><%= t('noLocation') %></option>
-                <% (locations || []).forEach(loc => { %>
-                  <option value="<%= loc.id %>" <%= node.locationId === loc.id ? 'selected' : '' %>><%= loc.name %> (<%= loc.shortCode %>)</option>
-                <% }); %>
-              </select>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('allocatedPorts') %></h2>
-            <div class="space-y-2">
-              <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                <!-- Port tags will be inserted here -->
-              </div>
-              <div class="flex gap-2">
-                <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1" @keypress.enter.prevent="addPortFromInput()">
-                <button id="addPortBtn" type="button" class="al-btn-primary" @click="addPortFromInput()">
-                  <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                  <%= t('addPort') %>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('maintenanceMode') %></h2>
-            <div class="p-4 rounded-xl border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-              <div class="flex items-center justify-between gap-4">
-                <div>
-                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('putNodeMaintenanceMode') %></h3>
-                  <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('maintenanceModeDesc') %></p>
-                </div>
-                <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="<%= t('putNodeMaintenanceMode') %>">
-                  <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                </label>
-              </div>
-            </div>
-          </div>
-
-        </form>
-      </div>
-
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminEditNodeTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminEditNodeText') %></p>
   </div>
-</main>
+  <div>
+    <button type="button" onclick="updateNode()" class="al-btn-primary" id="updateNodeBtn">
+      <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('saveChanges') %>
+    </button>
+    <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
+  </div>
+</div>
 
+<div id="nodeForm" class="al-page-body space-y-5">
+  <form class="space-y-5" onsubmit="event.preventDefault(); updateNode();">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('general') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="nodeName" class="al-label flex items-center gap-1.5">
+            <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('name') %>
+          </label>
+          <input id="nodeName" value="<%= node.name %>" class="al-input" placeholder="<%= t('nodeNamePlaceholder') %>" required>
+        </div>
+        <div>
+          <label for="nodeAddress" class="al-label flex items-center gap-1.5">
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('nodeAddressLabel') %>
+          </label>
+          <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="<%= t('nodeAddressPlaceholder') %>" required>
+        </div>
+        <div>
+          <label for="nodePort" class="al-label flex items-center gap-1.5">
+            <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('daemonPort') %>
+          </label>
+          <input id="nodePort" value="<%= node.port %>" class="al-input" placeholder="3001" type="number" min="1" max="65535" required>
+        </div>
+        <div>
+          <label for="nodeKey" class="al-label"><%= t('daemonKey') %></label>
+          <input id="nodeKey" value="" class="al-input" placeholder="<%= t('useCliToRetrieveKey') %>" disabled>
+          <p class="al-form-help"><%= t('nodeKeyRedactedHint') %></p>
+        </div>
+      </div>
+    </div>
 
-<%
-  // Compute used ports from servers
-  const usedPortsList = [];
-  if (node.servers && node.servers.length > 0) {
-    node.servers.forEach(function(server) {
-      try {
-        const ports = JSON.parse(server.Ports);
-        ports.forEach(function(portInfo) {
-          const port = parseInt(portInfo.Port.split(':')[0]);
-          if (!isNaN(port)) usedPortsList.push(port);
-        });
-      } catch (e) {
-        console.warn('[nodes/edit] Failed to parse ports for server', server.id, e);
-      }
-    });
-  }
-%>
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div>
+          <label for="nodeRam" class="al-label flex items-center gap-1.5">
+            <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %>
+          </label>
+          <% if (node.ram && isNaN(parseFloat(node.ram))) { %>
+            <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
+          <% } else { %>
+            <input type="hidden" id="nodeRamValue" value="<%= node.ram ? Math.round(node.ram * 1024) : '' %>">
+            <div class="flex items-stretch gap-0">
+              <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+              <button type="button" class="al-format-switcher" data-format-switcher
+                data-display="nodeRam" data-hidden="nodeRamValue"
+                data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+            </div>
+          <% } %>
+        </div>
+        <div>
+          <label for="nodeDisk" class="al-label flex items-center gap-1.5">
+            <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %>
+          </label>
+          <% if (node.disk && isNaN(parseFloat(node.disk))) { %>
+            <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
+          <% } else { %>
+            <input type="hidden" id="nodeDiskValue" value="<%= node.disk ? Math.round(node.disk * 1024) : '' %>">
+            <div class="flex items-stretch gap-0">
+              <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+              <button type="button" class="al-format-switcher" data-format-switcher
+                data-display="nodeDisk" data-hidden="nodeDiskValue"
+                data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+            </div>
+          <% } %>
+        </div>
+        <div>
+          <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
+            <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %>
+          </label>
+          <input type="hidden" id="nodeCpuValue" value="<%= node.cpu %>">
+          <div class="flex items-stretch gap-0">
+            <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
+            <button type="button" class="al-format-switcher" data-format-switcher
+              data-display="nodeProcessor" data-hidden="nodeCpuValue"
+              data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
+          </div>
+          <p class="al-form-help"><%= t('coreHint') %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('overallocation') %></h2>
+      <div class="al-card-body">
+        <p class="al-form-help"><%= t('nodeOverallocationDesc') %></p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
+          <div>
+            <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
+              <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %> %
+            </label>
+            <input id="nodeOverallocateMemory" type="number" min="0" value="<%= node.overallocateMemory || 0 %>" class="al-input">
+          </div>
+          <div>
+            <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
+              <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %> %
+            </label>
+            <input id="nodeOverallocateDisk" type="number" min="0" value="<%= node.overallocateDisk || 0 %>" class="al-input">
+          </div>
+          <div>
+            <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
+              <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %> %
+            </label>
+            <input id="nodeOverallocateCpu" type="number" min="0" value="<%= node.overallocateCpu || 0 %>" class="al-input">
+          </div>
+        </div>
+        <div class="mt-4">
+          <label for="nodeLocation" class="al-label flex items-center gap-1.5">
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('location') %>
+          </label>
+          <select id="nodeLocation" class="al-input">
+            <option value=""><%= t('noLocation') %></option>
+            <% (locations || []).forEach(function(loc) { %>
+            <option value="<%= loc.id %>" <%= node.locationId === loc.id ? 'selected' : '' %>><%= loc.name %> (<%= loc.shortCode %>)</option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('allocatedPorts') %></h2>
+      <div class="al-card-body space-y-2">
+        <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2"></div>
+        <div class="flex gap-2">
+          <input id="newPortInput" type="text" placeholder="<%= t('portRangeHint') %>" class="al-input flex-1">
+          <button id="addPortBtn" type="button" class="al-btn-primary">
+            <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('addPort') %>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('maintenanceMode') %></h2>
+      <div class="al-card-body">
+        <div class="al-panel">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h3 class="al-card-title"><%= t('putNodeInMaintenance') %></h3>
+              <p class="al-card-subtitle"><%= t('maintenanceModeDesc') %></p>
+            </div>
+            <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="<%= t('maintenanceMode') %>">
+              <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
 
 <div id="page-data" style="display:none"
   data-node-id="<%= node.id %>"
-  data-allocated-ports="<%- node.allocatedPorts || '[]' %>"
-  data-used-ports="<%= JSON.stringify(usedPortsList) %>"
+  data-allocated-ports="<%- JSON.stringify(typeof node.allocatedPorts === 'string' ? JSON.parse(node.allocatedPorts || '[]') : (node.allocatedPorts || [])) %>"
+  data-used-ports="<%= JSON.stringify((allocations || []).map(function(a) { return a.port; })) %>"
 ></div>
 
 <script nonce="<%- nonce %>">
-function nodeEditor() {
-  return {
-    allocatedPorts: [],
-    usedPortsSet: new Set(),
-    _portEase: getComputedStyle(document.documentElement).getPropertyValue('--ease-standard').trim() || 'ease',
-    PORT_MIN: 1024,
-    PORT_MAX: 65535,
-    PORT_STAGGER_MS: 30,
-    PORT_OUT_DURATION_MS: 160,
+var csrfToken = '<%= csrfToken %>';
+var allocatedPorts = [];
+var usedPortsSet = new Set();
 
-    init() {
-      const pd = document.getElementById('page-data').dataset;
-      this.allocatedPorts = JSON.parse(pd.allocatedPorts || '[]');
-      this.usedPortsSet = new Set(JSON.parse(pd.usedPorts || '[]'));
-      this.renderAllocatedPorts();
-    },
-
-    buildPortTag(port, usedPorts) {
-      const isUsed = usedPorts.has(port);
-      const portTag = document.createElement('div');
-      portTag.dataset.port = port;
-      portTag.className = 'flex items-center justify-between rounded-lg ' + (isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-700/20') + ' px-3 py-1.5 text-sm';
-      portTag.style.opacity = '0';
-      portTag.style.transform = 'translateY(4px)';
-
-      const portText = document.createElement('span');
-      portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';
-      if (isUsed) {
-      portText.innerHTML = port + ' <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">' + (req.translations.inUse || 'In use') + '</span>';
-      } else {
-        portText.textContent = port;
-      }
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
-      deleteBtn.innerHTML = alIcon('x', 'w-4 h-4', { strokeWidth: 1.5 });
-
-      if (isUsed) {
-        deleteBtn.disabled = true;
-        deleteBtn.title = req.translations.cannotRemovePortInUse || 'Cannot remove port that is in use by a server';
-        deleteBtn.className += ' opacity-50 cursor-not-allowed';
-      } else {
-        deleteBtn.onclick = (e) => {
-          e.preventDefault();
-          this.animatePortOut(portTag, () => this.removePort(port));
-        };
-      }
-
-      portTag.appendChild(portText);
-      portTag.appendChild(deleteBtn);
-      return portTag;
-    },
-
-    animatePortIn(el) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.transition = 'opacity 0.18s ' + this._portEase + ', transform 0.18s ' + this._portEase;
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-          setTimeout(() => { el.style.transition = ''; }, 200);
-        });
-      });
-    },
-
-    animatePortOut(el, cb) {
-      el.style.transition = 'opacity 0.15s ' + this._portEase + ', transform 0.15s ' + this._portEase;
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(-4px)';
-      setTimeout(cb, this.PORT_OUT_DURATION_MS);
-    },
-
-    addPort(input) {
-      const usedPorts = this.usedPortsSet;
-      if (input.includes('-')) {
-        const [start, end] = input.split('-').map(p => parseInt(p.trim()));
-        if (isNaN(start) || isNaN(end) || start >= end || start < this.PORT_MIN || end > this.PORT_MAX) {
-          showToast((req.translations.invalidPortRange || 'Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
-          return;
-        }
-        for (let port = start; port <= end; port++) {
-          if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
-        }
-      } else {
-        const port = parseInt(input.trim());
-        if (isNaN(port) || port < this.PORT_MIN || port > this.PORT_MAX) {
-          showToast((req.translations.invalidPort || 'Invalid port. Port must be between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
-          return;
-        }
-        if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
-      }
-
-      this.allocatedPorts.sort((a, b) => a - b);
-
-      const portsList = document.getElementById('allocatedPortsList');
-      portsList.innerHTML = '';
-      this.allocatedPorts.forEach((port, i) => {
-        const tag = this.buildPortTag(port, usedPorts);
-        portsList.appendChild(tag);
-        setTimeout(() => this.animatePortIn(tag), i * this.PORT_STAGGER_MS);
-      });
-    },
-
-    removePort(port) {
-      const usedPorts = this.usedPortsSet;
-      if (usedPorts.has(port)) {
-        showToast(req.translations.cannotRemovePortInUse || 'Cannot remove port that is in use by a server', 'error');
-        return;
-      }
-
-      this.allocatedPorts = this.allocatedPorts.filter(p => p !== Number(port));
-      const portsList = document.getElementById('allocatedPortsList');
-      portsList.innerHTML = '';
-      if (this.allocatedPorts.length === 0) {
-        const emptyMessage = document.createElement('div');
-        emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
-        portsList.appendChild(emptyMessage);
-        return;
-      }
-      const used = this.usedPortsSet;
-      this.allocatedPorts.forEach((p) => {
-        const tag = this.buildPortTag(p, used);
-        portsList.appendChild(tag);
-        tag.style.opacity = '1';
-        tag.style.transform = '';
-      });
-    },
-
-    addPortFromInput() {
-      const input = document.getElementById('newPortInput').value.trim();
-      if (input) {
-        this.addPort(input);
-        document.getElementById('newPortInput').value = '';
-      }
-    },
-
-    renderAllocatedPorts() {
-      const portsList = document.getElementById('allocatedPortsList');
-      portsList.innerHTML = '';
-      if (this.allocatedPorts.length === 0) {
-        const emptyMessage = document.createElement('div');
-        emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
-        portsList.appendChild(emptyMessage);
-        return;
-      }
-      const usedPorts = this.usedPortsSet;
-      this.allocatedPorts.forEach((port, i) => {
-        const tag = this.buildPortTag(port, usedPorts);
-        portsList.appendChild(tag);
-        setTimeout(() => this.animatePortIn(tag), i * this.PORT_STAGGER_MS);
-      });
-    },
-
-    gbValue(hiddenId, fallbackId) {
-      const hidden = document.getElementById(hiddenId);
-      if (hidden) {
-        const v = parseFloat(hidden.value);
-        if (hidden.value.trim() === '' || isNaN(v)) {
-          showToast(req.translations.valueIsRequired || 'Value is required.', 'error');
-          return '';
-        }
-        return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
-      }
-      return document.getElementById(fallbackId).value;
-    },
-
-    async updateNode() {
-      const pd = document.getElementById('page-data').dataset;
-      const maintenanceInput = document.getElementById('nodeMaintenanceMode');
-      const maintenanceMode = maintenanceInput ? maintenanceInput.checked : false;
-
-      if (maintenanceInput) {
-        try {
-          await fetch('/api/v2/admin/nodes/' + pd.nodeId + '/maintenance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ maintenanceMode })
-          });
-        } catch (err) {
-          console.error('Failed to save maintenance mode:', err);
-          showToast(req.translations.failedToSaveMaintenanceMode || 'Failed to save maintenance mode.', 'error');
-        }
-      }
-
-      const nodeData = {
-        name: document.getElementById('nodeName').value,
-        ram: this.gbValue('nodeRamValue', 'nodeRam'),
-        cpu: document.getElementById('nodeCpuValue').value,
-        disk: this.gbValue('nodeDiskValue', 'nodeDisk'),
-        address: document.getElementById('nodeAddress').value,
-        port: document.getElementById('nodePort').value,
-        allocatedPorts: JSON.stringify(this.allocatedPorts),
-        overallocateMemory: document.getElementById('nodeOverallocateMemory').value,
-        overallocateDisk: document.getElementById('nodeOverallocateDisk').value,
-        overallocateCpu: document.getElementById('nodeOverallocateCpu').value,
-        locationId: document.getElementById('nodeLocation').value
-      };
-
-      if (!nodeData.ram) { showToast(req.translations.ramRequired || 'RAM is required.', 'error'); return; }
-      if (!nodeData.disk) { showToast(req.translations.diskRequired || 'Disk is required.', 'error'); return; }
-
-      try {
-        const response = await fetch('/api/v2/admin/nodes/' + pd.nodeId, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(nodeData)
-        });
-
-        if (response.ok) {
-          showToast(req.translations.nodeUpdated || 'Node updated. Looking good.', 'success');
-          setTimeout(() => {
-            Turbo.visit('/admin/nodes?err=none');
-          }, 1000);
-        } else {
-          throw new Error('Failed to update node');
-        }
-      } catch (error) {
-        showToast((req.translations.errorUpdatingNode || 'Error updating node: ') + error, 'error');
-      }
+function renderAllocatedPorts() {
+  var portsList = document.getElementById('allocatedPortsList');
+  portsList.innerHTML = '';
+  if (allocatedPorts.length === 0) {
+    var emptyMessage = document.createElement('div');
+    emptyMessage.className = 'col-span-4 al-form-help mt-0';
+    emptyMessage.textContent = window.__i18n.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
+    portsList.appendChild(emptyMessage);
+    return;
+  }
+  allocatedPorts.forEach(function(port) {
+    var isUsed = usedPortsSet.has(port);
+    var portTag = document.createElement('div');
+    portTag.className = 'al-chip al-chip-mono justify-between w-full' + (isUsed ? ' al-chip-warning' : '');
+    portTag.dataset.port = port;
+    var portText = document.createElement('span');
+    if (isUsed) {
+      portText.innerHTML = port + ' <span class="al-badge al-badge-warning ml-2">' + (window.__i18n.inUse || 'In use') + '</span>';
+    } else {
+      portText.textContent = port;
     }
-  };
+    var deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'al-chip-remove disabled:opacity-50 disabled:cursor-not-allowed';
+    if (isUsed) {
+      deleteBtn.disabled = true;
+      deleteBtn.title = window.__i18n.cannotRemovePortInUse || 'Cannot remove port in use by a server';
+      deleteBtn.setAttribute('aria-label', window.__i18n.cannotRemovePortInUse || 'Cannot remove port in use by a server');
+    } else {
+      deleteBtn.setAttribute('aria-label', (window.__i18n.removePort || 'Remove port') + ' ' + port);
+      deleteBtn.innerHTML = '<%- icon("x", { class: "w-3.5 h-3.5", strokeWidth: 1.5 }) %>';
+      deleteBtn.onclick = function(e) {
+        e.preventDefault();
+        allocatedPorts = allocatedPorts.filter(function(p) { return p !== port; });
+        renderAllocatedPorts();
+      };
+    }
+    portTag.appendChild(portText);
+    portTag.appendChild(deleteBtn);
+    portsList.appendChild(portTag);
+  });
 }
+
+function addPort(input) {
+  if (input.indexOf('-') !== -1) {
+    var parts = input.split('-').map(function(p) { return parseInt(p.trim()); });
+    var start = parts[0], end = parts[1];
+    if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
+      showToast(window.__i18n.invalidPortRange || 'Invalid port range. Use format: 25565-25570 (1024-65535).', 'error');
+      return;
+    }
+    for (var port = start; port <= end; port++) {
+      if (allocatedPorts.indexOf(port) === -1) allocatedPorts.push(port);
+    }
+  } else {
+    var port = parseInt(input.trim());
+    if (isNaN(port) || port < 1024 || port > 65535) {
+      showToast(window.__i18n.invalidPortValue || 'Invalid port. Must be between 1024 and 65535.', 'error');
+      return;
+    }
+    if (allocatedPorts.indexOf(port) === -1) allocatedPorts.push(port);
+  }
+  allocatedPorts.sort(function(a, b) { return a - b; });
+  renderAllocatedPorts();
+}
+
+document.getElementById('addPortBtn').addEventListener('click', function() {
+  var input = document.getElementById('newPortInput').value.trim();
+  if (input) { addPort(input); document.getElementById('newPortInput').value = ''; }
+});
+document.getElementById('newPortInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); var input = this.value.trim(); if (input) { addPort(input); this.value = ''; } }
+});
+
+function gbValue(hiddenId, fallbackId) {
+  var hidden = document.getElementById(hiddenId);
+  if (hidden) {
+    var v = parseFloat(hidden.value);
+    if (hidden.value.trim() === '' || isNaN(v)) return '';
+    return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+  }
+  return document.getElementById(fallbackId).value;
+}
+
+function updateNode() {
+  var pd = document.getElementById('page-data').dataset;
+  var maintenanceInput = document.getElementById('nodeMaintenanceMode');
+  var maintenanceMode = maintenanceInput ? maintenanceInput.checked : false;
+
+  // Toggle maintenance mode separately
+  if (maintenanceInput) {
+    fetch('/admin/node/' + pd.nodeId + '/maintenance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: JSON.stringify({ maintenanceMode: maintenanceMode })
+    }).catch(function(err) {
+      console.error('Failed to save maintenance mode:', err);
+      showToast(window.__i18n.failedToSaveMaintenanceMode || 'Failed to save maintenance mode.', 'error');
+    });
+  }
+
+  var nodeData = {
+    name: document.getElementById('nodeName').value,
+    ram: gbValue('nodeRamValue', 'nodeRam') || 0,
+    cpu: parseInt(document.getElementById('nodeCpuValue').value) || 0,
+    disk: gbValue('nodeDiskValue', 'nodeDisk') || 0,
+    address: document.getElementById('nodeAddress').value,
+    port: parseInt(document.getElementById('nodePort').value) || 3001,
+    allocatedPorts: JSON.stringify(allocatedPorts),
+    overallocateMemory: parseInt(document.getElementById('nodeOverallocateMemory').value) || 0,
+    overallocateDisk: parseInt(document.getElementById('nodeOverallocateDisk').value) || 0,
+    overallocateCpu: parseInt(document.getElementById('nodeOverallocateCpu').value) || 0,
+    locationId: document.getElementById('nodeLocation').value ? parseInt(document.getElementById('nodeLocation').value) : null
+  };
+
+  var loader = showProgressToast(window.__i18n.updatingNode || 'Updating node...');
+
+  fetch('/admin/node/' + pd.nodeId + '/edit', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+    body: JSON.stringify(nodeData)
+  })
+  .then(function(response) {
+    if (response.ok) return response.json();
+    return response.json().then(function(d) { throw new Error(d.error || d.message || (window.__i18n.failedToUpdateNode || 'Failed to update node.')); });
+  })
+  .then(function() {
+    loader.complete(true, window.__i18n.nodeUpdatedLookingGood || 'Node updated. Looking good.');
+    setTimeout(function() { window.location.href = '/admin/nodes?err=none'; }, 1000);
+  })
+  .catch(function(error) {
+    loader.close();
+    showToast(error.message || (window.__i18n.errorUpdatingNode || 'Error updating node.'), 'error');
+  });
+}
+
+// Initialize
+(function() {
+  var pd = document.getElementById('page-data').dataset;
+  allocatedPorts = JSON.parse(pd.allocatedPorts || '[]');
+  usedPortsSet = new Set(JSON.parse(pd.usedPorts || '[]'));
+  renderAllocatedPorts();
+})();
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/admin-footer') %>

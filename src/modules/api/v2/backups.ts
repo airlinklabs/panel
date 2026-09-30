@@ -31,13 +31,14 @@ import {
   daemonRequest,
   DaemonNodeNotFoundError,
 } from '../../../services/daemonService';
+import { daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
+import { persistBackupRecord } from '../../user/server/backups';
 import {
   DAEMON_TIMEOUT_BACKUP_MS,
   DAEMON_TIMEOUT_BACKUP_RESTORE_MS,
-  DAEMON_TIMEOUT_MEDIUM_MS,
 } from '../../../config/daemonTimeouts';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups — List backups
@@ -85,7 +86,9 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
     return;
   }
 
-  const { name } = req.validatedBody as { name: string };
+  const name =
+    (req.validatedBody as { name?: string }).name?.trim() ||
+    `Backup ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
 
   // Check backup limit
   const backupCount = await prisma.backup.count({
@@ -101,8 +104,12 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup`,
-      { method: 'POST', body: { name }, timeout: DAEMON_TIMEOUT_BACKUP_MS },
+      '/container/backup',
+      {
+        method: 'POST',
+        body: { id: resolved.server.UUID, name },
+        timeout: DAEMON_TIMEOUT_BACKUP_MS,
+      },
     );
 
     if (!response.ok) {
@@ -115,6 +122,43 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
       );
     }
 
+    // The daemon runs the tar synchronously and answers with the artifact
+    // descriptor — persist it now so the backup is listable (and later
+    // restorable/deletable) the moment this response lands.
+    const payload = (await response.json().catch(() => null)) as {
+      success?: boolean;
+      error?: string;
+      backup?: {
+        uuid: string;
+        name: string;
+        filePath: string;
+        size: number;
+        checksum?: string;
+      };
+    } | null;
+
+    if (!payload?.success || !payload.backup?.filePath) {
+      return jsonError(
+        res,
+        'DAEMON_ERROR',
+        `Failed to create backup: ${payload?.error || 'daemon returned no artifact'}`,
+        502,
+      );
+    }
+
+    const record = await persistBackupRecord({
+      uuid: payload.backup.uuid,
+      name,
+      serverId: resolved.server.UUID,
+      filePath: payload.backup.filePath,
+      size: BigInt(payload.backup.size ?? 0),
+      checksum:
+        typeof payload.backup.checksum === 'string'
+          ? payload.backup.checksum
+          : null,
+      airlinkCloudId: null,
+    });
+
     logActivity(
       getAuthenticatedUserId(req),
       'backup.created',
@@ -123,7 +167,7 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
       req.ip,
     );
 
-    jsonOk(res, { name, status: 'creating' });
+    jsonOk(res, { name, status: 'created', backupId: record.UUID });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
       return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
@@ -156,13 +200,14 @@ router.delete('/:backupId', async (req, res) => {
   }
 
   try {
-    await daemonRequest(
-      resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup/${backup.UUID}`,
-      { method: 'DELETE', timeout: DAEMON_TIMEOUT_BACKUP_MS },
-    );
+    await daemonRequest(resolved.server.UUID, '/container/backup', {
+      method: 'DELETE',
+      body: { backupPath: backup.filePath },
+      timeout: DAEMON_TIMEOUT_BACKUP_MS,
+    });
   } catch {
-    // Best effort
+    // Best effort — the record goes away either way so the UI stays honest;
+    // an orphaned tar on the node is swept by the daemon's backup dir layout.
   }
 
   await prisma.backup.delete({ where: { UUID: backup.UUID } });
@@ -200,8 +245,16 @@ router.post('/:backupId/restore', async (req, res) => {
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup/${backup.UUID}/restore`,
-      { method: 'POST', timeout: DAEMON_TIMEOUT_BACKUP_RESTORE_MS },
+      '/container/restore',
+      {
+        method: 'POST',
+        body: {
+          id: resolved.server.UUID,
+          backupPath: backup.filePath,
+          ...(backup.checksum ? { checksum: backup.checksum } : {}),
+        },
+        timeout: DAEMON_TIMEOUT_BACKUP_RESTORE_MS,
+      },
     );
 
     if (!response.ok) {
@@ -274,39 +327,57 @@ router.get('/:backupId/download', async (req, res) => {
     return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
   }
 
+  const server = await prisma.server.findUnique({
+    where: { UUID: resolved.server.UUID },
+    select: { UUID: true, node: { select: { address: true, port: true } } },
+  });
+  if (!server?.node) {
+    return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+  }
+
   try {
-    const response = await daemonRequest(
-      resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup/${backup.UUID}/download`,
-      { timeout: DAEMON_TIMEOUT_BACKUP_RESTORE_MS },
-    );
+    // Mint a one-time download token instead of proxying the tarball through
+    // the panel — same pattern as the file manager's download flow.
+    const response = await daemonRequest(server.UUID, '/container/backup/download-token', {
+      method: 'POST',
+      body: { backupPath: backup.filePath },
+      timeout: DAEMON_TIMEOUT_BACKUP_MS,
+    });
 
     if (!response.ok) {
       const text = await response.text().catch(() => 'Daemon error');
       return jsonError(
         res,
         'DAEMON_ERROR',
-        `Failed to download backup: ${text}`,
+        `Failed to prepare backup download: ${text}`,
         502,
       );
     }
 
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${backup.name}.zip"`,
-    );
-    if (response.body) {
-      const reader = response.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        res.write(value);
-      }
+    const data = (await response.json().catch(() => null)) as {
+      token?: string;
+      url?: string;
+    } | null;
+
+    if (!data?.token || !data?.url) {
+      return jsonError(res, 'DAEMON_ERROR', 'Failed to start download', 502);
     }
-    res.end();
+
+    const base = await daemonBaseUrl(server.node.address, server.node.port);
+    logActivity(
+      getAuthenticatedUserId(req),
+      'backup.downloaded',
+      resolved.server.UUID,
+      { backupName: backup.name },
+      req.ip,
+    );
+
+    jsonOk(res, {
+      file: backup.filePath,
+      token: data.token,
+      url: `${base}${data.url}`,
+      filename: `${backup.name}.tar.gz`,
+    });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
       return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
@@ -317,32 +388,18 @@ router.get('/:backupId/download', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/progress — Backup progress
+//
+// Backup and restore are synchronous daemon operations: the create/restore
+// request itself does not answer until the tar work is done, so by the time
+// the browser polls this endpoint there is never anything in flight. Answer
+// "idle" directly rather than proxying a daemon endpoint that doesn't exist.
 // ---------------------------------------------------------------------------
 router.get('/progress', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
   }
-
-  try {
-    const response = await daemonRequest(
-      resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup/progress`,
-      { timeout: DAEMON_TIMEOUT_MEDIUM_MS },
-    );
-
-    if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
-    }
-
-    const data = await response.json();
-    jsonOk(res, data);
-  } catch (err) {
-    if (err instanceof DaemonNodeNotFoundError) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
-    }
-    jsonOk(res, { progress: 0, status: 'unreachable' });
-  }
+  jsonOk(res, { running: false, progress: 100, status: 'idle' });
 });
 
 // ---------------------------------------------------------------------------
@@ -353,26 +410,7 @@ router.get('/restore/progress', async (req, res) => {
   if (!resolved) {
     return;
   }
-
-  try {
-    const response = await daemonRequest(
-      resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/backup/restore/progress`,
-      { timeout: DAEMON_TIMEOUT_MEDIUM_MS },
-    );
-
-    if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
-    }
-
-    const data = await response.json();
-    jsonOk(res, data);
-  } catch (err) {
-    if (err instanceof DaemonNodeNotFoundError) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
-    }
-    jsonOk(res, { progress: 0, status: 'unreachable' });
-  }
+  jsonOk(res, { running: false, progress: 100, status: 'idle' });
 });
 
 export default router;

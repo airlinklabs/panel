@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { AddressInfo } from "node:net";
-import express, { Router } from "express";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import express, { Router } from 'express';
 
-vi.mock("../src/db", () => ({
+vi.mock('../src/db', () => ({
   default: {
     users: { findUnique: vi.fn() },
     server: { findUnique: vi.fn() },
@@ -18,24 +18,24 @@ vi.mock("../src/db", () => ({
   },
 }));
 
-vi.mock("../src/handlers/logger", () => ({
+vi.mock('../src/handlers/logger', () => ({
   default: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), success: vi.fn() },
 }));
 
-vi.mock("../src/handlers/utils/core/daemonRequest", () => ({
+vi.mock('../src/handlers/utils/core/daemonRequest', () => ({
   daemonRequest: vi.fn(),
 }));
 
-vi.mock("../src/handlers/realtime/events", () => ({
+vi.mock('../src/handlers/realtime/events', () => ({
   emitRealtime: vi.fn(),
   serverEvent: vi.fn(),
   userEvent: vi.fn(),
 }));
 
-import prisma from "../src/db";
-import { daemonRequest } from "../src/handlers/utils/core/daemonRequest";
-import { registerScheduleRoutes } from "../src/modules/user/server/schedules";
-import { runSchedule } from "../src/handlers/schedulerWorker";
+import prisma from '../src/db';
+import { daemonRequest } from '../src/handlers/utils/core/daemonRequest';
+import { registerScheduleRoutes } from '../src/modules/user/server/schedules';
+import { runSchedule } from '../src/handlers/schedulerWorker';
 
 const mockPrisma = vi.mocked(prisma);
 const mockDaemonRequest = vi.mocked(daemonRequest);
@@ -64,38 +64,38 @@ function stubSession(user?: { id: number; isAdmin?: boolean }) {
 const adminUser = {
   id: 1,
   isAdmin: true,
-  username: "admin",
-  email: "a@b.c",
-  description: "",
+  username: 'admin',
+  email: 'a@b.c',
+  description: '',
 };
 const serverFixture = {
-  UUID: "srv-abc",
-  name: "test",
+  UUID: 'srv-abc',
+  name: 'test',
   ownerId: adminUser.id,
-  node: { address: "127.0.0.1", port: 8080, key: "nodekey" },
-  image: { info: "{}" },
+  node: { address: '127.0.0.1', port: 8080, key: 'nodekey' },
+  image: { info: '{}' },
   Suspended: false,
   owner: adminUser,
 };
 
 const schedNode = {
-  UUID: "srv-abc",
+  UUID: 'srv-abc',
   Suspended: false,
   image: {},
-  node: { address: "127.0.0.1", port: 8080, key: "nodekey" },
+  node: { address: '127.0.0.1', port: 8080, key: 'nodekey' },
 };
 
 function scheduleFixture(overrides: Record<string, unknown> = {}) {
   return {
     id: 10,
-    serverId: "srv-abc",
-    name: "My schedule",
-    cron: "*/5 * * * *",
+    serverId: 'srv-abc',
+    name: 'My schedule',
+    cron: '*/5 * * * *',
     timeOffset: 0,
     enabled: true,
     lastRunAt: null,
     nextRunAt: null,
-    createdAt: new Date("2026-01-01T00:00:00Z"),
+    createdAt: new Date('2026-01-01T00:00:00Z'),
     server: schedNode,
     tasks: [],
     ...overrides,
@@ -117,7 +117,7 @@ async function withServer(
   fn: (base: string) => Promise<void>,
 ) {
   const server = app.listen(0);
-  await new Promise<void>((resolve) => server.once("listening", resolve));
+  await new Promise<void>((resolve) => server.once('listening', resolve));
   const { port } = server.address() as AddressInfo;
   try {
     await fn(`http://127.0.0.1:${port}`);
@@ -126,14 +126,14 @@ async function withServer(
   }
 }
 
-describe("schedules manual run", () => {
+describe('schedules manual run', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.users.findUnique.mockResolvedValue(adminUser as any);
     mockPrisma.server.findUnique.mockResolvedValue(serverFixture as any);
     mockDaemonRequest.mockResolvedValue({
       status: 200,
-      data: { message: "ok" },
+      data: { message: 'ok' },
     } as any);
   });
 
@@ -141,11 +141,11 @@ describe("schedules manual run", () => {
     vi.restoreAllMocks();
   });
 
-  it("POST .../run on a schedule with tasks updates and persists lastRunAt AND nextRunAt in the future", async () => {
+  it('POST .../run on a schedule with tasks updates and persists lastRunAt AND nextRunAt in the future', async () => {
     const task = {
       id: 1,
-      action: "command",
-      payload: { command: "echo hi" },
+      action: 'command',
+      payload: { command: 'echo hi' },
       timeOffset: 0,
     };
     const sched = scheduleFixture({ tasks: [task] });
@@ -157,7 +157,7 @@ describe("schedules manual run", () => {
     const before = Date.now();
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules/7/run`, {
-        method: "POST",
+        method: 'POST',
       });
       expect(res.status).toBe(200);
       expect(await res.json()).toMatchObject({ success: true });
@@ -171,13 +171,13 @@ describe("schedules manual run", () => {
     expect(data.nextRunAt.getTime()).toBeGreaterThan(data.lastRunAt.getTime());
   });
 
-  it("POST .../run on a schedule with zero tasks returns 400", async () => {
+  it('POST .../run on a schedule with zero tasks returns 400', async () => {
     const sched = scheduleFixture({ tasks: [] });
     mockPrisma.schedule.findFirst.mockResolvedValue(sched as any);
 
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules/abc/run`, {
-        method: "POST",
+        method: 'POST',
       });
       expect(res.status).toBe(400);
       expect((await res.json()).error).toBeTruthy();
@@ -187,29 +187,29 @@ describe("schedules manual run", () => {
     expect(mockPrisma.schedule.update).not.toHaveBeenCalled();
   });
 
-  it("POST .../run returns 500 and does NOT advance lastRunAt when the daemon fails", async () => {
+  it('POST .../run returns 500 and does NOT advance lastRunAt when the daemon fails', async () => {
     const task = {
       id: 1,
-      action: "command",
-      payload: { command: "echo hi" },
+      action: 'command',
+      payload: { command: 'echo hi' },
       timeOffset: 0,
     };
     const sched = scheduleFixture({ tasks: [task] });
     mockPrisma.schedule.findFirst.mockResolvedValue(sched as any);
     mockDaemonRequest.mockResolvedValue({
       status: 500,
-      data: { error: "boom" },
+      data: { error: 'boom' },
     } as any);
 
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules/7/run`, {
-        method: "POST",
+        method: 'POST',
       });
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.error).toContain("failed");
+      expect(body.error).toContain('failed');
       expect(Array.isArray(body.errors)).toBe(true);
-      expect(body.errors[0]).toContain("boom");
+      expect(body.errors[0]).toContain('boom');
     });
 
     expect(mockDaemonRequest).toHaveBeenCalledTimes(1);
@@ -217,7 +217,7 @@ describe("schedules manual run", () => {
   });
 });
 
-describe("schedules validation", () => {
+describe('schedules validation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.users.findUnique.mockResolvedValue(adminUser as any);
@@ -228,12 +228,12 @@ describe("schedules validation", () => {
     vi.restoreAllMocks();
   });
 
-  it("POST /server/:id/schedules with invalid cron returns 400 and is not persisted", async () => {
+  it('POST /server/:id/schedules with invalid cron returns 400 and is not persisted', async () => {
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "bad", cron: "not-a-cron" }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'bad', cron: 'not-a-cron' }),
       });
       expect(res.status).toBe(400);
       expect((await res.json()).error).toBeTruthy();
@@ -242,7 +242,7 @@ describe("schedules validation", () => {
     expect(mockPrisma.schedule.create).not.toHaveBeenCalled();
   });
 
-  it("POST /server/:id/schedules persists enabled: true by default", async () => {
+  it('POST /server/:id/schedules persists enabled: true by default', async () => {
     mockPrisma.schedule.create.mockImplementation(async ({ data }: any) => ({
       id: 1,
       ...data,
@@ -250,9 +250,9 @@ describe("schedules validation", () => {
 
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "nightly", cron: "0 0 * * *" }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'nightly', cron: '0 0 * * *' }),
       });
       expect(res.status).toBe(200);
       expect((await res.json()).success).toBe(true);
@@ -263,20 +263,20 @@ describe("schedules validation", () => {
     expect(data.enabled).toBe(true);
   });
 
-  it("POST .../tasks with an action outside {command,power,backup} returns 400", async () => {
+  it('POST .../tasks with an action outside {command,power,backup} returns 400', async () => {
     await withServer(buildApp(), async (base) => {
       const res = await fetch(`${base}/server/srv-abc/schedules/5/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "frobnicate", payload: { x: 1 } }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'frobnicate', payload: { x: 1 } }),
       });
       expect(res.status).toBe(400);
-      expect((await res.json()).error).toContain("command, power, backup");
+      expect((await res.json()).error).toContain('command, power, backup');
     });
   });
 });
 
-describe("scheduled backup recording (runSchedule)", () => {
+describe('scheduled backup recording (runSchedule)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -286,60 +286,60 @@ describe("scheduled backup recording (runSchedule)", () => {
   });
 
   function backupSchedule(
-    payload: Record<string, unknown> = { name: "nightly" },
+    payload: Record<string, unknown> = { name: 'nightly' },
   ) {
     return scheduleFixture({
       tasks: [
         {
           id: 2,
-          action: "backup",
-          payload: payload,
+          action: 'backup',
+          payload,
           timeOffset: 0,
         },
       ],
     });
   }
 
-  it("runSchedule records a Backup row from a successful daemon backup response", async () => {
+  it('runSchedule records a Backup row from a successful daemon backup response', async () => {
     mockDaemonRequest.mockResolvedValue({
       status: 200,
       data: {
         success: true,
         backup: {
-          uuid: "bk-111",
-          name: "nightly",
-          filePath: "backups/srv-abc/bk-111-backup.tar.gz",
+          uuid: 'bk-111',
+          name: 'nightly',
+          filePath: 'backups/srv-abc/bk-111-backup.tar.gz',
           size: 12345,
-          checksum: "abc123",
+          checksum: 'abc123',
         },
       },
     } as any);
-    mockPrisma.backup.create.mockResolvedValue({ UUID: "bk-111" } as any);
+    mockPrisma.backup.create.mockResolvedValue({ UUID: 'bk-111' } as any);
 
     await runSchedule(backupSchedule());
 
     expect(mockDaemonRequest).toHaveBeenCalledTimes(1);
     const opts = mockDaemonRequest.mock.calls[0][0];
-    expect(opts.path).toBe("/container/backup");
-    expect(opts.body).toEqual({ id: "srv-abc", name: "nightly" });
+    expect(opts.path).toBe('/container/backup');
+    expect(opts.body).toEqual({ id: 'srv-abc', name: 'nightly' });
 
     expect(mockPrisma.backup.create).toHaveBeenCalledTimes(1);
     const data = mockPrisma.backup.create.mock.calls[0][0].data;
     expect(data).toMatchObject({
-      UUID: "bk-111",
-      name: "nightly",
-      serverId: "srv-abc",
-      filePath: "backups/srv-abc/bk-111-backup.tar.gz",
-      checksum: "abc123",
+      UUID: 'bk-111',
+      name: 'nightly',
+      serverId: 'srv-abc',
+      filePath: 'backups/srv-abc/bk-111-backup.tar.gz',
+      checksum: 'abc123',
       airlinkCloudId: null,
     });
     expect(data.size).toEqual(BigInt(12345));
   });
 
-  it("runSchedule with a failing daemon backup response (success:false) does NOT create a Backup row", async () => {
+  it('runSchedule with a failing daemon backup response (success:false) does NOT create a Backup row', async () => {
     mockDaemonRequest.mockResolvedValue({
       status: 200,
-      data: { success: false, error: "no disk space" },
+      data: { success: false, error: 'no disk space' },
     } as any);
 
     await runSchedule(backupSchedule());
@@ -348,21 +348,21 @@ describe("scheduled backup recording (runSchedule)", () => {
     expect(mockPrisma.backup.create).not.toHaveBeenCalled();
   });
 
-  it("runSchedule falls back to a scheduled-<timestamp> name when the payload has no name", async () => {
+  it('runSchedule falls back to a scheduled-<timestamp> name when the payload has no name', async () => {
     mockDaemonRequest.mockResolvedValue({
       status: 200,
       data: {
         success: true,
         backup: {
-          uuid: "bk-222",
-          name: "scheduled-1",
-          filePath: "backups/srv-abc/bk-222-backup.tar.gz",
+          uuid: 'bk-222',
+          name: 'scheduled-1',
+          filePath: 'backups/srv-abc/bk-222-backup.tar.gz',
           size: 0,
           checksum: null,
         },
       },
     } as any);
-    mockPrisma.backup.create.mockResolvedValue({ UUID: "bk-222" } as any);
+    mockPrisma.backup.create.mockResolvedValue({ UUID: 'bk-222' } as any);
 
     await runSchedule(backupSchedule({}));
 

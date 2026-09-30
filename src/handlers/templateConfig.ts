@@ -1,24 +1,24 @@
-import type { Request, Response, NextFunction } from "express";
-import * as fs from "fs";
-import * as path from "path";
-import * as timeouts from "../config/timeouts";
-import * as limits from "../config/limits";
-import * as auth from "../config/auth";
-import * as server from "../config/server";
-import * as daemonTimeouts from "../config/daemonTimeouts";
-import * as urls from "../config/urls";
-import * as mime from "../config/mime";
+import type { Request, Response, NextFunction } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as timeouts from '../config/timeouts';
+import * as limits from '../config/limits';
+import * as auth from '../config/auth';
+import * as server from '../config/server';
+import * as daemonTimeouts from '../config/daemonTimeouts';
+import * as urls from '../config/urls';
+import * as mime from '../config/mime';
 
 let panelConfig: { meta?: { version?: string; codename?: string } } = {};
 try {
   panelConfig = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "../../storage/config.json"), "utf-8"),
+    fs.readFileSync(path.join(__dirname, '../../storage/config.json'), 'utf-8'),
   );
 } catch {
   /* optional — not all environments have config.json */
 }
-import * as ui from "../config/ui";
-import { getConfig } from "../config";
+import * as ui from '../config/ui';
+import { getConfig } from '../config';
 
 /**
  * Resolves the actual request protocol (http/https) from the incoming request.
@@ -27,8 +27,8 @@ import { getConfig } from "../config";
  */
 function resolveRequestProtocol(req: Request, envIsHttps: boolean): string {
   const proto = req.protocol;
-  if (proto === "https" || proto === "http") return proto;
-  return envIsHttps ? "https" : "http";
+  if (proto === 'https' || proto === 'http') {return proto;}
+  return envIsHttps ? 'https' : 'http';
 }
 
 /**
@@ -39,11 +39,11 @@ function resolveOrigin(
   envUrl: string,
   envIsHttps: boolean,
 ): string {
-  const assetBase = (req.app.get("assetBaseUrl") as string) || "";
+  const assetBase = (req.app.get('assetBaseUrl') as string) || '';
   if (assetBase && /^https?:\/\//.test(assetBase)) {
-    return assetBase.replace(/\/+$/, "");
+    return assetBase.replace(/\/+$/, '');
   }
-  const host = req.get("host") || new URL(envUrl).host;
+  const host = req.get('host') || new URL(envUrl).host;
   const protocol = resolveRequestProtocol(req, envIsHttps);
   return `${protocol}://${host}`;
 }
@@ -57,10 +57,10 @@ let viteManifest: Record<string, { file: string; css?: string[] }> | null =
 try {
   const manifestPath = path.resolve(
     __dirname,
-    "../../public/.vite/manifest.json",
+    '../../public/.vite/manifest.json',
   );
   if (fs.existsSync(manifestPath)) {
-    viteManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    viteManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
   }
 } catch {
   /* not built yet — dev mode */
@@ -88,53 +88,53 @@ export function templateConfigMiddleware(
     panel = getConfig();
   } catch {
     panel = {
-      url: process.env.URL || "",
-      assetBaseUrl: "",
-      assetUrl: "",
+      url: process.env.URL || '',
+      assetBaseUrl: '',
+      assetUrl: '',
       cspEnabled: false,
       trustProxy: false,
-      cookieDomain: "",
+      cookieDomain: '',
       allowedOrigins: [],
       cookieSecure: false,
       sessionMaxAgeMs: 604800000,
       rateLimitMax: 500,
       rateLimitWindowMs: 60000,
-      logLevel: "info",
-      storageDir: "",
+      logLevel: 'info',
+      storageDir: '',
       maxUploadBytes: 52428800,
-      tlsCertPath: "",
-      tlsKeyPath: "",
-      smtpHost: "",
+      tlsCertPath: '',
+      tlsKeyPath: '',
+      smtpHost: '',
       smtpPort: 587,
-      smtpUser: "",
-      smtpPass: "",
-      smtpFrom: "",
+      smtpUser: '',
+      smtpPass: '',
+      smtpFrom: '',
       smtpSecure: true,
       dbPoolMin: 2,
       dbConnectTimeoutMs: 10000,
-      nodeEnv: "development",
+      nodeEnv: 'development',
       isProduction: false,
       isHttps: false,
       port: 3000,
-      name: "Airlink",
-      sessionSecret: "",
-      databaseUrl: "",
-      redisUrl: "",
+      name: 'Airlink',
+      sessionSecret: '',
+      databaseUrl: '',
+      redisUrl: '',
     } as ReturnType<typeof getConfig>;
   }
 
   // Per-request protocol detection
-  const requestIsHttps = resolveRequestProtocol(req, panel.isHttps) === "https";
+  const requestIsHttps = resolveRequestProtocol(req, panel.isHttps) === 'https';
   const requestOrigin = resolveOrigin(req, panel.url, panel.isHttps);
 
-  const assetBase = panel.assetBaseUrl || "";
+  const assetBase = panel.assetBaseUrl || '';
 
   res.locals.panel = {
     url: panel.url,
     assetBaseUrl: assetBase,
     name: panel.name,
-    version: panelConfig.meta?.version ?? "",
-    codename: panelConfig.meta?.codename ?? "",
+    version: panelConfig.meta?.version ?? '',
+    codename: panelConfig.meta?.codename ?? '',
     trustProxy: panel.trustProxy,
     cspEnabled: panel.cspEnabled,
     cookieDomain: panel.cookieDomain,
@@ -178,30 +178,30 @@ export function templateConfigMiddleware(
   //   Vite manifest resolution:
   //     assetUrl('assets/css/panel.css')                → /assets/css/panel-abc123.css (hashed)
   //
-  const ASSET_URL = (process.env.ASSET_URL || "").replace(/\/+$/, "");
+  const ASSET_URL = (process.env.ASSET_URL || '').replace(/\/+$/, '');
 
   res.locals.assetUrl = function assetUrl(relativePath: string): string {
     // Normalize: strip leading slash so we control the path
-    const clean = relativePath.replace(/^\/+/, "");
+    const clean = relativePath.replace(/^\/+/, '');
 
     // Vite manifest resolution — source path → hashed output path
     if (viteManifest) {
       // Try multiple key formats (manifest may use "public/styles/tw.css" or "styles/tw.css")
       const candidates = [
         clean, // "styles/tw.css"
-        "public/" + clean, // "public/styles/tw.css"
-        clean.replace(/^assets\//, ""), // "css/panel.css" from "assets/css/panel.css"
+        `public/${  clean}`, // "public/styles/tw.css"
+        clean.replace(/^assets\//, ''), // "css/panel.css" from "assets/css/panel.css"
       ];
       for (const key of candidates) {
         const entry = viteManifest[key];
         if (entry) {
-          return ASSET_URL ? ASSET_URL + "/" + entry.file : "/" + entry.file;
+          return ASSET_URL ? `${ASSET_URL  }/${  entry.file}` : `/${  entry.file}`;
         }
       }
     }
 
     // Normal resolution — prepend ASSET_URL if configured
-    return ASSET_URL ? ASSET_URL + "/" + clean : "/" + clean;
+    return ASSET_URL ? `${ASSET_URL  }/${  clean}` : `/${  clean}`;
   };
 
   // Legacy alias

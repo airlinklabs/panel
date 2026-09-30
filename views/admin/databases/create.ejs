@@ -1,127 +1,160 @@
-<%- include('../../components/header', { title: t('addDatabaseHostTitle') }) %>
+<%- include('../../layouts/admin', { title: 'Add Database Host' }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="dbHostCreate()">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('adminDatabaseBreadcrumbDb'), href: '/admin/databases' },
-        { label: t('adminDatabaseBreadcrumbAddHost') }
-      ] }) %>
-      <div class="al-page-header mb-5 flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= t('addDatabaseHostTitle') %></h1>
-          <p class="al-page-desc"><%= t('addDatabaseHostDesc') %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <%- include('../../components/ui/save-button', { formId: 'hostForm', label: t('saveHost') }) %>
-          <a href="/admin/databases" class="al-btn-secondary"><%= t('backToDatabases') %></a>
-        </div>
-      </div>
+<%- include('../../partials/flash-messages') %>
 
-      <div id="hostForm" class="al-page-body space-y-5">
-        <div x-show="error" x-text="error" class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
-        <form @submit.prevent="submit()" class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('connectionDetails') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div class="md:col-span-2">
-                <label for="hostName" class="al-label flex items-center gap-1.5">
-                  <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('hostName') %>
-                </label>
-                <input id="hostName" x-model="form.name" class="al-input" placeholder="<%= t('hostName') %>" required>
-              </div>
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <span style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/admin/overview" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/admin/databases" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Databases</a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);">Add Host</span>
+    </li>
+  </ol>
+</nav>
 
-              <div>
-                <label for="hostAddress" class="al-label flex items-center gap-1.5">
-                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('hostAddress') %>
-                </label>
-                <input id="hostAddress" x-model="form.host" class="al-input" placeholder="localhost or 10.0.0.5" required>
-              </div>
-
-              <div>
-                <label for="hostPort" class="al-label flex items-center gap-1.5">
-                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('portLabel') %>
-                </label>
-                <input id="hostPort" x-model.number="form.port" class="al-input" placeholder="<%= settings.defaultDbPort ?? 3306 %>" type="number">
-              </div>
-
-              <div>
-                <label for="hostUser" class="al-label flex items-center gap-1.5">
-                  <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('usernameLabelForm') %>
-                </label>
-                <input id="hostUser" x-model="form.username" class="al-input" placeholder="root" autocomplete="off" required>
-              </div>
-
-              <div>
-                <label for="hostPassword" class="al-label flex items-center gap-1.5">
-                  <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('passwordLabelForm') %>
-                </label>
-                <input id="hostPassword" x-model="form.password" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
-              </div>
-              <div>
-                <label for="hostNode" class="al-label flex items-center gap-1.5">
-                  <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= t('nodeLabel') %>
-                </label>
-                <select id="hostNode" x-model="form.nodeId" class="al-input">
-                  <option value=""><%= t('anyNodeUnscoped') %></option>
-                  <% (nodes || []).forEach(n => { %>
-                    <option value="<%= n.id %>"><%= n.name %></option>
-                  <% }); %>
-                </select>
-                <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= t('nodeScopeHint') %></p>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <script nonce="<%- nonce %>">
-      function dbHostCreate() {
-        return {
-          saving: false,
-          error: '',
-          form: { name: '', host: '', port: <%= settings.defaultDbPort ?? 3306 %>, username: 'root', password: '', nodeId: '' },
-          async submit() {
-            if (this.saving) return;
-            this.error = '';
-            if (!this.form.name || !this.form.host || !this.form.username || !this.form.password) {
-              this.error = req.translations.fillAllRequiredFields || 'Please fill in all required fields.';
-              return;
-            }
-            this.saving = true;
-            try {
-              const res = await fetch('/api/v2/admin/databases', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-                body: JSON.stringify(this.form),
-              });
-              if (res.ok) {
-                showToast(req.translations.dbHostAdded || 'Database host added.', 'success');
-                setTimeout(() => { Turbo.visit('/admin/databases'); }, 500);
-              } else {
-                const data = await res.json().catch(() => ({ error: req.translations.dbHostCreateFailed || 'Failed to create host.' }));
-                this.error = data.error || data.message || (req.translations.dbHostCreateFailed || 'Failed to create host.');
-              }
-            } catch (e) {
-              this.error = req.translations.networkErrorTryAgain || 'Network error. Try again.';
-            } finally {
-              this.saving = false;
-            }
-          }
-        };
-      }
-      </script>
-    </div>
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">Add Database Host</h1>
+    <p class="al-page-desc">Configure a PostgreSQL server connection.</p>
   </div>
-</main>
+  <div class="flex gap-2 shrink-0 items-center">
+    <a href="/admin/databases" class="al-btn-secondary">Back to Databases</a>
+  </div>
+</div>
 
-<%- include('../../components/footer') %>
+<div class="al-page-body space-y-5">
+  <div id="dbError" class="rounded-xl px-4 py-3 text-sm hidden" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
+
+  <form id="hostForm" class="al-card space-y-5">
+    <h2 class="al-card-header">Connection Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="md:col-span-2">
+        <label for="hostName" class="al-label flex items-center gap-1.5">
+          <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Host Name
+        </label>
+        <input id="hostName" class="al-input" placeholder="Production DB" required>
+      </div>
+
+      <div>
+        <label for="hostAddress" class="al-label flex items-center gap-1.5">
+          <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Host Address
+        </label>
+        <input id="hostAddress" class="al-input" placeholder="localhost or 10.0.0.5" required>
+      </div>
+
+      <div>
+        <label for="hostPort" class="al-label flex items-center gap-1.5">
+          <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Port
+        </label>
+        <input id="hostPort" class="al-input" placeholder="5432" type="number">
+      </div>
+
+      <div>
+        <label for="hostUser" class="al-label flex items-center gap-1.5">
+          <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Username
+        </label>
+        <input id="hostUser" class="al-input" placeholder="postgres" autocomplete="off" required>
+      </div>
+
+      <div>
+        <label for="hostPassword" class="al-label flex items-center gap-1.5">
+          <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Password
+        </label>
+        <input id="hostPassword" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="hostNode" class="al-label flex items-center gap-1.5">
+          <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
+          Node
+        </label>
+        <select id="hostNode" class="al-input">
+          <option value="">Any node (unscoped)</option>
+          <% (nodes || []).forEach(function(n) { %>
+            <option value="<%= n.id %>"><%= n.name %></option>
+          <% }); %>
+        </select>
+        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Scope this host to a specific node, or leave unscoped for any node.</p>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <a href="/admin/databases" class="al-btn-secondary px-4 py-2 text-sm font-medium">Cancel</a>
+      <button type="submit" id="hostSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span id="hostSubmitText">Save Host</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script nonce="<%- nonce %>">
+var csrfToken = '<%= csrfToken %>';
+(function() {
+  var form = document.getElementById('hostForm');
+  var errEl = document.getElementById('dbError');
+  var submitBtn = document.getElementById('hostSubmit');
+  var submitText = document.getElementById('hostSubmitText');
+  var saving = false;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (saving) return;
+
+    var name = document.getElementById('hostName').value.trim();
+    var host = document.getElementById('hostAddress').value.trim();
+    var port = parseInt(document.getElementById('hostPort').value) || 5432;
+    var username = document.getElementById('hostUser').value.trim();
+    var password = document.getElementById('hostPassword').value;
+    var nodeId = document.getElementById('hostNode').value;
+
+    if (!name || !host || !username || !password) {
+      errEl.textContent = 'Please fill in all required fields.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    errEl.classList.add('hidden');
+    saving = true;
+    submitBtn.disabled = true;
+    submitText.textContent = 'Saving...';
+
+    fetch('/admin/databases/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: JSON.stringify({ name: name, host: host, port: port, username: username, password: password, nodeId: nodeId || undefined }),
+    }).then(function(res) {
+      if (res.redirected || res.ok) {
+        showToast('Database host added.', 'success');
+        window.location.href = '/admin/databases';
+      } else {
+        return res.json().catch(function() { return { error: 'Failed to create host.' }; }).then(function(data) {
+          errEl.textContent = data.error || data.message || 'Failed to create host.';
+          errEl.classList.remove('hidden');
+        });
+      }
+    }).catch(function() {
+      errEl.textContent = 'Network error. Try again.';
+      errEl.classList.remove('hidden');
+    }).finally(function() {
+      saving = false;
+      submitBtn.disabled = false;
+      submitText.textContent = 'Save Host';
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

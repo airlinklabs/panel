@@ -1,0 +1,61 @@
+@layer components {
+  /* Page layout ────────────────────────────────────────────────────────
+     Every page opens with the same two-part header: title + description on
+     the left, actions on the right, one hairline of space below. Mobile
+     stacks the actions under the title so the primary button stays
+     reachable (B-043). */
+
+  .al-page-header {
+    @apply flex flex-col gap-3 px-6 pt-5 pb-3 sm:flex-row sm:items-center sm:justify-between sm:px-8;
+  }
+  .al-page-header > :first-child {
+    @apply min-w-0;
+  }
+  /* The action column is the header's last child when there is more than
+     one child — a lone title column is never touched. */
+  .al-page-header > :last-child:not(:first-child) {
+    @apply flex flex-wrap items-center gap-2 sm:shrink-0;
+  }
+  .al-page-title {
+    @apply text-base font-medium leading-6 tracking-tight;
+    color: var(--theme-text-strong);
+  }
+  .al-page-desc {
+    @apply text-sm mt-1 tracking-tight;
+    color: var(--theme-text-muted);
+  }
+  .al-section-title {
+    @apply text-[15px] font-semibold tracking-tight;
+    color: var(--theme-text-strong);
+  }
+  .al-page-body {
+    @apply px-6 sm:px-8 pb-8;
+  }
+
+  /* Title column grows, action column keeps its intrinsic width. */
+  .al-page-header > :first-child {
+    @apply min-w-0;
+  }
+
+  /* ── Breadcrumb sits directly above the title ─────────────────────── */
+  .al-page-crumbs {
+    @apply px-6 pt-4 sm:px-8;
+  }
+
+  /* ── Stat row: the old panel's `grid md:grid-cols-2 gap-6` cards ──── */
+  .al-stat-grid {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4;
+  }
+
+  @media (max-width: 639px) {
+    .al-page-header {
+      gap: 0.75rem;
+    }
+    .al-page-header > div:last-child {
+      align-self: stretch;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      row-gap: 0.5rem;
+    }
+  }
+}

@@ -1,14 +1,13 @@
 /**
  * Node service — shared CRUD for node + allocation operations.
- * Used by the Alternative (Pterodactyl-compatible) API layer.
  */
 
-import prisma from "../db";
+import prisma from '../db';
 import {
   withNodePortLock,
   getNodePortPool,
   syncNodeAllocations,
-} from "../handlers/utils/server/allocations";
+} from '../handlers/utils/server/allocations';
 
 // ── Node CRUD ────────────────────────────────────────────────────────────────
 
@@ -81,7 +80,7 @@ export async function createNode(data: CreateNodeInput) {
   return prisma.node.create({
     data: {
       name: data.name,
-      address: data.address ?? "127.0.0.1",
+      address: data.address ?? '127.0.0.1',
       port: data.port ?? 3001,
       ram: data.ram ?? 0,
       cpu: data.cpu ?? 0,
@@ -164,10 +163,10 @@ export async function updateNode(id: number, fields: UpdateNodeInput) {
 export async function deleteNode(id: number) {
   const node = await getNodeForDelete(id);
   if (!node) {
-    throw new NodeError("Node not found", 404);
+    throw new NodeError('Node not found', 404);
   }
   if (node._count.servers > 0) {
-    throw new NodeError("Cannot delete node with assigned servers", 409);
+    throw new NodeError('Cannot delete node with assigned servers', 409);
   }
   await prisma.node.delete({ where: { id } });
   return node;
@@ -183,7 +182,7 @@ export async function listAllocations(nodeId: number) {
   return prisma.allocation.findMany({
     where: { nodeId },
     include: { server: { select: { UUID: true, name: true } } },
-    orderBy: { port: "asc" },
+    orderBy: { port: 'asc' },
   });
 }
 
@@ -214,7 +213,7 @@ export async function createAllocation(
     const next = Array.from(new Set([...pool, parsedPort])).sort(
       (a, b) => a - b,
     );
-    await syncNodeAllocations(nodeId, next, String(data.ip ?? ""));
+    await syncNodeAllocations(nodeId, next, String(data.ip ?? ''));
     await prisma.node.update({
       where: { id: nodeId },
       data: { allocatedPorts: next },
@@ -225,7 +224,7 @@ export async function createAllocation(
     where: {
       nodeId_ip_port: {
         nodeId,
-        ip: String(data.ip ?? ""),
+        ip: String(data.ip ?? ''),
         port: parsedPort,
       },
     },
@@ -238,10 +237,10 @@ export async function deleteAllocation(nodeId: number, allocationId: number) {
     where: { id: allocationId },
   });
   if (!allocation || allocation.nodeId !== nodeId) {
-    throw new NodeError("Allocation not found", 404);
+    throw new NodeError('Allocation not found', 404);
   }
   if (allocation.serverId) {
-    throw new NodeError("Allocation is in use and cannot be deleted.", 409);
+    throw new NodeError('Allocation is in use and cannot be deleted.', 409);
   }
 
   await withNodePortLock(nodeId, async () => {
@@ -264,6 +263,6 @@ export class NodeError extends Error {
     public status: number,
   ) {
     super(message);
-    this.name = "NodeError";
+    this.name = 'NodeError';
   }
 }

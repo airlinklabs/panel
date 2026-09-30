@@ -9,6 +9,9 @@ public/assets/js/
 public/assets/media/
 public/.vite/
 
+# Lingui compiled catalogs (source is locales/*/messages.json)
+locales/*/messages.js
+
 # Prisma files
 storage/prisma/*
 !storage/prisma/schema.prisma

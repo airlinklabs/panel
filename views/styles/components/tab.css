@@ -1,0 +1,29 @@
+@layer components {
+  /* ── Tabs (shared across settings, image edit, analytics) ───── */
+  .tab-btn {
+    position: relative;
+    color: var(--theme-text-muted);
+    border-bottom: none;
+    background: transparent;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0.75;
+    cursor: pointer;
+    transition:
+      color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tab-btn:hover:not([aria-selected="true"]) {
+    color: var(--theme-text);
+    opacity: 1;
+  }
+  .tab-btn[aria-selected="true"] {
+    color: var(--theme-text-strong);
+    background: var(--theme-bg-secondary);
+    opacity: 1;
+    font-weight: 600;
+  }
+  .tab-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

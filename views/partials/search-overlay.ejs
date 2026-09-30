@@ -1,0 +1,38 @@
+<% /* search-overlay — the panel-wide command/search dialog.
+   Opened by any [data-search-trigger] (desktop topbar pill, phone top bar);
+   bound by public/javascript/shared/search.js.
+
+   Copy comes from the live catalog: the dialog's aria-label, the combobox
+   label, the listbox label, the footer key hints and the no-results state
+   (data-empty-title / data-empty-hint are read by search.js) must all be
+   translated — never hardcoded here. */ %>
+<div id="colcont">
+  <div id="searchOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-start justify-center p-4"
+    role="dialog" aria-modal="true" aria-label="<%= t('navSearch') %>"
+    data-empty-title="<%= t('searchEmptyTitle') %>"
+    data-empty-hint="<%= t('searchEmptyHint') %>"
+    style="background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding-top:14vh;">
+    <div id="searchPanel" class="al-sheet-panel w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
+      style="border-color:var(--theme-border); background:var(--theme-bg-card); box-shadow:0 25px 60px -12px rgba(0,0,0,0.35);">
+      <div class="flex items-center gap-3 px-4 py-3.5 border-b" style="border-color:var(--theme-border);">
+        <%- icon('search', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+        <input id="searchInput" type="text" aria-label="<%= t('navSearch') %>"
+          placeholder="<%= t('navSearch') %>..."
+          class="flex-1 bg-transparent text-sm min-w-0"
+          style="color:var(--theme-text-strong);"
+          role="combobox" aria-autocomplete="list" aria-expanded="false"
+          aria-controls="searchResults" aria-activedescendant=""
+          autocomplete="off" spellcheck="false">
+        <span aria-hidden="true" class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
+          style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">ESC</span>
+      </div>
+      <div id="searchResults" role="listbox" aria-label="<%= t('searchResultsLabel') %>" class="p-2" style="max-height:45vh; overflow-y:auto;"></div>
+      <div class="hidden sm:flex items-center gap-4 px-4 py-2.5 border-t text-[11px]" style="border-color:var(--theme-border); color:var(--theme-text-muted);">
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">&#8593;&#8595;</kbd> <%= t('searchHintNavigate') %></span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">Enter</kbd> <%= t('searchHintOpen') %></span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">Esc</kbd> <%= t('searchHintClose') %></span>
+      </div>
+    </div>
+  </div>
+</div>
+<script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/search.js') %>?v=6"></script>

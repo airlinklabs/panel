@@ -1,10 +1,10 @@
-import { getSettings } from "./settingsCache";
-import type { Request, Response, NextFunction } from "express";
-import prisma from "../db";
-import logger from "./logger";
-import { isProductionPosture } from "../utils/errors";
-import { logT } from "../services/i18n";
-import { assetUrl } from "../utils/assetUrl";
+import { getSettings } from './settingsCache';
+import type { Request, Response, NextFunction } from 'express';
+import prisma from '../db';
+import logger from './logger';
+import { isProductionPosture } from '../utils/errors';
+import { logT } from '../services/i18n';
+import { assetUrl } from '../utils/assetUrl';
 
 interface ErrorPageInfo {
   title: string;
@@ -12,75 +12,75 @@ interface ErrorPageInfo {
 }
 
 const DEFAULT_SETTINGS = {
-  title: "Airlink",
-  favicon: assetUrl("favicon.ico"),
-  logo: assetUrl("assets/logo.png"),
-  theme: "default",
+  title: 'Airlink',
+  favicon: assetUrl('favicon.ico'),
+  logo: assetUrl('assets/logo.png'),
+  theme: 'default',
 };
 
 const ERROR_INFO: Record<number, ErrorPageInfo> = {
   400: {
-    title: "Bad request",
-    message: "The request could not be understood by the panel.",
+    title: 'Bad request',
+    message: 'The request could not be understood by the panel.',
   },
   401: {
-    title: "Sign in required",
-    message: "Your session is missing or has expired.",
+    title: 'Sign in required',
+    message: 'Your session is missing or has expired.',
   },
   403: {
-    title: "Not your territory",
+    title: 'Not your territory',
     message:
-      "You don't have access here. If that's wrong, your admin can fix it.",
+      'You don\'t have access here. If that\'s wrong, your admin can fix it.',
   },
   404: {
-    title: "Fell off the map",
-    message: "This page doesn't exist, or it did and we broke it.",
+    title: 'Fell off the map',
+    message: 'This page doesn\'t exist, or it did and we broke it.',
   },
   405: {
-    title: "Method not allowed",
-    message: "This page does not support that request method.",
+    title: 'Method not allowed',
+    message: 'This page does not support that request method.',
   },
   408: {
-    title: "Request timeout",
-    message: "The request took too long to complete.",
+    title: 'Request timeout',
+    message: 'The request took too long to complete.',
   },
   409: {
-    title: "Conflict",
-    message: "The request conflicts with the current panel state.",
+    title: 'Conflict',
+    message: 'The request conflicts with the current panel state.',
   },
   413: {
-    title: "Payload too large",
-    message: "The uploaded data is larger than the panel accepts.",
+    title: 'Payload too large',
+    message: 'The uploaded data is larger than the panel accepts.',
   },
   429: {
-    title: "Too many requests",
-    message: "Slow down and try again in a moment.",
+    title: 'Too many requests',
+    message: 'Slow down and try again in a moment.',
   },
   500: {
-    title: "We tripped",
+    title: 'We tripped',
     message:
-      "Something broke on our end. It's logged. We're probably already embarrassed.",
+      'Something broke on our end. It\'s logged. We\'re probably already embarrassed.',
   },
   502: {
-    title: "Bad gateway",
+    title: 'Bad gateway',
     message:
-      "The panel could not get a valid response from an upstream service.",
+      'The panel could not get a valid response from an upstream service.',
   },
   503: {
-    title: "Service unavailable",
-    message: "The panel or daemon is not available right now.",
+    title: 'Service unavailable',
+    message: 'The panel or daemon is not available right now.',
   },
   504: {
-    title: "Gateway timeout",
-    message: "An upstream service took too long to respond.",
+    title: 'Gateway timeout',
+    message: 'An upstream service took too long to respond.',
   },
 };
 
 function wantsJson(req: Request): boolean {
   return (
-    req.path.startsWith("/api/") ||
-    req.headers["x-requested-with"] === "XMLHttpRequest" ||
-    req.accepts(["html", "json"]) === "json"
+    req.path.startsWith('/api/') ||
+    req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+    req.accepts(['html', 'json']) === 'json'
   );
 }
 
@@ -92,8 +92,15 @@ function normalizeStatus(status: unknown): number {
   return 500;
 }
 
-function getErrorView(_req: Request): string {
-  return "errors/error";
+function getErrorView(statusCode: number): string {
+  // Rewritten error views ship one template per common status plus a generic
+  // fallback — 'errors/error' was deleted along with the old single template.
+  const views: Record<number, string> = {
+    403: 'errors/403',
+    404: 'errors/404',
+    500: 'errors/500',
+  };
+  return views[statusCode] ?? 'errors/generic';
 }
 
 async function getErrorRenderData(
@@ -110,7 +117,7 @@ async function getErrorRenderData(
   ]);
   const info = ERROR_INFO[statusCode] || {
     title: `Error ${statusCode}`,
-    message: "The panel could not complete this request.",
+    message: 'The panel could not complete this request.',
   };
 
   return {
@@ -134,7 +141,7 @@ export async function renderErrorPage(
   const normalizedStatus = normalizeStatus(statusCode);
   const info = ERROR_INFO[normalizedStatus] || {
     title: `Error ${normalizedStatus}`,
-    message: "The panel could not complete this request.",
+    message: 'The panel could not complete this request.',
   };
   const message = detail || info.message;
 
@@ -142,9 +149,9 @@ export async function renderErrorPage(
   // but never from /login or /register to avoid infinite redirect loops when
   // those pages themselves error (e.g. DB/Redis down).
   const isAuthenticated = req.session?.user?.id;
-  const isOnAuthPage = req.path === "/login" || req.path === "/register";
+  const isOnAuthPage = req.path === '/login' || req.path === '/register';
   if (!isAuthenticated && !wantsJson(req) && !isOnAuthPage) {
-    return res.redirect("/login");
+    return res.redirect('/login');
   }
 
   if (wantsJson(req)) {
@@ -157,9 +164,9 @@ export async function renderErrorPage(
 
   try {
     const data = await getErrorRenderData(req, normalizedStatus, detail);
-    return res.status(normalizedStatus).render(getErrorView(req), data);
+    return res.status(normalizedStatus).render(getErrorView(normalizedStatus), data);
   } catch (renderError) {
-    logger.error(logT("log.errorPageRenderFailed"), renderError);
+    logger.error(logT('log.errorPageRenderFailed'), renderError);
     return res
       .status(normalizedStatus)
       .send(`${normalizedStatus} ${info.title}`);
@@ -181,7 +188,7 @@ export function errorPageHandler(
   }
 
   const statusCode = normalizeStatus(err.status || err.statusCode);
-  logger.error(logT("log.unhandledError"), err);
+  logger.error(logT('log.unhandledError'), err);
   // Only an explicit development/debug env exposes internal detail. An unset
   // NODE_ENV is treated as production-safe so a missing .env cannot leak.
   const detail = isProductionPosture() ? undefined : err.message;

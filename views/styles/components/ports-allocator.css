@@ -1,0 +1,9 @@
+@layer components {
+  /* ports allocator external-port list — keyboard-highlighted option */
+  .pa-extopt.pa-extopt-active {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  .dark .pa-extopt.pa-extopt-active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

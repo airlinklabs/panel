@@ -1,0 +1,133 @@
+<%- include('../../layouts/admin', { title: 'Mounts' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <span style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/admin/overview" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);">Mounts</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">Mounts</h1>
+    <p class="al-page-desc">Manage shared directory mounts for servers.</p>
+  </div>
+  <div class="flex gap-2 shrink-0 items-center">
+    <a href="/admin/mounts/new" class="al-btn-primary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> New Mount
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body">
+  <% if (mounts.length === 0) { %>
+    <%- include('../../partials/empty-state', {
+      iconName: 'folder',
+      title: 'No mounts yet',
+      description: 'Create a mount to share directories across servers.',
+      action: '<a href="/admin/mounts/new" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }).toString() + ' New Mount</a>'
+    }) %>
+  <% } else { %>
+  <div class="al-card">
+    <div class="-mx-4 overflow-x-auto">
+      <table class="al-table">
+        <colgroup>
+          <col style="min-width:160px">
+          <col style="min-width:200px">
+          <col style="min-width:200px">
+          <col style="min-width:110px">
+          <col style="min-width:110px">
+        </colgroup>
+        <thead class="al-table-head">
+          <tr>
+            <th scope="col" class="al-table-th sm:pl-6">Name</th>
+            <th scope="col" class="al-table-th sm:pl-6">Source</th>
+            <th scope="col" class="al-table-th sm:pl-6">Target</th>
+            <th scope="col" class="al-table-th sm:pl-6">Mode</th>
+            <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% mounts.forEach(function(m) { %>
+          <tr class="al-table-tr" data-mount-id="<%= m.id %>">
+            <td class="al-table-td sm:pl-6">
+              <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
+            </td>
+            <td class="al-table-td">
+              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
+            </td>
+            <td class="al-table-td">
+              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
+            </td>
+            <td class="al-table-td">
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" <%= m.readOnly ? 'style="background:var(--theme-warning-bg);color:var(--theme-warning)"' : 'style="background:var(--theme-success-bg);color:var(--theme-success)"' %>>
+                <%= m.readOnly ? 'Read Only' : 'Read / Write' %>
+              </span>
+            </td>
+            <td class="al-table-td">
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  class="al-btn-ghost"
+                  style="color:var(--theme-danger);"
+                  aria-label="Delete mount"
+                  onclick="deleteMount(<%= m.id %>, '<%= m.name.replace(/'/g, "\\'") %>')">
+                  <%- icon('trash-2', { size: 16 }) %>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<script nonce="<%- nonce %>">
+var csrfToken = '<%= csrfToken %>';
+
+function deleteMount(id, name) {
+  modal.confirm({
+    title: 'Delete Mount',
+    body: 'Are you sure you want to delete "' + name + '"? Servers using it will no longer be able to attach it.',
+    danger: true,
+    confirmLabel: 'Delete',
+    onConfirm: async function() {
+      var loader = showProgressToast('Deleting mount...');
+      try {
+        var res = await fetch('/admin/mounts/' + id, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }
+        });
+        var data = await res.json();
+        if (data.success !== false) {
+          loader.complete(true, 'Mount deleted.');
+          var row = document.querySelector('[data-mount-id="' + id + '"]');
+          if (row) row.remove();
+          if (document.querySelectorAll('[data-mount-id]').length === 0) {
+            window.location.reload();
+          }
+        } else {
+          loader.close();
+          showToast(data.error || data.message || 'Failed to delete mount.', 'error');
+        }
+      } catch(e) {
+        loader.close();
+        showToast('Failed to delete mount.', 'error');
+      }
+    }
+  });
+}
+</script>
+
+<%- include('../../layouts/admin-footer') %>

@@ -1,0 +1,115 @@
+<%- include('../../layouts/admin', { title: 'Queue Management' }) %>
+
+<%- include('../../partials/flash-messages') %>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: 'Queue Management' }
+  ] }) %>
+
+  <div class="flex items-start justify-between gap-4 mt-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Queue Management</h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">View and manage the runtime start queue.</p>
+    </div>
+    <button type="button" id="refreshBtn" class="al-btn-secondary">
+      <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
+      Refresh
+    </button>
+  </div>
+
+  <div class="al-card mt-5 overflow-hidden">
+    <h2 class="al-card-header">Queued Server Starts</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
+        <thead style="background:var(--theme-bg-secondary)">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Server</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Node</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">User</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Position</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Priority</th>
+            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="queueTableBody" class="divide-y divide-[var(--theme-border)]">
+          <% if (entries && entries.length > 0) { %>
+            <% entries.forEach(function(entry) { %>
+              <tr class="hover:bg-[var(--theme-bg-secondary)] transition" data-server-id="<%= entry.serverId %>">
+                <td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-strong)"><%= entry.serverId %></td>
+                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">Node #<%= entry.nodeId %></td>
+                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">#<%= entry.userId %></td>
+                <td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)"><%= entry.position %> / <%= entry.total %></td>
+                <td class="px-5 py-3">
+                  <% if (entry.priority) { %>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">Priority</span>
+                  <% } else { %>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Normal</span>
+                  <% } %>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="flex gap-1">
+                    <button class="al-btn-secondary text-xs kick-btn" data-server-id="<%= entry.serverId %>">Kick</button>
+                    <button class="al-btn-secondary text-xs ban-btn" data-user-id="<%= entry.userId %>">Ban</button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="6" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">Queue is empty.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  document.getElementById('refreshBtn').addEventListener('click', function() {
+    window.location.reload();
+  });
+
+  document.querySelectorAll('.kick-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var serverId = btn.dataset.serverId;
+      if (!confirm('Kick server ' + serverId + ' from the queue?')) return;
+      try {
+        var resp = await fetch('/admin/queue/' + encodeURIComponent(serverId) + '/kick', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        var data = await resp.json();
+        if (data.removed) {
+          btn.closest('tr').remove();
+        }
+      } catch (e) {
+        alert('Failed to kick from queue');
+      }
+    });
+  });
+
+  document.querySelectorAll('.ban-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var userId = btn.dataset.userId;
+      if (!confirm('Ban user #' + userId + ' from the queue for 30 minutes?')) return;
+      try {
+        var resp = await fetch('/admin/queue/users/' + encodeURIComponent(userId) + '/ban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ minutes: 30 })
+        });
+        var data = await resp.json();
+        if (data.banned) {
+          alert('User banned from queue');
+        }
+      } catch (e) {
+        alert('Failed to ban user');
+      }
+    });
+  });
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>

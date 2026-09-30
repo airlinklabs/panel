@@ -23,53 +23,53 @@
  *   module.exports (Node tests)
  */
 (function (root, factory) {
-  var api = factory();
-  if (typeof window !== "undefined") window.ALRealtimeClient = api;
-  if (typeof module !== "undefined" && module.exports) module.exports = api;
-})(typeof window !== "undefined" ? window : globalThis, function () {
-  "use strict";
+  const api = factory();
+  if (typeof window !== 'undefined') {window.ALRealtimeClient = api;}
+  if (typeof module !== 'undefined' && module.exports) {module.exports = api;}
+})(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
 
-  var VERSION = 1;
-  var DEFAULT_PATH = "/ws/realtime";
-  var SEQ_KEY = "__al_realtime_seq";
-  var MAX_RETRY_MS = 15_000;
-  var MAX_ATTEMPTS = 12;
+  const VERSION = 1;
+  const DEFAULT_PATH = '/ws/realtime';
+  const SEQ_KEY = '__al_realtime_seq';
+  const MAX_RETRY_MS = 15_000;
+  const MAX_ATTEMPTS = 12;
 
   function backoffDelay(attempt) {
-    var jitter = 0.6 + Math.random() * 0.4;
+    const jitter = 0.6 + Math.random() * 0.4;
     return Math.min(MAX_RETRY_MS, 1000 * Math.pow(1.3, attempt)) * jitter;
   }
 
   function buildUrl(opts) {
     if (opts.url) {
-      if (/^wss?:\/\//i.test(opts.url)) return opts.url;
-      var scheme2 = opts.url.includes("://") ? opts.url.split("://")[0] : "ws";
-      return scheme2 + "://" + opts.url + DEFAULT_PATH;
+      if (/^wss?:\/\//i.test(opts.url)) {return opts.url;}
+      const scheme2 = opts.url.includes('://') ? opts.url.split('://')[0] : 'ws';
+      return `${scheme2  }://${  opts.url  }${DEFAULT_PATH}`;
     }
-    var scheme =
+    const scheme =
       opts.secure !== undefined ||
-      (typeof window !== "undefined" && window.location.protocol === "https:")
-        ? "wss:"
-        : "ws:";
-    var host =
-      typeof window !== "undefined" ? window.location.host : "localhost";
-    return scheme + "//" + host + DEFAULT_PATH;
+      (typeof window !== 'undefined' && window.location.protocol === 'https:')
+        ? 'wss:'
+        : 'ws:';
+    const host =
+      typeof window !== 'undefined' ? window.location.host : 'localhost';
+    return `${scheme  }//${  host  }${DEFAULT_PATH}`;
   }
 
   function readSeq(storage) {
-    if (!storage) return null;
-    var raw;
+    if (!storage) {return null;}
+    let raw;
     try {
       raw = storage.getItem(SEQ_KEY);
     } catch (e) {
       return null;
     }
-    var n = parseInt(raw, 10);
+    const n = parseInt(raw, 10);
     return Number.isFinite(n) && n > 0 ? n : null;
   }
 
   function writeSeq(storage, seq) {
-    if (!storage || seq == null) return;
+    if (!storage || seq === null || seq === undefined) {return;}
     try {
       storage.setItem(SEQ_KEY, String(seq));
     } catch (e) {
@@ -80,12 +80,12 @@
   /* Resolve the reconnecting-websocket class. In the browser it is vendored
      (window.ReconnectingWebSocket); in Node tests it is required directly. */
   function resolveRWS(opts) {
-    if (opts.ReconnectingWebSocket) return opts.ReconnectingWebSocket;
-    if (typeof window !== "undefined" && window.ReconnectingWebSocket)
-      return window.ReconnectingWebSocket;
+    if (opts.ReconnectingWebSocket) {return opts.ReconnectingWebSocket;}
+    if (typeof window !== 'undefined' && window.ReconnectingWebSocket)
+    {return window.ReconnectingWebSocket;}
     try {
       // InteropImport: @ts-ignore
-      return require("reconnecting-websocket");
+      return require('reconnecting-websocket');
     } catch (e) {
       /* not installed in this environment */
     }
@@ -94,67 +94,67 @@
 
   function create(opts) {
     opts = opts || {};
-    var url = buildUrl(opts);
-    var storage = opts.storage || null;
-    var onMessage = opts.onMessage; // (event) => void
-    var onEvent = opts.onEvent || onMessage || function () {};
-    var RWS = resolveRWS(opts);
-    var WS =
+    const url = buildUrl(opts);
+    const storage = opts.storage || null;
+    const onMessage = opts.onMessage; // (event) => void
+    const onEvent = opts.onEvent || onMessage || function () {};
+    const RWS = resolveRWS(opts);
+    const WS =
       opts.WebSocket ||
-      (typeof window !== "undefined" ? window.WebSocket : undefined);
+      (typeof window !== 'undefined' ? window.WebSocket : undefined);
 
     if (!RWS) {
       return {
-        status: function () {
-          return "unsupported";
+        status () {
+          return 'unsupported';
         },
-        subscribe: function () {
+        subscribe () {
           return function () {};
         },
-        onStatusChange: function () {
+        onStatusChange () {
           return function () {};
         },
-        send: function () {
+        send () {
           return false;
         },
-        watch: function () {
+        watch () {
           return false;
         },
-        unwatch: function () {
+        unwatch () {
           return false;
         },
-        watchEvents: function () {
+        watchEvents () {
           return false;
         },
-        unwatchEvents: function () {
+        unwatchEvents () {
           return false;
         },
-        watchAll: function () {
+        watchAll () {
           return false;
         },
-        reconnect: function () {},
-        disconnect: function () {},
-        lastSeq: function () {
+        reconnect () {},
+        disconnect () {},
+        lastSeq () {
           return 0;
         },
       };
     }
 
-    var status = "disconnected";
-    var socket = null;
-    var stopped = false;
-    var paused = false;
-    var lastSeq = readSeq(storage);
-    var handlers = (opts.handlers || []).slice();
-    var statusListeners = [];
+    let status = 'disconnected';
+    let socket = null;
+    let stopped = false;
+    let paused = false;
+    let lastSeq = readSeq(storage);
+    let handlers = (opts.handlers || []).slice();
+    let statusListeners = [];
 
     function setStatus(next) {
-      if (status === next) return;
-      var prev = status;
+      if (status === next) {return;}
+      const prev = status;
       status = next;
-      for (var i = 0; i < statusListeners.length; i++) {
+      for (const listener of statusListeners) {
         try {
-          statusListeners[i](status, prev);
+          listener(status, prev);
         } catch (e) {
           /* listener isolation */
         }
@@ -162,9 +162,9 @@
     }
 
     function dispatch(evt) {
-      for (var i = 0; i < handlers.length; i++) {
+      for (const handler of handlers) {
         try {
-          handlers[i](evt);
+          handler(evt);
         } catch (e) {
           /* handler isolation */
         }
@@ -174,16 +174,16 @@
     function makeRWS() {
       // reconnecting-websocket takes (url, protocols, options). Passing the
       // app's WebSocket lets tests inject the mock; browsers get the real one.
-      var rwsOpts = {
+      const rwsOpts = {
         connectionTimeout: 4000,
         minReconnectionDelay: 1000,
         maxReconnectionDelay: MAX_RETRY_MS,
         maxRetries: MAX_ATTEMPTS,
         startClosed: stopped,
       };
-      if (WS) rwsOpts.WebSocket = WS;
+      if (WS) {rwsOpts.WebSocket = WS;}
       try {
-        var r = new RWS(url, [], rwsOpts);
+        const r = new RWS(url, [], rwsOpts);
         return r;
       } catch (e) {
         return null;
@@ -191,51 +191,51 @@
     }
 
     function connectSocket() {
-      if (stopped || paused) return;
-      if (socket) return; // rws owns reconnects, keep exactly one instance
+      if (stopped || paused) {return;}
+      if (socket) {return;} // rws owns reconnects, keep exactly one instance
 
-      var rws = makeRWS();
+      const rws = makeRWS();
       if (!rws) {
-        setStatus("unsupported");
+        setStatus('unsupported');
         return;
       }
       socket = rws;
-      setStatus("connecting");
+      setStatus('connecting');
 
-      rws.addEventListener("open", function () {
+      rws.addEventListener('open', function () {
         try {
-          rws.send(JSON.stringify({ type: "sync", sinceSeq: lastSeq }));
+          rws.send(JSON.stringify({ type: 'sync', sinceSeq: lastSeq }));
         } catch (e) {
           /* transport not ready */
         }
       });
 
-      rws.addEventListener("message", function (evt) {
-        var parsed;
+      rws.addEventListener('message', function (evt) {
+        let parsed;
         try {
           parsed = JSON.parse(evt.data);
         } catch (e) {
           return;
         }
-        if (!parsed || typeof parsed !== "object") return;
+        if (!parsed || typeof parsed !== 'object') {return;}
 
-        if (parsed.type === "ping") {
+        if (parsed.type === 'ping') {
           try {
-            rws.send(JSON.stringify({ type: "pong" }));
+            rws.send(JSON.stringify({ type: 'pong' }));
           } catch (e) {}
           return;
         }
 
         if (
-          parsed.type === "realtime.ready" ||
-          parsed.type === "realtime.synced"
+          parsed.type === 'realtime.ready' ||
+          parsed.type === 'realtime.synced'
         ) {
-          if (typeof parsed.seq === "number" && parsed.seq > (lastSeq || 0)) {
+          if (typeof parsed.seq === 'number' && parsed.seq > (lastSeq || 0)) {
             lastSeq = parsed.seq;
             writeSeq(storage, lastSeq);
           }
-          setStatus("connected");
-          if (typeof onEvent === "function") {
+          setStatus('connected');
+          if (typeof onEvent === 'function') {
             try {
               onEvent(parsed);
             } catch (e) {
@@ -245,33 +245,33 @@
           return;
         }
 
-        if (typeof parsed.seq === "number" && parsed.seq > (lastSeq || 0)) {
+        if (typeof parsed.seq === 'number' && parsed.seq > (lastSeq || 0)) {
           lastSeq = parsed.seq;
           writeSeq(storage, lastSeq);
         }
         dispatch(parsed);
       });
 
-      rws.addEventListener("close", function () {
+      rws.addEventListener('close', function () {
         // rws keeps its single instance and owns the reconnect; the socket
         // reference must stay live so `disconnect()`/`reconnect()`/`send()`
         // keep targeting the same transport.
         if (stopped) {
-          setStatus("disconnected");
+          setStatus('disconnected');
           return;
         }
-        if (paused) return;
-        setStatus("reconnecting"); // rws is already backoff-scheduling
+        if (paused) {return;}
+        setStatus('reconnecting'); // rws is already backoff-scheduling
       });
 
-      rws.addEventListener("error", function () {
+      rws.addEventListener('error', function () {
         // A dead socket surfaces as 'close'; nothing else to do here.
       });
     }
 
     function wake() {
       paused = false;
-      if (stopped) return;
+      if (stopped) {return;}
       if (!socket) {
         connectSocket();
         return;
@@ -296,28 +296,28 @@
 
     // Browser wiring.
     if (
-      typeof window !== "undefined" &&
-      typeof window.addEventListener === "function"
+      typeof window !== 'undefined' &&
+      typeof window.addEventListener === 'function'
     ) {
-      window.addEventListener("online", function () {
+      window.addEventListener('online', function () {
         wake();
       });
-      window.addEventListener("offline", function () {
-        if (!socket) setStatus("reconnecting");
+      window.addEventListener('offline', function () {
+        if (!socket) {setStatus('reconnecting');}
       });
     }
     if (
-      typeof document !== "undefined" &&
-      typeof document.addEventListener === "function"
+      typeof document !== 'undefined' &&
+      typeof document.addEventListener === 'function'
     ) {
-      document.addEventListener("visibilitychange", function () {
-        if (document.hidden) pause();
-        else wake();
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {pause();}
+        else {wake();}
       });
     }
 
-    var client = {
-      subscribe: function (fn) {
+    const client = {
+      subscribe (fn) {
         handlers.push(fn);
         return function () {
           handlers = handlers.filter(function (h) {
@@ -325,7 +325,7 @@
           });
         };
       },
-      onStatusChange: function (fn) {
+      onStatusChange (fn) {
         statusListeners.push(fn);
         return function () {
           statusListeners = statusListeners.filter(function (h) {
@@ -333,8 +333,8 @@
           });
         };
       },
-      send: function (obj) {
-        if (!socket) return false;
+      send (obj) {
+        if (!socket) {return false;}
         try {
           socket.send(JSON.stringify(obj));
           return true;
@@ -342,22 +342,22 @@
           return false;
         }
       },
-      watch: function (serverId) {
-        return this.send({ type: "watch", serverId: serverId });
+      watch (serverId) {
+        return this.send({ type: 'watch', serverId });
       },
-      unwatch: function (serverId) {
-        return this.send({ type: "unwatch", serverId: serverId });
+      unwatch (serverId) {
+        return this.send({ type: 'unwatch', serverId });
       },
-      watchEvents: function (serverId) {
-        return this.send({ type: "watchEvents", serverId: serverId });
+      watchEvents (serverId) {
+        return this.send({ type: 'watchEvents', serverId });
       },
-      unwatchEvents: function (serverId) {
-        return this.send({ type: "unwatchEvents", serverId: serverId });
+      unwatchEvents (serverId) {
+        return this.send({ type: 'unwatchEvents', serverId });
       },
-      watchAll: function () {
-        return this.send({ type: "watchAll" });
+      watchAll () {
+        return this.send({ type: 'watchAll' });
       },
-      disconnect: function () {
+      disconnect () {
         stopped = true;
         if (socket) {
           try {
@@ -367,35 +367,33 @@
           }
           socket = null;
         }
-        setStatus("disconnected");
+        setStatus('disconnected');
       },
-      reconnect: function () {
+      reconnect () {
         stopped = false;
         wake();
       },
-      status: function () {
+      status () {
         return status;
       },
-      lastSeq: function () {
+      lastSeq () {
         return lastSeq;
       },
     };
 
     if (opts.autostart !== false) {
-      // One socket, kept across navigation. Turbo keeps window alive, so this
-      // instance survives page swaps; a full reload creates a fresh one that
-      // resyncs from the persisted cursor.
+      // One socket, kept across navigation.
       connectSocket();
     }
     return client;
   }
 
   return {
-    create: create,
+    create,
     createClient: create,
-    VERSION: VERSION,
-    SEQ_KEY: SEQ_KEY,
-    backoffDelay: backoffDelay,
-    buildUrl: buildUrl,
+    VERSION,
+    SEQ_KEY,
+    backoffDelay,
+    buildUrl,
   };
 });

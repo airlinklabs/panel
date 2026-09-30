@@ -1,0 +1,91 @@
+<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — ' + (file.name || 'File') }) %>
+<%
+  var isDir = file.type === 'directory';
+  var filePath = (parentPath === '/' ? '' : parentPath) + '/' + (file.name || '');
+  var downloadHref = '/server/' + server.UUID + '/files/download' +
+    filePath.split('/').map(encodeURIComponent).join('/');
+  var filesHref = '/server/' + server.UUID + '/files?path=' + encodeURIComponent(parentPath || '/');
+  function fmtSize(bytes) {
+    var n = Number(bytes);
+    if (!isFinite(n) || n < 0) return '—';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+    return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+  }
+%>
+
+<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
+  <ol class="flex items-center text-sm gap-1">
+    <li class="flex items-center">
+      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <a href="<%= filesHref %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('files') %></a>
+    </li>
+    <li class="flex items-center">
+      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
+      <span style="color:var(--theme-text);"><%= file.name || '/' %></span>
+    </li>
+  </ol>
+</nav>
+
+<div class="px-6 sm:px-8 pb-12">
+  <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
+    <h1 class="text-xl font-semibold" style="color:var(--theme-text);"><%= file.name || '/' %></h1>
+    <div class="flex items-center gap-2">
+      <a class="al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" href="<%= filesHref %>">
+        <%- icon('arrow-left', { class: 'w-3.5 h-3.5 inline-block align-[-2px]', strokeWidth: 2 }) %>
+        Back to files
+      </a>
+      <% if (!isDir) { %>
+        <a class="al-btn-primary px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" href="<%= downloadHref %>">
+          <%- icon('download', { class: 'w-3.5 h-3.5 inline-block align-[-2px]', strokeWidth: 2 }) %>
+          Download
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="al-card p-6">
+    <div class="flex items-center gap-4 mb-6 pb-6" style="border-bottom:1px solid var(--theme-border);">
+      <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-bg-secondary);">
+        <%- icon(isDir ? 'folder' : 'file', { class: 'w-6 h-6', strokeWidth: 1.5, style: 'color:var(--theme-text-muted);' }) %>
+      </div>
+      <div class="min-w-0">
+        <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= file.name || '/' %></p>
+        <p class="text-xs truncate" style="color:var(--theme-text-muted);"><%= parentPath === '/' ? '/' : parentPath %></p>
+      </div>
+    </div>
+
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+      <div>
+        <dt class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Type</dt>
+        <dd class="text-sm m-0" style="color:var(--theme-text-strong);"><%= isDir ? 'Directory' : 'File' %></dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Size</dt>
+        <dd class="text-sm m-0" style="color:var(--theme-text-strong);"><%= isDir ? '—' : fmtSize(file.size) %></dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Extension</dt>
+        <dd class="text-sm m-0" style="color:var(--theme-text-strong);"><%= file.extension ? '.' + String(file.extension).replace(/^\./, '') : '—' %></dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Category</dt>
+        <dd class="text-sm m-0" style="color:var(--theme-text-strong);"><%= file.category || '—' %></dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Path</dt>
+        <dd class="text-sm m-0 break-all" style="color:var(--theme-text-strong);"><%= filePath %></dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<%- include('../../layouts/user-footer') %>

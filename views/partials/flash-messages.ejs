@@ -1,0 +1,26 @@
+<% if (typeof req !== 'undefined' && req && req.session && req.session.flash) { %>
+<% const flash = req.session.flash; %>
+<% req.session.flash = null; %>
+<div class="fixed top-4 right-4 z-50 max-sm:left-4 max-sm:right-4" style="max-width:400px;">
+  <div class="px-4 py-3 rounded-xl shadow-lg flex items-start gap-3" role="alert" aria-live="assertive"
+    style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <span class="mt-0.5 shrink-0" style="color:var(--theme-<%= flash.type || 'info' %>);">
+      <% if (flash.type === 'success') { %>
+        <%- icon('circle-check', { class: 'w-5 h-5' }) %>
+      <% } else if (flash.type === 'error' || flash.type === 'danger') { %>
+        <%- icon('circle-x', { class: 'w-5 h-5' }) %>
+      <% } else if (flash.type === 'warning') { %>
+        <%- icon('triangle-alert', { class: 'w-5 h-5' }) %>
+      <% } else { %>
+        <%- icon('info', { class: 'w-5 h-5' }) %>
+      <% } %>
+    </span>
+    <p class="flex-1 font-medium text-sm" style="color:var(--theme-text);"><%= flash.message || '' %></p>
+    <button type="button" onclick="this.parentElement.parentElement.remove()"
+      class="shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70"
+      style="color:var(--theme-text-muted);" aria-label="Dismiss">
+      <%- icon('x', { class: 'w-3.5 h-3.5' }) %>
+    </button>
+  </div>
+</div>
+<% } %>

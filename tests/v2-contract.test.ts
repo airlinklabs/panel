@@ -10,14 +10,14 @@
  * These are contract/static-analysis tests — they import helpers and build
  * small Express apps with mocked deps, no real database required.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express, {
   type Request,
   type Response,
   type NextFunction,
-} from "express";
-import http from "http";
-import type { AddressInfo } from "net";
+} from 'express';
+import type http from 'http';
+import type { AddressInfo } from 'net';
 import {
   jsonOk,
   jsonError,
@@ -25,8 +25,8 @@ import {
   type V2SuccessResponse,
   type V2ErrorResponse,
   type PaginationMeta,
-} from "../src/modules/api/v2/helpers";
-import { isCsrfExempt } from "../src/handlers/utils/security/csrfRouting";
+} from '../src/modules/api/v2/helpers';
+import { isCsrfExempt } from '../src/handlers/utils/security/csrfRouting';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,26 +37,26 @@ function buildEnvelopeApp(): express.Express {
   app.use(express.json());
 
   // Success: { success: true, data: ... }
-  app.get("/ok", (_req, res) => {
-    jsonOk(res, { id: 1, name: "test" });
+  app.get('/ok', (_req, res) => {
+    jsonOk(res, { id: 1, name: 'test' });
   });
 
   // Success with pagination: { success: true, data: [...], meta: { ... } }
-  app.get("/paginated", (_req, res) => {
+  app.get('/paginated', (_req, res) => {
     const items = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }));
     const { data, meta } = paginate(items, 1, 5);
     jsonOk(res, data, meta);
   });
 
   // Error: { success: false, error: { code, message } }
-  app.get("/err", (_req, res) => {
-    jsonError(res, "NOT_FOUND", "Resource not found", 404);
+  app.get('/err', (_req, res) => {
+    jsonError(res, 'NOT_FOUND', 'Resource not found', 404);
   });
 
   // Error with details
-  app.get("/err-details", (_req, res) => {
-    jsonError(res, "VALIDATION_ERROR", "Invalid input", 400, [
-      { field: "name", message: "required" },
+  app.get('/err-details', (_req, res) => {
+    jsonError(res, 'VALIDATION_ERROR', 'Invalid input', 400, [
+      { field: 'name', message: 'required' },
     ]);
   });
 
@@ -81,8 +81,8 @@ async function stopServer(server: http.Server): Promise<void> {
 // Response envelope
 // ---------------------------------------------------------------------------
 
-describe("V2 API Contract", () => {
-  describe("Response envelope", () => {
+describe('V2 API Contract', () => {
+  describe('Response envelope', () => {
     let server: http.Server;
     let base: string;
 
@@ -94,7 +94,7 @@ describe("V2 API Contract", () => {
       await stopServer(server);
     });
 
-    it("success responses have { success: true, data }", async () => {
+    it('success responses have { success: true, data }', async () => {
       const res = await fetch(`${base}/ok`);
       const body = (await res.json()) as V2SuccessResponse<{
         id: number;
@@ -102,34 +102,34 @@ describe("V2 API Contract", () => {
       }>;
 
       expect(body.success).toBe(true);
-      expect(body.data).toEqual({ id: 1, name: "test" });
-      expect(body).not.toHaveProperty("error");
+      expect(body.data).toEqual({ id: 1, name: 'test' });
+      expect(body).not.toHaveProperty('error');
     });
 
-    it("error responses have { success: false, error: { code, message } }", async () => {
+    it('error responses have { success: false, error: { code, message } }', async () => {
       const res = await fetch(`${base}/err`);
       const body = (await res.json()) as V2ErrorResponse;
 
       expect(res.status).toBe(404);
       expect(body.success).toBe(false);
       expect(body.error).toBeDefined();
-      expect(typeof body.error.code).toBe("string");
-      expect(typeof body.error.message).toBe("string");
-      expect(body.error.code).toBe("NOT_FOUND");
-      expect(body.error.message).toBe("Resource not found");
+      expect(typeof body.error.code).toBe('string');
+      expect(typeof body.error.message).toBe('string');
+      expect(body.error.code).toBe('NOT_FOUND');
+      expect(body.error.message).toBe('Resource not found');
     });
 
-    it("error responses may include details array", async () => {
+    it('error responses may include details array', async () => {
       const res = await fetch(`${base}/err-details`);
       const body = (await res.json()) as V2ErrorResponse;
 
       expect(body.success).toBe(false);
       expect(body.error.details).toEqual([
-        { field: "name", message: "required" },
+        { field: 'name', message: 'required' },
       ]);
     });
 
-    it("paginated responses have { data, meta: { total, per_page, current_page, last_page } }", async () => {
+    it('paginated responses have { data, meta: { total, per_page, current_page, last_page } }', async () => {
       const res = await fetch(`${base}/paginated`);
       const body = (await res.json()) as V2SuccessResponse<unknown[]> & {
         meta: PaginationMeta;
@@ -150,8 +150,8 @@ describe("V2 API Contract", () => {
   // Source-level: V2 helpers match contract types
   // ---------------------------------------------------------------------------
 
-  describe("V2 helpers source contract", () => {
-    it("jsonOk sends { success: true, data } envelope", () => {
+  describe('V2 helpers source contract', () => {
+    it('jsonOk sends { success: true, data } envelope', () => {
       let sentBody: unknown;
       const fakeRes = {
         json(body: unknown) {
@@ -163,7 +163,7 @@ describe("V2 API Contract", () => {
       expect(sentBody).toEqual({ success: true, data: { x: 1 } });
     });
 
-    it("jsonOk attaches meta when provided", () => {
+    it('jsonOk attaches meta when provided', () => {
       let sentBody: unknown;
       const fakeRes = {
         json(body: unknown) {
@@ -181,7 +181,7 @@ describe("V2 API Contract", () => {
       expect((sentBody as V2SuccessResponse<unknown[]>).meta).toEqual(meta);
     });
 
-    it("jsonOk omits meta when not provided", () => {
+    it('jsonOk omits meta when not provided', () => {
       let sentBody: unknown;
       const fakeRes = {
         json(body: unknown) {
@@ -189,11 +189,11 @@ describe("V2 API Contract", () => {
         },
       } as unknown as Response;
 
-      jsonOk(fakeRes, "ok");
-      expect(sentBody).not.toHaveProperty("meta");
+      jsonOk(fakeRes, 'ok');
+      expect(sentBody).not.toHaveProperty('meta');
     });
 
-    it("jsonError sends { success: false, error: { code, message } } with status", () => {
+    it('jsonError sends { success: false, error: { code, message } } with status', () => {
       let sentStatus: number | undefined;
       let sentBody: unknown;
       const fakeRes = {
@@ -206,15 +206,15 @@ describe("V2 API Contract", () => {
         },
       } as unknown as Response;
 
-      jsonError(fakeRes, "FORBIDDEN", "No access", 403);
+      jsonError(fakeRes, 'FORBIDDEN', 'No access', 403);
       expect(sentStatus).toBe(403);
       expect(sentBody).toEqual({
         success: false,
-        error: { code: "FORBIDDEN", message: "No access" },
+        error: { code: 'FORBIDDEN', message: 'No access' },
       });
     });
 
-    it("jsonError defaults to 400 status", () => {
+    it('jsonError defaults to 400 status', () => {
       let sentStatus: number | undefined;
       const fakeRes = {
         status(code: number) {
@@ -224,11 +224,11 @@ describe("V2 API Contract", () => {
         json() {},
       } as unknown as Response;
 
-      jsonError(fakeRes, "BAD_REQUEST", "Oops");
+      jsonError(fakeRes, 'BAD_REQUEST', 'Oops');
       expect(sentStatus).toBe(400);
     });
 
-    it("paginate returns { data, meta } with correct structure", () => {
+    it('paginate returns { data, meta } with correct structure', () => {
       const items = [1, 2, 3, 4, 5, 6, 7];
       const result = paginate(items, 2, 3);
 
@@ -241,7 +241,7 @@ describe("V2 API Contract", () => {
       });
     });
 
-    it("paginate clamps page to valid range", () => {
+    it('paginate clamps page to valid range', () => {
       const result = paginate([1, 2], 99, 10);
       expect(result.meta.current_page).toBe(1);
       expect(result.data).toEqual([1, 2]);
@@ -252,7 +252,7 @@ describe("V2 API Contract", () => {
   // Auth middleware
   // ---------------------------------------------------------------------------
 
-  describe("Auth middleware", () => {
+  describe('Auth middleware', () => {
     // Build an app that simulates the V2 auth pattern from index.ts:
     //   apiKeyOrSessionAuth(capability) → checks Bearer header first, else session
     function buildAuthApp(): express.Express {
@@ -261,7 +261,7 @@ describe("V2 API Contract", () => {
 
       // Simulated middleware: set userId if session or apiKey present
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        const session = req["session"] as
+        const session = req['session'] as
           { user?: { id?: number } } | undefined;
         const sessionUserId = session?.user?.id;
         const apiKeyUserId = (req as any).apiKey?.userId as number | undefined;
@@ -270,39 +270,39 @@ describe("V2 API Contract", () => {
       });
 
       // Protected endpoint: requireUser equivalent
-      app.get("/protected", (req: Request, res: Response) => {
+      app.get('/protected', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         jsonOk(res, { userId });
       });
 
       // Admin-only endpoint
-      app.get("/admin", (req: Request, res: Response) => {
+      app.get('/admin', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         // Simulate isAdmin check
         const isAdmin = (req as any)._isAdmin === true;
         if (!isAdmin) {
-          jsonError(res, "FORBIDDEN", "Admin access required", 403);
+          jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
           return;
         }
         jsonOk(res, { userId, admin: true });
       });
 
       // POST endpoint for CSRF tests
-      app.post("/protected", (req: Request, res: Response) => {
+      app.post('/protected', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
-        jsonOk(res, { userId, method: "POST" });
+        jsonOk(res, { userId, method: 'POST' });
       });
 
       return app;
@@ -319,28 +319,28 @@ describe("V2 API Contract", () => {
       await stopServer(server);
     });
 
-    it("rejects requests without session or API key", async () => {
+    it('rejects requests without session or API key', async () => {
       const res = await fetch(`${base}/protected`);
       const body = (await res.json()) as V2ErrorResponse;
 
       expect(res.status).toBe(401);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe("UNAUTHORIZED");
+      expect(body.error.code).toBe('UNAUTHORIZED');
     });
 
-    it("accepts valid session cookie (simulated via cookie header)", async () => {
+    it('accepts valid session cookie (simulated via cookie header)', async () => {
       // Build app with session injection BEFORE route handlers
       const app = express();
       app.use(express.json());
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as any)["session"] = { user: { id: 42 } };
+        (req as any)['session'] = { user: { id: 42 } };
         (req as any)._authUserId = 42;
         next();
       });
-      app.get("/protected", (req: Request, res: Response) => {
+      app.get('/protected', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         jsonOk(res, { userId });
@@ -356,19 +356,19 @@ describe("V2 API Contract", () => {
       await stopServer(s2);
     });
 
-    it("accepts valid API key with matching capability", async () => {
+    it('accepts valid API key with matching capability', async () => {
       // Build app with apiKey injection BEFORE route handlers
       const app = express();
       app.use(express.json());
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as any).apiKey = { userId: 7, capabilities: ["servers.*"] };
+        (req as any).apiKey = { userId: 7, capabilities: ['servers.*'] };
         (req as any)._authUserId = 7;
         next();
       });
-      app.get("/protected", (req: Request, res: Response) => {
+      app.get('/protected', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         jsonOk(res, { userId });
@@ -384,44 +384,44 @@ describe("V2 API Contract", () => {
       await stopServer(s2);
     });
 
-    it("rejects API key without required capability", async () => {
+    it('rejects API key without required capability', async () => {
       const app = express();
       app.use(express.json());
-      app.get("/protected", (_req: Request, res: Response) => {
-        jsonError(res, "FORBIDDEN", "Insufficient API key scope", 403);
+      app.get('/protected', (_req: Request, res: Response) => {
+        jsonError(res, 'FORBIDDEN', 'Insufficient API key scope', 403);
       });
 
       const { server: s2, base: b2 } = await startServer(app);
       const res = await fetch(`${b2}/protected`, {
-        headers: { Authorization: "Bearer ak_some_key" },
+        headers: { Authorization: 'Bearer ak_some_key' },
       });
       const body = (await res.json()) as V2ErrorResponse;
 
       expect(res.status).toBe(403);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe("FORBIDDEN");
+      expect(body.error.code).toBe('FORBIDDEN');
       await stopServer(s2);
     });
 
-    it("admin routes require admin session", async () => {
+    it('admin routes require admin session', async () => {
       // Build app with non-admin session injection BEFORE routes
       const app = express();
       app.use(express.json());
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as any)["session"] = { user: { id: 1 } };
+        (req as any)['session'] = { user: { id: 1 } };
         (req as any)._authUserId = 1;
         (req as any)._isAdmin = false;
         next();
       });
-      app.get("/admin", (req: Request, res: Response) => {
+      app.get('/admin', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         const isAdmin = (req as any)._isAdmin === true;
         if (!isAdmin) {
-          jsonError(res, "FORBIDDEN", "Admin access required", 403);
+          jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
           return;
         }
         jsonOk(res, { userId, admin: true });
@@ -433,30 +433,30 @@ describe("V2 API Contract", () => {
 
       expect(res.status).toBe(403);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe("FORBIDDEN");
-      expect(body.error.message).toContain("Admin");
+      expect(body.error.code).toBe('FORBIDDEN');
+      expect(body.error.message).toContain('Admin');
       await stopServer(s2);
     });
 
-    it("admin routes accept admin session", async () => {
+    it('admin routes accept admin session', async () => {
       // Build app with admin session injection BEFORE routes
       const app = express();
       app.use(express.json());
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as any)["session"] = { user: { id: 1 } };
+        (req as any)['session'] = { user: { id: 1 } };
         (req as any)._authUserId = 1;
         (req as any)._isAdmin = true;
         next();
       });
-      app.get("/admin", (req: Request, res: Response) => {
+      app.get('/admin', (req: Request, res: Response) => {
         const userId = (req as any)._authUserId as number | undefined;
         if (!userId) {
-          jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+          jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
           return;
         }
         const isAdmin = (req as any)._isAdmin === true;
         if (!isAdmin) {
-          jsonError(res, "FORBIDDEN", "Admin access required", 403);
+          jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
           return;
         }
         jsonOk(res, { userId, admin: true });
@@ -480,20 +480,20 @@ describe("V2 API Contract", () => {
   // CSRF protection
   // ---------------------------------------------------------------------------
 
-  describe("CSRF protection", () => {
-    it("rejects POST without CSRF token", async () => {
+  describe('CSRF protection', () => {
+    it('rejects POST without CSRF token', async () => {
       // V2 routes use hybrid auth. With session cookie, CSRF is required.
       const app = express();
       app.use(express.json());
-      app.post("/api/v2/test", (_req: Request, res: Response) => {
+      app.post('/api/v2/test', (_req: Request, res: Response) => {
         res.json({ ok: true });
       });
 
       const { server: s, base } = await startServer(app);
 
       const res = await fetch(`${base}/api/v2/test`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ x: 1 }),
       });
 
@@ -504,69 +504,69 @@ describe("V2 API Contract", () => {
       await stopServer(s);
     });
 
-    it("exempts Bearer-authenticated requests from CSRF", () => {
+    it('exempts Bearer-authenticated requests from CSRF', () => {
       // Request with Authorization: Bearer → CSRF exempt
       const reqBearer = {
-        path: "/api/v2/servers",
-        headers: { authorization: "Bearer ak_test123" },
-      } as Pick<Request, "path" | "headers">;
+        path: '/api/v2/servers',
+        headers: { authorization: 'Bearer ak_test123' },
+      } as Pick<Request, 'path' | 'headers'>;
 
       expect(isCsrfExempt(reqBearer)).toBe(true);
     });
 
-    it("does NOT exempt session-authenticated POSTs from CSRF", () => {
+    it('does NOT exempt session-authenticated POSTs from CSRF', () => {
       // Session-only request (no Bearer header) on V2 hybrid path → NOT exempt
       const reqSession = {
-        path: "/api/v2/servers",
+        path: '/api/v2/servers',
         headers: {},
-      } as Pick<Request, "path" | "headers">;
+      } as Pick<Request, 'path' | 'headers'>;
 
       expect(isCsrfExempt(reqSession)).toBe(false);
     });
 
-    it("exempts WebSocket upgrade paths", () => {
+    it('exempts WebSocket upgrade paths', () => {
       expect(
-        isCsrfExempt({ path: "/ws", headers: {} } as Pick<
+        isCsrfExempt({ path: '/ws', headers: {} } as Pick<
           Request,
-          "path" | "headers"
+          'path' | 'headers'
         >),
       ).toBe(true);
       expect(
-        isCsrfExempt({ path: "/ws/servers", headers: {} } as Pick<
+        isCsrfExempt({ path: '/ws/servers', headers: {} } as Pick<
           Request,
-          "path" | "headers"
+          'path' | 'headers'
         >),
       ).toBe(true);
     });
 
-    it("exempts client / application / health mounts (Bearer-only)", () => {
+    it('exempts client / application / health mounts (Bearer-only)', () => {
       const mounts = [
-        "/api/client/test",
-        "/api/application/test",
-        "/api/health",
+        '/api/client/test',
+        '/api/application/test',
+        '/api/health',
       ];
       for (const path of mounts) {
         expect(
           isCsrfExempt({ path, headers: {} } as Pick<
             Request,
-            "path" | "headers"
+            'path' | 'headers'
           >),
         ).toBe(true);
       }
     });
 
-    it("does NOT exempt V2 session routes without Bearer", () => {
+    it('does NOT exempt V2 session routes without Bearer', () => {
       const v2Paths = [
-        "/api/v2/servers",
-        "/api/v2/files",
-        "/api/v2/backups",
-        "/api/v2/admin/users",
+        '/api/v2/servers',
+        '/api/v2/files',
+        '/api/v2/backups',
+        '/api/v2/admin/users',
       ];
       for (const path of v2Paths) {
         expect(
           isCsrfExempt({ path, headers: {} } as Pick<
             Request,
-            "path" | "headers"
+            'path' | 'headers'
           >),
         ).toBe(false);
       }
@@ -577,18 +577,18 @@ describe("V2 API Contract", () => {
   // Rate limiting
   // ---------------------------------------------------------------------------
 
-  describe("Rate limiting", () => {
-    it("returns 429 when rate limit exceeded", async () => {
+  describe('Rate limiting', () => {
+    it('returns 429 when rate limit exceeded', async () => {
       // Simulate rate-limited endpoint
       const app = express();
       app.use(express.json());
       let hitCount = 0;
-      app.get("/api/v2/test", (_req: Request, res: Response) => {
+      app.get('/api/v2/test', (_req: Request, res: Response) => {
         hitCount++;
         if (hitCount > 3) {
           res.status(429).json({
             success: false,
-            error: { code: "RATE_LIMITED", message: "Too many requests" },
+            error: { code: 'RATE_LIMITED', message: 'Too many requests' },
           });
           return;
         }
@@ -609,21 +609,21 @@ describe("V2 API Contract", () => {
 
       expect(res.status).toBe(429);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe("RATE_LIMITED");
-      expect(typeof body.error.message).toBe("string");
+      expect(body.error.code).toBe('RATE_LIMITED');
+      expect(typeof body.error.message).toBe('string');
 
       await stopServer(server);
     });
 
-    it("rate limit response follows V2 error envelope", async () => {
+    it('rate limit response follows V2 error envelope', async () => {
       const app = express();
       app.use(express.json());
-      app.get("/limited", (_req: Request, res: Response) => {
+      app.get('/limited', (_req: Request, res: Response) => {
         res.status(429).json({
           success: false,
           error: {
-            code: "RATE_LIMITED",
-            message: "Rate limit exceeded. Retry after 60s.",
+            code: 'RATE_LIMITED',
+            message: 'Rate limit exceeded. Retry after 60s.',
           },
         });
       });
@@ -633,9 +633,9 @@ describe("V2 API Contract", () => {
       const body = (await res.json()) as V2ErrorResponse;
 
       expect(body.success).toBe(false);
-      expect(body.error).toHaveProperty("code");
-      expect(body.error).toHaveProperty("message");
-      expect(body.error.code).toBe("RATE_LIMITED");
+      expect(body.error).toHaveProperty('code');
+      expect(body.error).toHaveProperty('message');
+      expect(body.error.code).toBe('RATE_LIMITED');
       await stopServer(server);
     });
   });
@@ -644,59 +644,59 @@ describe("V2 API Contract", () => {
   // V2 source structure: route mounts
   // ---------------------------------------------------------------------------
 
-  describe("V2 route structure (source inspection)", () => {
+  describe('V2 route structure (source inspection)', () => {
     let indexSrc: string;
 
     beforeEach(async () => {
-      const fs = await import("fs");
-      const path = await import("path");
+      const fs = await import('fs');
+      const path = await import('path');
       indexSrc = fs.readFileSync(
-        path.resolve(__dirname, "../src/modules/api/v2/index.ts"),
-        "utf8",
+        path.resolve(__dirname, '../src/modules/api/v2/index.ts'),
+        'utf8',
       );
     });
 
-    it("mounts servers under /api/v2/servers with servers.* capability", () => {
-      expect(indexSrc).toContain("/servers");
-      expect(indexSrc).toContain("servers.*");
+    it('mounts servers under /api/v2/servers with servers.* capability', () => {
+      expect(indexSrc).toContain('/servers');
+      expect(indexSrc).toContain('servers.*');
     });
 
-    it("mounts files under /api/v2/files with files.* capability", () => {
-      expect(indexSrc).toContain("/files");
-      expect(indexSrc).toContain("files.*");
+    it('mounts files under /api/v2/files with files.* capability', () => {
+      expect(indexSrc).toContain('/files');
+      expect(indexSrc).toContain('files.*');
     });
 
-    it("mounts backups under /api/v2/backups with backups.* capability", () => {
-      expect(indexSrc).toContain("/backups");
-      expect(indexSrc).toContain("backups.*");
+    it('mounts backups under /api/v2/backups with backups.* capability', () => {
+      expect(indexSrc).toContain('/backups');
+      expect(indexSrc).toContain('backups.*');
     });
 
-    it("mounts admin routes with admin-only session auth", () => {
-      expect(indexSrc).toContain("/admin");
-      expect(indexSrc).toContain("isAuthenticated(true)");
+    it('mounts admin routes with admin-only session auth', () => {
+      expect(indexSrc).toContain('/admin');
+      expect(indexSrc).toContain('isAuthenticated(true)');
     });
 
-    it("uses hybrid auth (API key or session) for server-scoped endpoints", () => {
-      expect(indexSrc).toContain("apiKeyOrSessionAuth");
+    it('uses hybrid auth (API key or session) for server-scoped endpoints', () => {
+      expect(indexSrc).toContain('apiKeyOrSessionAuth');
     });
 
-    it("mounts account routes with session-only auth (no API key)", () => {
-      expect(indexSrc).toContain("/account");
+    it('mounts account routes with session-only auth (no API key)', () => {
+      expect(indexSrc).toContain('/account');
       // account uses isAuthenticated() without capability check
       const accountLine = indexSrc
-        .split("\n")
+        .split('\n')
         .find(
           (l) =>
-            l.includes("/account") &&
-            l.includes("isAuthenticated") &&
-            !l.includes("passkey") &&
-            !l.includes("import"),
+            l.includes('/account') &&
+            l.includes('isAuthenticated') &&
+            !l.includes('passkey') &&
+            !l.includes('import'),
         );
-      expect(accountLine).toContain("isAuthenticated()");
+      expect(accountLine).toContain('isAuthenticated()');
     });
 
-    it("scopes everything under /api/v2 prefix", () => {
-      expect(indexSrc).toContain("/api/v2");
+    it('scopes everything under /api/v2 prefix', () => {
+      expect(indexSrc).toContain('/api/v2');
     });
   });
 });

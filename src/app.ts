@@ -1,34 +1,34 @@
-import { getSettings } from "./handlers/settingsCache";
-import type { Request, Response, NextFunction } from "express";
-import type { Socket } from "net";
-import express from "express";
-import prisma from "./db";
-import path from "path";
-import session from "express-session";
-import { loadEnv } from "./handlers/envLoader";
-import { databaseLoader } from "./handlers/databaseLoader";
-import { loadModules } from "./handlers/modulesLoader";
-import logger, { drawBanner } from "./handlers/logger";
-import config from "../storage/config.json";
-import cookieParser from "cookie-parser";
-import expressWs from "express-ws";
-import compression from "compression";
-import { i18nMiddleware, initI18n } from "./services/i18n";
-import { templateConfigMiddleware } from "./handlers/templateConfig";
-import { getSessionStore } from "./handlers/sessionStore";
-import { settingsLoader } from "./handlers/settingsLoader";
-import { loadAddons, setAppInstance } from "./handlers/addonHandler";
+import { getSettings } from './handlers/settingsCache';
+import type { Request, Response, NextFunction } from 'express';
+import type { Socket } from 'net';
+import express from 'express';
+import prisma from './db';
+import path from 'path';
+import session from 'express-session';
+import { loadEnv } from './handlers/envLoader';
+import { databaseLoader } from './handlers/databaseLoader';
+import { loadModules } from './handlers/modulesLoader';
+import logger, { drawBanner } from './handlers/logger';
+import config from '../storage/config.json';
+import cookieParser from 'cookie-parser';
+import expressWs from 'express-ws';
+import compression from 'compression';
+import { i18nMiddleware, initI18n } from './services/i18n';
+import { templateConfigMiddleware } from './handlers/templateConfig';
+import { getSessionStore } from './handlers/sessionStore';
+import { settingsLoader } from './handlers/settingsLoader';
+import { loadAddons, setAppInstance } from './handlers/addonHandler';
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
-} from "./handlers/uiComponentHandler";
-import { startPlayerStatsCollection } from "./handlers/playerStatsCollector";
-import { startScheduler } from "./handlers/schedulerWorker";
-import { initEggCatalogue } from "./handlers/eggCatalogueService";
-import { reenqueueQueuedInstalls } from "./handlers/installQueue";
-import crypto from "crypto";
-import helmet from "helmet";
-import { createRedisRateLimit } from "./handlers/utils/security/redisRateLimit";
+} from './handlers/uiComponentHandler';
+import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
+import { startScheduler } from './handlers/schedulerWorker';
+import { initEggCatalogue } from './handlers/eggCatalogueService';
+import { reenqueueQueuedInstalls } from './handlers/installQueue';
+import crypto from 'crypto';
+import helmet from 'helmet';
+import { createRedisRateLimit } from './handlers/utils/security/redisRateLimit';
 import {
   HSTS_MAX_AGE_S,
   SECURITY_CACHE_REFRESH_MS,
@@ -39,29 +39,29 @@ import {
   URLENCODED_LIMIT,
   RAW_BODY_LIMIT,
   PRISMA_DISCONNECT_TIMEOUT_MS,
-} from "./config/defaults";
-import icon from "./utils/icon";
-import { getClientIp } from "./utils/ip";
+} from './config/defaults';
+import icon from './utils/icon';
+import { getClientIp } from './utils/ip';
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from "./handlers/utils/security/csrfProtection";
-import { isCsrfExempt } from "./handlers/utils/security/csrfRouting";
+} from './handlers/utils/security/csrfProtection';
+import { isCsrfExempt } from './handlers/utils/security/csrfRouting';
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from "./handlers/errorPages";
-import { logSystemError } from "./services/systemLogService";
+} from './handlers/errorPages';
+import { logSystemError } from './services/systemLogService';
 
-import fs from "fs";
-import { getConfig } from "./config";
-import { installRenderResolver } from "./handlers/renderResolver";
-import { validationErrorBoundary } from "./utils/validation";
+import fs from 'fs';
+import { getConfig } from './config';
+import { installRenderResolver } from './handlers/renderResolver';
+import { validationErrorBoundary } from './utils/validation';
 import {
   refreshSecurityCache,
   getSecurityCache,
-} from "./handlers/securityCache";
+} from './handlers/securityCache';
 
 loadEnv();
 
@@ -82,7 +82,7 @@ try {
 process.env.SESSION_SECRET = panelConfig.sessionSecret;
 
 // Store asset base URL on app instance for templateConfig middleware access
-app.set("assetBaseUrl", panelConfig.assetBaseUrl || "");
+app.set('assetBaseUrl', panelConfig.assetBaseUrl || '');
 
 const port = panelConfig.port;
 const name = panelConfig.name;
@@ -90,20 +90,20 @@ const airlinkVersion = config.meta.version;
 const airlinkCodename = config.meta.codename;
 
 // ── Startup banner ───────────────────────────────────────────────────────────
-drawBanner("Airlink Panel", airlinkVersion, airlinkCodename);
+drawBanner('Airlink Panel', airlinkVersion, airlinkCodename);
 
 // Trust proxy — when behind Nginx/Caddy/Cloudflare, trust forwarded headers
 // so req.ip reflects the real client IP. Configurable via TRUST_PROXY env or
 // the admin "behind reverse proxy" toggle (DB). Env takes precedence.
 if (panelConfig.trustProxy) {
-  app.set("trust proxy", 1);
+  app.set('trust proxy', 1);
 } else {
   // Fall back to DB setting (async, after startup)
   (async () => {
     try {
       const s = await getSettings();
       if (s?.behindReverseProxy) {
-        app.set("trust proxy", 1);
+        app.set('trust proxy', 1);
       }
     } catch {
       // DB not ready yet — leave default (no trust proxy)
@@ -115,66 +115,83 @@ if (panelConfig.trustProxy) {
 const expressWsInstance = expressWs(app);
 
 // Load static files
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Runtime uploads (user-uploaded files)
-app.use("/uploads", express.static(path.join(__dirname, "../storage/uploads")));
+app.use('/uploads', express.static(path.join(__dirname, '../storage/uploads')));
 
-// Themes — built-in + user-installed
-app.use("/themes", express.static(path.join(__dirname, "../storage/themes")));
+// Themes — built-in (immutable shipped CSS)
+app.use(
+  '/themes/builtin',
+  express.static(path.join(__dirname, '../storage/themes/builtin')),
+);
+
+// Themes — user-installed (uploaded via admin)
+app.use(
+  '/themes/user',
+  express.static(path.join(__dirname, '../storage/themes/user')),
+);
 
 // Root favicon (runtime-generated)
 app.use(
-  "/favicon.ico",
-  express.static(path.join(__dirname, "../public/assets/favicon.ico")),
+  '/favicon.ico',
+  express.static(path.join(__dirname, '../public/assets/favicon.ico')),
 );
 
 // Vendor — serve node_modules directly at /vendor/
 // Force correct MIME types for JS files to prevent "text/html" mismatches
 // when express.static falls through (missing files, directory index, etc).
 app.use(
-  "/vendor",
-  express.static(path.join(__dirname, "../node_modules"), {
+  '/vendor',
+  express.static(path.join(__dirname, '../node_modules'), {
     setHeaders(res, filePath) {
-      if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
-        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
-      } else if (filePath.endsWith(".cjs")) {
-        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
-      } else if (filePath.endsWith(".css")) {
-        res.setHeader("Content-Type", "text/css; charset=utf-8");
-      } else if (filePath.endsWith(".json")) {
-        res.setHeader("Content-Type", "application/json; charset=utf-8");
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.cjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      } else if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
       }
       // Prevent browsers from MIME-sniffing JS as HTML
-      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
     },
   }),
 );
 
 // Fonts — Inter via @fontsource
 app.use(
-  "/vendor/@fontsource-variable/inter",
+  '/vendor/@fontsource-variable/inter',
   express.static(
-    path.join(__dirname, "../node_modules/@fontsource-variable/inter"),
+    path.join(__dirname, '../node_modules/@fontsource-variable/inter'),
   ),
 );
 
+// Monaco editor — file.ejs and the image editor load /monaco/vs/loader.js and
+// configure require.config({ paths: { vs: '/monaco/vs' } }) against this mount.
+// The package ships its AMD build under min/, so serve that as the root.
+app.use(
+  '/monaco',
+  express.static(path.join(__dirname, '../node_modules/monaco-editor/min')),
+);
+
 // Load views
-const viewsPath = path.join(__dirname, "../views");
-app.set("views", viewsPath);
-app.set("view engine", "ejs");
+const viewsPath = path.join(__dirname, '../views');
+app.set('views', viewsPath);
+app.set('view engine', 'ejs');
 // Cache compiled EJS templates in memory. In production this is already the
 // default, but setting it explicitly ensures it's on regardless of NODE_ENV.
-app.set("view cache", true);
+app.set('view cache', true);
 
-const addonViewsDir = path.join(__dirname, "../../storage/addons");
+const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
 // Load compression
 app.use(compression());
 
 // htmx detection — sets req.htmx for all downstream handlers
 app.use((req: any, _res, next) => {
-  req.htmx = req.headers["hx-request"] === "true";
+  req.htmx = req.headers['hx-request'] === 'true';
   next();
 });
 
@@ -185,7 +202,7 @@ app.use((req: any, _res, next) => {
 // Nonce middleware — generates a per-request CSP nonce for XSS protection.
 // Exposed as res.locals.nonce (EJS templates) and req.nonce (downstream handlers).
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const nonce = crypto.randomBytes(16).toString("base64");
+  const nonce = crypto.randomBytes(16).toString('base64');
   res.locals.nonce = nonce;
   req.nonce = nonce;
   next();
@@ -193,11 +210,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // X-Request-Id — propagates a stable request ID from browser → panel → daemon for distributed tracing.
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const incoming = req.headers["x-request-id"];
+  const incoming = req.headers['x-request-id'];
   const requestId =
-    (typeof incoming === "string" && incoming.trim()) || crypto.randomUUID();
-  req.headers["x-request-id"] = requestId;
-  res.setHeader("X-Request-Id", requestId);
+    (typeof incoming === 'string' && incoming.trim()) || crypto.randomUUID();
+  req.headers['x-request-id'] = requestId;
+  res.setHeader('X-Request-Id', requestId);
   next();
 });
 
@@ -209,50 +226,50 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   // Per-request protocol — respects trust proxy + X-Forwarded-Proto
   const reqIsHttps =
-    req.protocol === "https" || req.headers["x-forwarded-proto"] === "https";
+    req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https';
 
   helmet({
     noSniff: true,
-    frameguard: { action: "deny" },
+    frameguard: { action: 'deny' },
     hsts: reqIsHttps
       ? { maxAge: HSTS_MAX_AGE_S, includeSubDomains: true, preload: true }
       : false,
-    crossOriginOpenerPolicy: reqIsHttps ? { policy: "same-origin" } : false,
+    crossOriginOpenerPolicy: reqIsHttps ? { policy: 'same-origin' } : false,
     originAgentCluster: reqIsHttps ? undefined : false,
-    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-    permittedCrossDomainPolicies: { permittedPolicies: "none" },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 
     contentSecurityPolicy: panelConfig.cspEnabled
       ? {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-              "'self'",
-              `'nonce-${nonce}'`,
-              "'strict-dynamic'",
-              // Alpine.js uses new Function() internally for directive compilation
-              "'unsafe-eval'",
-              // Dev-only: Eruda console debugger loaded from CDN
-              ...(!panelConfig.isProduction
-                ? ["https://cdn.jsdelivr.net"]
-                : []),
-            ],
-            scriptSrcAttr: ["'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            fontSrc: ["'self'", "data:"],
-            imgSrc: ["'self'", "data:", "blob:", "https:"],
-            connectSrc: [
-              "'self'",
-              ...(reqIsHttps ? ["wss:"] : ["ws:", "wss:"]),
-              ...(panelConfig.allowedOrigins || []),
-            ],
-            frameAncestors: ["'none'"],
-            objectSrc: ["'none'"],
-            baseUri: ["'self'"],
-            formAction: ["'self'"],
-            ...(reqIsHttps ? { upgradeInsecureRequests: [] } : {}),
-          },
-        }
+        directives: {
+          defaultSrc: ['\'self\''],
+          scriptSrc: [
+            '\'self\'',
+            `'nonce-${nonce}'`,
+            '\'strict-dynamic\'',
+            // Alpine.js uses new Function() internally for directive compilation
+            '\'unsafe-eval\'',
+            // Dev-only: Eruda console debugger loaded from CDN
+            ...(!panelConfig.isProduction
+              ? ['https://cdn.jsdelivr.net']
+              : []),
+          ],
+          scriptSrcAttr: ['\'unsafe-inline\''],
+          styleSrc: ['\'self\'', '\'unsafe-inline\''],
+          fontSrc: ['\'self\'', 'data:'],
+          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
+          connectSrc: [
+            '\'self\'',
+            ...(reqIsHttps ? ['wss:'] : ['ws:', 'wss:']),
+            ...(panelConfig.allowedOrigins || []),
+          ],
+          frameAncestors: ['\'none\''],
+          objectSrc: ['\'none\''],
+          baseUri: ['\'self\''],
+          formAction: ['\'self\''],
+          ...(reqIsHttps ? { upgradeInsecureRequests: [] } : {}),
+        },
+      }
       : false,
   })(req, res, next);
 });
@@ -269,7 +286,7 @@ app.use((req, res, next) => {
       req,
       res,
       403,
-      "You're blocked so shoo you are not welcome here...",
+      'You\'re blocked so shoo you are not welcome here...',
     );
     return;
   }
@@ -281,7 +298,7 @@ app.use(
   createRedisRateLimit({
     windowMs: panelConfig.rateLimitWindowMs || RATE_LIMIT_WINDOW_MS,
     max: panelConfig.rateLimitMax || GLOBAL_RATE_LIMIT_MAX,
-    keyPrefix: "rl:global",
+    keyPrefix: 'rl:global',
     skip: () =>
       panelConfig.rateLimitMax === 0 || !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
@@ -304,7 +321,7 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       maxAge: panelConfig.sessionMaxAgeMs || SESSION_MAX_AGE_MS,
       ...(panelConfig.cookieDomain ? { domain: panelConfig.cookieDomain } : {}),
     },
@@ -365,6 +382,45 @@ app.use((req, res, next) => {
 // Handle CSRF errors
 app.use(handleCsrfError);
 
+// Daemon → panel install-status callback. The daemon reports install and
+// reinstall completion here; it authenticates with its node key as a Bearer
+// token, which is also what exempts the request from CSRF (no cookies).
+app.post('/api/daemon/install/status', async (req, res) => {
+  const auth = req.headers.authorization;
+  const key = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
+  const node = key ? await prisma.node.findFirst({ where: { key } }) : null;
+  if (!node) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+
+  const body = req.body as { id?: unknown; status?: unknown; error?: unknown };
+  const id = typeof body.id === 'string' ? body.id : '';
+  const status = typeof body.status === 'string' ? body.status : '';
+  if (!id || (status !== 'installed' && status !== 'failed')) {
+    res.status(400).json({ error: 'invalid payload' });
+    return;
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { UUID: id },
+    select: { nodeId: true },
+  });
+  if (!server || server.nodeId !== node.id) {
+    res.status(404).json({ error: 'unknown server' });
+    return;
+  }
+
+  await prisma.server.update({
+    where: { UUID: id },
+    data: { Installing: false, Queued: false },
+  });
+  if (status === 'failed') {
+    logger.warn(`Daemon reported failed install for ${id}: ${String(body.error ?? 'unknown error')}`);
+  }
+  res.json({ ok: true });
+});
+
 app.use(async (_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
@@ -385,7 +441,7 @@ app.use(async (_req, res, next) => {
   res.locals.isMobileViewport = false;
 
   try {
-    const { getSettings } = await import("./handlers/settingsCache");
+    const { getSettings } = await import('./handlers/settingsCache');
     res.locals.settings = await getSettings();
   } catch {
     res.locals.settings = null;
@@ -414,41 +470,41 @@ async function seedDefaultRoles() {
   const now = new Date();
   const defaults = [
     {
-      name: "owner",
-      displayName: "Owner",
-      description: "Full system owner",
+      name: 'owner',
+      displayName: 'Owner',
+      description: 'Full system owner',
       isAdmin: true,
       isSystem: true,
       sortOrder: 0,
-      permissions: "[]",
+      permissions: '[]',
       createdAt: now,
       updatedAt: now,
     },
     {
-      name: "admin",
-      displayName: "Admin",
-      description: "Administrator",
+      name: 'admin',
+      displayName: 'Admin',
+      description: 'Administrator',
       isAdmin: true,
       isSystem: true,
       sortOrder: 1,
-      permissions: "[]",
+      permissions: '[]',
       createdAt: now,
       updatedAt: now,
     },
     {
-      name: "user",
-      displayName: "User",
-      description: "Standard user",
+      name: 'user',
+      displayName: 'User',
+      description: 'Standard user',
       isAdmin: false,
       isSystem: true,
       sortOrder: 2,
-      permissions: "[]",
+      permissions: '[]',
       createdAt: now,
       updatedAt: now,
     },
   ];
   await prisma.role.createMany({ data: defaults });
-  logger.info("Default roles seeded");
+  logger.info('Default roles seeded');
 }
 
 // Load modules, plugins, database and start the webserver
@@ -456,23 +512,23 @@ async function seedDefaultRoles() {
   try {
     // ── Initialize with ora-style progress ─────────────────────────────────
     await databaseLoader();
-    logger.info("Database connected");
+    logger.info('Database connected');
 
     // Seed default roles if missing (needed for fresh DBs after prisma db push).
     await seedDefaultRoles();
 
     await settingsLoader();
-    logger.info("Settings loaded");
+    logger.info('Settings loaded');
 
     initializeDefaultUIComponents();
-    logger.info("UI components initialized");
+    logger.info('UI components initialized');
 
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
-    logger.info("Modules loaded");
+    logger.info('Modules loaded');
 
     setAppInstance(app);
     await loadAddons(app);
-    logger.info("Addons loaded");
+    logger.info('Addons loaded');
 
     // Consistent request-validation boundary
     app.use(validationErrorBoundary);
@@ -481,22 +537,22 @@ async function seedDefaultRoles() {
     app.use(errorPageHandler);
 
     // Global unhandled error logger — captures errors that slip through middleware
-    process.on("unhandledRejection", (reason: unknown) => {
+    process.on('unhandledRejection', (reason: unknown) => {
       const msg = reason instanceof Error ? reason.message : String(reason);
       const stack = reason instanceof Error ? reason.stack : undefined;
       logSystemError({
         message: `Unhandled rejection: ${msg}`,
         stack,
-        component: "api",
-        severity: "error",
+        component: 'api',
+        severity: 'error',
       });
     });
-    process.on("uncaughtException", (err: Error) => {
+    process.on('uncaughtException', (err: Error) => {
       logSystemError({
         message: `Uncaught exception: ${err.message}`,
         stack: err.stack,
-        component: "api",
-        severity: "critical",
+        component: 'api',
+        severity: 'critical',
       });
     });
 
@@ -504,7 +560,7 @@ async function seedDefaultRoles() {
       // Direct TLS — when cert/key are provided, serve HTTPS without a reverse proxy
       if (panelConfig.tlsCertPath && panelConfig.tlsKeyPath) {
         try {
-          const https = require("node:https") as typeof import("node:https");
+          const https = require('node:https') as typeof import('node:https');
           const options = {
             cert: fs.readFileSync(panelConfig.tlsCertPath),
             key: fs.readFileSync(panelConfig.tlsKeyPath),
@@ -531,16 +587,16 @@ async function seedDefaultRoles() {
     initEggCatalogue().catch((err) =>
       logger.warn(`Store catalogue init failed: ${err?.message || err}`),
     );
-    import("./handlers/realtime/nodeStatsWs").then((m) =>
+    import('./handlers/realtime/nodeStatsWs').then((m) =>
       m.attachNodeStatsWs(server),
     );
 
     let shuttingDown = false;
     const connections = new Set<Socket>();
 
-    server.on("connection", (conn) => {
+    server.on('connection', (conn) => {
       connections.add(conn);
-      conn.on("close", () => connections.delete(conn));
+      conn.on('close', () => connections.delete(conn));
     });
 
     async function shutdown(signal: string) {
@@ -576,7 +632,7 @@ async function seedDefaultRoles() {
           prisma.$disconnect(),
           new Promise((_, reject) =>
             setTimeout(
-              () => reject(new Error("prisma disconnect timeout")),
+              () => reject(new Error('prisma disconnect timeout')),
               PRISMA_DISCONNECT_TIMEOUT_MS,
             ),
           ),
@@ -592,10 +648,10 @@ async function seedDefaultRoles() {
       process.exit(0);
     }
 
-    process.on("SIGINT", () => shutdown("SIGINT"));
-    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
-    logger.error("Failed to load modules or database:", err);
+    logger.error('Failed to load modules or database:', err);
   }
 })();
 

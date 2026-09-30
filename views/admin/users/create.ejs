@@ -1,298 +1,310 @@
-<%- include('../../components/header', { title: t('adminCreateUserTitle') }) %>
+<%- include('../../layouts/admin', { title: t('adminCreateUserTitle') }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: t('admin') },
-        { label: t('breadcrumbUsers'), href: '/admin/users' },
-        { label: t('create') }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= t('adminCreateUserTitle') %></h1>
-          <p class="al-page-desc"><%= t('adminCreateUserText') %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <%- include('../../components/ui/save-button', { formId: 'createUserForm', label: t('create'), iconName: 'plus' }) %>
-          <a href="/admin/users" class="al-btn-secondary"><%= t('backToUsers') %></a>
-        </div>
-      </div>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbUsers'), url: '/admin/users' },
+    { label: t('create') }
+  ] }) %>
+</div>
 
-      <div class="al-page-body space-y-5" x-data="adminUserCreate()">
-        <template x-if="error">
-          <div class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)" x-text="error"></div>
-        </template>
-        <form id="createUserForm" @submit.prevent="submit()" class="space-y-5">
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('userInformation') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="userEmail" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('email') %>:
-                </label>
-                <input id="userEmail" x-model="form.email" type="email" class="al-input" placeholder="example@domain.com">
-              </div>
-
-              <div>
-                <label for="userUsername" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('username') %>:
-                </label>
-                <input id="userUsername" x-model="form.username" @input="validateUsername()" type="text" class="al-input" placeholder="username">
-                <div id="username-criteria" class="mt-2 space-y-1">
-                  <p class="text-xs" :class="usernameLenOk ? 'text-green-500' : (form.username ? 'text-red-500' : 'text-neutral-400')" style="">
-                    <span class="crit-icon" x-text="usernameLenOk ? '✓' : (form.username ? '✗' : '—')"></span> <%= t('usernameChars3to32') %>
-                  </p>
-                  <p class="text-xs" :class="usernameCharsOk ? 'text-green-500' : (form.username ? 'text-red-500' : 'text-neutral-400')" style="">
-                    <span class="crit-icon" x-text="usernameCharsOk ? '✓' : (form.username ? '✗' : '—')"></span> <%= t('lettersAndNumbersOnly') %>
-                  </p>
-                </div>
-              </div>
-
-              <div class="md:col-span-2">
-                <label for="userDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= t('description') %>
-                </label>
-                <textarea id="userDescription" x-model="form.description" rows="3" class="al-input" placeholder="<%= t('optionalDescription') %>"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('security') %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="userPassword" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
-                  <%= t('password') %>:
-                </label>
-                <input id="userPassword" x-model="form.password" @input="validatePassword()" type="password" class="al-input" placeholder="********">
-                <div id="password-criteria" class="mt-2 space-y-1">
-                  <p class="text-xs" :class="pwLenOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
-                    <span class="crit-icon" x-text="pwLenOk ? '✓' : (form.password ? '✗' : '—')"></span> <%= t('atLeast8Characters') %>
-                  </p>
-                  <p class="text-xs" :class="pwLetterOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
-                    <span class="crit-icon" x-text="pwLetterOk ? '✓' : (form.password ? '✗' : '—')"></span> <%= t('atLeastOneLetter') %>
-                  </p>
-                  <p class="text-xs" :class="pwNumberOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
-                    <span class="crit-icon" x-text="pwNumberOk ? '✓' : (form.password ? '✗' : '—')"></span> <%= t('atLeastOneNumber') %>
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <label for="userConfirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= t('confirmPassword') %>
-                </label>
-                <input id="userConfirmPassword" x-model="form.confirmPassword" type="password" class="al-input" placeholder="********">
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= t('role') %>
-                      </h3>
-                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= t('roleDescriptionCreate') %>
-                      </p>
-                    </div>
-                    <select x-model="form.role" class="al-input w-44">
-                      <option value="user"><%= t('roleUser') %></option>
-                      <option value="privileged"><%= t('rolePrivileged') %></option>
-                      <option value="admin"><%= t('roleAdmin') %></option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= t('adminStatus') %>
-                      </h3>
-                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= t('adminDescription') %>
-                      </p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" x-model="form.isAdmin" aria-label="<%= t('adminStatus') %>" class="sr-only peer">
-                      <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('serverLimits') %></h2>
-            <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('leaveBlankForDefaults') %></p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> <%= t('serverLimit') %></label>
-                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('maxServersThisUserCanCreate') %></p>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> <%= t('maxMemory') %></label>
-                <input type="hidden" :value="form.maxMemory">
-                <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="maxMemoryDisplay" data-hidden="maxMemory"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> <%= t('maxCpu') %> <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
-                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> <%= t('maxStorage') %></label>
-                <input type="hidden" :value="form.maxStorage">
-                <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="maxStorageDisplay" data-hidden="maxStorage"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-              </div>
-              <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> <%= t('maxDatabases') %></label>
-                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('totalDatabasesAcrossAllServers') %></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-2">
-            <a href="/admin/users" class="al-btn-secondary"><%= t('cancel') %></a>
-            <button type="submit" class="al-btn-primary" :disabled="saving">
-              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-              <span x-text="saving ? '<%= t('creating') %>' : '<%= t('createUser') %>'"><%= t('createUser') %></span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('adminCreateUserTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminCreateUserText') %></p>
   </div>
-</main>
+  <div>
+    <a href="/admin/users" class="al-btn-secondary"><%= t('backToUsers') %></a>
+    <button type="submit" form="createUserForm" class="al-btn-primary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <span><%= t('create') %></span>
+    </button>
+  </div>
+</div>
 
-<%- include('../../components/loading-popup') %>
+<div class="al-page-body space-y-5">
+  <div id="createUserError" class="hidden al-alert-danger" role="alert" aria-live="assertive">
+    <%- icon('alert-triangle', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+    <p id="createUserErrorText" class="al-alert-title"></p>
+  </div>
 
-<style>
-#createUserForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
+  <form id="createUserForm" onsubmit="event.preventDefault(); submitUserCreate()" class="space-y-5">
+    <%- include('../../partials/csrf') %>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('userInformation') %></span></h2>
+      <div class="al-card-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="userEmail" class="al-form-label"><%= t('email') %></label>
+            <input id="userEmail" type="email" class="al-form-input" placeholder="<%= t('fieldEmailPlaceholder') %>" required>
+          </div>
+          <div class="al-form-field">
+            <label for="userUsername" class="al-form-label"><%= t('username') %></label>
+            <input id="userUsername" type="text" class="al-form-input" placeholder="<%= t('fieldUsername') %>" required>
+            <ul class="al-pw-criteria" id="username-criteria" data-criteria>
+              <li data-met="false" data-criterion="username-length">
+                <span class="al-criteria-mark" aria-hidden="true"><%- icon('circle', { class: 'al-criteria-pending' }) %><%- icon('check', { class: 'al-criteria-done' }) %></span>
+                <span><%= t('usernameChars3to32') %></span>
+              </li>
+              <li data-met="false" data-criterion="username-chars">
+                <span class="al-criteria-mark" aria-hidden="true"><%- icon('circle', { class: 'al-criteria-pending' }) %><%- icon('check', { class: 'al-criteria-done' }) %></span>
+                <span><%= t('lettersAndNumbersOnly') %></span>
+              </li>
+            </ul>
+          </div>
+          <div class="al-form-field md:col-span-2">
+            <label for="userDescription" class="al-form-label"><%= t('description') %></label>
+            <textarea id="userDescription" rows="3" class="al-form-textarea" placeholder="<%= t('optionalDescription') %>"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('security') %></span></h2>
+      <div class="al-card-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="userPassword" class="al-form-label"><%= t('password') %></label>
+            <input id="userPassword" type="password" class="al-form-input" placeholder="********" required>
+            <ul class="al-pw-criteria" id="password-criteria" data-criteria>
+              <li data-met="false" data-criterion="password-length">
+                <span class="al-criteria-mark" aria-hidden="true"><%- icon('circle', { class: 'al-criteria-pending' }) %><%- icon('check', { class: 'al-criteria-done' }) %></span>
+                <span><%= t('atLeast8Characters') %></span>
+              </li>
+              <li data-met="false" data-criterion="password-letter">
+                <span class="al-criteria-mark" aria-hidden="true"><%- icon('circle', { class: 'al-criteria-pending' }) %><%- icon('check', { class: 'al-criteria-done' }) %></span>
+                <span><%= t('atLeastOneLetter') %></span>
+              </li>
+              <li data-met="false" data-criterion="password-number">
+                <span class="al-criteria-mark" aria-hidden="true"><%- icon('circle', { class: 'al-criteria-pending' }) %><%- icon('check', { class: 'al-criteria-done' }) %></span>
+                <span><%= t('atLeastOneNumber') %></span>
+              </li>
+            </ul>
+          </div>
+          <div class="al-form-field">
+            <label for="userConfirmPassword" class="al-form-label"><%= t('confirmPassword') %></label>
+            <input id="userConfirmPassword" type="password" class="al-form-input" placeholder="********" required>
+          </div>
+        </div>
+
+        <div class="al-setting-row">
+          <div class="al-setting-copy">
+            <h3 class="al-setting-title"><%= t('role') %></h3>
+            <p class="al-setting-desc"><%= t('roleDescriptionCreate') %></p>
+          </div>
+          <div class="al-setting-control">
+            <select id="createRole" name="role" class="al-form-select" aria-label="<%= t('role') %>">
+              <option value="user"><%= t('roleUser') %></option>
+              <option value="privileged"><%= t('rolePrivileged') %></option>
+              <option value="admin"><%= t('roleAdmin') %></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="al-setting-row">
+          <div class="al-setting-copy">
+            <h3 class="al-setting-title"><%= t('adminStatus') %></h3>
+            <p class="al-setting-desc"><%= t('adminDescription') %></p>
+          </div>
+          <div class="al-setting-control">
+            <label class="relative inline-flex items-center cursor-pointer gap-3">
+              <input type="checkbox" id="createIsAdmin" aria-label="<%= t('adminStatus') %>" class="sr-only peer">
+              <span class="al-toggle-track"><span class="al-toggle-dot"></span></span>
+              <span id="createIsAdminLabel" class="text-sm font-medium al-text-strong"><%= t('disabled') %></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><span class="al-card-title"><%= t('serverLimits') %></span></h2>
+      <div class="al-card-body">
+        <p class="al-form-help mb-4"><%= t('leaveBlankForDefaults') %></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="al-form-field">
+            <label for="createServerLimit" class="al-form-label"><%= t('serverLimit') %></label>
+            <input type="number" id="createServerLimit" name="serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input">
+            <p class="al-form-help"><%= t('maxServersThisUserCanCreate') %></p>
+          </div>
+          <div class="al-form-field">
+            <label for="createMaxMemoryDisplay" class="al-form-label"><%= t('maxMemory') %></label>
+            <input type="hidden" id="createMaxMemory" name="maxMemory">
+            <div class="flex items-stretch gap-0">
+              <input type="number" id="createMaxMemoryDisplay" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input rounded-l-xl flex-1 border-r-0">
+              <button type="button" class="al-format-switcher" data-format-switcher data-display="createMaxMemoryDisplay" data-hidden="createMaxMemory" data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+            </div>
+          </div>
+          <div class="al-form-field">
+            <label for="createMaxCpu" class="al-form-label"><%= t('maxCpu') %> <span class="al-form-help">(%)</span></label>
+            <input type="number" id="createMaxCpu" name="maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input">
+          </div>
+          <div class="al-form-field">
+            <label for="createMaxStorageDisplay" class="al-form-label"><%= t('maxStorage') %></label>
+            <input type="hidden" id="createMaxStorage" name="maxStorage">
+            <div class="flex items-stretch gap-0">
+              <input type="number" id="createMaxStorageDisplay" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input rounded-l-xl flex-1 border-r-0">
+              <button type="button" class="al-format-switcher" data-format-switcher data-display="createMaxStorageDisplay" data-hidden="createMaxStorage" data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+            </div>
+          </div>
+          <div class="al-form-field">
+            <label for="createMaxDatabases" class="al-form-label"><%= t('maxDatabases') %></label>
+            <input type="number" id="createMaxDatabases" name="maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-form-input">
+            <p class="al-form-help"><%= t('totalDatabasesAcrossAllServers') %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <a href="/admin/users" class="al-btn-secondary"><%= t('cancel') %></a>
+      <button type="submit" id="createUserSubmitBtn" class="al-btn-primary">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span id="createUserSubmitText"><%= t('createUser') %></span>
+      </button>
+    </div>
+  </form>
+</div>
 
 <script nonce="<%- nonce %>">
-function adminUserCreate() {
-  return {
-    saving: false,
-    error: '',
-    form: {
-      email: '', username: '', description: '', password: '', confirmPassword: '',
-      role: 'user', isAdmin: false,
-      serverLimit: null, maxMemory: null, maxMemoryDisplay: null,
-      maxCpu: null, maxStorage: null, maxStorageDisplay: null, maxDatabases: null
-    },
-    usernameLenOk: false,
-    usernameCharsOk: false,
-    pwLenOk: false,
-    pwLetterOk: false,
-    pwNumberOk: false,
+(function() {
+  var saving = false;
+  var errorEl = document.getElementById('createUserError');
+  var errorText = document.getElementById('createUserErrorText');
+  var submitBtn = document.getElementById('createUserSubmitBtn');
+  var submitText = document.getElementById('createUserSubmitText');
+  var usernameInput = document.getElementById('userUsername');
+  var passwordInput = document.getElementById('userPassword');
+  var usernameCriteria = document.getElementById('username-criteria');
+  var passwordCriteria = document.getElementById('password-criteria');
+  var isAdminToggle = document.getElementById('createIsAdmin');
+  var isAdminLabel = document.getElementById('createIsAdminLabel');
 
-    validateUsername() {
-      const v = this.form.username;
-      this.usernameLenOk = v.length >= 3 && v.length <= 32;
-      this.usernameCharsOk = /^[a-zA-Z0-9]+$/.test(v);
-    },
-    validatePassword() {
-      const v = this.form.password;
-      this.pwLenOk = v.length >= 8;
-      this.pwLetterOk = /[A-Za-z]/.test(v);
-      this.pwNumberOk = /\d/.test(v);
-    },
-    async submit() {
-      if (this.saving) return;
-      this.error = '';
-      const { email, username, password, confirmPassword } = this.form;
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
 
-      if (!email || !username || !password) {
-        this.error = '<%= t('createUserAllFieldsRequired') %>';
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        this.error = '<%= t('createUserInvalidEmail') %>';
-        return;
-      }
-      this.validateUsername();
-      if (!this.usernameLenOk || !this.usernameCharsOk) {
-        this.error = '<%= t('createUserInvalidUsername') %>';
-        return;
-      }
-      this.validatePassword();
-      if (!this.pwLenOk || !this.pwLetterOk || !this.pwNumberOk) {
-        this.error = '<%= t('createUserInvalidPassword') %>';
-        return;
-      }
+  function hideError() {
+    errorEl.classList.add('hidden');
+    errorText.textContent = '';
+  }
 
-      this.saving = true;
-      const loader = showLoadingPopup('<%= t('createUserLoading') %>', '<%= t('createUserProcessing') %>');
-      loader.updateProgress(20, '<%= t('createUserSending') %>');
+  // Paint a criteria list: data-met drives the colour, data-touched decides
+  // whether an unmet rule reads as a warning (typed) or as pending (empty).
+  function setCriteria(list, value, states) {
+    if (!list) return;
+    list.setAttribute('data-touched', value ? 'true' : 'false');
+    list.querySelectorAll('li').forEach(function(li) {
+      li.dataset.met = states[li.dataset.criterion] ? 'true' : 'false';
+    });
+  }
 
-      try {
-        const limits = {};
-        ['serverLimit', 'maxCpu', 'maxDatabases', 'maxMemory', 'maxStorage'].forEach(k => {
-          const v = this.form[k];
-          limits[k] = (v === null || v === '' || v === undefined) ? null : parseInt(v, 10);
-        });
-        // Handle display fields
-        if (this.form.maxMemoryDisplay !== null && this.form.maxMemory === null) limits.maxMemory = parseInt(this.form.maxMemoryDisplay, 10) || null;
-        if (this.form.maxStorageDisplay !== null && this.form.maxStorage === null) limits.maxStorage = parseInt(this.form.maxStorageDisplay, 10) || null;
+  function validateUsername() {
+    var v = usernameInput.value;
+    var states = {
+      'username-length': v.length >= 3 && v.length <= 32,
+      'username-chars': /^[a-zA-Z0-9]+$/.test(v)
+    };
+    setCriteria(usernameCriteria, v, states);
+    return states['username-length'] && states['username-chars'];
+  }
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const res = await fetch('/api/v2/admin/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-          body: JSON.stringify({
-            email, username, password, role: this.form.role,
-            isAdmin: this.form.isAdmin, ...limits
-          }),
-        });
-        if (res.ok) {
-          loader.updateProgress(100, '<%= t('createUserSuccess') %>');
-          setTimeout(() => {
-            loader.close();
-            showToast('<%= t('createUserAdded') %>', 'success');
-            setTimeout(() => { Turbo.visit('/admin/users?err=none'); }, 1000);
-          }, 500);
-        } else {
-          const err = await res.json().catch(() => ({ message: 'Unknown error' }));
-          loader.close();
-          this.error = err.message || '<%= t('createUserFailed') %>';
-        }
-      } catch (e) {
-        loader.close();
-        this.error = '<%= t('createUserNetworkError') %>';
-      } finally {
-        this.saving = false;
+  function validatePassword() {
+    var v = passwordInput.value;
+    var states = {
+      'password-length': v.length >= 8,
+      'password-letter': /[A-Za-z]/.test(v),
+      'password-number': /\d/.test(v)
+    };
+    setCriteria(passwordCriteria, v, states);
+    return states['password-length'] && states['password-letter'] && states['password-number'];
+  }
+
+  usernameInput.addEventListener('input', validateUsername);
+  passwordInput.addEventListener('input', validatePassword);
+  validateUsername();
+  validatePassword();
+  isAdminToggle.addEventListener('change', function() {
+    isAdminLabel.textContent = this.checked ? '<%= t('enabled') %>' : '<%= t('disabled') %>';
+  });
+
+  window.submitUserCreate = async function() {
+    if (saving) return;
+    hideError();
+
+    var email = document.getElementById('userEmail').value;
+    var username = usernameInput.value;
+    var password = passwordInput.value;
+    var confirmPassword = document.getElementById('userConfirmPassword').value;
+
+    if (!email || !username || !password) {
+      showError('<%= t('createUserAllFieldsRequired') %>');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('<%= t('createUserInvalidEmail') %>');
+      return;
+    }
+    if (!validateUsername()) {
+      showError('<%= t('createUserInvalidUsername') %>');
+      return;
+    }
+    if (!validatePassword()) {
+      showError('<%= t('createUserInvalidPassword') %>');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showError('<%= t('passwordsDoNotMatch') %>');
+      return;
+    }
+
+    saving = true;
+    submitBtn.disabled = true;
+    submitText.textContent = '<%= t('creating') %>';
+
+    try {
+      var maxMemoryDisplay = document.getElementById('createMaxMemoryDisplay').value;
+      var maxMemoryHidden = document.getElementById('createMaxMemory').value;
+      var maxStorageDisplay = document.getElementById('createMaxStorageDisplay').value;
+      var maxStorageHidden = document.getElementById('createMaxStorage').value;
+
+      var limits = {
+        serverLimit: parseInt(document.getElementById('createServerLimit').value) || null,
+        maxCpu: parseInt(document.getElementById('createMaxCpu').value) || null,
+        maxDatabases: parseInt(document.getElementById('createMaxDatabases').value) || null,
+        maxMemory: maxMemoryDisplay !== '' ? parseInt(maxMemoryDisplay, 10) : (maxMemoryHidden !== '' ? parseInt(maxMemoryHidden, 10) : null),
+        maxStorage: maxStorageDisplay !== '' ? parseInt(maxStorageDisplay, 10) : (maxStorageHidden !== '' ? parseInt(maxStorageHidden, 10) : null),
+      };
+
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var res = await fetch('/admin/users/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({
+          email: email, username: username, password: password,
+          role: document.getElementById('createRole').value,
+          isAdmin: isAdminToggle.checked, description: document.getElementById('userDescription').value,
+          ...limits
+        }),
+      });
+      if (res.ok) {
+        window.location.href = '/admin/users?err=none';
+      } else {
+        var err = await res.json().catch(function() { return { message: 'Unknown error' }; });
+        showError(err.message || err.error || '<%= t('createUserFailed') %>');
       }
+    } catch (e) {
+      showError('<%= t('createUserNetworkError') %>');
+    } finally {
+      saving = false;
+      submitBtn.disabled = false;
+      submitText.textContent = '<%= t('createUser') %>';
     }
   };
-}
+})();
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../../layouts/admin-footer') %>

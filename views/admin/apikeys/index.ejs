@@ -1,0 +1,525 @@
+<%- include('../../layouts/admin', { title: t('apiKeysManagement') }) %>
+
+<style>
+.category-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.15s ease;
+  opacity: 0;
+}
+.category-panel.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.category-panel > div {
+  overflow: hidden;
+  min-height: 0;
+}
+</style>
+
+<div class="px-4 sm:px-6 lg:px-8 pt-4">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbApiKeys') }
+  ] }) %>
+
+  <div class="flex items-start justify-between gap-4 mt-4">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('apiKeysManagement') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('apiKeysDesc') %></p>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <button id="openCreateApiKeyModal" type="button" class="al-btn-primary">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span><%= t('createApiKey') %></span>
+      </button>
+      <a href="/admin/api/docs" class="al-btn-secondary"><%= t('apiDocs') %></a>
+    </div>
+  </div>
+
+  <div class="mt-5 space-y-3" id="admin-apikeys-list">
+    <% if (apiKeys.length === 0) { %>
+      <div class="flex flex-col items-center justify-center py-24 text-center al-card">
+        <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noApiKeysYetDesc') %></p>
+      </div>
+    <% } else { %>
+      <% apiKeys.forEach(function(apiKey) { %>
+        <div class="al-card p-5" data-api-key-id="<%= apiKey.id %>">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-3 mb-1">
+                <span class="text-sm font-medium api-key-name" style="color:var(--theme-text-strong)"><%= apiKey.name %></span>
+                <% if (apiKey.active) { %>
+                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);"><%= t('apiKeyActive') %></span>
+                <% } else { %>
+                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset" style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:color-mix(in srgb, var(--theme-danger) 25%, transparent);"><%= t('apiKeyInactive') %></span>
+                <% } %>
+              </div>
+              <% if (apiKey.description) { %>
+                <p class="text-xs api-key-desc" style="color:var(--theme-text-muted)"><%= apiKey.description %></p>
+              <% } %>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= Array.isArray(apiKey.permissions) ? JSON.stringify(apiKey.permissions) : '[]' %>)"
+                class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-[var(--theme-bg-hover)] hover:text-[var(--theme-text-strong)]" style="color:var(--theme-text-muted)"
+                aria-label="<%= t('ariaEditApiKey') %>">
+                <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+              </button>
+              <form id="toggleKeyForm_<%= apiKey.id %>" action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                <%- include('../../partials/csrf') %>
+                <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" aria-label="<%= apiKey.active ? t('ariaDisableApiKey') : t('ariaEnableApiKey') %>">
+                  <% if (apiKey.active) { %>
+                    <%- icon('x-circle', { size: 16, class: 'shrink-0' }) %>
+                  <% } else { %>
+                    <%- icon('check-circle', { size: 16, class: 'shrink-0' }) %>
+                  <% } %>
+                </button>
+              </form>
+              <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
+                <%- include('../../partials/csrf') %>
+                <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="<%= t('ariaDeleteApiKey') %>">
+                  <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                </button>
+              </form>
+            </div>
+          </div>
+          <% if (apiKey.key) { %>
+          <div class="mt-3 flex items-center gap-3 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+            <code class="flex-1 text-xs font-mono truncate" style="color:var(--theme-text-muted)"><%= apiKey.key.substring(0, 12) %>••••••••••••</code>
+            <button onclick="copyToClipboard('<%= apiKey.key %>')" type="button"
+              class="text-[11px] font-medium px-2 py-1 rounded-md transition hover:bg-[var(--theme-bg-hover)] inline-flex items-center gap-1.5" style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+              <%- icon('copy', { class: 'size-3', strokeWidth: 1.5 }) %>
+              <%= t('copyKey') %>
+            </button>
+          </div>
+          <% } %>
+          <div class="mt-2 flex items-center gap-3 text-xs" style="color:var(--theme-text-muted)">
+            <span><%= t('apiKeyCreatedBy') %> <span class="font-medium" style="color:var(--theme-text-strong)">System</span></span>
+            <span>·</span>
+            <span><%= new Date(apiKey.createdAt).toLocaleDateString() %></span>
+          </div>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+</div>
+
+<!-- Create API Key Modal -->
+<div id="createApiKeyModal" class="al-modal-overlay al-modal-md" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" style="display:none;">
+  <div class="al-modal-backdrop" data-close-modal></div>
+  <div class="al-modal-container">
+    <div class="al-modal-header">
+      <h3 id="createApiKeyTitle" class="al-modal-title"><%= t('createApiKeyModal') %></h3>
+      <button type="button" class="al-modal-close" data-close-modal aria-label="Close">
+        <%- icon('x', { class: 'w-5 h-5' }) %>
+      </button>
+    </div>
+    <form id="createApiKeyForm">
+      <div class="al-modal-body space-y-5">
+        <%- include('../../partials/csrf') %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="al-form-field">
+            <label for="name" class="al-form-label"><%= t('apiKeyName') %></label>
+            <input type="text" name="name" id="name" required class="al-form-input" placeholder="<%= t('apiKeyNamePlaceholder') %>">
+          </div>
+          <div class="al-form-field">
+            <label for="description" class="al-form-label"><%= t('apiKeyDescriptionLabel') %> <span class="font-normal" style="color:var(--theme-text-placeholder)"><%= t('apiKeyOptionalLabel') %></span></label>
+            <input type="text" name="description" id="description" class="al-form-input" placeholder="<%= t('apiKeyPlaceholderDesc') %>">
+          </div>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted)"><%= t('apiKeyPresets') %></p>
+          <div class="flex gap-2 flex-wrap">
+            <button type="button" data-preset="full-admin" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyFullAdmin') %>
+            </button>
+            <button type="button" data-preset="read-only" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyReadOnlyPreset') %>
+            </button>
+            <button type="button" data-preset="server-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyServerManager') %>
+            </button>
+            <button type="button" data-preset="user-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyUserManager') %>
+            </button>
+            <button type="button" data-preset="node-monitor" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyNodeMonitor') %>
+            </button>
+            <button type="button" data-preset="none" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)">
+              <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyClearAll') %>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted)"><%= t('apiKeyPermissions') %></p>
+          <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <% ['servers', 'users', 'nodes', 'settings'].forEach(function(category) { %>
+              <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border)">
+                <button type="button"
+                  class="category-toggle w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[var(--theme-bg-hover)]"
+                  style="background:var(--theme-bg-secondary)"
+                  data-category="create_<%= category %>">
+                  <div class="flex items-center gap-2">
+                    <% if (category === 'servers') { %>
+                      <%- icon('server', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+                    <% } else if (category === 'users') { %>
+                      <%- icon('user', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+                    <% } else if (category === 'nodes') { %>
+                      <%- icon('hard-drive', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+                    <% } else { %>
+                      <%- icon('key', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+                    <% } %>
+                    <span class="text-xs font-medium capitalize" style="color:var(--theme-text)"><%= category %></span>
+                    <span class="category-count text-[10px]" style="color:var(--theme-text-muted)" data-category="<%= category %>">0 selected</span>
+                  </div>
+                  <%- icon('chevron-down', { size: 14, class: 'category-chevron transition-transform duration-200 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+                </button>
+                <div class="category-panel" data-create-category="<%= category %>" style="background:var(--theme-bg-card)">
+                  <div class="px-4 py-3 border-t" style="border-color:var(--theme-border)">
+                    <div class="grid grid-cols-2 gap-2">
+                      <% allPermissions.filter(function(p) { return p.value.indexOf(category) !== -1; }).forEach(function(permission) { %>
+                        <label class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-150 hover:border-[var(--theme-border)] has-[:checked]:border-[var(--theme-accent)] has-[:checked]:bg-[var(--theme-accent-subtle)]"
+                          style="border-color:var(--theme-border);background:var(--theme-bg-secondary)">
+                          <input type="checkbox"
+                            data-perm="<%= permission.value %>"
+                            class="create-perm h-3.5 w-3.5 rounded shrink-0">
+                          <span class="text-xs" style="color:var(--theme-text-muted)"><%= permission.name.split(' - ')[1] || permission.name %></span>
+                        </label>
+                      <% }); %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+      <div class="al-modal-footer">
+        <button type="button" data-close-modal class="al-btn-secondary"><%= t('cancel') %></button>
+        <button type="submit" class="al-btn-primary">
+          <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
+          <%= t('createApiKey') %>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit API Key Modal -->
+<div id="editApiKeyModal" class="al-modal-overlay al-modal-lg" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" style="display:none;">
+  <div class="al-modal-backdrop" data-close-modal></div>
+  <div class="al-modal-container max-h-[85vh] flex flex-col">
+    <div class="al-modal-header shrink-0">
+      <p id="editApiKeyTitle" class="al-modal-title"><%= t('editApiKey') %></p>
+      <button type="button" class="al-modal-close" data-close-modal aria-label="Close">
+        <%- icon('x', { class: 'w-5 h-5' }) %>
+      </button>
+    </div>
+    <form id="editApiKeyForm" class="flex flex-col min-h-0 flex-1">
+      <%- include('../../partials/csrf') %>
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="al-form-field">
+            <label class="al-form-label"><%= t('apiKeyName') %></label>
+            <input type="text" name="name" id="edit-name" required class="al-form-input" placeholder="<%= t('apiKeyNamePlaceholder') %>">
+          </div>
+          <div class="al-form-field">
+            <label class="al-form-label"><%= t('apiKeyDescriptionLabel') %></label>
+            <input type="text" name="description" id="edit-description" class="al-form-input" placeholder="<%= t('apiKeyPlaceholderDesc') %>">
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('selectAll') %></button>
+          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('clearAll') %></button>
+          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted)"><%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('apiKeyReadOnlyPerm') %></button>
+        </div>
+
+        <div class="space-y-3">
+          <% ['servers', 'users', 'nodes', 'settings'].forEach(function(cat) { %>
+          <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border)">
+            <div class="flex items-center justify-between px-4 py-2.5" style="background:var(--theme-bg-secondary)">
+              <p class="text-xs font-semibold capitalize" style="color:var(--theme-text-muted)"><%= cat %></p>
+              <button type="button" class="edit-select-category text-xs transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted)" data-category="<%= cat %>"><%= t('selectAll') %></button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
+              <% allPermissions.filter(function(p) { return p.value.indexOf(cat) !== -1; }).forEach(function(permission) { %>
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox"
+                  data-perm="<%= permission.value %>"
+                  class="edit-perm h-3.5 w-3.5 rounded focus:ring-[var(--theme-border-accent)]">
+                <span class="text-xs transition group-hover:text-[var(--theme-text-strong)]" style="color:var(--theme-text)"><%= permission.name %></span>
+              </label>
+              <% }); %>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+      <div class="al-modal-footer shrink-0">
+        <button type="button" data-close-modal class="al-btn-secondary"><%= t('cancel') %></button>
+        <button type="submit" class="al-btn-primary">
+          <%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %>
+          <%= t('apiKeySaveChanges') %>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<% if (created) { %>
+<div id="createdKeyModal" class="al-modal-overlay al-modal-md" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" style="display:none;">
+  <div class="al-modal-backdrop" data-close-modal></div>
+  <div class="al-modal-container">
+    <div class="al-modal-header">
+      <h3 id="createdKeyTitle" class="al-modal-title"><%= t('apiKeyCreatedTitle') %></h3>
+      <button type="button" class="al-modal-close" data-close-modal aria-label="Close">
+        <%- icon('x', { class: 'w-5 h-5' }) %>
+      </button>
+    </div>
+    <div class="al-modal-body">
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('apiKeyCopyNotice') %></p>
+      <div class="flex items-center gap-2 rounded-xl px-3 py-2.5" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+        <code class="flex-1 text-xs font-mono break-all" style="color:var(--theme-text-strong)"><%= created %></code>
+      </div>
+    </div>
+    <div class="al-modal-footer">
+      <button type="button" data-close-modal class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('close') %></button>
+      <button type="button" id="copyCreatedKeyBtn" class="al-btn-primary"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('apiKeyCopyKeyBtn') %></button>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var createForm = { name: '', description: '', permissions: [] };
+  var editForm = { id: 0, name: '', description: '', permissions: [] };
+  var activePreset = null;
+  var createdKey = '<%= typeof created !== "undefined" ? created : "" %>';
+
+  var presetPermissions = {
+    'full-admin': ['airlink.api.servers.read','airlink.api.servers.create','airlink.api.servers.update','airlink.api.servers.delete','airlink.api.users.read','airlink.api.users.create','airlink.api.users.update','airlink.api.users.delete','airlink.api.nodes.read','airlink.api.nodes.create','airlink.api.nodes.update','airlink.api.nodes.delete','airlink.api.settings.read','airlink.api.settings.update'],
+    'read-only': ['airlink.api.servers.read','airlink.api.users.read','airlink.api.nodes.read','airlink.api.settings.read'],
+    'server-manager': ['airlink.api.servers.read','airlink.api.servers.create','airlink.api.servers.update','airlink.api.servers.delete','airlink.api.nodes.read'],
+    'user-manager': ['airlink.api.users.read','airlink.api.users.create','airlink.api.users.update','airlink.api.users.delete','airlink.api.servers.read'],
+    'node-monitor': ['airlink.api.nodes.read','airlink.api.servers.read'],
+    'none': []
+  };
+
+  var allPermissions = <%- JSON.stringify(allPermissions) %>;
+
+  function showModal(id) { document.getElementById(id).style.display = ''; document.body.style.overflow = 'hidden'; }
+  function hideModal(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
+
+  function applyPreset(name) {
+    activePreset = name;
+    createForm.permissions = [].concat(presetPermissions[name] || []);
+    document.querySelectorAll('.preset-btn').forEach(function(btn) {
+      var isActive = btn.dataset.preset === name;
+      if (isActive) {
+        btn.style.background = 'var(--theme-primary)';
+        btn.style.color = 'var(--theme-accent-text)';
+        btn.style.borderColor = 'var(--theme-primary)';
+      } else {
+        btn.style.background = 'var(--theme-bg-card)';
+        btn.style.color = 'var(--theme-text)';
+        btn.style.borderColor = 'var(--theme-border)';
+      }
+    });
+    syncCreatePermCheckboxes();
+  }
+
+  function toggleCreatePerm(perm) {
+    var idx = createForm.permissions.indexOf(perm);
+    if (idx === -1) createForm.permissions.push(perm);
+    else createForm.permissions.splice(idx, 1);
+    syncCreatePermCheckboxes();
+  }
+
+  function syncCreatePermCheckboxes() {
+    document.querySelectorAll('.create-perm').forEach(function(cb) {
+      cb.checked = createForm.permissions.indexOf(cb.dataset.perm) !== -1;
+    });
+    updateCategoryCounts('create');
+  }
+
+  function toggleEditPerm(perm) {
+    var idx = editForm.permissions.indexOf(perm);
+    if (idx === -1) editForm.permissions.push(perm);
+    else editForm.permissions.splice(idx, 1);
+    syncEditPermCheckboxes();
+  }
+
+  function syncEditPermCheckboxes() {
+    document.querySelectorAll('.edit-perm').forEach(function(cb) {
+      cb.checked = editForm.permissions.indexOf(cb.dataset.perm) !== -1;
+    });
+    updateCategoryCounts('edit');
+  }
+
+  function updateCategoryCounts(prefix) {
+    var perms = prefix === 'create' ? createForm.permissions : editForm.permissions;
+    ['servers','users','nodes','settings'].forEach(function(cat) {
+      var count = perms.filter(function(p) { return p.indexOf(cat) !== -1; }).length;
+      var el = document.querySelector('[data-category="' + cat + '"]');
+      if (el) el.textContent = count + ' selected';
+    });
+  }
+
+  async function submitCreate() {
+    try {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var params = new URLSearchParams();
+      params.append('name', document.getElementById('name').value);
+      params.append('description', document.getElementById('description').value);
+      createForm.permissions.forEach(function(p) { params.append('permissions', p); });
+      var res = await fetch('/admin/apikeys/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-csrf-token': csrfToken },
+        body: params,
+      });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else if (res.ok) {
+        window.location.reload();
+      } else {
+        var data = await res.json().catch(function() { return {}; });
+        showToast(data.error || '<%= t('apiKeyCreateFailed') || 'Failed to create key.' %>', 'error');
+      }
+    } catch (e) { showToast('<%= t('networkError') || 'Network error.' %>', 'error'); }
+  }
+
+  async function submitEdit() {
+    try {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var params = new URLSearchParams();
+      params.append('name', document.getElementById('edit-name').value);
+      params.append('description', document.getElementById('edit-description').value);
+      editForm.permissions.forEach(function(p) { params.append('permissions', p); });
+      var res = await fetch('/admin/apikeys/edit/' + editForm.id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-csrf-token': csrfToken },
+        body: params,
+      });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else if (res.ok) {
+        window.location.reload();
+      } else {
+        var data = await res.json().catch(function() { return {}; });
+        showToast(data.error || '<%= t('apiKeyUpdateFailed') || 'Failed to update key.' %>', 'error');
+      }
+    } catch (e) { showToast('<%= t('networkError') || 'Network error.' %>', 'error'); }
+  }
+
+  async function deleteKey(keyId) {
+    try {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      var res = await fetch('/admin/apikeys/delete/' + keyId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-csrf-token': csrfToken }
+      });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else if (res.ok) {
+        window.location.reload();
+      } else {
+        var data = await res.json().catch(function() { return {}; });
+        showToast(data.error || '<%= t('apiKeyDeleteFailed') || 'Failed to delete key.' %>', 'error');
+      }
+    } catch (e) { showToast('<%= t('networkError') || 'Network error.' %>', 'error'); }
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() { showToast('<%= t('apiKeyCopied') || 'API key copied to clipboard' %>', 'success'); }).catch(function() { showToast('<%= t('apiKeyCopyFailed') || 'Failed to copy' %>', 'error'); });
+  }
+
+  // Event listeners
+  document.getElementById('openCreateApiKeyModal').addEventListener('click', function() { showModal('createApiKeyModal'); });
+  document.getElementById('createApiKeyForm').addEventListener('submit', function(e) { e.preventDefault(); submitCreate(); });
+
+  document.getElementById('editApiKeyForm').addEventListener('submit', function(e) { e.preventDefault(); submitEdit(); });
+
+  document.querySelectorAll('.preset-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { applyPreset(this.dataset.preset); });
+  });
+
+  document.querySelectorAll('.category-toggle[data-category]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var panel = document.querySelector('[data-create-category="' + this.dataset.category.replace('create_', '') + '"]');
+      if (panel) panel.classList.toggle('open');
+    });
+  });
+
+  document.querySelectorAll('.create-perm').forEach(function(cb) {
+    cb.addEventListener('change', function() { toggleCreatePerm(this.dataset.perm); });
+  });
+
+  document.querySelectorAll('.edit-perm').forEach(function(cb) {
+    cb.addEventListener('change', function() { toggleEditPerm(this.dataset.perm); });
+  });
+
+  document.getElementById('editSelectAllBtn').addEventListener('click', function() {
+    editForm.permissions = allPermissions.map(function(p) { return p.value; });
+    syncEditPermCheckboxes();
+  });
+
+  document.getElementById('editSelectNoneBtn').addEventListener('click', function() {
+    editForm.permissions = [];
+    syncEditPermCheckboxes();
+  });
+
+  document.getElementById('editSelectReadOnlyBtn').addEventListener('click', function() {
+    editForm.permissions = allPermissions.filter(function(p) { return p.value.indexOf('.read') !== -1; }).map(function(p) { return p.value; });
+    syncEditPermCheckboxes();
+  });
+
+  document.querySelectorAll('.edit-select-category').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var cat = this.dataset.category;
+      var catPerms = allPermissions.filter(function(p) { return p.value.indexOf(cat) !== -1; }).map(function(p) { return p.value; });
+      var allChecked = catPerms.every(function(p) { return editForm.permissions.indexOf(p) !== -1; });
+      if (allChecked) {
+        editForm.permissions = editForm.permissions.filter(function(p) { return catPerms.indexOf(p) === -1; });
+      } else {
+        catPerms.forEach(function(p) { if (editForm.permissions.indexOf(p) === -1) editForm.permissions.push(p); });
+      }
+      syncEditPermCheckboxes();
+    });
+  });
+
+  // Expose for external callers
+  window.showEditModal = function(id, name, desc, perms) {
+    try { perms = typeof perms === 'string' ? JSON.parse(perms) : perms; } catch(e) { perms = []; }
+    editForm = { id: id, name: name, description: desc || '', permissions: [].concat(perms) };
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-description').value = desc || '';
+    syncEditPermCheckboxes();
+    showModal('editApiKeyModal');
+  };
+
+  window.confirmDeleteApiKey = function(keyId) {
+    window.modal.confirm({
+      title: '<%= t('apiKeyDeleteTitle') || 'Delete API key' %>',
+      body: '<%= t('apiKeyDeleteConfirm') || 'This will permanently revoke the key. Any integrations using it will stop working.' %>',
+      danger: true,
+      confirmLabel: '<%= t('apiKeyDeleteAction') || 'Yeah, delete it' %>',
+      onConfirm: function() { deleteKey(keyId); }
+    });
+  };
+
+  // Show created modal if key was just created
+  if (createdKey) { document.getElementById('createdKeyModal').style.display = ''; }
+  if (document.getElementById('copyCreatedKeyBtn')) {
+    document.getElementById('copyCreatedKeyBtn').addEventListener('click', function() { copyToClipboard(createdKey); });
+  }
+
+  syncCreatePermCheckboxes();
+  syncEditPermCheckboxes();
+})();
+</script>
+
+<%- include('../../layouts/admin-footer') %>
