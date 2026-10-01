@@ -1,28 +1,31 @@
-<%- include('../../../layouts/admin', { title: 'Edit Radar Script' }) %>
+<%- include('../../../layouts/admin', { title: t('editRadarScriptTitle') }) %>
 
 <%- include('../../../partials/flash-messages') %>
 
-<%- include('../../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: 'Radar', url: '/admin/radar' },
-  { label: 'Scripts', url: '/admin/radar/scripts' },
-  { label: (typeof script !== 'undefined' && script && script.name) ? script.name : 'Edit' }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbRadar'), url: '/admin/radar' },
+    { label: t('scripts'), url: '/admin/radar/scripts' },
+    { label: (typeof script !== 'undefined' && script && script.name) ? script.name : t('editScriptCrumb') }
+  ] }) %>
+</div>
 
 <%
   var s = (typeof script !== 'undefined' && script && typeof script === 'object') ? script : {};
   var scriptId = typeof req !== 'undefined' && req.params ? req.params.id : '';
   var patternsJson = JSON.stringify(Array.isArray(s.patterns) ? s.patterns : [], null, 2);
+  var patternsJsonEsc = patternsJson.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 %>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title">Edit Script</h1>
-    <p class="al-page-desc"><%= s.description || 'Update detection patterns for this radar script.' %></p>
+    <h1 class="al-page-title"><%= t('editScriptTitle') %></h1>
+    <p class="al-page-desc"><%= s.description || t('editScriptDesc') %></p>
   </div>
-  <div class="flex gap-2 shrink-0">
-    <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">
-      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+  <div>
+    <a href="/admin/radar/scripts" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('back') %></span>
     </a>
   </div>
 </div>
@@ -30,41 +33,48 @@
 <div class="al-page-body">
   <form id="scriptForm" class="max-w-3xl space-y-5">
     <div class="al-card">
-      <h2 class="al-card-header">Details</h2>
-      <div class="p-4 space-y-4">
-        <div>
-          <label for="scriptName" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Name</label>
-          <input type="text" id="scriptName" name="name" required maxlength="120" value="<%= s.name || '' %>" class="al-input">
-        </div>
-        <div>
-          <label for="scriptDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Description</label>
-          <textarea id="scriptDescription" name="description" rows="2" maxlength="500" class="al-input resize-y"><%= s.description || '' %></textarea>
-        </div>
-        <div class="w-40">
-          <label for="scriptVersion" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Version</label>
-          <input type="text" id="scriptVersion" name="version" value="<%= s.version || '1.0.0' %>" maxlength="20" class="al-input font-mono">
-        </div>
+      <div class="al-card-header">
+        <p class="al-card-header-title"><%= t('details') %></p>
+      </div>
+      <div class="al-card-body space-y-4">
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'name', id: 'scriptName',
+          label: t('name'), value: s.name || '', required: true, maxlength: 120
+        }) %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'textarea', name: 'description', id: 'scriptDescription',
+          label: t('description'), rows: 2, maxlength: 500, value: (s.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        }) %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'version', id: 'scriptVersion',
+          label: t('version'), value: s.version || '1.0.0', maxlength: 20, wrapperCls: 'max-w-[10rem]',
+          cls: 'font-mono'
+        }) %>
         <% if (s.filename) { %>
-        <p class="text-xs font-mono" style="color:var(--theme-text-muted)"><%= s.filename %></p>
+        <p class="text-xs font-mono al-text-muted break-all"><%= s.filename %></p>
         <% } %>
       </div>
     </div>
 
     <div class="al-card">
-      <h2 class="al-card-header">Patterns</h2>
-      <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">JSON array of pattern objects: <code>type</code>, <code>pattern</code>, optional <code>content</code>, <code>severity</code>, <code>description</code>.</p>
-      <div class="p-4">
-        <label for="scriptPatterns" class="sr-only">Patterns JSON</label>
-        <textarea id="scriptPatterns" name="patterns" rows="16" spellcheck="false" class="al-input font-mono text-xs leading-relaxed resize-y"><%= patternsJson %></textarea>
-        <p id="patternsError" class="mt-2 text-xs hidden" style="color:var(--theme-danger);"></p>
+      <div class="al-card-header">
+        <p class="al-card-header-title"><%= t('patternsTitle') %></p>
+      </div>
+      <div class="al-card-body">
+        <%- include('../../../partials/ui/form-field', {
+          type: 'textarea', name: 'patterns', id: 'scriptPatterns',
+          label: t('patternsJsonLabel'), value: patternsJsonEsc,
+          helpText: t('patternsHelp'), cls: 'font-mono text-xs leading-relaxed min-h-[20rem]'
+        }) %>
+        <p id="patternsError" class="al-form-error-msg mt-2 hidden"></p>
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <button type="submit" class="al-btn-primary inline-flex items-center gap-1.5">
-        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Changes
+    <div class="flex flex-wrap items-center gap-3">
+      <button type="submit" class="al-btn-primary">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('saveChanges') %></span>
       </button>
-      <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">Cancel</a>
+      <a href="/admin/radar/scripts" class="al-btn-secondary"><%= t('cancel') %></a>
     </div>
   </form>
 </div>
@@ -75,6 +85,12 @@
   var scriptId = '<%= scriptId %>';
   var form = document.getElementById('scriptForm');
   var errEl = document.getElementById('patternsError');
+  var msgNameRequired = <%- JSON.stringify(t('nameRequired')) %>;
+  var msgInvalidJson = <%- JSON.stringify(t('patternsInvalidJson')) %>;
+  var msgNotArray = <%- JSON.stringify(t('patternsNotArray')) %>;
+  var msgSaved = <%- JSON.stringify(t('scriptSaved')) %>;
+  var msgSaveFailed = <%- JSON.stringify(t('scriptSaveFailed')) %>;
+  var msgSomethingWrong = <%- JSON.stringify(t('somethingWentWrong')) %>;
 
   function showError(msg) {
     errEl.textContent = msg;
@@ -86,17 +102,17 @@
     errEl.classList.add('hidden');
 
     var name = document.getElementById('scriptName').value.trim();
-    if (!name) { showToast('Name is required.', 'error'); return; }
+    if (!name) { showToast(msgNameRequired, 'error'); return; }
 
     var patterns;
     try {
       patterns = JSON.parse(document.getElementById('scriptPatterns').value);
     } catch (err) {
-      showError('Patterns must be valid JSON: ' + err.message);
+      showError(msgInvalidJson.replace('{{error}}', err.message));
       return;
     }
     if (!Array.isArray(patterns)) {
-      showError('Patterns must be a JSON array.');
+      showError(msgNotArray);
       return;
     }
 
@@ -115,13 +131,13 @@
       .then(function(r) { return r.json(); })
       .then(function(res) {
         if (res.success) {
-          showToast('Script saved.', 'success');
+          showToast(msgSaved, 'success');
           window.location.href = '/admin/radar/scripts';
         } else {
-          showToast(res.message || 'Failed to save script.', 'error');
+          showToast(res.message || msgSaveFailed, 'error');
         }
       })
-      .catch(function() { showToast('Something went wrong.', 'error'); });
+      .catch(function() { showToast(msgSomethingWrong, 'error'); });
   });
 })();
 </script>

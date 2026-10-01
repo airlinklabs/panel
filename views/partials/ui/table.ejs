@@ -29,7 +29,7 @@ const tableEmpty = typeof emptyState !== 'undefined' ? emptyState : 'No data ava
         </tr>
       <% } else { %>
         <% tableRows.forEach(function(row, rowIdx) { %>
-          <tr class="al-table-row" data-index="<%= rowIdx %>">
+          <tr class="al-table-tr" data-index="<%= rowIdx %>">
             <% tableColumns.forEach(function(col) { %>
               <td class="al-table-td <%= typeof col.class !== 'undefined' ? col.class : '' %>">
                 <%- typeof row[col.key] !== 'undefined' ? row[col.key] : '' %>

@@ -3,14 +3,14 @@
   <div id="pc-sidebar2" class="flex flex-col h-full">
 
     <!-- Static top: logo -->
-    <div id="sidebar-logo-block" class="pl-5 pt-3 pb-3 flex min-w-0 shrink-0">
+    <div id="sidebar-logo-block" class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
       <a href="/" id="sidebar-logo-link" class="flex items-center min-w-0">
         <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>"
-          class="logo-bg p-1 h-[34px] w-[34px] rounded-xl mr-2.5 shrink-0 inline-flex"
+          class="logo-bg p-1 h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex"
           style="background:var(--theme-logo-bg);">
-        <div class="sidebar-label font-medium tracking-tight text-[15px] truncate min-w-0"
+        <div class="sidebar-label font-medium tracking-tight text-lg truncate min-w-0"
           style="color:var(--theme-text-strong);">
-          <%= settings.title || 'Airlink' %>
+          <%= settings.title || t('brandName') %>
         </div>
       </a>
     </div>
@@ -18,16 +18,16 @@
     <!-- User info -->
     <% if (typeof user !== 'undefined' && user != null) { %>
       <a href="/account" id="sidebar-account-link"
-        class="sidebar-special-link flex items-center space-x-3 py-3 px-3.5 border-y shrink-0 transition-colors group"
+        class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y shrink-0 transition-colors group"
         style="border-color:var(--theme-nav-border);">
-        <img loading="lazy" decoding="async" class="h-7 w-7 rounded-xl shrink-0"
+        <img loading="lazy" decoding="async" class="h-8 w-8 rounded-xl shrink-0"
           src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= t('userAvatarAlt') %>">
         <div class="min-w-0">
-          <p class="text-[13px] font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
+          <p class="sidebar-account-name text-sm font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
             <span id="sidebar-username"><%= user.username %></span>
-            <span style="color:var(--theme-text-muted);"><sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup></span>
+            <span class="text-xs" style="color:var(--theme-text-muted);"><sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup></span>
           </p>
-          <p id="sidebar-description" class="text-[11px] truncate" style="color:var(--theme-text-muted);"><%= user.description %></p>
+          <p id="sidebar-description" class="text-xs truncate" style="color:var(--theme-text-muted);"><%= user.description %></p>
         </div>
       </a>
     <% } %>
@@ -36,9 +36,9 @@
     <nav class="flex-1 overflow-y-auto">
       <ul role="list" class="py-1.5">
         <li>
-          <ul role="list" class="-mx-2 space-y-0.5 relative">
+          <ul role="list" class="-mx-2 space-y-1 relative">
             <div id="active-background"
-              class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-8 transition-none duration-0 z-[-1] rounded-xl opacity-0">
+              class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-10 transition-none duration-0 z-[-1] rounded-xl opacity-0">
             </div>
             <%
             const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
@@ -48,9 +48,9 @@
               <% if (!sidebarItems || sidebarItems.length === 0) { %>
                 <li class="nav-item sidebar-view-item">
                   <a href="/"
-                    class="nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal transition-all duration-200"
-                    style="color:var(--theme-nav-text);">
-                    <%- icon('layout-dashboard', { class: 'w-4 h-4 mt-0.5' }) %>
+                    class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal"
+                    <% if (req.path === '/') { %> aria-current="page"<% } %>>
+                    <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
                     <span><%= t('backToDashboard') %></span>
                   </a>
                 </li>
@@ -59,8 +59,7 @@
                   <% const isCurrentPath = (req.path === item.url) || (item.matchPrefix && req.path.startsWith(item.matchPrefix)); %>
                   <li class="nav-item sidebar-view-item" style="--i:<%= i + 1 %>">
                     <a href="<%= item.url %>"
-                      class="nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal transition-all duration-200"
-                      style="color:var(--theme-nav-text);"
+                      class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal"
                       <% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>
                       <% if (isCurrentPath) { %> aria-current="page"<% } %>>
                       <%- item.icon %>
@@ -74,7 +73,7 @@
               <% if (typeof user !== 'undefined' && user != null && user.isAdmin === true) { %>
                 <% const adminGroups = adminSidebarGroups || []; %>
                 <% if (adminGroups.length > 0) { %>
-                  <p class="pl-7 text-[11px] font-medium pt-4 pb-1.5" style="color:var(--theme-nav-text);">
+                  <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);">
                     <span><%= t('navAdminPanel') %></span>
                   </p>
                   <% let adminAnimIdx = 0; %>
@@ -82,8 +81,7 @@
                     <% group.items.forEach(function(item) { %>
                       <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
                         <a href="<%= item.url %>"
-                          class="transition nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal"
-                          style="color:var(--theme-nav-text);"
+                          class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal"
                           <% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>
                           <% if (req.path === item.url) { %> aria-current="page"<% } %>>
                           <%- item.icon %>
@@ -118,9 +116,9 @@
             <div id="sidebar-server-view" class="sidebar-view showing">
               <li class="nav-item">
                 <a href="/"
-                  class="nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal transition-all duration-200"
-                  style="color:var(--theme-nav-text);" data-match-prefix="/server">
-                  <%- icon('layout-dashboard', { class: 'w-4 h-4 mt-0.5' }) %>
+                  class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal"
+                  data-match-prefix="/server">
+                  <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= t('backToDashboard') %></span>
                 </a>
               </li>
@@ -128,9 +126,9 @@
                 <% grp.entries.forEach(function(entry) { %>
                   <li class="nav-item server-anim-in" style="--i:<%= srvAnimIdx++ %>">
                     <a href="<%= entry.url %>"
-                      class="transition nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal"
-                      style="color:var(--theme-nav-text);" data-server-control-link>
-                      <%- entry.item.icon.replace(/class="[^" ]*"/, 'class="w-4 h-4 mt-0.5 shrink-0"') %>
+                      class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal"
+                      data-server-control-link>
+                      <%- entry.item.icon.replace(/class="[^" ]*"/, 'class="w-5 h-5 mt-0.5 shrink-0"') %>
                       <span><%= entry.item.label %></span>
                     </a>
                   </li>
@@ -145,18 +143,11 @@
       </ul>
     </nav>
 
-    <style>
-      #pc-sidebar .nav-link { transition: none; }
-      #sidebar-main-view .sidebar-view-item { opacity: 1; }
-      #sidebar-server-view .server-anim-in { opacity: 1; }
-    </style>
-
     <!-- Static bottom: logout -->
     <div class="shrink-0 border-t" style="border-color:var(--theme-nav-border);">
       <a href="/logout" id="sidebar-logout-link"
-        class="sidebar-special-link group flex gap-x-2.5 pl-5 py-3 text-[13px] font-medium leading-5 transition-colors duration-200"
-        style="color:var(--theme-danger);">
-        <%- icon('log-out', { class: 'w-4 h-4 mt-0.5 shrink-0', strokeWidth: 1.5 }) %>
+        class="sidebar-special-link sidebar-logout group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 transition-colors duration-200">
+        <%- icon('log-out', { class: 'w-5 h-5 mt-0.5 shrink-0', strokeWidth: 1.5 }) %>
         <span><%= t('navLogout') %></span>
       </a>
     </div>
@@ -166,32 +157,20 @@
 
 <script nonce="<%- nonce %>">
 (function () {
-  function themeVar(name, fallback) {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    return v || fallback;
-  }
-
+  /* Paint only. Which row is active is decided here; the colours live in
+     views/styles/components/sidebar.css (`.nav-link.active`, `.sidebar-active`)
+     so no hex or inline colour ever ships in this partial. */
   function markActiveNav(path) {
-    const pillBg = themeVar('--theme-text', '#171717');
-    const pillFg = themeVar('--theme-bg', '#f0f0f0');
-
     const srvLinks = document.querySelectorAll('[data-server-control-link]');
     let srvBest = null;
     let bestLen = -1;
     srvLinks.forEach(function (link) {
       link.classList.remove('active');
-      link.style.color = '';
-      link.style.background = '';
       const href = link.getAttribute('href') || '';
       const matched = path === href || (href !== '/' && path.startsWith(href + '/'));
       if (matched && href.length > bestLen) { bestLen = href.length; srvBest = link; }
     });
-    if (srvBest) {
-      srvBest.classList.add('active');
-      srvBest.style.color = pillFg;
-      srvBest.style.background = pillBg;
-      srvBest.style.borderRadius = '0.75rem';
-    }
+    if (srvBest) { srvBest.classList.add('active'); }
 
     const links = document.querySelectorAll('.nav-link');
     links.forEach(function (link) {
@@ -203,47 +182,21 @@
       if (href && path === href) active = true;
       else if (prefix && path.startsWith(prefix)) active = true;
       else if (href && path.startsWith(href + '/')) active = true;
-      if (active) {
-        link.classList.add('active');
-        link.style.color = pillFg;
-        link.style.background = pillBg;
-        link.style.borderRadius = '0.75rem';
-      } else {
-        link.classList.remove('active');
-        link.style.color = '';
-        link.style.background = '';
-      }
+      link.classList.toggle('active', active);
     });
   }
 
   function markSpecialLinks(path) {
-    const pillBg = themeVar('--theme-text', '#171717');
-    const pillFg = themeVar('--theme-bg', '#f0f0f0');
     const account = document.getElementById('sidebar-account-link');
-    const logo = document.getElementById('sidebar-logo-link');
     if (account) {
-      const onAccount = path === '/account' || path.startsWith('/account/');
-      const userText = account.querySelector('#sidebar-username');
-      if (onAccount) {
-        account.style.background = pillBg; account.style.color = pillFg; account.style.borderRadius = '0.75rem';
-        if (userText) userText.parentElement.style.color = pillFg;
-      } else {
-        account.style.background = ''; account.style.color = ''; account.style.borderRadius = '';
-        if (userText) userText.parentElement.style.color = '';
-      }
+      account.classList.toggle('sidebar-active', path === '/account' || path.startsWith('/account/'));
     }
-    if (logo) {
+    const logo = document.getElementById('sidebar-logo-link');
+    const logoBlock = document.getElementById('sidebar-logo-block');
+    if (logo || logoBlock) {
       const onCredits = path === '/credits' || path.startsWith('/credits/');
-      const logoBlock = document.getElementById('sidebar-logo-block');
-      const logoTitle = logo.querySelector('h1');
-      const logoImg = logo.querySelector('img');
-      if (onCredits) {
-        if (logoBlock) { logoBlock.style.background = pillBg; logoBlock.style.borderRadius = '0.75rem'; }
-        logo.style.color = pillFg; if (logoImg) logoImg.style.background = pillFg; if (logoTitle) logoTitle.style.color = pillFg;
-      } else {
-        if (logoBlock) { logoBlock.style.background = ''; logoBlock.style.borderRadius = ''; }
-        logo.style.color = ''; if (logoImg) logoImg.style.background = ''; if (logoTitle) logoTitle.style.color = '';
-      }
+      if (logoBlock) logoBlock.classList.toggle('sidebar-active', onCredits);
+      if (logo) logo.classList.toggle('sidebar-active', onCredits);
     }
   }
 

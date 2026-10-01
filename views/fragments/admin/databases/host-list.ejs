@@ -1,5 +1,5 @@
 <!-- Database host list fragment — replaces the host table on create/delete -->
-<div id="admin-databases-list" class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
+<div id="admin-databases-list" class="al-table-wrapper">
   <% if (hosts.length === 0) { %>
     <div class="flex flex-col items-center justify-center py-20 text-center">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
@@ -27,17 +27,17 @@
     </colgroup>
     <thead class="al-table-head">
       <tr>
-        <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= t('host') %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= t('databases') %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= t('created') %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
+        <th scope="col" class="al-table-th"><%= t('name') %></th>
+        <th scope="col" class="al-table-th"><%= t('host') %></th>
+        <th scope="col" class="al-table-th"><%= t('databases') %></th>
+        <th scope="col" class="al-table-th"><%= t('created') %></th>
+        <th scope="col" class="al-table-th"><%= t('actions') %></th>
       </tr>
     </thead>
     <tbody>
       <% hosts.forEach(function(host) { %>
         <tr class="al-table-tr" data-host-id="<%= host.id %>">
-          <td class="al-table-td sm:pl-6">
+          <td class="al-table-td">
             <div class="font-medium" style="color:var(--theme-text-strong);"><%= host.name %></div>
           </td>
           <td class="al-table-td">
@@ -59,14 +59,14 @@
             <div class="flex gap-3 whitespace-nowrap">
               <form method="POST" action="/api/v2/admin/databases/<%= host.id %>/test" style="display:inline">
                 <%- include('../../../partials/csrf') %>
-                <button type="submit" class="al-btn-secondary text-xs">
+                <button type="submit" class="al-btn-secondary al-btn-sm">
                   <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('test') %>
                 </button>
               </form>
               <button
-                onclick="if(confirm('<%= t('deleteDatabaseHostConfirm') %>')) { fetch('/api/v2/admin/databases/<%= host.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) window.location.reload(); else showToast('<%= t('deleteFailed') %>', 'error'); }).catch(() => showToast('<%= t('networkError') %>', 'error')); }"
+                onclick="if(confirm('<%= t('deleteDatabaseHostConfirm') %>')) { fetch('/api/v2/admin/databases/<%= host.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) window.location.reload(); else showToast('<%= t('failedToDelete') %>', 'error'); }).catch(() => showToast('<%= t('networkError') %>', 'error')); }"
                 type="button"
-                class="al-btn-ghost"
+                class="al-btn-ghost al-btn-icon-only"
                 style="color:var(--theme-danger);"
                 aria-label="<%= t('deleteHost') %>">
                 <%- icon('trash-2', { size: 16 }) %>

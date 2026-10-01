@@ -1,129 +1,148 @@
 <%- include('../../layouts/user', { title: t('settings') }) %>
 
-<div class="px-4 sm:px-8 pt-4 pb-8">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('dashboard'), url: '/' },
-    { label: server.name || 'Server', url: '/server/' + server.UUID },
+    { label: server.name || t('server'), url: '/server/' + server.UUID },
     { label: t('settings') }
   ] }) %>
+</div>
 
-  <div class="flex flex-wrap items-start justify-between gap-4 mt-4">
-    <div class="flex-1 min-w-0">
-      <h1 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= server.name %></h1>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">
-        <% if (server.node) { %><span class="flex items-center gap-1"><%- icon('server', { class: 'w-3 h-3' }) %> <%= server.node.name %></span><% } %>
-        <span class="flex items-center gap-1"><%- icon('hash', { class: 'w-3 h-3' }) %> <%= server.UUID %></span>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= server.name %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
+  </div>
+</header>
+
+<div class="al-page-body">
+  <!-- Settings Form -->
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('serverSettings') %></h2>
+        <p class="al-card-subtitle"><%= t('serverSettingsDesc') %></p>
       </div>
+    </div>
+    <div class="al-card-body">
+      <form id="serverSettingsForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <%- include('../../partials/ui/form-field', {
+            type: 'text', name: 'name', label: t('serverName'), id: 'serverName',
+            value: server.name, cls: 'min-h-11'
+          }) %>
+          <%- include('../../partials/ui/form-field', {
+            type: 'text', name: 'description', label: t('description'), id: 'serverDescription',
+            value: server.description || '', cls: 'min-h-11'
+          }) %>
+        </div>
+        <div class="mt-5 flex items-center gap-3">
+          <button type="submit" id="settingsSubmit" class="al-btn-primary min-h-11">
+            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+            <span id="settingsSaveLabel"><%= t('saveSettings') %></span>
+            <span id="settingsSavingLabel" style="display:none"><%= t('saving') %></span>
+          </button>
+          <span id="settingsSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Settings Form -->
-  <div class="al-card p-5 mt-6">
-    <h3 class="text-[15px] font-semibold mb-1" style="color:var(--theme-text-strong)"><%= t('serverSettings') || 'Server Settings' %></h3>
-    <p class="text-[13px] mb-4" style="color:var(--theme-text-muted)"><%= t('serverSettingsDesc') || "Configure your server's basic settings." %></p>
-    <form id="serverSettingsForm">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label for="serverName" class="block text-[13px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('serverName') || 'Server Name' %></label>
-          <input type="text" id="serverName" name="name" class="al-input w-full" value="<%= server.name %>">
-        </div>
-        <div>
-          <label for="serverDescription" class="block text-[13px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('description') || 'Description' %></label>
-          <input type="text" id="serverDescription" name="description" class="al-input w-full" value="<%= server.description || '' %>">
-        </div>
-      </div>
-      <div class="mt-5 flex items-center gap-3">
-        <button type="submit" id="settingsSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
-          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span id="settingsSaveLabel"><%= t('saveSettings') || 'Save Settings' %></span>
-          <span id="settingsSavingLabel" style="display:none">Saving...</span>
-        </button>
-        <span id="settingsSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
-      </div>
-    </form>
-  </div>
-
   <!-- Server Information -->
-  <div class="al-card p-5 mt-4">
-    <h3 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= t('serverInformation') || 'Server Information' %></h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('serverId') || 'Server ID' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.UUID %></p>
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('serverInformation') %></h2>
       </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('createdAt') || 'Created At' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.createdAt ? new Date(server.createdAt).toLocaleString() : '--' %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('nodes') || 'Node' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.node ? server.node.name : '--' %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('images') || 'Image' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= (server.image && server.image.name) || t('unknown') || 'Unknown' %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('memory') || 'Memory' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? (t('unlimited') || 'Unlimited') : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('cpu') || 'CPU' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? (t('unlimited') || 'Unlimited') : (server.Cpu / 100).toFixed(1) + ' ' + (t('coresLabel') || 'Cores') %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('storage') || 'Storage' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? (t('unlimited') || 'Unlimited') : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
-      </div>
-      <div>
-        <h4 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('statusColumn') || 'Status' %></h4>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)">
-          <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
-            style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent)' : 'background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent)' %>">
-            <%= server.Suspended ? (t('suspendedLabel') || 'Suspended') : (t('activeLabel') || 'Active') %>
-          </span>
-        </p>
-      </div>
+    </div>
+    <div class="al-card-body">
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+        <div>
+          <dt class="al-section-label"><%= t('serverId') %></dt>
+          <dd class="text-sm font-mono m-0 al-text-muted"><%= server.UUID %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('createdAt') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= server.createdAt ? new Date(server.createdAt).toLocaleString() : '--' %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('node') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= server.node ? server.node.name : '--' %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('image') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= (server.image && server.image.name) || t('unknown') %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('memory') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= server.Memory === 0 ? t('unlimited') : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('cpu') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= server.Cpu === 0 ? t('unlimited') : (server.Cpu / 100).toFixed(1) + ' ' + t('coresLabel') %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('storage') %></dt>
+          <dd class="text-sm m-0 al-text-muted"><%= server.Storage === 0 ? t('unlimited') : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></dd>
+        </div>
+        <div>
+          <dt class="al-section-label"><%= t('statusColumn') %></dt>
+          <dd class="text-sm m-0">
+            <span class="<%= server.Suspended ? 'al-badge al-badge-warning' : 'al-badge al-badge-online' %>">
+              <span class="al-dot <%= server.Suspended ? 'al-dot-warning' : 'al-dot-online' %>"></span>
+              <%= server.Suspended ? t('suspendedLabel') : t('activeLabel') %>
+            </span>
+          </dd>
+        </div>
+      </dl>
     </div>
   </div>
 
   <!-- Danger Zone -->
-  <div class="al-card p-5 mt-4" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
-    <h3 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= t('dangerZone') || 'Danger Zone' %></h3>
-
-    <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
-    <div class="flex items-center justify-between mb-3">
-      <div>
-        <p class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('deleteServer') || 'Delete Server' %></p>
-        <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('deleteServerDesc') || 'Permanently delete this server and all its data.' %></p>
+  <div class="al-card" style="background:var(--theme-danger-bg);border-color:color-mix(in srgb, var(--theme-danger) 25%, transparent)">
+    <div class="al-card-header" style="background:transparent;border-color:color-mix(in srgb, var(--theme-danger) 25%, transparent)">
+      <div class="min-w-0">
+        <h2 class="al-card-title" style="color:var(--theme-danger)"><%= t('dangerZone') %></h2>
       </div>
-      <button id="deleteServerButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-        <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-        <%= t('delete') || 'Delete' %>
-      </button>
     </div>
-    <% } %>
-
-    <div class="flex items-center justify-between gap-3 mb-3">
-      <div>
-        <p class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('reinstallServer') || 'Reinstall Server' %></p>
-        <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('reinstallServerDesc') || 'Re-run the install scripts. Files, worlds and settings are kept.' %></p>
+    <div class="al-card-body">
+      <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="min-w-0">
+          <p class="text-sm font-medium al-text-strong"><%= t('deleteServer') %></p>
+          <p class="text-xs al-text-muted"><%= t('deleteServerDesc') %></p>
+        </div>
+        <button id="deleteServerButton" type="button" class="al-btn-danger shrink-0 min-h-11">
+          <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %>
+          <%= t('delete') %>
+        </button>
       </div>
-      <button id="reinstallButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-        <%- icon('rotate-ccw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-        <%= t('reinstall') || 'Reinstall' %>
-      </button>
-    </div>
+      <% } %>
 
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <p class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('reinstallAndDeleteData') || 'Reinstall & Delete Data' %></p>
-        <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('reinstallAndDeleteDataDesc') || 'Wipe the server volume and reinstall from scratch.' %></p>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="min-w-0">
+          <p class="text-sm font-medium al-text-strong"><%= t('reinstallServer') %></p>
+          <p class="text-xs al-text-muted"><%= t('reinstallServerDesc') %></p>
+        </div>
+        <button id="reinstallButton" type="button" class="al-btn-danger shrink-0 min-h-11">
+          <%- icon('rotate-ccw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
+          <%= t('reinstall') %>
+        </button>
       </div>
-      <button id="reinstallWipeButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-        <%- icon('triangle-alert', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-        <%= t('reinstallAndDeleteData') || 'Reinstall & Delete Data' %>
-      </button>
+
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm font-medium al-text-strong"><%= t('reinstallAndDeleteData') %></p>
+          <p class="text-xs al-text-muted"><%= t('reinstallAndDeleteDataDesc') %></p>
+        </div>
+        <button id="reinstallWipeButton" type="button" class="al-btn-danger shrink-0 min-h-11">
+          <%- icon('triangle-alert', { class: 'size-3.5', strokeWidth: 1.5 }) %>
+          <%= t('reinstallAndDeleteData') %>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -132,6 +151,35 @@
   var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var serverId = '<%= server.UUID %>';
+  var msg = <%- JSON.stringify({
+    saved: t('settingsSaved'),
+    saveFailed: t('failedToSaveSettings'),
+    requestFailed: t('requestFailed'),
+    saving: t('saving'),
+    savedPrefix: t('savedTimeAgo'),
+    deleteTitle: t('deleteServer'),
+    deleteBody: t('deleteServerConfirmBody'),
+    deleteConfirm: t('deleteServer'),
+    typeDelete: t('typeDeleteToConfirm'),
+    mustTypeDelete: t('mustTypeDelete'),
+    deleting: t('deletingServer'),
+    contacting: t('contactingNode'),
+    preparing: t('preparingReinstall'),
+    reinstallInitiated: t('reinstallInitiated'),
+    failedLabel: t('failureLabel'),
+    unknownError: t('unknownError'),
+    somethingWentWrong: t('somethingWentWrong'),
+    deleteFailed: t('failedToDeleteServer'),
+    reinstallTitle: t('confirmReinstallation'),
+    reinstallBody: t('reinstallConfirmBody'),
+    reinstall: t('reinstall'),
+    reinstalling: t('reinstallingServer'),
+    reinstallDone: t('serverReinstalling'),
+    wipeTitle: t('reinstallAndDeleteData'),
+    wipeBody: t('wipeConfirmBody'),
+    wipeConfirm: t('continueLabel'),
+    wipeDone: t('serverReinstallingDataDeleted')
+  }) %>;
 
   // Settings form
   var form = document.getElementById('serverSettingsForm');
@@ -143,7 +191,7 @@
 
   function updateSaved() {
     var now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    savedSpan.textContent = 'Saved ' + now;
+    savedSpan.textContent = msg.savedPrefix + now;
     savedSpan.style.display = '';
     setTimeout(function() { savedSpan.style.display = 'none'; }, 3000);
   }
@@ -163,9 +211,9 @@
         description: document.getElementById('serverDescription').value
       })
     }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.success !== false) { updateSaved(); showToast('Server settings saved.', 'success'); }
-      else showToast(d.error || 'Failed to save settings.', 'error');
-    }).catch(function() { showToast('Failed to save settings.', 'error'); })
+      if (d.success !== false) { updateSaved(); showToast(msg.saved, 'success'); }
+      else showToast(d.error || msg.saveFailed, 'error');
+    }).catch(function() { showToast(msg.saveFailed, 'error'); })
     .finally(function() {
       saving = false;
       submitBtn.disabled = false;
@@ -179,18 +227,18 @@
   if (deleteBtn) {
     deleteBtn.addEventListener('click', function() {
       window.modal.confirm({
-        title: 'Delete Server',
-        body: 'This will permanently delete the server and all its data. Type <strong>DELETE</strong> to confirm.',
+        title: msg.deleteTitle,
+        body: msg.deleteBody,
         danger: true,
-        confirmLabel: 'Delete Server',
-        prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
+        confirmLabel: msg.deleteConfirm,
+        prompt: { label: msg.typeDelete, pattern: /^DELETE$/i, invalidMessage: msg.mustTypeDelete },
         onConfirm: function() {
-          var loader = showProgressToast('Deleting Server...');
-          loader.setStage('Contacting node...');
+          var loader = showProgressToast(msg.deleting);
+          loader.setStage(msg.contacting);
           fetch('/api/v2/servers/' + serverId, { method: 'DELETE' })
             .then(function(r) { return r.json(); })
-            .then(function(d) { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error?.message || "Couldn't delete the server.", 'error'); })
-            .catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
+            .then(function(d) { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error?.message || msg.deleteFailed, 'error'); })
+            .catch(function() { loader.close(); showToast(msg.somethingWentWrong, 'error'); });
         }
       });
     });
@@ -199,20 +247,20 @@
   // Reinstall
   document.getElementById('reinstallButton').addEventListener('click', function() {
     window.modal.confirm({
-      title: 'Confirm Reinstallation',
-      body: 'Re-run the install scripts. Your files, worlds and settings are kept. Continue?',
-      confirmLabel: 'Reinstall',
+      title: msg.reinstallTitle,
+      body: msg.reinstallBody,
+      confirmLabel: msg.reinstall,
       onConfirm: function() {
-        var loader = showProgressToast('Reinstalling Server...');
-        loader.setStage('Preparing for reinstallation...');
+        var loader = showProgressToast(msg.reinstalling);
+        loader.setStage(msg.preparing);
         fetch('/server/' + serverId + '/reinstall', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
           body: JSON.stringify({ preserveData: true })
         }).then(function(r) { return r.json(); }).then(function(data) {
-          loader.setStage('Reinstallation initiated!');
-          setTimeout(function() { loader.close(); if (data.success !== false) showToast('Server reinstalling.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
-        }).catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
+          loader.setStage(msg.reinstallInitiated);
+          setTimeout(function() { loader.close(); if (data.success !== false) showToast(msg.reinstallDone, 'success'); else showToast(data.error || msg.unknownError, 'error'); }, 1000);
+        }).catch(function() { loader.close(); showToast(msg.somethingWentWrong, 'error'); });
       }
     });
   });
@@ -222,22 +270,22 @@
   if (wipeBtn) {
     wipeBtn.addEventListener('click', function() {
       window.modal.confirm({
-        title: 'Reinstall & Delete All Data',
-        body: 'This wipes the server volume and reinstalls from scratch. Type <strong>DELETE</strong> to confirm.',
+        title: msg.wipeTitle,
+        body: msg.wipeBody,
         danger: true,
-        confirmLabel: 'Continue',
-        prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
+        confirmLabel: msg.wipeConfirm,
+        prompt: { label: msg.typeDelete, pattern: /^DELETE$/i, invalidMessage: msg.mustTypeDelete },
         onConfirm: function() {
-          var loader = showProgressToast('Reinstalling Server...');
-          loader.setStage('Preparing for reinstallation...');
+          var loader = showProgressToast(msg.reinstalling);
+          loader.setStage(msg.preparing);
           fetch('/server/' + serverId + '/reinstall', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
             body: JSON.stringify({ preserveData: false })
           }).then(function(r) { return r.json(); }).then(function(data) {
-            loader.setStage('Reinstallation initiated!');
-            setTimeout(function() { loader.close(); if (data.success !== false) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
-          }).catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
+            loader.setStage(msg.reinstallInitiated);
+            setTimeout(function() { loader.close(); if (data.success !== false) showToast(msg.wipeDone, 'success'); else showToast(data.error || msg.unknownError, 'error'); }, 1000);
+          }).catch(function() { loader.close(); showToast(msg.somethingWentWrong, 'error'); });
         }
       });
     });

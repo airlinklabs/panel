@@ -1,18 +1,19 @@
 <%- include('../../layouts/admin', { title: t('adminEditImageTitle') }) %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
     { label: t('breadcrumbImages'), url: '/admin/images' },
     { label: image.name || t('adminEditImageTitle') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= image.name || t('adminEditImageTitle') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('adminEditImageText') %></p>
-    </div>
-    <div class="flex gap-2 shrink-0 items-center">
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= image.name || t('adminEditImageTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminEditImageText') %></p>
+  </div>
+  <div class="flex flex-wrap gap-2 items-center">
       <button type="button" id="tab-save-btn" class="al-btn-primary">
         <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('save') %>
       </button>
@@ -24,13 +25,12 @@
     </div>
   </div>
 
+<div class="al-page-body">
   <% if (req.query && req.query.success) { %>
-    <div class="mt-4 px-4 py-3 rounded-xl text-sm" style="background:var(--theme-success-bg);border:1px solid color-mix(in srgb, var(--theme-success) 25%, transparent);color:var(--theme-success)">
-      <%= t('changesSaved') %>
-    </div>
+    <div class="al-alert-success"><%= t('changesSaved') %></div>
   <% } %>
 
-  <div class="mt-5" data-al-tabs data-tabs-default="general" data-tabs-hash>
+  <div data-al-tabs data-tabs-default="general" data-tabs-hash>
     <div role="tablist" class="flex gap-1 mb-6">
       <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
         <%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('general') %>
@@ -85,7 +85,7 @@
             <div class="sm:col-span-2 al-form-field">
               <label for="field-startup" class="al-form-label"><%= t('startupCommand') %></label>
               <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}" class="al-form-input font-mono">
-              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Use <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
+              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%- t('eggVariableHint').replace('{{code}}', '<code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">{{VARIABLE_NAME}}</code>') %></p>
             </div>
             <div class="al-form-field">
               <label for="field-stop" class="al-form-label"><%= t('stopCommand') %></label>
@@ -94,7 +94,7 @@
             </div>
             <div class="al-form-field">
               <label for="field-startup-done" class="al-form-label"><%= t('startupDoneSignal') %></label>
-              <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type" class="al-form-input font-mono">
+              <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="<%= t('startupDonePlaceholder') %>" class="al-form-input font-mono">
               <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('startupDoneSignalHint') %></p>
             </div>
           </div>
@@ -105,9 +105,9 @@
     <!-- Docker Images tab -->
     <div id="panel-docker" role="tabpanel" aria-labelledby="tab-docker" data-tab-panel="docker" class="tab-panel space-y-5" hidden>
       <div class="al-card">
-        <div class="al-card-header flex items-center justify-between">
+        <div class="al-card-header">
           <h2 class="al-card-title"><%= t('dockerImages') %></h2>
-          <button type="button" id="add-docker-image" class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+          <button type="button" id="add-docker-image" class="al-btn-secondary al-btn-sm">
             <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('addImage') %>
           </button>
         </div>
@@ -121,9 +121,9 @@
     <!-- Variables tab -->
     <div id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" data-tab-panel="variables" class="tab-panel space-y-5" hidden>
       <div class="al-card">
-        <div class="al-card-header flex items-center justify-between">
+        <div class="al-card-header">
           <h2 class="al-card-title"><%= t('eggVariables') %></h2>
-          <button type="button" id="add-variable" class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+          <button type="button" id="add-variable" class="al-btn-secondary al-btn-sm">
             <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('addVariable') %>
           </button>
         </div>
@@ -165,9 +165,9 @@
     <!-- Settings tab -->
     <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-tab-panel="settings" class="tab-panel space-y-5" hidden>
       <div class="al-card">
-        <div class="al-card-header flex items-center justify-between">
+        <div class="al-card-header">
           <h2 class="al-card-title"><%= t('requiredPorts') %></h2>
-          <button type="button" id="add-port-requirement" class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+          <button type="button" id="add-port-requirement" class="al-btn-secondary al-btn-sm">
             <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('addPort') %>
           </button>
         </div>
@@ -198,7 +198,7 @@
       function rebind(id) {
         if (window.tabHandlers && saveBtn) {
           saveBtn.onclick = window.tabHandlers[id] || null;
-          saveBtn.textContent = (window.tabLabels && window.tabLabels[id]) || 'Save';
+          saveBtn.textContent = (window.tabLabels && window.tabLabels[id]) || <%- JSON.stringify(t('save')) %>;
         }
         if (window.tabResetHandlers && resetBtn) {
           resetBtn.onclick = window.tabResetHandlers[id] || null;
@@ -280,7 +280,7 @@ function imageEditor() {
     list.innerHTML = '';
     var entries = Object.entries(state.docker_images);
     if (entries.length === 0) {
-      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">No Docker images configured. Click Add Image to add one.</p>';
+      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">' + <%- JSON.stringify(t('noDockerImagesYet')) %> + '</p>';
       return;
     }
     entries.forEach(function(pair, idx) {
@@ -288,13 +288,12 @@ function imageEditor() {
       var row = document.createElement('div');
       row.className = 'flex gap-2 items-center';
       row.innerHTML =
-        '<input data-docker-label="' + idx + '" type="text" value="' + escHtml(label) + '" placeholder="Label (e.g. java 21)"' +
+        '<input data-docker-label="' + idx + '" type="text" value="' + escHtml(label) + '" <%- JSON.stringify(t('dockerLabelPlaceholder')) %>' +
         ' class="w-40 shrink-0 al-form-input font-mono">' +
-        '<input data-docker-image="' + idx + '" type="text" value="' + escHtml(image) + '" placeholder="Image ref (e.g. ghcr.io/ptero-eggs/yolks:java_21)"' +
+        '<input data-docker-image="' + idx + '" type="text" value="' + escHtml(image) + '" <%- JSON.stringify(t('dockerImageRefPlaceholder')) %>' +
         ' class="flex-1 al-form-input font-mono">' +
         '<button data-docker-remove="' + idx + '" type="button"' +
-        ' class="al-btn-ghost px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition shrink-0">' +
-        'Remove</button>';
+        ' class="al-btn-ghost al-btn-sm shrink-0" style="color:var(--theme-danger)">' + <%- JSON.stringify(t('remove')) %> + '</button>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-docker-remove]').forEach(function(btn) {
@@ -311,7 +310,7 @@ function imageEditor() {
     var list = document.getElementById('variables-list');
     list.innerHTML = '';
     if (!state.variables.length) {
-      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">No variables defined. Click Add Variable to add one.</p>';
+      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">' + <%- JSON.stringify(t('noVariablesYet')) %> + '</p>';
       return;
     }
     state.variables.forEach(function(v, idx) {
@@ -321,31 +320,31 @@ function imageEditor() {
         '<div class="al-card-body">' +
         '<div class="flex items-center justify-between mb-3">' +
           '<span class="text-xs font-medium" style="color:var(--theme-text-muted)">#' + (idx + 1) + '</span>' +
-          '<button data-var-remove="' + idx + '" type="button" class="text-xs text-red-500 hover:text-red-400 transition">Remove</button>' +
+          '<button data-var-remove="' + idx + '" type="button" class="al-btn-ghost al-btn-sm" style="color:var(--theme-danger)">' + <%- JSON.stringify(t('remove')) %> + '</button>' +
         '</div>' +
         '<div class="grid grid-cols-2 gap-3">' +
-          '<div class="al-form-field"><label class="al-form-label">Name</label>' +
+          '<div class="al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('name')) %> + '</label>' +
             '<input data-var-field="' + idx + '" data-field="name" type="text" value="' + escHtml(v.name || '') + '" class="al-form-input"></div>' +
-          '<div class="al-form-field"><label class="al-form-label">Env Variable</label>' +
+          '<div class="al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('envVariable')) %> + '</label>' +
             '<input data-var-field="' + idx + '" data-field="env_variable" type="text" value="' + escHtml(v.env_variable || '') + '" placeholder="SERVER_JARFILE" class="al-form-input font-mono"></div>' +
-          '<div class="al-form-field"><label class="al-form-label">Default Value</label>' +
+          '<div class="al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('defaultValue')) %> + '</label>' +
             '<input data-var-field="' + idx + '" data-field="default_value" type="text" value="' + escHtml(v.default_value || '') + '" class="al-form-input font-mono"></div>' +
-          '<div class="al-form-field"><label class="al-form-label">Field Type</label>' +
+          '<div class="al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('fieldType')) %> + '</label>' +
             '<select data-var-field="' + idx + '" data-field="field_type" class="al-form-select">' +
-              '<option value="text"' + ((v.field_type || 'text') === 'text' ? ' selected' : '') + '>text</option>' +
-              '<option value="number"' + (v.field_type === 'number' ? ' selected' : '') + '>number</option>' +
+              '<option value="text"' + ((v.field_type || 'text') === 'text' ? ' selected' : '') + '>' + <%- JSON.stringify(t('fieldTypeText')) %> + '</option>' +
+              '<option value="number"' + (v.field_type === 'number' ? ' selected' : '') + '>' + <%- JSON.stringify(t('fieldTypeNumber')) %> + '</option>' +
             '</select></div>' +
-          '<div class="col-span-2 al-form-field"><label class="al-form-label">Description</label>' +
+          '<div class="col-span-2 al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('description')) %> + '</label>' +
             '<input data-var-field="' + idx + '" data-field="description" type="text" value="' + escHtml(v.description || '') + '" class="al-form-input"></div>' +
-          '<div class="col-span-2 al-form-field"><label class="al-form-label">Validation Rules</label>' +
+          '<div class="col-span-2 al-form-field"><label class="al-form-label">' + <%- JSON.stringify(t('validationRules')) %> + '</label>' +
             '<input data-var-field="' + idx + '" data-field="rules" type="text" value="' + escHtml(v.rules || '') + '" placeholder="required|string|between:3,15" class="al-form-input font-mono"></div>' +
           '<div class="col-span-2 flex items-center gap-4">' +
             '<label class="flex items-center gap-2 text-xs cursor-pointer" style="color:var(--theme-text-muted)">' +
               '<input data-var-field="' + idx + '" data-field="user_viewable" type="checkbox"' + (v.user_viewable !== false ? ' checked' : '') +
-              ' class="rounded"> User viewable</label>' +
+              ' class="rounded"> ' + <%- JSON.stringify(t('userViewable')) %> + '</label>' +
             '<label class="flex items-center gap-2 text-xs cursor-pointer" style="color:var(--theme-text-muted)">' +
               '<input data-var-field="' + idx + '" data-field="user_editable" type="checkbox"' + (v.user_editable !== false ? ' checked' : '') +
-              ' class="rounded"> User editable</label>' +
+              ' class="rounded"> ' + <%- JSON.stringify(t('userEditable')) %> + '</label>' +
           '</div>' +
         '</div>' +
         '</div>';
@@ -363,18 +362,18 @@ function imageEditor() {
     var list = document.getElementById('port-requirements-list');
     list.innerHTML = '';
     if (!state.portRequirements.length) {
-      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">No required ports.</p>';
+      list.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">' + <%- JSON.stringify(t('noRequiredPorts')) %> + '</p>';
       return;
     }
     state.portRequirements.forEach(function(port, idx) {
       var row = document.createElement('div');
       row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_140px_auto] gap-2 items-end';
       row.innerHTML =
-        '<label class="text-xs" style="color:var(--theme-text-muted)">Port name<input data-port-req="' + idx + '" data-field="name" value="' + escHtml(port.name || '') + '"' +
+        '<label class="text-xs" style="color:var(--theme-text-muted)">' + <%- JSON.stringify(t('portName')) %> + '<input data-port-req="' + idx + '" data-field="name" value="' + escHtml(port.name || '') + '"' +
         ' class="mt-1 w-full al-form-input"></label>' +
-        '<label class="text-xs" style="color:var(--theme-text-muted)">Internal port<input data-port-req="' + idx + '" data-field="internalPort" type="number" min="1" max="65535" value="' + escHtml(port.internalPort || '') + '"' +
+        '<label class="text-xs" style="color:var(--theme-text-muted)">' + <%- JSON.stringify(t('internalPort')) %> + '<input data-port-req="' + idx + '" data-field="internalPort" type="number" min="1" max="65535" value="' + escHtml(port.internalPort || '') + '"' +
         ' class="mt-1 w-full al-form-input"></label>' +
-        '<button type="button" data-port-req-remove="' + idx + '" class="al-btn-ghost px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">Remove</button>';
+        '<button type="button" data-port-req-remove="' + idx + '" class="al-btn-ghost al-btn-sm" style="color:var(--theme-danger)">' + <%- JSON.stringify(t('remove')) %> + '</button>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-port-req-remove]').forEach(function(btn) {
@@ -429,13 +428,13 @@ function imageEditor() {
       });
       var data = await r.json();
       if (data.success) {
-        showToast('Saved.', 'success');
+        showToast(<%- JSON.stringify(t('imageSaved')) %>, 'success');
         window.location.reload();
       } else {
-        showToast(data.error || 'Failed to save.', 'error');
+        showToast(data.error || <%- JSON.stringify(t('failedToSave')) %>, 'error');
       }
     } catch (e) {
-      showToast('Network error.', 'error');
+      showToast(<%- JSON.stringify(t('networkError')) %>, 'error');
     }
   }
 
@@ -474,7 +473,7 @@ function imageEditor() {
       });
       renderPortRequirements();
       document.getElementById('add-port-requirement').addEventListener('click', function() {
-        state.portRequirements.push({ name: 'Port ' + (state.portRequirements.length + 1), internalPort: DEFAULT_PORT });
+        state.portRequirements.push({ name: <%- JSON.stringify(t('portDefaultName')) %>.replace('{{count}}', state.portRequirements.length + 1), internalPort: DEFAULT_PORT });
         renderPortRequirements();
       });
       document.getElementById('tab-raw').addEventListener('click', renderRawEditor);
@@ -492,7 +491,7 @@ function imageEditor() {
         state.startup_done = document.getElementById('field-startup-done').value.trim();
         await saveState();
       };
-      window.tabLabels['general'] = 'Save';
+      window.tabLabels['general'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['general'] = function() {
         state.name = originalData.name;
         state.description = originalData.description;
@@ -519,7 +518,7 @@ function imageEditor() {
         state.docker_images = newImages;
         await saveState();
       };
-      window.tabLabels['docker'] = 'Save';
+      window.tabLabels['docker'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['docker'] = function() {
         state.docker_images = JSON.parse(JSON.stringify(originalData.docker_images));
         renderDockerImages();
@@ -538,7 +537,7 @@ function imageEditor() {
         });
         await saveState();
       };
-      window.tabLabels['variables'] = 'Save';
+      window.tabLabels['variables'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['variables'] = function() {
         state.variables = JSON.parse(JSON.stringify(originalData.variables));
         renderVariables();
@@ -552,7 +551,7 @@ function imageEditor() {
         };
         await saveState();
       };
-      window.tabLabels['install'] = 'Save';
+      window.tabLabels['install'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['install'] = function() {
         var orig = originalData.scripts.installation || {};
         state.scripts.installation = { container: orig.container || '', entrypoint: orig.entrypoint || 'bash', script: orig.script || '' };
@@ -570,7 +569,7 @@ function imageEditor() {
         state.portRequirements = state.portRequirements.filter(function(p) { return p.name && p.internalPort; });
         await saveState();
       };
-      window.tabLabels['settings'] = 'Save';
+      window.tabLabels['settings'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['settings'] = function() {
         state.portRequirements = JSON.parse(JSON.stringify(originalData.portRequirements));
         renderPortRequirements();
@@ -580,10 +579,10 @@ function imageEditor() {
         if (!monacoEditor) return;
         var parsed;
         try { parsed = JSON.parse(monacoEditor.getValue()); }
-        catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
+        catch (e) { showToast(<%- JSON.stringify(t('invalidJsonPrefix')) %> + ' ' + e.message, 'error'); return; }
         await savePayload(parsed);
       };
-      window.tabLabels['raw'] = 'Save';
+      window.tabLabels['raw'] = <%- JSON.stringify(t('save')) %>;
       window.tabResetHandlers['raw'] = function() {
         if (monacoEditor) {
           monacoEditor.setValue(buildExportJson());

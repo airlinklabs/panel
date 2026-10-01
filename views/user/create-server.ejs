@@ -1,19 +1,22 @@
-<%- include('../layouts/user', { title: 'Create Server' }) %>
+<%- include('../layouts/user', { title: t('createServer') }) %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
-  <div class="flex items-start gap-4">
-    <a href="/" class="al-btn al-btn-ghost p-2 shrink-0">
+<div class="al-page-header">
+  <div class="flex items-start gap-2 min-w-0 justify-start flex-nowrap">
+    <a href="/" class="al-btn al-btn-ghost al-btn-icon-only shrink-0" title="<%= t('back') %>" aria-label="<%= t('back') %>">
       <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
     </a>
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('createServer') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('createNewServerDesc') %></p>
+    <div class="min-w-0">
+      <h1 class="al-page-title"><%= t('createServer') %></h1>
+      <p class="al-page-desc"><%= t('createNewServerDesc') %></p>
     </div>
   </div>
+</div>
 
+<div class="al-page-body">
   <% if (typeof error !== 'undefined' && error) { %>
-  <div class="mt-4 p-3 rounded-xl text-[13px]" style="background:var(--theme-danger-bg); border:1px solid var(--theme-danger); color:var(--theme-danger);">
-    <%= error %>
+  <div class="al-alert-danger mt-2" role="alert">
+    <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+    <div class="flex-1"><%= error %></div>
   </div>
   <% } %>
 
@@ -27,31 +30,31 @@
   </div>
   <% } else { %>
 
-  <form id="createServerForm" class="mt-5 max-w-2xl">
+  <form id="createServerForm" class="mt-4 max-w-2xl space-y-4">
     <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 
     <!-- Server Name -->
-    <div class="al-card p-4 mb-4">
-      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('basicInfo') %></h3>
+    <div class="al-form-card">
+      <h3 class="al-form-card-title mb-4"><%= t('basicInfo') %></h3>
       <div class="al-form-field">
-        <label class="al-form-label"><%= t('serverName') %> <span class="text-red-500">*</span></label>
+        <label for="serverName" class="al-form-label"><%= t('serverName') %> <span class="al-required" aria-hidden="true">*</span></label>
         <input type="text" id="serverName" name="name" class="al-form-input" required maxlength="100"
-          placeholder="my-server">
+          placeholder="<%= t('createServerNamePlaceholder') %>" aria-required="true">
       </div>
       <div class="al-form-field mt-3">
-        <label class="al-form-label"><%= t('description') %></label>
+        <label for="serverDescription" class="al-form-label"><%= t('description') %></label>
         <input type="text" id="serverDescription" name="description" class="al-form-input" maxlength="500"
           placeholder="<%= t('optionalDescription') %>">
       </div>
     </div>
 
     <!-- Node & Image Selection -->
-    <div class="al-card p-4 mb-4">
-      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('configuration') %></h3>
+    <div class="al-form-card">
+      <h3 class="al-form-card-title mb-4"><%= t('configuration') %></h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="al-form-field">
-          <label class="al-form-label"><%= t('node') %> <span class="text-red-500">*</span></label>
-          <select id="nodeId" name="nodeId" class="al-form-select" required>
+          <label for="nodeId" class="al-form-label"><%= t('node') %> <span class="al-required" aria-hidden="true">*</span></label>
+          <select id="nodeId" name="nodeId" class="al-form-select" required aria-required="true">
             <option value="" disabled selected><%= t('selectNode') %></option>
             <% if (typeof nodes !== 'undefined' && Array.isArray(nodes)) { %>
               <% nodes.forEach(function(node) { %>
@@ -61,8 +64,8 @@
           </select>
         </div>
         <div class="al-form-field">
-          <label class="al-form-label"><%= t('image') %> <span class="text-red-500">*</span></label>
-          <select id="imageId" name="imageId" class="al-form-select" required>
+          <label for="imageId" class="al-form-label"><%= t('image') %> <span class="al-required" aria-hidden="true">*</span></label>
+          <select id="imageId" name="imageId" class="al-form-select" required aria-required="true">
             <option value="" disabled selected><%= t('selectImage') %></option>
             <% if (typeof images !== 'undefined' && Array.isArray(images)) { %>
               <% images.forEach(function(img) { %>
@@ -73,50 +76,62 @@
         </div>
       </div>
       <div class="al-form-field mt-3">
-        <label class="al-form-label"><%= t('dockerImage') %> <span class="text-red-500">*</span></label>
-        <select id="dockerImage" name="dockerImage" class="al-form-select" required>
+        <label for="dockerImage" class="al-form-label"><%= t('dockerImage') %> <span class="al-required" aria-hidden="true">*</span></label>
+        <select id="dockerImage" name="dockerImage" class="al-form-select" required aria-required="true">
           <option value="" disabled selected><%= t('selectDockerImage') %></option>
         </select>
       </div>
     </div>
 
     <!-- Resources -->
-    <div class="al-card p-4 mb-4">
-      <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('resources') %></h3>
+    <div class="al-form-card">
+      <h3 class="al-form-card-title mb-4"><%= t('resources') %></h3>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="al-form-field">
-          <label class="al-form-label"><%= t('memory') %> (MB) <span class="text-red-500">*</span></label>
-          <input type="number" id="memory" name="Memory" class="al-form-input" required min="128"
-            value="<%= typeof resourceLimits !== 'undefined' ? 512 : 512 %>">
-          <% if (typeof resourceLimits !== 'undefined') { %>
-          <p class="text-[10px] mt-1" style="color:var(--theme-text-muted)">Max: <%= resourceLimits.maxMemory %> MB</p>
-          <% } %>
-        </div>
-        <div class="al-form-field">
-          <label class="al-form-label"><%= t('cpu') %> (%) <span class="text-red-500">*</span></label>
-          <input type="number" id="cpu" name="Cpu" class="al-form-input" required min="5" step="5"
-            value="<%= typeof resourceLimits !== 'undefined' ? 50 : 50 %>">
-          <% if (typeof resourceLimits !== 'undefined') { %>
-          <p class="text-[10px] mt-1" style="color:var(--theme-text-muted)">Max: <%= resourceLimits.maxCpu %>%</p>
-          <% } %>
-        </div>
-        <div class="al-form-field">
-          <label class="al-form-label"><%= t('storage') %> (MB) <span class="text-red-500">*</span></label>
-          <input type="number" id="storage" name="Storage" class="al-form-input" required min="1024"
-            value="<%= typeof resourceLimits !== 'undefined' ? 10240 : 10240 %>">
-          <% if (typeof resourceLimits !== 'undefined') { %>
-          <p class="text-[10px] mt-1" style="color:var(--theme-text-muted)">Max: <%= resourceLimits.maxStorage %> MB</p>
-          <% } %>
-        </div>
+        <%- include('../partials/ui/form-field', {
+          type: 'number',
+          id: 'memory',
+          name: 'Memory',
+          label: t('memory') + ' (MB)',
+          required: true,
+          min: 128,
+          value: 512,
+          helpText: (typeof resourceLimits !== 'undefined') ? (t('max') + ': ' + resourceLimits.maxMemory + ' MB') : ''
+        }) %>
+        <%- include('../partials/ui/form-field', {
+          type: 'number',
+          id: 'cpu',
+          name: 'Cpu',
+          label: t('cpu') + ' (%)',
+          required: true,
+          min: 5,
+          step: 5,
+          value: 50,
+          helpText: (typeof resourceLimits !== 'undefined') ? (t('max') + ': ' + resourceLimits.maxCpu + '%') : ''
+        }) %>
+        <%- include('../partials/ui/form-field', {
+          type: 'number',
+          id: 'storage',
+          name: 'Storage',
+          label: t('storage') + ' (MB)',
+          required: true,
+          min: 1024,
+          value: 10240,
+          helpText: (typeof resourceLimits !== 'undefined') ? (t('max') + ': ' + resourceLimits.maxStorage + ' MB') : ''
+        }) %>
       </div>
-      <div class="al-form-field mt-3">
-        <label class="al-form-label"><%= t('swap') %> (MB, -1 = unlimited)</label>
-        <input type="number" id="swap" name="Swap" class="al-form-input" min="-1" value="0">
-      </div>
+      <%- include('../partials/ui/form-field', {
+        type: 'number',
+        id: 'swap',
+        name: 'Swap',
+        label: t('swapFieldLabel'),
+        min: -1,
+        value: 0,
+        wrapperCls: 'mt-3'
+      }) %>
     </div>
 
     <!-- Submit -->
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
       <button type="submit" id="submitBtn" class="al-btn al-btn-primary">
         <%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('createServer') %>
       </button>
@@ -129,6 +144,16 @@
 
 <script nonce="<%- nonce %>">
 (function() {
+  // Copy is injected server-side: window.__i18n serialises to {} (Proxy with
+  // a get trap only), so every client string must arrive through t().
+  var CREATE_I18N = {
+    loading: <%- JSON.stringify(t('loading')).replace(/</g, '\\x3c') %>,
+    noImages: <%- JSON.stringify(t('noImagesAvailable')).replace(/</g, '\\x3c') %>,
+    noDockerImages: <%- JSON.stringify(t('noDockerImages')).replace(/</g, '\\x3c') %>,
+    creating: <%- JSON.stringify(t('creating')).replace(/</g, '\\x3c') %>,
+    failedToCreate: <%- JSON.stringify(t('failedToCreate')).replace(/</g, '\\x3c') %>
+  };
+
   var images = <%- JSON.stringify(typeof images !== 'undefined' ? images : []) %>;
   var imageSelect = document.getElementById('imageId');
   var dockerSelect = document.getElementById('dockerImage');
@@ -137,17 +162,17 @@
     imageSelect.addEventListener('change', function() {
       var selected = imageSelect.options[imageSelect.selectedIndex];
       var imageId = selected.value;
-      dockerSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+      dockerSelect.innerHTML = '<option value="" disabled selected>' + escHtml(CREATE_I18N.loading) + '</option>';
 
       var image = images.find(function(img) { return String(img.id) === String(imageId); });
-      if (!image) { dockerSelect.innerHTML = '<option value="" disabled>No images</option>'; return; }
+      if (!image) { dockerSelect.innerHTML = '<option value="" disabled>' + escHtml(CREATE_I18N.noImages) + '</option>'; return; }
 
       var dockerImages = [];
       try { dockerImages = JSON.parse(image.dockerImages || '[]'); } catch(e) { dockerImages = []; }
 
       dockerSelect.innerHTML = '';
       if (dockerImages.length === 0) {
-        dockerSelect.innerHTML = '<option value="" disabled>No docker images</option>';
+        dockerSelect.innerHTML = '<option value="" disabled>' + escHtml(CREATE_I18N.noDockerImages) + '</option>';
         return;
       }
 
@@ -165,8 +190,9 @@
   document.getElementById('createServerForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     var btn = document.getElementById('submitBtn');
+    var btnHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Creating...';
+    btn.textContent = CREATE_I18N.creating;
 
     try {
       var fd = new FormData(e.target);
@@ -181,11 +207,11 @@
 
       if (r.redirected) { window.location.href = r.url; }
       else if (r.ok) { window.location.href = '/dashboard'; }
-      else { var err = await r.text(); showToast(err, 'error'); btn.disabled = false; btn.textContent = '<%= t("createServer") %>'; }
+      else { var err = await r.text(); showToast(err, 'error'); btn.disabled = false; btn.innerHTML = btnHtml; }
     } catch(err) {
-      showToast('Failed to create server', 'error');
+      showToast(CREATE_I18N.failedToCreate, 'error');
       btn.disabled = false;
-      btn.textContent = '<%= t("createServer") %>';
+      btn.innerHTML = btnHtml;
     }
   });
 })();

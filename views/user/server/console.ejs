@@ -39,17 +39,17 @@
     </div>
     <div class="al-card">
       <p class="al-section-label"><%= t('memory') %></p>
-      <p id="ramUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
+      <p id="ramUsage" class="text-sm font-medium mt-1 al-text-strong">—</p>
       <canvas id="ramChart" class="mt-2 w-full h-6"></canvas>
     </div>
     <div class="al-card">
       <p class="al-section-label"><%= t('cpu') %></p>
-      <p id="cpuUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
+      <p id="cpuUsage" class="text-sm font-medium mt-1 al-text-strong">—</p>
       <canvas id="cpuChart" class="mt-2 w-full h-6"></canvas>
     </div>
     <div class="al-card">
       <p class="al-section-label"><%= t('disk') %></p>
-      <p id="diskUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
+      <p id="diskUsage" class="text-sm font-medium mt-1 al-text-strong">—</p>
       <canvas id="diskChart" class="mt-2 w-full h-6"></canvas>
     </div>
   </div>
@@ -73,7 +73,7 @@
     <div class="min-w-0 flex-1">
       <p id="queue-position" class="al-alert-title"></p>
       <p id="queue-available" class="al-alert-body"></p>
-      <button id="cancelQueueBtn" type="button" class="al-btn-link al-btn-sm mt-1"><%= t('cancelStart') %></button>
+      <button id="cancelQueueBtn" type="button" class="al-btn-link al-btn-sm mt-1 min-h-11"><%= t('cancelStart') %></button>
     </div>
   </div>
 
@@ -146,9 +146,9 @@
     };
     mount(root, config).catch(err => {
       console.error('Console mount failed:', err);
-      root.innerHTML = '<div class="p-6 text-center text-sm" style="color:var(--theme-text-muted);">' +
-        '<p class="font-medium mb-1" style="color:var(--theme-text);"><%= t('consoleUnavailableTitle') %></p>' +
-        '<p><%= t('consoleUnavailableBody') %></p></div>';
+      root.innerHTML = '<div class="p-6 text-center text-sm al-text-muted">' +
+        '<p class="font-medium mb-1" style="color:var(--theme-text);"><%= t('Console unavailable') %></p>' +
+        '<p><%= t('Failed to initialize the server console.') %></p></div>';
     });
   }
 </script>

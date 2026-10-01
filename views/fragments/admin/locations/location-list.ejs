@@ -10,7 +10,7 @@
     </div>
   <% } else { %>
     <% const byRegion = new Map(); locations.forEach(loc => {
-         const region = loc.shortCode.split('-')[0] || 'Other';
+         const region = loc.shortCode.split('-')[0] || <%- JSON.stringify(t('otherRegion')) %>;
          if (!byRegion.has(region)) byRegion.set(region, []);
          byRegion.get(region).push(loc);
        }); %>
@@ -23,7 +23,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <% regionLocs.forEach(loc => { %>
-            <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="<%= loc.id %>">
+            <div class="al-card flex items-center justify-between gap-3" data-location-id="<%= loc.id %>">
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= (loc._count && loc._count.nodes > 0) ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
@@ -34,19 +34,17 @@
               </div>
               <div class="flex items-center gap-1 shrink-0">
                 <a href="/admin/nodes?location=<%= loc.id %>"
-                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                   style="color:var(--theme-text-muted);"
+                   class="al-btn-ghost al-btn-icon-only"
                    aria-label="<%= t('viewNodesIn', { name: loc.name }) %>">
                   <%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </a>
                 <a href="/admin/nodes?location=<%= loc.id %>"
-                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                   style="color:var(--theme-text-muted);"
+                   class="al-btn-ghost al-btn-icon-only"
                    aria-label="<%= t('editLocation', { name: loc.name }) %>">
                   <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </a>
                 <button type="button"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                  class="al-btn-ghost al-btn-icon-only"
                   style="color:var(--theme-danger);"
                   aria-label="<%= t('deleteLocation', { name: loc.name }) %>"
                   data-location-id="<%= loc.id %>"

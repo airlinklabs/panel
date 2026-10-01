@@ -58,13 +58,13 @@
     }
 
     const typeIcon = {
-      server: alIcon('server', 'w-4 h-4 shrink-0 text-neutral-400'),
-      user: alIcon('user', 'w-4 h-4 shrink-0 text-neutral-400'),
-      node: alIcon('hard-drive', 'w-4 h-4 shrink-0 text-neutral-400'),
-      nav: alIcon('search', 'w-4 h-4 shrink-0 text-neutral-400'),
-      clock: alIcon('clock', 'w-4 h-4 shrink-0 text-neutral-400'),
-      arrow: alIcon('arrow-up-right', 'w-4 h-4 shrink-0 text-neutral-400'),
-      feature: alIcon('sparkles', 'w-4 h-4 shrink-0 text-neutral-400'),
+      server: alIcon('server', 'w-4 h-4 shrink-0 al-search-icon'),
+      user: alIcon('user', 'w-4 h-4 shrink-0 al-search-icon'),
+      node: alIcon('hard-drive', 'w-4 h-4 shrink-0 al-search-icon'),
+      nav: alIcon('search', 'w-4 h-4 shrink-0 al-search-icon'),
+      clock: alIcon('clock', 'w-4 h-4 shrink-0 al-search-icon'),
+      arrow: alIcon('arrow-up-right', 'w-4 h-4 shrink-0 al-search-icon'),
+      feature: alIcon('sparkles', 'w-4 h-4 shrink-0 al-search-icon'),
     };
 
     function escHtml(t) {
@@ -77,7 +77,7 @@
       const regex = new RegExp(`(${  safe  })`, 'gi');
       return escHtml(text).replace(
         regex,
-        '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded px-0.5">$1</mark>',
+        '<mark class="al-search-mark">$1</mark>',
       );
     }
 
@@ -392,7 +392,7 @@
       if (quickLinks.length) {
         const hdr = document.createElement('p');
         hdr.className =
-          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+          'al-search-group';
         hdr.textContent = tx('searchQuickLinks', 'Quick Links');
         searchResults.appendChild(hdr);
 
@@ -400,7 +400,7 @@
           const row = document.createElement('a');
           row.href = item.url;
           row.className =
-            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+            'al-search-result';
           row.innerHTML =
             `${typeIcon[item.icon] || typeIcon.nav 
             }<span class="flex-1 min-w-0"><span class="block truncate">${ 
@@ -419,20 +419,20 @@
       if (recentSearches.length) {
         const hdr = document.createElement('p');
         hdr.className =
-          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+          'al-search-group';
         hdr.textContent = tx('searchRecent', 'Recent');
         searchResults.appendChild(hdr);
 
         recentSearches.forEach(function (term) {
           const row = document.createElement('div');
           row.className =
-            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+            'al-search-result';
           row.innerHTML =
             `${typeIcon.clock 
             }<span class="flex-1 min-w-0"><span class="block truncate">${ 
               escHtml(term) 
             }</span></span>` +
-            `<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="${ 
+            `<button class="al-search-remove" data-remove="${ 
               escHtml(term) 
             }" aria-label="${ 
               escHtml(tx('remove', 'Remove')) 
@@ -483,7 +483,7 @@
 
         const msg = document.createElement('p');
         msg.className =
-          'text-sm font-medium text-neutral-600 dark:text-neutral-300';
+          'al-search-empty-title';
         msg.textContent =
           `${searchOverlay.dataset.emptyTitle ||
           tx('searchEmptyTitle', 'No results for') 
@@ -494,7 +494,7 @@
 
         const hint = document.createElement('p');
         hint.className =
-          'text-xs text-neutral-500 dark:text-neutral-400 max-w-xs';
+          'al-search-empty-hint';
         hint.textContent =
           searchOverlay.dataset.emptyHint ||
           tx(
@@ -532,7 +532,7 @@
 
         const hdr = document.createElement('p');
         hdr.className =
-          'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+          'al-search-group';
         hdr.textContent = labels[type];
         searchResults.appendChild(hdr);
 
@@ -543,11 +543,11 @@
             `search-result-${ 
               type 
             }-${ 
-              searchResults.querySelectorAll('.search-result').length}`;
+              searchResults.querySelectorAll('.al-search-result').length}`;
           row.setAttribute('role', 'option');
           row.setAttribute('aria-selected', 'false');
           row.className =
-            'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+            'al-search-result';
           row.innerHTML =
             `${typeIcon[item.type] || typeIcon.nav 
             }<span class="flex-1 min-w-0">` +
@@ -555,7 +555,7 @@
               highlightMatch(item.label, term) 
             }</span>${ 
               item.sub
-                ? `<span class="block text-[11px] text-neutral-400 truncate">${ 
+                ? `<span class="al-search-sub">${ 
                   escHtml(item.sub) 
                 }</span>`
                 : '' 
@@ -600,12 +600,11 @@
     }
 
     function updateActiveResult() {
-      const rows = searchResults.querySelectorAll('.search-result');
+      const rows = searchResults.querySelectorAll('.al-search-result');
       rows.forEach(function (row, i) {
-        const active = i === activeIndex;
-        row.classList.toggle('bg-neutral-100', active);
-        row.classList.toggle('dark:bg-neutral-700/50', active);
-        row.setAttribute('aria-selected', active ? 'true' : 'false');
+        // Selection styling is CSS on [aria-selected="true"] (topbar.css), so
+        // this loop only keeps the attribute truthful.
+        row.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
       });
       const activeRow = rows[activeIndex];
       searchInput.setAttribute(
@@ -694,7 +693,7 @@
         searchInput.blur();
         return;
       }
-      const rows = searchResults.querySelectorAll('.search-result');
+      const rows = searchResults.querySelectorAll('.al-search-result');
       if (!rows.length) {return;}
       if (e.key === 'ArrowDown') {
         e.preventDefault();

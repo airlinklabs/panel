@@ -1,58 +1,58 @@
-<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Worlds' }) %>
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + t('worlds') }) %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);"><%= t('worlds') %></span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name || t('server'), url: '/server/' + server.UUID },
+    { label: t('worlds') }
+  ] }) %>
+</div>
 
-<div class="px-6 sm:px-8 pb-12" data-server-uuid="<%= server.UUID %>">
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= server.name || t('server') %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
+  </div>
+</header>
 
-  <h1 class="text-xl font-semibold mb-6" style="color:var(--theme-text);"><%= t('worlds') %></h1>
+<div class="al-page-body" data-server-uuid="<%= server.UUID %>">
 
-  <div id="worlds-list">
+  <div id="worlds-list" class="flex flex-col gap-3">
     <% if (!worlds || worlds.length === 0) { %>
-      <div class="al-card p-8 text-center">
-        <%- icon('globe', { class: 'w-10 h-10 mx-auto mb-3', strokeWidth: 1.5, style: 'color:var(--theme-text-muted);' }) %>
-        <p class="text-sm mb-1" style="color:var(--theme-text-strong);">No worlds found</p>
-        <p class="text-xs" style="color:var(--theme-text-muted);">Start your server to generate worlds.</p>
-      </div>
+      <%- include('../../partials/empty-state', {
+        iconName: 'globe',
+        title: t('noWorlds'),
+        description: t('noWorldsDesc')
+      }) %>
     <% } else { %>
       <% worlds.forEach(function(world) { %>
-        <div class="al-card p-4 mb-3 flex flex-col sm:flex-row sm:items-center gap-3" data-world-name="<%= world.name %>">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-bg-secondary);">
-              <%- icon('globe', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-text-muted);' }) %>
+        <div class="al-card" data-world-name="<%= world.name %>">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <span class="al-icon-tile shrink-0"><%- icon('globe', { class: 'w-5 h-5' }) %></span>
+              <div class="min-w-0">
+                <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong)"><%= world.name %></p>
+                <p class="text-[11px] mt-0.5" style="color:var(--theme-text-muted)">
+                  <% if (world.size) { %><span><%= t('worldSizeLabel') %>: <%= (world.size / 1024 / 1024).toFixed(1) %> MB</span><% } %>
+                  <% if (world.players !== undefined) { %><% if (world.size) { %> · <% } %><span><%= t('worldPlayersLabel', { count: world.players }) %></span><% } %>
+                </p>
+              </div>
             </div>
-            <div class="min-w-0">
-              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= world.name %></p>
-              <p class="text-[10px]" style="color:var(--theme-text-muted);">
-                <% if (world.size) { %>Size: <%= (world.size / 1024 / 1024).toFixed(1) %> MB<% } %>
-                <% if (world.players !== undefined) { %> · <%= world.players %> player(s)<% } %>
-              </p>
+            <div class="flex items-center gap-2 shrink-0 sm:justify-end">
+              <% if (world.name !== 'world') { %>
+                <button type="button" class="world-action-btn al-btn-secondary al-btn-sm min-h-11" data-world="<%= world.name %>" data-action="download" aria-label="<%= t('ariaDownloadWorld', { world: world.name }) %>">
+                  <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> <%= t('download') %>
+                </button>
+                <button type="button" class="world-action-btn world-delete-btn al-btn-danger al-btn-icon-only" data-world="<%= world.name %>" data-action="delete" aria-label="<%= t('ariaDeleteWorld', { world: world.name }) %>">
+                  <%- icon('trash-2', { class: 'w-4 h-4', strokeWidth: 2 }) %>
+                </button>
+              <% } else { %>
+                <span class="al-badge al-badge-neutral"><%= t('default') %></span>
+              <% } %>
             </div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <% if (world.name !== 'world') { %>
-              <button type="button" class="world-action-btn al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium" data-world="<%= world.name %>" data-action="download">
-                <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> Download
-              </button>
-              <button type="button" class="world-action-btn world-delete-btn al-btn-danger px-3 py-1.5 rounded-lg text-xs font-medium" data-world="<%= world.name %>" data-action="delete">
-                <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
-              </button>
-            <% } else { %>
-              <span class="text-[10px] px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">Default</span>
-            <% } %>
           </div>
         </div>
       <% }); %>
@@ -63,6 +63,19 @@
 
 <script type="module" nonce="<%- nonce %>">
   const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
+  const T = <%- JSON.stringify({
+    worldDeleteConfirmTitle: t('worldDeleteConfirmTitle'),
+    worldDeleteConfirmBody: t('worldDeleteConfirmBody'),
+    worldDeletedToast: t('worldDeletedToast'),
+    worldDownloadStarted: t('worldDownloadStarted'),
+    deleteLabel: t('delete')
+  }) %>;
+
+  async function confirmAction({ title, body, danger }) {
+    await new Promise(resolve => {
+      window.modal.confirm({ title, body, danger, confirmLabel: T.deleteLabel, onConfirm: resolve });
+    });
+  }
 
   document.querySelectorAll('.world-action-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -70,7 +83,11 @@
       const action = btn.dataset.action;
 
       if (action === 'delete') {
-        if (!confirm(`Delete world "${world}"? This cannot be undone.`)) return;
+        await confirmAction({
+          title: T.worldDeleteConfirmTitle,
+          body: T.worldDeleteConfirmBody.replace('{{world}}', world),
+          danger: true
+        });
       }
 
       try {
@@ -83,10 +100,10 @@
           if (action === 'delete') {
             btn.closest('[data-world-name]')?.remove();
           }
-          if (window.showToast) window.showToast(`World ${action}d`, 'success');
+          if (window.showToast) window.showToast(action === 'delete' ? T.worldDeletedToast.replace('{{world}}', world) : T.worldDownloadStarted, 'success');
         }
       } catch (e) {
-        console.error(`World ${action} failed`, e);
+        console.error('World action failed', e);
       }
     });
   });

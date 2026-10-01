@@ -1,7 +1,8 @@
 @layer components {
   /* ── File manager ─────────────────────────────────────────────────
      Path strip → filter row → file table → selection action bar.
-     Used by: views/user/server/files.ejs, views/user/server/files-rows.ejs */
+     Used by: views/user/server/files.ejs, views/user/server/files-rows.ejs,
+     views/user/server/file.ejs (editor), views/user/server/file-detail.ejs */
 
   /* Bordered, scrollable shell that keeps the radius on every child. */
   .al-file-panel {
@@ -145,6 +146,21 @@
   @media (max-width: 1023px) {
     .al-editor-shell {
       min-height: 60dvh;
+    }
+  }
+
+  /* Touch-target floor for the compact controls (clear button, editor
+     status toggles, file row link) once the layout is in finger territory. */
+  @media (max-width: 639px) {
+    .al-file-search-clear,
+    .al-editor-status button {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+    /* The row link is the tap target for opening a file — the cell's own
+       padding is not part of it, so it carries the 44px floor itself. */
+    .al-file-link {
+      min-height: 2.75rem;
     }
   }
 }

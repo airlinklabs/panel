@@ -46,6 +46,12 @@
 @import "./components/activity.css";
 @import "./components/console-panel.css";
 @import "./components/credits-bg.css";
+@import "./components/file-manager.css";
+@import "./components/disclosure.css";
+@import "./components/image-store.css";
+@import "./components/segmented.css";
+@import "./components/error-state.css";
+@import "./pages/mobile-sheet.css";
 @import "./pages/wallpaper.css";
 @import "./pages/auth.css";
 @import "./pages/console.css";

@@ -1,20 +1,22 @@
 <%- include('../../layouts/admin', { title: t('imageStoreTitle') }) %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
     { label: t('breadcrumbImages'), url: '/admin/images' },
     { label: t('storeTab') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('imageStoreTitle') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('imageStoreDesc') %></p>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('imageStoreTitle') %></h1>
+    <p class="al-page-desc"><%= t('imageStoreDesc') %></p>
   </div>
+</div>
 
-  <div class="mt-5">
+<div class="al-page-body">
+  <div>
     <div class="flex gap-1 mb-6">
       <a href="/admin/images" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
         <%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('installed') %>
@@ -41,9 +43,9 @@ function imageStore() {
   var CAT_CLS = { game: 'cat-game', application: 'cat-application', generic: 'cat-generic' };
   var CAT_LABEL = { game: window.__i18n.categoryGame || 'Game', application: window.__i18n.categoryApp || 'App', generic: window.__i18n.categoryGeneric || 'Generic' };
   var CAT_COLOR = {
-    game: _rootStyle.getPropertyValue('--theme-accent-purple').trim() || '#7c3aed',
-    application: _rootStyle.getPropertyValue('--theme-accent-blue').trim() || '#0284c7',
-    generic: _rootStyle.getPropertyValue('--theme-success').trim() || '#16a34a',
+    game: _rootStyle.getPropertyValue('--theme-accent').trim(),
+    application: _rootStyle.getPropertyValue('--theme-info').trim(),
+    generic: _rootStyle.getPropertyValue('--theme-success').trim(),
   };
 
   var allImages = [], pendingEgg = null, mdParse = null;
@@ -54,8 +56,8 @@ function imageStore() {
   function cap(s) { return s.replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
   function show(id,d) { var e=document.getElementById(id); if(e)e.style.display=d||'block'; }
   function hide(id) { var e=document.getElementById(id); if(e)e.style.display='none'; }
-  function catDot(cat,size) { var c=CAT_COLOR[cat]||'#999'; return '<span style="display:inline-block;width:'+(size||8)+'px;height:'+(size||8)+'px;border-radius:50%;background:'+c+';flex-shrink:0"></span>'; }
-  function catBadge(cat) { return '<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset '+(CAT_CLS[cat]||'')+'">'+catDot(cat,6)+(CAT_LABEL[cat]||cat)+'</span>'; }
+  function catDot(cat,size) { var c=CAT_COLOR[cat]||'currentColor'; return '<span style="display:inline-block;width:'+(size||8)+'px;height:'+(size||8)+'px;border-radius:50%;background:'+c+';flex-shrink:0"></span>'; }
+  function catBadge(cat) { return '<span class="al-badge '+(CAT_CLS[cat]||'')+'">'+catDot(cat,6)+(CAT_LABEL[cat]||cat)+'</span>'; }
 
   function groupData() {
     var map = {};
@@ -118,14 +120,15 @@ function imageStore() {
       allImages=data.images||[];
       hide('loadingEl');
       var age=data.builtAt?Math.round((Date.now()-data.builtAt)/60000):0;
-      if(st) st.textContent=allImages.length+' images \u00B7 '+(age<1?'fresh':age+'m old');
+      var stCount = allImages.length;
+      if(st) st.textContent = stCount + ' ' + (stCount !== 1 ? <%- JSON.stringify(t('imageOther')) %> : <%- JSON.stringify(t('imageOne')) %>) + ' \u00B7 ' + (age < 1 ? <%- JSON.stringify(t('fresh')) %> : age + <%- JSON.stringify(t('minutesShort')) %>);
       updateCount(); render();
     } catch(e) { console.error('Failed to load catalogue:',e); hide('loadingEl'); show('errorEl'); }
   }
 
   async function doRefresh() {
     document.getElementById('refreshBtnLoad').disabled=true;
-    var st=document.getElementById('statusText'); if(st)st.textContent='Refreshing\u2026';
+    var st=document.getElementById('statusText'); if(st)st.textContent=<%- JSON.stringify(t('storeRefreshing')) %>;
     var before=0;
     try { before=(await(await fetch('/api/v2/admin/images/store/catalogue')).json()).builtAt||0; } catch(e) {}
     try {
@@ -134,7 +137,7 @@ function imageStore() {
     } catch(e) {
       document.getElementById('refreshBtnLoad').disabled=false;
       if(st)st.textContent='';
-      if(typeof showToast==='function') showToast('Could not refresh the catalogue','error');
+      if(typeof showToast==='function') showToast(<%- JSON.stringify(t('couldNotRefresh')) %>,'error');
       return;
     }
     var REFRESH_POLL_INTERVAL_MS = 1000;
@@ -157,7 +160,7 @@ function imageStore() {
     var groups=groupData();
     hide('listEl'); hide('emptyEl'); updateCount();
     if(!groups.length) {
-      document.getElementById('emptyTxt').textContent=allImages.length?'No apps match your search.':'The image catalogue is empty.';
+      document.getElementById('emptyTxt').textContent=allImages.length?<%- JSON.stringify(t('noAppsMatch')) %>:<%- JSON.stringify(t('catalogueEmpty')) %>;
       show('emptyEl'); return;
     }
     var body=document.getElementById('listBody'); body.innerHTML='';
@@ -168,7 +171,7 @@ function imageStore() {
   function makeGroupRow(g) {
     var tr=document.createElement('tr');
     tr.className='al-table-tr transition-colors cursor-pointer group-hdr-tr';
-    tr.innerHTML='<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap px-3 py-4">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+' image'+(g.imgs.length!==1?'s':'')+'</td><td class="al-table-td px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,'')):esc(g.desc||''))+'</td>';
+    tr.innerHTML='<td class="al-table-td whitespace-nowrap"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+' '+(g.imgs.length!==1?<%- JSON.stringify(t('imageOther')) %>:<%- JSON.stringify(t('imageOne')) %>)+'</td><td class="al-table-td text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,'')):esc(g.desc||''))+'</td>';
     tr.addEventListener('click',function(){openGroup(g.group,g.imgs);});
     return tr;
   }
@@ -182,12 +185,12 @@ function imageStore() {
   function openGroup(group,imgs) {
     var s=imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
     stageBody('groupTpl',cap(group),'max-w-3xl');
-    document.getElementById('grpCount').textContent=s.length+' image'+(s.length!==1?'s':'');
+    document.getElementById('grpCount').textContent=s.length+' '+(s.length!==1?<%- JSON.stringify(t('imageOther')) %>:<%- JSON.stringify(t('imageOne')) %>);
     var list=document.getElementById('grpSubList'); list.innerHTML='';
     s.forEach(function(img,i){
       var row=document.createElement('div'); row.className='grp-img-row';
       var subLabel=img.subGroup&&img.subGroup!==img.group?img.subGroup.replace(img.group+'/',''):'';
-      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+'</p>'+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+'</p>':'')+'</div></div>'+'<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">Install</button>';
+      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+'</p>'+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+'</p>':'')+'</div></div>'+'<button type="button" class="al-btn-secondary al-btn-sm shrink-0">' + <%- JSON.stringify(t('storeInstallBtn')) %> + '</button>';
       row.style.animationDelay=Math.min(i*20,300)+'ms';
       row.addEventListener('click',function(){openEgg(img);});
       row.querySelector('button').addEventListener('click',function(e){e.stopPropagation();openEgg(img);});
@@ -204,8 +207,8 @@ function imageStore() {
   }
 
   async function renderMd(md,el) {
-    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">Rendering\u2026</p>';
-    try { var m=await getMd(); el.innerHTML='<div class="md-body">'+(md?m.parse(md):'<p style="font-style:italic;color:#a3a3a3;font-size:12px;">No readme available.</p>')+'</div>'; }
+    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">' + <%- JSON.stringify(t('rendering')) %> + '</p>';
+    try { var m=await getMd(); el.innerHTML='<div class="md-body">' + (md ? m.parse(md) : '<p class="al-text-muted" style="font-style:italic;font-size:12px;">' + <%- JSON.stringify(t('storeNoReadme')) %> + '</p>') + '</div>'; }
     catch(e) { el.innerHTML='<div class="md-body">'+esc(md||'')+'</div>'; }
   }
 
@@ -216,31 +219,31 @@ function imageStore() {
     catEl.className='text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset '+(CAT_CLS[img.category]||'');
     catEl.innerHTML=catDot(img.category,6)+(CAT_LABEL[img.category]||img.category);
     document.getElementById('eggDesc').textContent=img.description||'';
-    document.getElementById('eggAuthor').textContent=img.author?'by '+img.author:'';
+    document.getElementById('eggAuthor').textContent=img.author?<%- JSON.stringify(t('byAuthor')) %>.replace('{author}', img.author):'';
     renderMd(img.fullReadme||img.readme||'',document.getElementById('eggReadme'));
     hide('eggErr');
     var btn=document.getElementById('eggInstallBtn');
-    btn.innerHTML='Install'; btn.disabled=false; btn.style.background=''; btn.style.borderColor=''; btn.style.pointerEvents='';
+    btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>; btn.disabled=false; btn.style.background=''; btn.style.borderColor=''; btn.style.pointerEvents='';
   }
 
   async function confirmInstall() {
     if(!pendingEgg) return;
     var btn=document.getElementById('eggInstallBtn');
-    btn.disabled=true; btn.textContent='Installing\u2026'; hide('eggErr');
+    btn.disabled=true; btn.textContent=<%- JSON.stringify(t('storeInstallingBtn')) %>; hide('eggErr');
     try {
       var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
       var res=await fetch('/api/v2/admin/images/store/install',{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},body:JSON.stringify(pendingEgg.egg)});
       var body=await res.json();
-      if(!res.ok){document.getElementById('eggErrTxt').textContent=body.error||'Installation failed.';show('eggErr');btn.disabled=false;btn.innerHTML='Install';return;}
+      if(!res.ok){document.getElementById('eggErrTxt').textContent=body.error||<%- JSON.stringify(t('storeInstallationFailed')) %>;show('eggErr');btn.disabled=false;btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>;return;}
       var installedName=pendingEgg.name;
-      btn.innerHTML='<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Installed';
-      btn.style.background='var(--theme-success, #16a34a)'; btn.style.borderColor='var(--theme-success, #16a34a)'; btn.style.pointerEvents='none';
-      if(typeof showToast==='function') showToast('"'+installedName+'" installed successfully.', 'success');
+      btn.innerHTML=<%- JSON.stringify(icon('check', { class: 'size-4', strokeWidth: 1.5 })) %> + ' ' + <%- JSON.stringify(t('installed')) %>;
+      btn.style.background='var(--theme-success)'; btn.style.borderColor='var(--theme-success)'; btn.style.pointerEvents='none';
+      if(typeof showToast==='function') showToast('"' + installedName + '" ' + <%- JSON.stringify(t('storeInstalledSuccessfully')) %>, 'success');
       setTimeout(function(){window.modal.close();pendingEgg=null;},1500);
     } catch(err) {
       console.error('Image install error:',err);
-      document.getElementById('eggErrTxt').textContent='Installation failed. Try again.';
-      show('eggErr'); btn.disabled=false; btn.innerHTML='Install';
+      document.getElementById('eggErrTxt').textContent=<%- JSON.stringify(t('storeInstallationFailedRetry')) %>;
+      show('eggErr'); btn.disabled=false; btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>;
     }
   }
 

@@ -30,6 +30,16 @@
     border: 1px solid var(--theme-border-input);
     color: var(--theme-text-strong);
   }
+  /* ── Touch floor: inputs render 38px (py-2 + text-sm + 1px borders).
+     Same phone-only contract as button.css. ─────────────────────────── */
+  @media (max-width: 639px) {
+    .al-input,
+    .al-form-input,
+    .al-form-select {
+      min-height: 44px;
+    }
+  }
+
   .al-form-textarea {
     @apply min-h-[6rem];
     resize: vertical;
@@ -121,6 +131,17 @@
   .al-form-check-label {
     @apply text-sm;
     color: var(--theme-text);
+  }
+  /* Touch floor §4.5 (phone): a checkbox/radio box measures 16×16 and cannot
+     grow to 44px without looking absurd — the label that toggles it carries
+     the floor instead (touch.mjs measures the label for labelled inputs).
+     Covers nodes/create's "All" chips and /admin/servers' row checkbox. */
+  @media (max-width: 639px) {
+    .al-form-check-label {
+      min-height: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+    }
   }
   .al-form-field:has(.al-form-check) {
     gap: 0.375rem;

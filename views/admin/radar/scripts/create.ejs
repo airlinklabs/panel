@@ -1,22 +1,24 @@
-<%- include('../../../layouts/admin', { title: 'New Radar Script' }) %>
+<%- include('../../../layouts/admin', { title: t('newRadarScriptTitle') }) %>
 
 <%- include('../../../partials/flash-messages') %>
 
-<%- include('../../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: 'Radar', url: '/admin/radar' },
-  { label: 'Scripts', url: '/admin/radar/scripts' },
-  { label: 'New' }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbRadar'), url: '/admin/radar' },
+    { label: t('scripts'), url: '/admin/radar/scripts' },
+    { label: t('newScriptBtn') }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title">New Radar Script</h1>
-    <p class="al-page-desc">Define detection patterns the scanner matches against server volume contents.</p>
+    <h1 class="al-page-title"><%= t('newRadarScriptTitle') %></h1>
+    <p class="al-page-desc"><%= t('newRadarScriptDesc') %></p>
   </div>
-  <div class="flex gap-2 shrink-0">
-    <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">
-      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+  <div>
+    <a href="/admin/radar/scripts" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('back') %></span>
     </a>
   </div>
 </div>
@@ -24,45 +26,57 @@
 <div class="al-page-body">
   <form id="scriptForm" class="max-w-3xl space-y-5">
     <div class="al-card">
-      <h2 class="al-card-header">Details</h2>
-      <div class="p-4 space-y-4">
-        <div>
-          <label for="scriptName" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Name</label>
-          <input type="text" id="scriptName" name="name" required maxlength="120" placeholder="Crypto Miner Scanner" class="al-input">
-        </div>
-        <div>
-          <label for="scriptDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Description</label>
-          <textarea id="scriptDescription" name="description" rows="2" maxlength="500" placeholder="What this script detects." class="al-input resize-y"></textarea>
-        </div>
-        <div class="w-40">
-          <label for="scriptVersion" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Version</label>
-          <input type="text" id="scriptVersion" name="version" value="1.0.0" maxlength="20" class="al-input font-mono">
-        </div>
+      <div class="al-card-header">
+        <p class="al-card-header-title"><%= t('details') %></p>
+      </div>
+      <div class="al-card-body space-y-4">
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'name', id: 'scriptName',
+          label: t('name'), required: true, maxlength: 120, placeholder: t('scriptNamePlaceholder'),
+          wrapperCls: ''
+        }) %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'textarea', name: 'description', id: 'scriptDescription',
+          label: t('description'), rows: 2, maxlength: 500, placeholder: t('scriptDescPlaceholder')
+        }) %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'version', id: 'scriptVersion',
+          label: t('version'), value: '1.0.0', maxlength: 20, wrapperCls: 'max-w-[10rem]',
+          cls: 'font-mono'
+        }) %>
       </div>
     </div>
 
     <div class="al-card">
-      <h2 class="al-card-header">Patterns</h2>
-      <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">JSON array of pattern objects. Each pattern has <code>type</code> (filename / extension / content), <code>pattern</code>, optional <code>content</code>, <code>severity</code> (low / medium / high / critical), and <code>description</code>.</p>
-      <div class="p-4">
-        <label for="scriptPatterns" class="sr-only">Patterns JSON</label>
-        <textarea id="scriptPatterns" name="patterns" rows="16" spellcheck="false" class="al-input font-mono text-xs leading-relaxed resize-y">[
-  {
-    "type": "filename",
-    "pattern": "(?i)suspicious-name",
-    "severity": "medium",
-    "description": "Matches a suspicious file name"
-  }
-]</textarea>
-        <p id="patternsError" class="mt-2 text-xs hidden" style="color:var(--theme-danger);"></p>
+      <div class="al-card-header">
+        <p class="al-card-header-title"><%= t('patternsTitle') %></p>
+      </div>
+      <div class="al-card-body">
+        <%
+          var blankPatterns = JSON.stringify([
+            {
+              type: 'filename',
+              pattern: '(?i)suspicious-name',
+              severity: 'medium',
+              description: t('patternExampleDesc')
+            }
+          ], null, 2);
+          var blankPatternsEsc = blankPatterns.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'textarea', name: 'patterns', id: 'scriptPatterns',
+          label: t('patternsJsonLabel'), value: blankPatternsEsc,
+          helpText: t('patternsHelp'), cls: 'font-mono text-xs leading-relaxed min-h-[20rem]'
+        }) %>
+        <p id="patternsError" class="al-form-error-msg mt-2 hidden"></p>
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <button type="submit" class="al-btn-primary inline-flex items-center gap-1.5">
-        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Create Script
+    <div class="flex flex-wrap items-center gap-3">
+      <button type="submit" class="al-btn-primary">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('createScript') %></span>
       </button>
-      <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">Cancel</a>
+      <a href="/admin/radar/scripts" class="al-btn-secondary"><%= t('cancel') %></a>
     </div>
   </form>
 </div>
@@ -72,6 +86,12 @@
   var csrfToken = '<%= csrfToken %>';
   var form = document.getElementById('scriptForm');
   var errEl = document.getElementById('patternsError');
+  var msgNameRequired = <%- JSON.stringify(t('nameRequired')) %>;
+  var msgInvalidJson = <%- JSON.stringify(t('patternsInvalidJson')) %>;
+  var msgNotArray = <%- JSON.stringify(t('patternsNotArray')) %>;
+  var msgCreated = <%- JSON.stringify(t('scriptCreated')) %>;
+  var msgCreateFailed = <%- JSON.stringify(t('scriptCreateFailed')) %>;
+  var msgSomethingWrong = <%- JSON.stringify(t('somethingWentWrong')) %>;
 
   function showError(msg) {
     errEl.textContent = msg;
@@ -83,17 +103,17 @@
     errEl.classList.add('hidden');
 
     var name = document.getElementById('scriptName').value.trim();
-    if (!name) { showToast('Name is required.', 'error'); return; }
+    if (!name) { showToast(msgNameRequired, 'error'); return; }
 
     var patterns;
     try {
       patterns = JSON.parse(document.getElementById('scriptPatterns').value);
     } catch (err) {
-      showError('Patterns must be valid JSON: ' + err.message);
+      showError(msgInvalidJson.replace('{{error}}', err.message));
       return;
     }
     if (!Array.isArray(patterns)) {
-      showError('Patterns must be a JSON array.');
+      showError(msgNotArray);
       return;
     }
 
@@ -112,13 +132,13 @@
       .then(function(r) { return r.json(); })
       .then(function(res) {
         if (res.success) {
-          showToast('Script created.', 'success');
+          showToast(msgCreated, 'success');
           window.location.href = '/admin/radar/scripts';
         } else {
-          showToast(res.message || 'Failed to create script.', 'error');
+          showToast(res.message || msgCreateFailed, 'error');
         }
       })
-      .catch(function() { showToast('Something went wrong.', 'error'); });
+      .catch(function() { showToast(msgSomethingWrong, 'error'); });
   });
 })();
 </script>

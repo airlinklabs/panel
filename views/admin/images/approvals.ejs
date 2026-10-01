@@ -1,25 +1,27 @@
 <%- include('../../layouts/admin', { title: t('imageApprovalsTitle') }) %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
     { label: t('breadcrumbImages'), url: '/admin/images' },
     { label: t('approvals') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('imageApprovalsTitle') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('imageApprovalsDesc') %></p>
-    </div>
-    <div class="flex gap-2 shrink-0">
-      <a href="/admin/images" class="al-btn-secondary">
-        <%- icon('arrow-left', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('backToImages') %>
-      </a>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('imageApprovalsTitle') %></h1>
+    <p class="al-page-desc"><%= t('imageApprovalsDesc') %></p>
   </div>
+  <div>
+    <a href="/admin/images" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('backToImages') %>
+    </a>
+  </div>
+</div>
 
-  <div class="mt-5">
+<div class="al-page-body">
+  <div>
     <% if (!pending || pending.length === 0) { %>
       <%- include('../../partials/empty-state', {
         iconName: 'check',
@@ -29,19 +31,17 @@
     <% } else { %>
       <div id="pendingApprovalsList" class="space-y-3">
         <% pending.forEach(function(image) { %>
-        <div class="pending-card rounded-xl border p-4" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-pending-image="<%= image.id %>">
+        <div class="pending-card al-card" data-pending-image="<%= image.id %>">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="flex items-center gap-1.5">
                 <h3 class="text-[13px] font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
-                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning)">
-                  <%= t('pending') %>
-                </span>
+                <span class="al-badge al-badge-warning"><%= t('pending') %></span>
               </div>
               <% if (image.description) { %><p class="text-[13px] mt-1" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
               <% if (image.creator) { %>
               <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">
-                Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
+                <%= t('submittedBy') %> <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
                 &middot; <%= new Date(image.createdAt).toLocaleString() %>
               </p>
               <% } %>
@@ -51,13 +51,13 @@
               </div>
             </div>
             <div class="flex gap-1.5 shrink-0">
-              <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-[11px]">
+              <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost al-btn-sm">
                 <%- icon('external-link', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('view') %>
               </a>
-              <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-approve-image="<%= image.id %>">
+              <button type="button" class="al-btn-primary al-btn-sm" data-approve-image="<%= image.id %>">
                 <%- icon('check', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('approve') %>
               </button>
-              <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-reject-image="<%= image.id %>" data-reject-name="<%= image.name %>">
+              <button type="button" class="al-btn-danger al-btn-sm" data-reject-image="<%= image.id %>" data-reject-name="<%= image.name %>">
                 <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('reject') %>
               </button>
             </div>
@@ -70,24 +70,24 @@
 </div>
 
 <!-- Reject modal -->
-<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+<div id="rejectModal" class="al-sheet-overlay opacity-0 pointer-events-none">
   <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
         <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)"><%= t('rejectImage') %></h2>
         <p class="text-[11px] mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
       </div>
-      <button type="button" class="al-btn-ghost p-1.5 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
+      <button type="button" class="al-btn-ghost al-btn-icon-only shrink-0" data-close-reject aria-label="<%= t('ariaClose') %>">
         <%- icon('x', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-5 py-3">
-      <label class="al-label" for="rejectReason"><%= t('reason') %> <span class="font-normal" style="color:var(--theme-text-muted)">(<%= t('reasonHint') %>)</span></label>
-      <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+      <label class="al-form-label" for="rejectReason"><%= t('reason') %> <span class="font-normal" style="color:var(--theme-text-muted)">(<%= t('reasonHint') %>)</span></label>
+      <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="<%= t('rejectReasonPlaceholder') %>"></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" class="al-btn-secondary px-3 py-1.5 text-[11px] font-medium" data-close-reject><%= t('cancel') %></button>
-      <button type="button" id="confirmReject" class="al-btn-danger px-3 py-1.5 text-[11px] font-medium inline-flex items-center gap-1.5">
+      <button type="button" class="al-btn-secondary al-btn-sm" data-close-reject><%= t('cancel') %></button>
+      <button type="button" id="confirmReject" class="al-btn-danger al-btn-sm">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('reject') %>
       </button>
     </div>
@@ -95,10 +95,10 @@
 </div>
 
 <div id="page-data" style="display:none"
-  data-approve-confirm="Approve this image? It will become available to all users."
-  data-approved="Image approved."
-  data-rejected="Image rejected."
-  data-error="Something went wrong."
+  data-approve-confirm="<%= t('approveImageConfirm') %>"
+  data-approved="<%= t('imageApproved') %>"
+  data-rejected="<%= t('imageRejected') %>"
+  data-error="<%= t('somethingWentWrong') %>"
 ></div>
 
 <script nonce="<%- nonce %>">
@@ -136,7 +136,7 @@ function imageApprovals() {
             title: pd.approveConfirm,
             body: pd.approveConfirm,
             danger: false,
-            confirmLabel: 'Approve',
+            confirmLabel: <%- JSON.stringify(t('approve')) %>,
             onConfirm: async function() {
               var id = btn.dataset.approveImage;
               try {
@@ -162,7 +162,7 @@ function imageApprovals() {
 
       document.querySelectorAll('[data-reject-image]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          openReject(btn.dataset.rejectImage, btn.dataset.rejectName || btn.closest('div.rounded-xl') ? btn.closest('div.rounded-xl').querySelector('h3').textContent : '');
+          openReject(btn.dataset.rejectImage, btn.dataset.rejectName || btn.closest('.pending-card') ? btn.closest('.pending-card').querySelector('h3').textContent : '');
         });
       });
 

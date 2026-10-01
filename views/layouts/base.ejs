@@ -7,10 +7,7 @@ const wallpaperExcluded = req && req.path && (
 );
 %>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <%- include('../partials/head-meta', { viewportFit: true }) %>
     <title><%= settings.title %> - <%= typeof title !== 'undefined' ? title : 'Panel' %></title>
     <script nonce="<%- nonce %>">
       (function(){
@@ -34,9 +31,6 @@ const wallpaperExcluded = req && req.path && (
       <% for (const stylesheet of extraStyles) { %>
     <link rel="stylesheet" href="<%= stylesheet %>">
       <% } %>
-    <% } %>
-    <% if (typeof csrfToken !== 'undefined') { %>
-    <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
     <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/csrf.js') %>?v=8"></script>

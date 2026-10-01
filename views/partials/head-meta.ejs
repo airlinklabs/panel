@@ -1,7 +1,20 @@
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<% if (typeof csrfToken !== 'undefined') { %>
-<meta name="csrf-token" content="<%= csrfToken %>">
-<% } %>
+<meta charset="UTF-8"><%# Shared <head> meta for every layout — the owner lives
+    here, not in the layouts. theme-color is read by the browser, not by CSS, so
+    it cannot use --theme-* tokens; both values must track the light/dark
+    backgrounds (Batch 0 precedent).
+
+    viewport-fit=cover is only correct where the layout also pads for
+    env(safe-area-inset-*): layouts/base.ejs passes { viewportFit: true } and has
+    that padding (near line 56); layouts/auth.ejs matches the old panel and has
+    neither. Do not "harmonise" the two without moving the padding too.
+
+    Layouts include this at 4-space indent, so line 1 sits at column 0 on
+    purpose, and the final EJS tag below carries a trailing-dash trim marker so
+    the include's own newline is swallowed — otherwise the head grows
+    whitespace-only lines. Do not "tidy" either detail. %>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0<%= typeof viewportFit !== 'undefined' && viewportFit ? ', viewport-fit=cover' : '' %>">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <% if (typeof csrfToken !== 'undefined') { %>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <% } -%>

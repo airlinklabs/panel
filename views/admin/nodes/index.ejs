@@ -104,7 +104,7 @@
         </thead>
         <tbody>
           <% let nodeIdx = 0; nodes.forEach(function(node) { %>
-          <tr data-node-id="<%= node.id %>" data-instances="<%= node._count ? node._count.servers : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-row cursor-pointer" onclick="window.location='/admin/node/<%= node.id %>/stats'">
+          <tr data-node-id="<%= node.id %>" data-instances="<%= node._count ? node._count.servers : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="window.location='/admin/node/<%= node.id %>/stats'">
             <td class="al-table-td">
               <div class="flex items-center">
                 <div class="mr-5">
@@ -444,8 +444,8 @@ function openLocationEdit(id, name, shortCode) {
         '<input id="editLocCode" name="shortCode" type="text" value="' + shortCode.replace(/"/g, '&quot;') + '" class="al-input" autocapitalize="off" spellcheck="false" required>' +
       '</div>' +
       '<div class="flex justify-end gap-2 pt-1">' +
-        '<button type="button" onclick="window.modal.close()" class="al-btn-secondary px-4 py-2 text-sm font-medium">' + (window.__i18n.cancel || 'Cancel') + '</button>' +
-        '<button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium">' + (window.__i18n.save || 'Save') + '</button>' +
+        '<button type="button" onclick="window.modal.close()" class="al-btn-secondary">' + (window.__i18n.cancel || 'Cancel') + '</button>' +
+        '<button type="submit" class="al-btn-primary">' + (window.__i18n.save || 'Save') + '</button>' +
       '</div>' +
     '</form>';
 

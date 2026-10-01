@@ -55,9 +55,24 @@ function loadBundle(lang: string): LangBundle {
   // English is the base for every locale: a locale only ships ~700 of the
   // ~2350 keys, and without this merge each untranslated key would render
   // as its raw camelCase identifier in the UI.
+  // An entry whose value is '' means "not translated yet", not "render
+  // nothing". Every non-English bundle currently ships 682-685 entries that
+  // are all '' (placeholders), and spreading them over en after the fact
+  // blanks ~682 strings per request — `?? key` never fires because '' is not
+  // nullish, so the raw camelCase key leaks into the UI instead. Filtering
+  // them out here leaves the English base in place, which is the intended
+  // degradation until real translations land.
+  const own = lang === 'en' ? {} : readJson(langPath) ?? {};
+  const filteredOwn: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(own)) {
+    if (key.startsWith('_') || (typeof value === 'string' && value === '')) {
+      continue;
+    }
+    filteredOwn[key] = value;
+  }
   const raw = {
     ...(readJson(fallbackPath) ?? {}),
-    ...(lang === 'en' ? {} : readJson(langPath) ?? {}),
+    ...filteredOwn,
   };
 
   const strings: TranslationMap = {};
@@ -82,6 +97,43 @@ function loadBundle(lang: string): LangBundle {
   const bundle: LangBundle = { strings, plurals };
   bundleCache.set(lang, bundle);
   return bundle;
+}
+
+const overrideCache = new Map<string, TranslationMap>();
+
+/**
+ * The locale's OWN entries only — no English merge (contrast loadBundle).
+ *
+ * This is what `window.__i18n` must serialise to in the browser:
+ *   - `en` returns {} because client-side copy already falls back to an
+ *     English literal (`window.__i18n.x || 'English'`), so serialising the
+ *     140KB English catalogue would ship every byte a second time.
+ *   - any other locale returns only its ~700 overrides (~16KB). Keys the
+ *     locale has not translated are absent, so the same `|| 'English'`
+ *     fallback renders English — which is the intended degradation.
+ * Plural entries are objects, not strings; client copy never looks one up,
+ * so they are skipped rather than serialised as `{one, other}`.
+ */
+function ownOverrides(lang: string): TranslationMap {
+  if (lang === 'en') {
+    return {};
+  }
+  const cached = overrideCache.get(lang);
+  if (cached) {
+    return cached;
+  }
+  const raw = readJson(path.join(LANG_DIR, lang, 'lang.json'));
+  const out: TranslationMap = {};
+  if (raw) {
+    for (const [key, value] of Object.entries(raw)) {
+      if (key.startsWith('_') || typeof value !== 'string' || value === '') {
+        continue; // '' means untranslated — the JS `|| 'English'` fallback needs it absent
+      }
+      out[key] = value;
+    }
+  }
+  overrideCache.set(lang, out);
+  return out;
 }
 
 function readJson(filePath: string): Record<string, unknown> | null {
@@ -234,12 +286,42 @@ export function i18nMiddleware(
     vars?: Record<string, string | number>,
   ) => tn(lang, key, count, vars);
 
-  // Proxy so req.translations.someKey works in EJS templates
+  // Proxy so req.translations.someKey works in EJS templates.
+  //
+  // The `get` trap is the whole read path and is unchanged: any key resolves
+  // through t(), which merges English underneath the locale.
+  //
+  // The other traps exist because the original Proxy had ONLY `get`, so
+  // `JSON.stringify(req.translations)` enumerated no own keys and produced
+  // `{}`. `layouts/base.ejs` and `layouts/auth.ejs` both do exactly that to
+  // build `window.__i18n`, which meant every `window.__i18n.x || 'English'`
+  // in client-side JS — 130 call sites across views plus shared search.js,
+  // theme-init.js, files.js and logs.js — was permanently rendering English
+  // in all 10 locales. Enumeration is deliberately scoped to the locale's own
+  // overrides (see ownOverrides): `en` still serialises to `{}`, so the
+  // default locale's payload and markup are byte-identical to before.
+  const overrides = ownOverrides(lang);
+  const overrideKeys = Object.keys(overrides);
+  const overrideSet = new Set(overrideKeys);
   (req as any).translations = new Proxy(
     {},
     {
-      get(_target, prop: string) {
-        return t(lang, prop);
+      get(_target, prop) {
+        return typeof prop === 'string' ? t(lang, prop) : undefined;
+      },
+      ownKeys() {
+        return overrideKeys;
+      },
+      getOwnPropertyDescriptor(_target, prop) {
+        if (typeof prop !== 'string' || !overrideSet.has(prop)) {
+          return undefined;
+        }
+        return {
+          value: overrides[prop],
+          enumerable: true,
+          configurable: true,
+          writable: true,
+        };
       },
     },
   );

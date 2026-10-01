@@ -1,28 +1,22 @@
-<%- include('../../layouts/admin', { title: 'Databases' }) %>
+<%- include('../../layouts/admin', { title: t('databases') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <span style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/admin/overview" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);">Databases</span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('databases') }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title">Database Hosts</h1>
-    <p class="al-page-desc">Manage database server connections for user-created databases.</p>
+    <h1 class="al-page-title"><%= t('databaseHostsTitle') %></h1>
+    <p class="al-page-desc"><%= t('databaseHostsDesc') %></p>
   </div>
-  <div class="flex gap-2 shrink-0 items-center">
+  <div>
     <a href="/admin/databases/create" class="al-btn-primary">
-      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> Add Database Host
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('addDatabaseHost') %>
     </a>
   </div>
 </div>
@@ -30,27 +24,27 @@
 <div class="al-page-body">
 
   <div class="mb-5 grid gap-4 md:grid-cols-2">
-    <div class="al-card rounded-xl p-5">
+    <div class="al-card">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-Generate Host</h3>
-          <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Automatically configure a database host from available nodes.</p>
+          <h3 class="text-sm font-semibold al-text-strong"><%= t('autoGenerateHost') %></h3>
+          <p class="mt-1 text-xs leading-relaxed al-text-muted"><%= t('autoGenerateHostDesc') %></p>
         </div>
         <button type="button" class="al-btn-primary shrink-0" onclick="autoHost()">
           <%- icon('zap', { size: 15 }) %>
-          <span class="ml-1.5">Auto Generate</span>
+          <%= t('autoGenerateBtn') %>
         </button>
       </div>
     </div>
-    <div class="al-card rounded-xl p-5">
+    <div class="al-card">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-Generate Bucket</h3>
-          <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Automatically configure an S3 bucket for database backups.</p>
+          <h3 class="text-sm font-semibold al-text-strong"><%= t('autoGenerateBucket') %></h3>
+          <p class="mt-1 text-xs leading-relaxed al-text-muted"><%= t('autoGenerateBucketDesc') %></p>
         </div>
         <button type="button" class="al-btn-primary shrink-0" onclick="autoBucket()">
           <%- icon('zap', { size: 15 }) %>
-          <span class="ml-1.5">Auto Generate</span>
+          <%= t('autoGenerateBtn') %>
         </button>
       </div>
     </div>
@@ -59,12 +53,12 @@
   <% if (hosts.length === 0) { %>
     <%- include('../../partials/empty-state', {
       iconName: 'database',
-      title: 'No database hosts yet',
-      description: 'Add a database host to allow users to create databases for their servers.',
-      action: '<a href="/admin/databases/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }).toString() + ' Add Database Host</a>'
+      title: t('noDatabaseHostsYet'),
+      description: t('noDatabaseHostsYetDesc'),
+      action: '<a href="/admin/databases/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }).toString() + ' ' + t('addDatabaseHost') + '</a>'
     }) %>
   <% } else { %>
-  <div class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
+  <div class="al-table-wrapper">
     <table class="al-table">
       <colgroup>
         <col style="min-width:160px">
@@ -73,47 +67,47 @@
         <col style="min-width:140px">
         <col style="min-width:160px">
       </colgroup>
-      <thead class="al-table-head">
+      <thead class="al-table-thead">
         <tr>
-          <th scope="col" class="al-table-th sm:pl-6">Name</th>
-          <th scope="col" class="al-table-th sm:pl-6">Host</th>
-          <th scope="col" class="al-table-th sm:pl-6">Databases</th>
-          <th scope="col" class="al-table-th sm:pl-6">Created</th>
-          <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+          <th scope="col" class="al-table-th"><%= t('name') %></th>
+          <th scope="col" class="al-table-th"><%= t('host') %></th>
+          <th scope="col" class="al-table-th"><%= t('databases') %></th>
+          <th scope="col" class="al-table-th"><%= t('created') %></th>
+          <th scope="col" class="al-table-th"><%= t('actions') %></th>
         </tr>
       </thead>
       <tbody>
         <% hosts.forEach(function(host) { %>
         <tr class="al-table-tr" data-host-id="<%= host.id %>">
-          <td class="al-table-td sm:pl-6">
-            <div class="font-medium" style="color:var(--theme-text-strong);"><%= host.name %></div>
+          <td class="al-table-td">
+            <span class="al-table-cell-strong"><%= host.name %></span>
           </td>
           <td class="al-table-td">
             <div class="flex items-center gap-2">
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
-              <span><%= host.host %>:<%= host.port %></span>
+              <span class="al-dot"></span>
+              <span class="font-mono text-xs"><%= host.host %>:<%= host.port %></span>
             </div>
-            <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" style="color:var(--theme-text-muted)">
+            <div class="mt-1 ml-4 text-xs al-text-muted">
               <%= host.username %>
             </div>
-            <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" style="color:var(--theme-text-muted)">
-              <%- icon('network', { size: 12, class: 'mr-1' }) %>
-              <%= host.node ? host.node.name : 'Any node' %>
+            <div class="mt-1 ml-4 text-xs al-text-muted inline-flex items-center gap-1">
+              <%- icon('network', { size: 12 }) %>
+              <%= host.node ? host.node.name : t('dbHostAnyNode') %>
             </div>
           </td>
-          <td class="al-table-td"><%= host._count ? host._count.databases : 0 %></td>
+          <td class="al-table-td tabular-nums"><%= host._count ? host._count.databases : 0 %></td>
           <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
           <td class="al-table-td">
-            <div class="flex gap-3 whitespace-nowrap">
-              <button type="button" class="al-btn-secondary text-xs" onclick="testConnection(<%= host.id %>, this)">
-                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> Test
+            <div class="flex gap-2 whitespace-nowrap items-center">
+              <button type="button" class="al-btn-secondary al-btn-sm" onclick="testConnection(<%= host.id %>, this)">
+                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('test') %>
               </button>
               <button
                 type="button"
-                class="al-btn-ghost"
+                class="al-btn-ghost al-btn-icon-only"
                 style="color:var(--theme-danger);"
-                aria-label="Delete host"
-                onclick="deleteHost(<%= host.id %>, '<%= host.name.replace(/'/g, "\\'") %>')">
+                aria-label="<%= t('dbHostDeleteAria') %>"
+                onclick="deleteHost(<%= host.id %>, <%- JSON.stringify(host.name) %>)">
                 <%- icon('trash-2', { size: 16 }) %>
               </button>
             </div>
@@ -127,62 +121,82 @@
 </div>
 
 <script nonce="<%- nonce %>">
-var csrfToken = '<%= csrfToken %>';
+var csrfToken = <%- JSON.stringify(csrfToken) %>;
+var msg = {
+  autoHost: <%- JSON.stringify(t('autoGeneratingHost')) %>,
+  autoBucket: <%- JSON.stringify(t('autoGeneratingBucket')) %>,
+  hostGenerated: <%- JSON.stringify(t('dbHostGenerated')) %>,
+  bucketGenerated: <%- JSON.stringify(t('dbHostBucketGenerated')) %>,
+  bucketConfigured: <%- JSON.stringify(t('dbHostBucketConfigured')) %>,
+  hostFailed: <%- JSON.stringify(t('dbHostAutoFailed')) %>,
+  bucketFailed: <%- JSON.stringify(t('dbHostBucketFailed')) %>,
+  network: <%- JSON.stringify(t('networkError')) %>,
+  testing: <%- JSON.stringify(t('dbHostTesting')) %>,
+  testOk: <%- JSON.stringify(t('dbHostTestSuccess')) %>,
+  testFail: <%- JSON.stringify(t('dbHostTestFailed')) %>,
+  unknown: <%- JSON.stringify(t('dbHostUnknownError')) %>,
+  deleteTitle: <%- JSON.stringify(t('dbHostDeleteTitle')) %>,
+  deleteBody: <%- JSON.stringify(t('dbHostDeleteConfirm')) %>,
+  deleteLabel: <%- JSON.stringify(t('delete')) %>,
+  deleting: <%- JSON.stringify(t('deletingHost')) %>,
+  deleted: <%- JSON.stringify(t('dbHostDeleted')) %>,
+  deleteFailed: <%- JSON.stringify(t('dbHostDeleteFailed')) %>
+};
 
 function autoHost() {
-  var loader = showProgressToast('Auto-generating host...');
+  var loader = showProgressToast(msg.autoHost);
   fetch('/admin/databases/auto-host', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.success !== false) {
-      loader.complete(true, 'Host generated.');
+      loader.complete(true, msg.hostGenerated);
       window.location.reload();
     } else {
       loader.close();
-      showToast(data.error || data.message || 'Failed to auto-generate host.', 'error');
+      showToast(data.error || data.message || msg.hostFailed, 'error');
     }
   }).catch(function() {
     loader.close();
-    showToast('Network error.', 'error');
+    showToast(msg.network, 'error');
   });
 }
 
 function autoBucket() {
-  var loader = showProgressToast('Auto-generating bucket...');
+  var loader = showProgressToast(msg.autoBucket);
   fetch('/admin/databases/auto-bucket', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.success !== false) {
-      loader.complete(true, 'Bucket generated.');
-      showToast('Bucket configured.', 'success');
+      loader.complete(true, msg.bucketGenerated);
+      showToast(msg.bucketConfigured, 'success');
     } else {
       loader.close();
-      showToast(data.error || data.message || 'Failed to auto-generate bucket.', 'error');
+      showToast(data.error || data.message || msg.bucketFailed, 'error');
     }
   }).catch(function() {
     loader.close();
-    showToast('Network error.', 'error');
+    showToast(msg.network, 'error');
   });
 }
 
 function testConnection(id, btn) {
   var original = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<%- icon("loader", { class: "size-3 animate-spin" }) %> Testing...';
+  btn.innerHTML = '<%- icon("loader", { class: "size-3 animate-spin" }) %> ' + msg.testing;
   fetch('/admin/databases/' + id + '/test', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
   }).then(function(r) { return r.json(); }).then(function(data) {
     var result = data.data || data;
     if (result.connected) {
-      showToast('Connection successful.', 'success');
+      showToast(msg.testOk, 'success');
     } else {
-      showToast('Connection failed: ' + (result.error || 'Unknown error'), 'error');
+      showToast(msg.testFail.replace('{{error}}', result.error || msg.unknown), 'error');
     }
   }).catch(function() {
-    showToast('Network error.', 'error');
+    showToast(msg.network, 'error');
   }).finally(function() {
     btn.disabled = false;
     btn.innerHTML = original;
@@ -191,12 +205,12 @@ function testConnection(id, btn) {
 
 function deleteHost(id, name) {
   modal.confirm({
-    title: 'Delete Database Host',
-    body: 'Are you sure you want to delete "' + name + '"? All databases on this host will be lost.',
+    title: msg.deleteTitle,
+    body: msg.deleteBody.replace('{{name}}', name),
     danger: true,
-    confirmLabel: 'Delete',
+    confirmLabel: msg.deleteLabel,
     onConfirm: async function() {
-      var loader = showProgressToast('Deleting host...');
+      var loader = showProgressToast(msg.deleting);
       try {
         var res = await fetch('/admin/databases/' + id, {
           method: 'DELETE',
@@ -204,7 +218,7 @@ function deleteHost(id, name) {
         });
         var data = await res.json();
         if (data.success !== false) {
-          loader.complete(true, 'Host deleted.');
+          loader.complete(true, msg.deleted);
           var row = document.querySelector('[data-host-id="' + id + '"]');
           if (row) row.remove();
           if (document.querySelectorAll('[data-host-id]').length === 0) {
@@ -212,11 +226,11 @@ function deleteHost(id, name) {
           }
         } else {
           loader.close();
-          showToast(data.error || data.message || 'Failed to delete host.', 'error');
+          showToast(data.error || data.message || msg.deleteFailed, 'error');
         }
       } catch(e) {
         loader.close();
-        showToast('Failed to delete host.', 'error');
+        showToast(msg.deleteFailed, 'error');
       }
     }
   });

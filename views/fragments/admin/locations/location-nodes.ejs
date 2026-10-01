@@ -3,7 +3,7 @@
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-2">
       <button type="button" onclick="document.getElementById('location-nodes-panel').closest('.al-sheet-panel')?.querySelector('[data-close-location-nodes]')?.click()"
-        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-75 transition" style="color:var(--theme-text-muted);">
+        class="al-btn-ghost al-btn-icon-only">
         <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
       </button>
       <div>
@@ -31,7 +31,7 @@
             <p class="text-xs font-mono truncate" style="color:var(--theme-text-muted);"><%= node.address %>:<%= node.port %></p>
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <span class="text-xs px-2 py-0.5 rounded-lg" style="background:<%= node.status === 'online' ? 'color-mix(in srgb, var(--theme-success) 12%, transparent)' : node.status === 'starting' ? 'color-mix(in srgb, var(--theme-warning) 12%, transparent)' : 'color-mix(in srgb, var(--theme-text-muted) 12%, transparent)' %>; color:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"><%= node.status || 'offline' %></span>
+            <span class="<%= node.status === 'online' ? 'al-badge al-badge-online' : node.status === 'starting' ? 'al-badge al-badge-warning' : 'al-badge al-badge-neutral' %>"><%= node.status === 'online' ? t('online') : node.status === 'starting' ? t('starting') : t('offline') %></span>
             <span class="text-xs" style="color:var(--theme-text-muted);"><%= node.servers.length %> <%= node.servers.length === 1 ? t('serverSingular') : t('serverPlural') %></span>
           </div>
           <%- icon('chevron-right', { class: 'size-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>

@@ -31,17 +31,14 @@
   .al-table-tbody {
     background: transparent;
   }
-  .al-table-tr,
-  .al-table-row {
+  .al-table-tr {
     @apply border-b transition-colors;
     border-color: var(--theme-table-divide, var(--theme-border));
   }
-  .al-table-tr:hover,
-  .al-table-row:hover {
+  .al-table-tr:hover {
     background: var(--theme-table-row-hover);
   }
-  .al-table-tr:last-child,
-  .al-table-row:last-child {
+  .al-table-tr:last-child {
     border-bottom: none;
   }
   .al-table-td {
@@ -89,6 +86,19 @@
     .al-table {
       display: table;
       overflow: visible;
+    }
+  }
+
+  /* Touch floor §4.5 (phone): cell text links keep their inline content
+     height — measured 16px (node) and 20px (owner) on /admin/servers, far
+     under 44. Direct children only; nested markup keeps its own sizing, and
+     `.al-btn*` anchors are already floored in button.css. */
+  @media (max-width: 639px) {
+    .al-table-td > a {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+      display: inline-flex;
+      align-items: center;
     }
   }
 
@@ -147,11 +157,17 @@
     .al-table-card tbody tr > td:last-child {
       padding-bottom: 0.75rem;
     }
-    /* B-041: shared owner for "hide this table column on phones".
-       Was previously copy-pasted per-view (images, store, addons). */
-    .col-hide {
+  /* B-041: shared owner for "hide this table column below lg".
+     Was previously copy-pasted per-view (images, store, addons).
+     The `.al-table-card` term is load-bearing: card mode sets
+     `tbody td { display:flex }` at (0,1,2), which outranks a bare
+     `.col-hide` (0,1,0) — without it the column never hid on phones. */
+  @media (max-width: 1023px) {
+    .col-hide,
+    .al-table-card .col-hide {
       display: none;
     }
+  }
     /* B-042: collapsible expansion rows (e.g. schedules task list) must
        not be re-styled as cards; the single colspan cell spans the row. */
     .al-table-card tbody tr[data-tasks-row] {

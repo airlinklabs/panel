@@ -1,0 +1,14 @@
+/* al-segmented route switch — the active segment is a link, not a button.
+   `.al-segmented` (components/button.css) keys the pressed state off
+   aria-pressed, which is only valid on <button>. A segment that navigates
+   to another route carries aria-current="page" instead, so this rule gives
+   links the exact same pressed surface.
+   Used by: views/admin/addons/index.ejs, views/admin/addons/store.ejs */
+@layer components {
+  .al-segmented-btn[aria-current="page"] {
+    background: var(--theme-bg-card);
+    color: var(--theme-text-strong);
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px var(--theme-border-strong, var(--theme-border));
+  }
+}

@@ -2,6 +2,11 @@
 (function () {
   if (window.createToastSystem) return;
 
+  // Copy is SSR-injected: client JS must not read window.__i18n.
+  const MSG_INSTALL_COMPLETE = <%- JSON.stringify(t('installationComplete')) %>;
+  const MSG_INSTALL_FAILED = <%- JSON.stringify(t('installationFailed')) %>;
+  const MSG_DONE = <%- JSON.stringify(t('actionCompleted')) %>;
+
   const colorMap = {
     error: 'var(--theme-danger)', success: 'var(--theme-success)',
     warning: 'var(--theme-warning)', loading: 'var(--theme-info)', info: 'var(--theme-info)',
@@ -69,8 +74,8 @@
     if (!data || typeof data !== 'object') return {};
     if (typeof data.state === 'string') {
       const st = data.state;
-      if (st === 'installed') return { done: true, success: true, message: (window.__i18n && window.__i18n.installationComplete) || 'Installation complete.' };
-      if (st === 'failed') return { done: true, success: false, error: data.error || ((window.__i18n && window.__i18n.installationFailed) || 'Installation failed.') };
+      if (st === 'installed') return { done: true, success: true, message: MSG_INSTALL_COMPLETE };
+      if (st === 'failed') return { done: true, success: false, error: data.error || MSG_INSTALL_FAILED };
       return { message: typeof data.error === 'string' ? data.error : undefined };
     }
     const done = data.done === true || data.success === true || data.success === false || !!data.error;
@@ -160,9 +165,10 @@
     if (!isActive) {
       const dismissBtn = document.createElement('button');
       dismissBtn.type = 'button';
-      dismissBtn.className = 'shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70 ml-1';
+      dismissBtn.className = 'shrink-0 flex items-center justify-center rounded-lg transition-opacity hover:opacity-70 ml-1 min-h-10 min-w-10 max-sm:min-h-11 max-sm:min-w-11';
+      dismissBtn.setAttribute('aria-label', <%- JSON.stringify(t('close')) %>);
       dismissBtn.style.color = 'var(--theme-text-muted)';
-      dismissBtn.innerHTML = alIcon('x', 'w-3.5 h-3.5');
+      dismissBtn.innerHTML = alIcon('x', 'w-4 h-4');
       dismissBtn.addEventListener('click', function (e) { e.stopPropagation(); removeToast(); });
       el.appendChild(dismissBtn);
     }
@@ -228,7 +234,7 @@
             if (stopped || removed || completed) return;
             const view = interpretJob(data);
             if (typeof view.message === 'string' && view.message !== rec.message) { setMessage(view.message); setStage(view.message); }
-            if (view.done) complete(view.success, view.error || view.message || 'Done.');
+            if (view.done) complete(view.success, view.error || view.message || MSG_DONE);
           })
           .catch(function () {})
           .then(function () { if (!stopped && !removed && !completed) timer = setTimeout(tick, intervalMs); });

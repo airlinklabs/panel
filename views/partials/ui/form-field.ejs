@@ -6,7 +6,8 @@
                  'textarea'|'select'|'checkbox'|'radio'),
            name, label, id, value, placeholder, required, disabled, readonly,
            helpText, error, options ([{value,label,selected,disabled}]),
-           checked, min, max, step, autocomplete, inputmode, cls, describedBy */
+           checked, min, max, step, minlength, maxlength, pattern, rows,
+           autocomplete, inputmode, cls, wrapperCls, describedBy */
 const fieldType = typeof type !== 'undefined' ? type : 'text';
 const fieldName = typeof name !== 'undefined' ? name : '';
 const fieldLabel = typeof label !== 'undefined' ? label : '';
@@ -27,6 +28,10 @@ const fieldMax = typeof max !== 'undefined' ? max : '';
 const fieldStep = typeof step !== 'undefined' ? step : '';
 const fieldAutocomplete = typeof autocomplete !== 'undefined' ? autocomplete : '';
 const fieldInputmode = typeof inputmode !== 'undefined' ? inputmode : '';
+const fieldMinlength = typeof minlength !== 'undefined' ? minlength : '';
+const fieldMaxlength = typeof maxlength !== 'undefined' ? maxlength : '';
+const fieldPattern = typeof pattern !== 'undefined' ? pattern : '';
+const fieldRows = typeof rows !== 'undefined' ? rows : '';
 
 const isToggle = fieldType === 'checkbox' || fieldType === 'radio';
 const helpId = fieldId + '-help';
@@ -37,7 +42,7 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
 <div class="al-form-field <%= wrapCls %>">
   <% if (fieldLabel && !isToggle) { %>
     <label for="<%= fieldId %>" class="al-form-label">
-      <%- fieldLabel %>
+      <%= fieldLabel %>
       <% if (fieldRequired) { %><span class="al-required" aria-hidden="true">*</span><% } %>
     </label>
   <% } %>
@@ -49,10 +54,13 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
       <% if (fieldRequired) { %> required aria-required="true"<% } %>
       <% if (fieldDisabled) { %> disabled<% } %>
       <% if (fieldReadonly) { %> readonly<% } %>
+      <% if (fieldRows) { %> rows="<%= fieldRows %>"<% } %>
+      <% if (fieldMinlength !== '' ) { %> minlength="<%= fieldMinlength %>"<% } %>
+      <% if (fieldMaxlength !== '' ) { %> maxlength="<%= fieldMaxlength %>"<% } %>
       <% if (fieldAutocomplete) { %> autocomplete="<%= fieldAutocomplete %>"<% } %>
       <% if (described) { %> aria-describedby="<%= described %>"<% } %>
       <% if (fieldError) { %> aria-invalid="true"<% } %>
-    ><%- fieldValue %></textarea>
+    ><%= fieldValue %></textarea>
 
   <% } else if (fieldType === 'select') { %>
     <select id="<%= fieldId %>" name="<%= fieldName %>"
@@ -68,7 +76,7 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
         <option value="<%= opt.value %>"
           <% if (opt.value === fieldValue || opt.selected) { %> selected<% } %>
           <% if (typeof opt.disabled !== 'undefined' && opt.disabled) { %> disabled<% } %>>
-          <%- opt.label %>
+          <%= opt.label %>
         </option>
       <% }); %>
     </select>
@@ -83,11 +91,11 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
         <% if (fieldDisabled) { %> disabled<% } %>
         <% if (described) { %> aria-describedby="<%= described %>"<% } %>>
       <% if (fieldLabel) { %>
-        <label for="<%= fieldId %>" class="al-form-check-label"><%- fieldLabel %></label>
+        <label for="<%= fieldId %>" class="al-form-check-label"><%= fieldLabel %></label>
       <% } %>
     </div>
     <% if (fieldError) { %>
-      <p class="al-form-error-msg" id="<%= errorId %>"><%- fieldError %></p>
+      <p class="al-form-error-msg" id="<%= errorId %>"><%= fieldError %></p>
     <% } %>
 
   <% } else { %>
@@ -101,6 +109,9 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
       <% if (fieldMin !== '' && typeof fieldMin !== 'undefined') { %> min="<%= fieldMin %>"<% } %>
       <% if (fieldMax !== '' && typeof fieldMax !== 'undefined') { %> max="<%= fieldMax %>"<% } %>
       <% if (fieldStep !== '' && typeof fieldStep !== 'undefined') { %> step="<%= fieldStep %>"<% } %>
+      <% if (fieldMinlength !== '') { %> minlength="<%= fieldMinlength %>"<% } %>
+      <% if (fieldMaxlength !== '') { %> maxlength="<%= fieldMaxlength %>"<% } %>
+      <% if (fieldPattern !== '') { %> pattern="<%= fieldPattern %>"<% } %>
       <% if (fieldAutocomplete) { %> autocomplete="<%= fieldAutocomplete %>"<% } %>
       <% if (fieldInputmode) { %> inputmode="<%= fieldInputmode %>"<% } %>
       <% if (described) { %> aria-describedby="<%= described %>"<% } %>
@@ -108,9 +119,9 @@ const described = [fieldHelp ? helpId : '', fieldError ? errorId : '']
   <% } %>
 
   <% if (fieldHelp) { %>
-    <p class="al-form-help" id="<%= helpId %>"><%- fieldHelp %></p>
+    <p class="al-form-help" id="<%= helpId %>"><%= fieldHelp %></p>
   <% } %>
   <% if (fieldError && !isToggle) { %>
-    <p class="al-form-error-msg" id="<%= errorId %>" role="alert"><%- fieldError %></p>
+    <p class="al-form-error-msg" id="<%= errorId %>" role="alert"><%= fieldError %></p>
   <% } %>
 </div>

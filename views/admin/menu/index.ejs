@@ -1,82 +1,92 @@
-<%- include('../../layouts/admin', { title: 'Menu Manager' }) %>
+<%- include('../../layouts/admin', { title: t('menuManagerTitle') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
-    { label: 'Menu Manager' }
+    { label: t('menuManagerTitle') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Menu Manager</h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Manage the server navigation menu items visible to users.</p>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('menuManagerTitle') %></h1>
+    <p class="al-page-desc"><%= t('menuManagerDesc') %></p>
   </div>
+</div>
 
-  <div class="al-card mt-5 overflow-hidden">
-    <h2 class="al-card-header">Server Menu Items</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
-        <thead style="background:var(--theme-bg-secondary)">
+<div class="al-page-body">
+  <section class="al-section">
+    <div class="al-section-head">
+      <h2 class="al-section-title"><%= t('menuSectionTitle') %></h2>
+    </div>
+    <div class="al-table-wrapper">
+      <table class="al-table al-table-card">
+        <thead class="al-table-thead">
           <tr>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Item</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">URL</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Group</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Priority</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Default</th>
+            <th scope="col" class="al-table-th"><%= t('menuColumnItem') %></th>
+            <th scope="col" class="al-table-th"><%= t('menuColumnUrl') %></th>
+            <th scope="col" class="al-table-th"><%= t('menuColumnGroup') %></th>
+            <th scope="col" class="al-table-th"><%= t('menuColumnPriority') %></th>
+            <th scope="col" class="al-table-th"><%= t('default') %></th>
           </tr>
         </thead>
-        <tbody id="menuTableBody" class="divide-y divide-[var(--theme-border)]">
+        <tbody id="menuTableBody" class="al-table-tbody">
           <% if (Array.isArray(items) && items.length > 0) { %>
             <% items.forEach(function(item) { %>
-              <tr class="hover:bg-[var(--theme-bg-secondary)] transition">
-                <td class="px-5 py-3 font-medium" style="color:var(--theme-text-strong)"><%= item.label %></td>
-                <td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-muted)"><%= item.url %></td>
-                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)"><%= item.group || '—' %></td>
-                <td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)"><%= item.priority %></td>
-                <td class="px-5 py-3">
+              <tr class="al-table-tr">
+                <td class="al-table-td al-table-cell-strong" data-label="<%= t('menuColumnItem') %>"><%= item.label %></td>
+                <td class="al-table-td font-mono text-xs" data-label="<%= t('menuColumnUrl') %>"><%= item.url %></td>
+                <td class="al-table-td text-xs" data-label="<%= t('menuColumnGroup') %>"><%= item.group || '—' %></td>
+                <td class="al-table-td text-xs tabular-nums" data-label="<%= t('menuColumnPriority') %>"><%= item.priority %></td>
+                <td class="al-table-td" data-label="<%= t('default') %>">
                   <% if (item.isDefault) { %>
-                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Default</span>
+                    <span class="al-badge al-badge-online"><%= t('default') %></span>
                   <% } else { %>
-                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Custom</span>
+                    <span class="al-badge al-badge-neutral"><%= t('menuCustom') %></span>
                   <% } %>
                 </td>
               </tr>
             <% }); %>
           <% } else if (Array.isArray(items)) { %>
-            <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No menu items configured.</td></tr>
+            <tr><td colspan="5" class="al-table-td al-table-empty py-6"><%= t('menuNoItems') %></td></tr>
           <% } else { %>
-            <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">Loading...</td></tr>
+            <tr><td colspan="5" class="al-table-td al-table-empty py-6"><%= t('loading') %></td></tr>
           <% } %>
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>
 
 <script nonce="<%- nonce %>">
 (function() {
   var items = <%- JSON.stringify(items || []) %>;
   var tbody = document.getElementById('menuTableBody');
+  var strItem = <%- JSON.stringify(t('menuColumnItem')) %>;
+  var strUrl = <%- JSON.stringify(t('menuColumnUrl')) %>;
+  var strGroup = <%- JSON.stringify(t('menuColumnGroup')) %>;
+  var strPriority = <%- JSON.stringify(t('menuColumnPriority')) %>;
+  var strDefault = <%- JSON.stringify(t('default')) %>;
+  var strCustom = <%- JSON.stringify(t('menuCustom')) %>;
+  var strNoItems = <%- JSON.stringify(t('menuNoItems')) %>;
 
   if (items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No menu items configured.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="al-table-td al-table-empty py-6">' + strNoItems + '</td></tr>';
     return;
   }
 
   tbody.innerHTML = items.map(function(item) {
-    return '<tr class="hover:bg-[var(--theme-bg-secondary)] transition">' +
-      '<td class="px-5 py-3 font-medium" style="color:var(--theme-text-strong)">' + item.label + '</td>' +
-      '<td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-muted)">' + item.url + '</td>' +
-      '<td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">' + (item.group || '—') + '</td>' +
-      '<td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)">' + item.priority + '</td>' +
-      '<td class="px-5 py-3">' +
-        (item.isDefault
-          ? '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Default</span>'
-          : '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Custom</span>') +
-      '</td></tr>';
+    var badge = item.isDefault
+      ? '<span class="al-badge al-badge-online">' + strDefault + '</span>'
+      : '<span class="al-badge al-badge-neutral">' + strCustom + '</span>';
+    return '<tr class="al-table-tr">' +
+      '<td class="al-table-td al-table-cell-strong" data-label="' + strItem + '">' + item.label + '</td>' +
+      '<td class="al-table-td font-mono text-xs" data-label="' + strUrl + '">' + item.url + '</td>' +
+      '<td class="al-table-td text-xs" data-label="' + strGroup + '">' + (item.group || '—') + '</td>' +
+      '<td class="al-table-td text-xs tabular-nums" data-label="' + strPriority + '">' + item.priority + '</td>' +
+      '<td class="al-table-td" data-label="' + strDefault + '">' + badge + '</td></tr>';
   }).join('');
 })();
 </script>

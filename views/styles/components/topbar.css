@@ -34,6 +34,100 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary, #2563eb) 18%, transparent);
   }
 
+  /* Search results — every element public/javascript/shared/search.js emits
+     into #searchResults owns one class here, so the greys those rows used to
+     carry as inline utilities are now theme tokens and no `dark:` variant is
+     needed: the tokens flip with the theme. */
+  .al-search-group {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted);
+    padding: 0.75rem 0.75rem 0.25rem;
+  }
+
+  .al-search-result {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    cursor: pointer;
+    color: var(--theme-text);
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .al-search-result:hover {
+    background: var(--theme-bg-hover);
+  }
+  /* Keyboard selection (aria-selected, toggled by the arrow keys) must read
+     stronger than hover — accent-subtle is the panel's selected surface. */
+  .al-search-result[aria-selected="true"] {
+    background: var(--theme-accent-subtle);
+    color: var(--theme-text-strong);
+  }
+
+  .al-search-icon {
+    color: var(--theme-text-muted);
+  }
+
+  .al-search-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--theme-text-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .al-search-remove {
+    padding: 0.25rem;
+    color: var(--theme-text-muted);
+    transition: color 0.15s ease;
+  }
+  .al-search-remove:hover {
+    color: var(--theme-text-strong);
+  }
+
+  /* Touch floor (§4.5): the remove button measures 20×36 at rest — under the
+     project's 44px floor (and WCAG 2.5.8's 24×24 in width). Phone-only, same
+     contract as the button/field/tab passes in §14 #4: on phones the row grows
+     to fit a 44px target, desktop keeps its compact 20×36. Hit-tested with
+     .agents/ui-shots/search-sheet.mjs. */
+  @media (max-width: 639px) {
+    .al-search-remove {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .al-search-empty-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--theme-text-strong);
+  }
+  .al-search-empty-hint {
+    font-size: 0.75rem;
+    max-width: 20rem;
+    color: var(--theme-text-muted);
+  }
+
+  /* Matched fragment inside a result label — tinted with the brand colour
+     so the highlight follows the theme instead of a hardcoded yellow. */
+  .al-search-mark {
+    background-color: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+    color: var(--theme-text-strong);
+    border-radius: 0.125rem;
+    padding: 0 0.125rem;
+  }
+
   .al-kbd {
     border: 1px solid var(--theme-border);
     border-radius: 0.375rem;

@@ -1,33 +1,33 @@
 <%- include('../../layouts/admin', { title: t('adminImagesTitle') }) %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
     { label: t('breadcrumbImages') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('images') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('adminImagesText') %></p>
-    </div>
-    <div class="flex gap-2 shrink-0">
-      <button onclick="imageManagerState.openUploadImageModal()" type="button" class="al-btn-secondary">
-        <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= t('uploadJson') %>
-      </button>
-      <button onclick="imageManagerState.openCreate()" type="button" class="al-btn-secondary">
-        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= t('newImage') %>
-      </button>
-      <a href="/admin/images#store" class="al-btn-secondary"><%= t('browseStore') %></a>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('images') %></h1>
+    <p class="al-page-desc"><%= t('adminImagesText') %></p>
   </div>
+  <div class="flex flex-wrap gap-2">
+    <button onclick="imageManagerState.openUploadImageModal()" type="button" class="al-btn-secondary">
+      <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= t('uploadJson') %>
+    </button>
+    <button onclick="imageManagerState.openCreate()" type="button" class="al-btn-secondary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+      <%= t('newImage') %>
+    </button>
+    <a href="/admin/images#store" class="al-btn-secondary"><%= t('browseStore') %></a>
+  </div>
+</div>
 
+<div class="al-page-body">
   <% if (typeof req !== 'undefined' && req.query && req.query.success) { %>
-    <div class="mt-4 px-4 py-3 rounded-xl text-sm" style="background:var(--theme-success-bg);border:1px solid color-mix(in srgb, var(--theme-success) 25%, transparent);color:var(--theme-success)">
-      <%= t('changesSaved') %>
-    </div>
+    <div class="al-alert-success"><%= t('changesSaved') %></div>
   <% } %>
 
   <div class="mt-5" data-al-tabs data-tabs-default="installed" data-tabs-hash>
@@ -67,7 +67,7 @@
         }) %>
       </div>
 
-      <div id="installedTableSection" class="<%= images && images.length === 0 ? 'hidden' : '' %> overflow-x-auto shadow-sm rounded-xl border mt-4" style="border-color:var(--theme-border)">
+      <div id="installedTableSection" class="<%= images && images.length === 0 ? 'hidden' : '' %> al-table-wrapper mt-4">
         <table class="al-table" style="table-layout:auto">
           <colgroup>
             <col style="min-width:200px">
@@ -77,28 +77,28 @@
           </colgroup>
           <thead class="al-table-head">
             <tr>
-              <th class="al-table-th sm:pl-6"><%= t('name') %></th>
-              <th class="al-table-th px-3"><%= t('author') %></th>
-              <th class="al-table-th px-3"><%= t('createdAt') %></th>
-              <th class="al-table-th px-3"><%= t('actions') %></th>
+              <th class="al-table-th"><%= t('name') %></th>
+              <th class="al-table-th"><%= t('author') %></th>
+              <th class="al-table-th"><%= t('createdAt') %></th>
+              <th class="al-table-th"><%= t('actions') %></th>
             </tr>
           </thead>
           <tbody id="tableBody">
             <% if (images) { images.forEach(function(image, idx) { %>
               <tr style="--i:<%= idx %>" class="al-table-tr transition-colors cursor-pointer img-row" data-search="<%= (image.name + ' ' + (image.author || '')).toLowerCase() %>"
                 onclick="imageManagerState.handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
-                <td class="al-table-td sm:pl-6 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
-                <td class="al-table-td px-3"><%= image.author || '—' %></td>
-                <td class="al-table-td px-3"><%= new Date(image.createdAt).toLocaleDateString() %></td>
-                <td class="al-table-td px-3">
+                <td class="al-table-td font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
+                <td class="al-table-td"><%= image.author || '—' %></td>
+                <td class="al-table-td"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+                <td class="al-table-td">
                   <div class="flex gap-2">
-                    <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">
+                    <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary al-btn-sm">
                       <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('edit') %>
                     </a>
-                    <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">
+                    <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary al-btn-sm">
                       <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('export') %>
                     </a>
-                    <button onclick="event.stopPropagation(); imageManagerState.openDelete('<%= image.id %>', '<%= (image.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>')" type="button" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);" aria-label="<%= t('deleteImage') %> <%= image.name %>">
+                    <button onclick="event.stopPropagation(); imageManagerState.openDelete('<%= image.id %>', '<%= (image.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>')" type="button" class="al-btn-ghost al-btn-icon-only" style="color:var(--theme-danger);" aria-label="<%= t('deleteImage') %> <%= image.name %>">
                       <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %>
                     </button>
                   </div>
@@ -124,20 +124,18 @@
       <% } else { %>
         <div id="pendingApprovalsList" class="space-y-3">
           <% pending.forEach(function(image) { %>
-          <div class="pending-card rounded-xl border p-4" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-pending-image="<%= image.id %>">
+          <div class="pending-card al-card" data-pending-image="<%= image.id %>">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
                   <h3 class="text-[13px] font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
-                  <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning)">
-                    <%= t('pending') %>
-                  </span>
+                  <span class="al-badge al-badge-warning"><%= t('pending') %></span>
                 </div>
                 <% if (image.description) { %><p class="text-[13px] mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
                 <% if (image.creator) { %>
                 <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">
-                  Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
-                  &middot; <%= new Date(image.createdAt).toLocaleString() %>
+                  <%= t('submittedBy') %> <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
+                  <span aria-hidden="true">&middot;</span> <%= new Date(image.createdAt).toLocaleString() %>
                 </p>
                 <% } %>
                 <div class="flex flex-wrap gap-3 mt-2 text-[11px]" style="color:var(--theme-text-muted)">
@@ -146,13 +144,13 @@
                 </div>
               </div>
               <div class="flex gap-1.5 shrink-0">
-                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-[11px]">
+                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost al-btn-sm">
                   <%- icon('external-link', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('view') %>
                 </a>
-                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-approve-image="<%= image.id %>">
+                <button type="button" class="al-btn-primary al-btn-sm" data-approve-image="<%= image.id %>">
                   <%- icon('check', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('approve') %>
                 </button>
-                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-reject-image="<%= image.id %>" data-reject-name="<%= image.name %>">
+                <button type="button" class="al-btn-danger al-btn-sm" data-reject-image="<%= image.id %>" data-reject-name="<%= image.name %>">
                   <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('reject') %>
                 </button>
               </div>
@@ -171,24 +169,24 @@
 </div>
 
 <!-- Reject modal -->
-<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+<div id="rejectModal" class="al-sheet-overlay opacity-0 pointer-events-none">
   <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rejectImage') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectName"></p>
       </div>
-      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" onclick="imageManagerState.closeRejectModal()" aria-label="Close">
+      <button type="button" class="al-btn-ghost al-btn-icon-only shrink-0" onclick="imageManagerState.closeRejectModal()" aria-label="<%= t('ariaClose') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-6 py-4">
-      <label class="al-label" for="rejectReasonInput"><%= t('reason') %> <span class="font-normal" style="color:var(--theme-text-muted)"><%= t('reasonHint') %></span></label>
-      <textarea id="rejectReasonInput" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+      <label class="al-form-label" for="rejectReasonInput"><%= t('reason') %> <span class="font-normal" style="color:var(--theme-text-muted)"><%= t('reasonHint') %></span></label>
+      <textarea id="rejectReasonInput" class="al-input w-full" rows="3" placeholder="<%= t('rejectReasonPlaceholder') %>"></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" onclick="imageManagerState.closeRejectModal()"><%= t('cancel') %></button>
-      <button type="button" id="rejectConfirmBtn" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+      <button type="button" class="al-btn-secondary al-btn-sm" onclick="imageManagerState.closeRejectModal()"><%= t('cancel') %></button>
+      <button type="button" id="rejectConfirmBtn" class="al-btn-danger al-btn-sm">
         <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><span id="rejectConfirmLabel"><%= t('reject') %></span>
       </button>
     </div>
@@ -196,21 +194,21 @@
 </div>
 
 <!-- Upload modal -->
-<div id="uploadImageModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+<div id="uploadImageModal" class="al-sheet-overlay opacity-0 pointer-events-none">
   <div id="uploadImageModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('uploadImage') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('uploadImageDesc') %></p>
       </div>
-      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('ariaClose') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
-        <button type="button" id="uploadModeFile" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-strong); background:var(--theme-bg-card);"><%= t('uploadFile') %></button>
-        <button type="button" id="uploadModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-muted);"><%= t('importFromUrl') %></button>
+      <div class="al-segmented w-full mb-4" role="group" aria-label="<%= t('uploadModeLabel') %>">
+        <button type="button" id="uploadModeFile" class="al-segmented-btn flex-1" aria-pressed="true"><%= t('uploadFile') %></button>
+        <button type="button" id="uploadModeUrl" class="al-segmented-btn flex-1" aria-pressed="false"><%= t('importFromUrl') %></button>
       </div>
       <div id="uploadFileSection">
         <div class="mb-4">
@@ -227,26 +225,26 @@
               <p id="imageSelectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
               <p id="imageSelectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
             </div>
-            <button type="button" onclick="imageManagerState.removeSelectedImageFile()" class="ml-2" aria-label="Remove file" style="color:var(--theme-text-muted)">
+            <button type="button" onclick="imageManagerState.removeSelectedImageFile()" class="ml-2 al-btn-ghost al-btn-icon-only" aria-label="<%= t('removeFile') %>">
               <%- icon('x', { class: 'w-5 h-5' }) %>
             </button>
           </div>
         </div>
       </div>
       <div id="importUrlSection" class="hidden">
-        <label class="al-label" for="importUrlInput"><%= t('imageUrl') %></label>
+        <label class="al-form-label" for="importUrlInput"><%= t('imageUrl') %></label>
         <input id="importUrlInput" type="url" placeholder="https://raw.githubusercontent.com/…/egg.json" class="al-input w-full">
         <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= t('importUrlDesc') %></p>
       </div>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+      <button type="button" onclick="imageManagerState.closeUploadImageModal()" class="al-btn-secondary al-btn-sm">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('cancel') %>
       </button>
-      <button type="button" id="imageUploadButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
+      <button type="button" id="imageUploadButton" class="al-btn-primary al-btn-sm" disabled>
         <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('upload') %>
       </button>
-      <button type="button" id="importUrlSubmit" class="al-btn-primary hidden px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+      <button type="button" id="importUrlSubmit" class="al-btn-primary al-btn-sm hidden">
         <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('fetchAndImport') %>
       </button>
     </div>
@@ -258,31 +256,31 @@
   <form onsubmit="imageManagerState.submitCreateImage(event); return false;" class="flex flex-col gap-4">
     <div class="grid grid-cols-2 gap-3">
       <div class="col-span-2">
-        <label class="al-label"><%= t('name') %> <span style="color:var(--theme-danger)">*</span></label>
-        <input class="al-input" type="text" name="name" required placeholder="e.g. Minecraft Java">
+        <label class="al-form-label"><%= t('name') %> <span class="al-required" aria-hidden="true">*</span></label>
+        <input class="al-input" type="text" name="name" required placeholder="<%= t('imageNamePlaceholder') %>">
       </div>
       <div>
-        <label class="al-label"><%= t('author') %></label>
-        <input class="al-input" type="text" name="author" placeholder="e.g. github.com/you">
+        <label class="al-form-label"><%= t('author') %></label>
+        <input class="al-input" type="text" name="author" placeholder="<%= t('imageAuthorPlaceholder') %>">
       </div>
       <div>
-        <label class="al-label"><%= t('authorName') %></label>
-        <input class="al-input" type="text" name="authorName" placeholder="Your Name">
+        <label class="al-form-label"><%= t('authorName') %></label>
+        <input class="al-input" type="text" name="authorName" placeholder="<%= t('imageAuthorNamePlaceholder') %>">
       </div>
       <div class="col-span-2">
-        <label class="al-label"><%= t('startupCommand') %> <span style="color:var(--theme-danger)">*</span></label>
+        <label class="al-form-label"><%= t('startupCommand') %> <span class="al-required" aria-hidden="true">*</span></label>
         <input class="al-input font-mono" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar">
       </div>
       <div class="col-span-2">
-        <label class="al-label"><%= t('description') %></label>
+        <label class="al-form-label"><%= t('description') %></label>
         <textarea class="al-input" name="description" rows="2" placeholder="<%= t('imageDescriptionPlaceholder') %>" style="resize:none;"></textarea>
       </div>
     </div>
     <div class="flex gap-2 pt-1">
-      <button type="button" onclick="imageManagerState.closeCreate()" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)">
+      <button type="button" onclick="imageManagerState.closeCreate()" class="al-btn-secondary flex-1">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %>
       </button>
-      <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)">
+      <button type="submit" class="al-btn-primary flex-1">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createAndEdit') %>
       </button>
     </div>
@@ -326,18 +324,18 @@ document.addEventListener('DOMContentLoaded', function() {
       var data = await res.json();
       closeRejectModal();
       if (data.error) { showToast(data.error, 'error'); }
-      else { showToast(data.message || 'Image rejected.', 'success'); window.location.reload(); }
-    } catch (e) { closeRejectModal(); showToast('Something went wrong.', 'error'); }
+      else { showToast(data.message || <%- JSON.stringify(t('imageRejected')) %>, 'success'); window.location.reload(); }
+    } catch (e) { closeRejectModal(); showToast(<%- JSON.stringify(t('somethingWentWrong')) %>, 'error'); }
     finally { btn.disabled = false; document.getElementById('rejectConfirmLabel').textContent = '<%= t('reject') %>'; }
   });
 });
 </script>
 
 <div id="page-data" style="display:none"
-  data-approve-confirm="Approve this image? It will become available to all users."
-  data-approved="Image approved."
-  data-rejected="Image rejected."
-  data-error="Something went wrong."
+  data-approve-confirm="<%= t('approveImageConfirm') %>"
+  data-approved="<%= t('imageApproved') %>"
+  data-rejected="<%= t('imageRejected') %>"
+  data-error="<%= t('somethingWentWrong') %>"
 ></div>
 
 <script nonce="<%- nonce %>">
@@ -365,10 +363,8 @@ function imageManager() {
     var urlSection = document.getElementById('importUrlSection');
     var uploadBtn = document.getElementById('imageUploadButton');
     var submitBtn = document.getElementById('importUrlSubmit');
-    var active = 'color:var(--theme-text-strong); background:var(--theme-bg-card);';
-    var idle = 'color:var(--theme-text-muted);';
-    if (fileBtn) fileBtn.setAttribute('style', isUrl ? idle : active);
-    if (urlBtn) urlBtn.setAttribute('style', isUrl ? active : idle);
+    if (fileBtn) fileBtn.setAttribute('aria-pressed', String(!isUrl));
+    if (urlBtn) urlBtn.setAttribute('aria-pressed', String(isUrl));
     if (fileSection) fileSection.classList.toggle('hidden', isUrl);
     if (urlSection) urlSection.classList.toggle('hidden', !isUrl);
     if (uploadBtn) uploadBtn.classList.toggle('hidden', isUrl);
@@ -412,7 +408,7 @@ function imageManager() {
       if (importUrlSubmit) {
         importUrlSubmit.addEventListener('click', async function() {
           var url = document.getElementById('importUrlInput').value.trim();
-          if (!url) { showToast('Enter a URL.', 'error'); return; }
+          if (!url) { showToast(<%- JSON.stringify(t('enterUrl')) %>, 'error'); return; }
           var btn = importUrlSubmit;
           btn.disabled = true; btn.classList.add('opacity-60');
           try {
@@ -421,10 +417,10 @@ function imageManager() {
             });
             var d = await r.json();
             if (r.ok && d.success) {
-              showToast(d.message || 'Image imported.', 'success');
+              showToast(d.message || <%- JSON.stringify(t('imageImported')) %>, 'success');
               window.location.reload();
-            } else { showToast((d.error && d.error.message) || 'Import failed.', 'error'); }
-          } catch (err) { showToast('Import failed.', 'error'); }
+            } else { showToast((d.error && d.error.message) || <%- JSON.stringify(t('importFailed')) %>, 'error'); }
+          } catch (err) { showToast(<%- JSON.stringify(t('importFailed')) %>, 'error'); }
           finally { btn.disabled = false; btn.classList.remove('opacity-60'); }
         });
       }
@@ -461,8 +457,8 @@ function imageManager() {
         method: 'DELETE',
         headers: { 'x-csrf-token': csrfToken }
       });
-      if (res.ok) { showToast('Image deleted.', 'success'); window.location.reload(); }
-      else { showToast('Failed.', 'error'); }
+      if (res.ok) { showToast(<%- JSON.stringify(t('imageDeleted')) %>, 'success'); window.location.reload(); }
+      else { showToast(<%- JSON.stringify(t('imageDeleteFailed')) %>, 'error'); }
     },
     openUploadImageModal: function() {
       setUploadMode('file');
@@ -497,22 +493,22 @@ function imageManager() {
       document.getElementById('imageUploadButton').disabled = false;
     },
     confirmImageUpload: function() {
-      if (!window.selectedImageFile) { showToast('Select a JSON file to upload.', 'error'); return; }
+      if (!window.selectedImageFile) { showToast(<%- JSON.stringify(t('selectJsonFile')) %>, 'error'); return; }
       var file = window.selectedImageFile;
       this.closeUploadImageModal();
       var r = new FileReader();
       r.onload = function(e) {
-        try { JSON.parse(e.target.result); } catch (err) { showToast('Invalid JSON.', 'error'); return; }
+        try { JSON.parse(e.target.result); } catch (err) { showToast(<%- JSON.stringify(t('invalidJson')) %>, 'error'); return; }
         var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/admin/images/upload', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.setRequestHeader('x-csrf-token', csrfToken);
         xhr.onload = function() {
-          if (xhr.status === 200) { showToast('Image uploaded.', 'success'); window.location.reload(); }
-          else { showToast('Upload failed.', 'error'); }
+          if (xhr.status === 200) { showToast(<%- JSON.stringify(t('imageUploaded')) %>, 'success'); window.location.reload(); }
+          else { showToast(<%- JSON.stringify(t('uploadFailed')) %>, 'error'); }
         };
-        xhr.onerror = function() { showToast('Upload failed.', 'error'); };
+        xhr.onerror = function() { showToast(<%- JSON.stringify(t('uploadFailed')) %>, 'error'); };
         xhr.send(e.target.result);
       };
       r.readAsText(file);
@@ -520,7 +516,7 @@ function imageManager() {
     submitCreateImage: function(e) {
       var form = e.target;
       var data = Object.fromEntries(new FormData(form));
-      if (!data.name || !data.startup) { showToast('Name and startup command are required.', 'error'); return; }
+      if (!data.name || !data.startup) { showToast(<%- JSON.stringify(t('nameStartupRequired')) %>, 'error'); return; }
       var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
       fetch('/admin/images/create', {
         method: 'POST',
@@ -528,11 +524,11 @@ function imageManager() {
         body: JSON.stringify(data),
       }).then(function(r) { return r.json(); }).then(function(result) {
         if (result.success !== false) {
-          showToast('Image created.', 'success');
+          showToast(<%- JSON.stringify(t('imageCreated')) %>, 'success');
           imageManagerState.closeCreate();
           window.location.reload();
-        } else { showToast(result.error || result.message || 'Failed to create image.', 'error'); }
-      }).catch(function() { showToast('Network error.', 'error'); });
+        } else { showToast(result.error || result.message || <%- JSON.stringify(t('failedCreateImage')) %>, 'error'); }
+      }).catch(function() { showToast(<%- JSON.stringify(t('networkError')) %>, 'error'); });
     }
   };
 }
@@ -547,9 +543,9 @@ function imageStore() {
   var CAT_CLS = { game: 'cat-game', application: 'cat-application', generic: 'cat-generic' };
   var CAT_LABEL = { game: window.__i18n.categoryGame || 'Game', application: window.__i18n.categoryApp || 'App', generic: window.__i18n.categoryGeneric || 'Generic' };
   var CAT_COLOR = {
-    game: _rootStyle.getPropertyValue('--theme-accent-purple').trim() || '#7c3aed',
-    application: _rootStyle.getPropertyValue('--theme-accent-blue').trim() || '#0284c7',
-    generic: _rootStyle.getPropertyValue('--theme-success').trim() || '#16a34a',
+    game: _rootStyle.getPropertyValue('--theme-accent').trim(),
+    application: _rootStyle.getPropertyValue('--theme-info').trim(),
+    generic: _rootStyle.getPropertyValue('--theme-success').trim(),
   };
 
   var allImages = [], pendingEgg = null, mdParse = null;
@@ -560,7 +556,7 @@ function imageStore() {
   function cap(s) { return s.replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
   function show(id,d) { var e=document.getElementById(id); if(e)e.style.display=d||'block'; }
   function hide(id) { var e=document.getElementById(id); if(e)e.style.display='none'; }
-  function catDot(cat,size) { var c=CAT_COLOR[cat]||'#999'; return '<span style="display:inline-block;width:'+(size||8)+'px;height:'+(size||8)+'px;border-radius:50%;background:'+c+';flex-shrink:0"></span>'; }
+  function catDot(cat,size) { var c=CAT_COLOR[cat]||'currentColor'; return '<span style="display:inline-block;width:'+(size||8)+'px;height:'+(size||8)+'px;border-radius:50%;background:'+c+';flex-shrink:0"></span>'; }
   function catBadge(cat) { return '<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset '+(CAT_CLS[cat]||'')+'">'+catDot(cat,6)+(CAT_LABEL[cat]||cat)+'</span>'; }
 
   function groupData() {
@@ -624,7 +620,8 @@ function imageStore() {
       allImages=data.images||[];
       hide('loadingEl');
       var age=data.builtAt?Math.round((Date.now()-data.builtAt)/60000):0;
-      if(st) st.textContent=allImages.length+' images \u00B7 '+(age<1?'fresh':age+'m old');
+      var stCount = allImages.length;
+      if(st) st.textContent = stCount + ' ' + (stCount !== 1 ? <%- JSON.stringify(t('imageOther')) %> : <%- JSON.stringify(t('imageOne')) %>) + ' \u00B7 ' + (age < 1 ? <%- JSON.stringify(t('fresh')) %> : age + <%- JSON.stringify(t('minutesShort')) %>);
       updateCount(); render();
     } catch(e) { console.error('Failed to load catalogue:',e); hide('loadingEl'); show('errorEl'); }
   }
@@ -640,7 +637,7 @@ function imageStore() {
     } catch(e) {
       document.getElementById('refreshBtnLoad').disabled=false;
       if(st)st.textContent='';
-      if(typeof showToast==='function') showToast('Could not refresh the catalogue','error');
+      if(typeof showToast==='function') showToast(<%- JSON.stringify(t('couldNotRefresh')) %>,'error');
       return;
     }
     var REFRESH_POLL_INTERVAL_MS = 1000;
@@ -663,7 +660,7 @@ function imageStore() {
     var groups=groupData();
     hide('listEl'); hide('emptyEl'); updateCount();
     if(!groups.length) {
-      document.getElementById('emptyTxt').textContent=allImages.length?'No apps match your search.':'The image catalogue is empty.';
+      document.getElementById('emptyTxt').textContent=allImages.length?<%- JSON.stringify(t('noAppsMatch')) %>:<%- JSON.stringify(t('catalogueEmpty')) %>;
       show('emptyEl'); return;
     }
     var body=document.getElementById('listBody'); body.innerHTML='';
@@ -674,7 +671,7 @@ function imageStore() {
   function makeGroupRow(g) {
     var tr=document.createElement('tr');
     tr.className='al-table-tr transition-colors cursor-pointer group-hdr-tr';
-    tr.innerHTML='<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap px-3 py-4">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+' image'+(g.imgs.length!==1?'s':'')+'</td><td class="al-table-td px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,'')):esc(g.desc||''))+'</td>';
+    tr.innerHTML='<td class="al-table-td whitespace-nowrap"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+' '+(g.imgs.length!==1?<%- JSON.stringify(t('imageOther')) %>:<%- JSON.stringify(t('imageOne')) %>)+'</td><td class="al-table-td text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,'')):esc(g.desc||''))+'</td>';
     tr.addEventListener('click',function(){openGroup(g.group,g.imgs);});
     return tr;
   }
@@ -688,12 +685,12 @@ function imageStore() {
   function openGroup(group,imgs) {
     var s=imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
     stageBody('groupTpl',cap(group),'max-w-3xl');
-    document.getElementById('grpCount').textContent=s.length+' image'+(s.length!==1?'s':'');
+    document.getElementById('grpCount').textContent=s.length+' '+(s.length!==1?<%- JSON.stringify(t('imageOther')) %>:<%- JSON.stringify(t('imageOne')) %>);
     var list=document.getElementById('grpSubList'); list.innerHTML='';
     s.forEach(function(img,i){
       var row=document.createElement('div'); row.className='grp-img-row';
       var subLabel=img.subGroup&&img.subGroup!==img.group?img.subGroup.replace(img.group+'/',''):'';
-      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+'</p>'+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+'</p>':'')+'</div></div>'+'<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">Install</button>';
+      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+'</p>'+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+'</p>':'')+'</div></div>'+'<button type="button" class="al-btn-secondary al-btn-sm shrink-0">' + <%- JSON.stringify(t('storeInstallBtn')) %> + '</button>';
       row.style.animationDelay=Math.min(i*20,300)+'ms';
       row.addEventListener('click',function(){openEgg(img);});
       row.querySelector('button').addEventListener('click',function(e){e.stopPropagation();openEgg(img);});
@@ -710,8 +707,8 @@ function imageStore() {
   }
 
   async function renderMd(md,el) {
-    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">Rendering\u2026</p>';
-    try { var m=await getMd(); el.innerHTML='<div class="md-body">'+(md?m.parse(md):'<p style="font-style:italic;color:#a3a3a3;font-size:12px;">No readme available.</p>')+'</div>'; }
+    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">' + <%- JSON.stringify(t('rendering')) %> + '</p>';
+    try { var m=await getMd(); el.innerHTML='<div class="md-body">' + (md ? m.parse(md) : '<p class="al-text-muted" style="font-style:italic;font-size:12px;">' + <%- JSON.stringify(t('storeNoReadme')) %> + '</p>') + '</div>'; }
     catch(e) { el.innerHTML='<div class="md-body">'+esc(md||'')+'</div>'; }
   }
 
@@ -722,31 +719,31 @@ function imageStore() {
     catEl.className='text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset '+(CAT_CLS[img.category]||'');
     catEl.innerHTML=catDot(img.category,6)+(CAT_LABEL[img.category]||img.category);
     document.getElementById('eggDesc').textContent=img.description||'';
-    document.getElementById('eggAuthor').textContent=img.author?'by '+img.author:'';
+    document.getElementById('eggAuthor').textContent=img.author?<%- JSON.stringify(t('byAuthor')) %>.replace('{author}', img.author):'';
     renderMd(img.fullReadme||img.readme||'',document.getElementById('eggReadme'));
     hide('eggErr');
     var btn=document.getElementById('eggInstallBtn');
-    btn.innerHTML='Install'; btn.disabled=false; btn.style.background=''; btn.style.borderColor=''; btn.style.pointerEvents='';
+    btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>; btn.disabled=false; btn.style.background=''; btn.style.borderColor=''; btn.style.pointerEvents='';
   }
 
   async function confirmInstall() {
     if(!pendingEgg) return;
     var btn=document.getElementById('eggInstallBtn');
-    btn.disabled=true; btn.textContent='Installing\u2026'; hide('eggErr');
+    btn.disabled=true; btn.textContent=<%- JSON.stringify(t('storeInstallingBtn')) %>; hide('eggErr');
     try {
       var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
       var res=await fetch('/api/v2/admin/images/store/install',{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},body:JSON.stringify(pendingEgg.egg)});
       var body=await res.json();
-      if(!res.ok){document.getElementById('eggErrTxt').textContent=body.error||'Installation failed.';show('eggErr');btn.disabled=false;btn.innerHTML='Install';return;}
+      if(!res.ok){document.getElementById('eggErrTxt').textContent=body.error||<%- JSON.stringify(t('storeInstallationFailed')) %>;show('eggErr');btn.disabled=false;btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>;return;}
       var installedName=pendingEgg.name;
-      btn.innerHTML='<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Installed';
-      btn.style.background='var(--theme-success, #16a34a)'; btn.style.borderColor='var(--theme-success, #16a34a)'; btn.style.pointerEvents='none';
-      if(typeof showToast==='function') showToast('"'+installedName+'" installed successfully.', 'success');
+      btn.innerHTML=<%- JSON.stringify(icon('check', { class: 'size-4', strokeWidth: 1.5 })) %> + ' ' + <%- JSON.stringify(t('installed')) %>;
+      btn.style.background='var(--theme-success)'; btn.style.borderColor='var(--theme-success)'; btn.style.pointerEvents='none';
+      if(typeof showToast==='function') showToast('"' + installedName + '" ' + <%- JSON.stringify(t('storeInstalledSuccessfully')) %>, 'success');
       setTimeout(function(){window.modal.close();pendingEgg=null;},1500);
     } catch(err) {
       console.error('Image install error:',err);
-      document.getElementById('eggErrTxt').textContent='Installation failed. Try again.';
-      show('eggErr'); btn.disabled=false; btn.innerHTML='Install';
+      document.getElementById('eggErrTxt').textContent=<%- JSON.stringify(t('storeInstallationFailedRetry')) %>;
+      show('eggErr'); btn.disabled=false; btn.innerHTML=<%- JSON.stringify(t('storeInstallBtn')) %>;
     }
   }
 

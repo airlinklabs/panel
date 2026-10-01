@@ -1,24 +1,26 @@
-<%- include('../../../layouts/admin', { title: 'Radar Scripts' }) %>
+<%- include('../../../layouts/admin', { title: t('radarScriptsTitle') }) %>
 
 <%- include('../../../partials/flash-messages') %>
 
-<%- include('../../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: 'Radar', url: '/admin/radar' },
-  { label: 'Scripts' }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbRadar'), url: '/admin/radar' },
+    { label: t('scripts') }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title">Radar Scripts</h1>
-    <p class="al-page-desc">Detection scripts used when scanning server volumes for malicious content.</p>
+    <h1 class="al-page-title"><%= t('radarScriptsTitle') %></h1>
+    <p class="al-page-desc"><%= t('radarScriptsDesc') %></p>
   </div>
   <div class="flex gap-2 shrink-0">
-    <a href="/admin/radar" class="al-btn-secondary inline-flex items-center gap-1.5">
-      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+    <a href="/admin/radar" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('back') %></span>
     </a>
-    <a href="/admin/radar/scripts/create" class="al-btn-primary inline-flex items-center gap-1.5">
-      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> New Script
+    <a href="/admin/radar/scripts/create" class="al-btn-primary">
+      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('newScriptBtn') %></span>
     </a>
   </div>
 </div>
@@ -30,47 +32,46 @@
   <% if (list.length === 0) { %>
     <%- include('../../../partials/empty-state', {
       iconName: 'file-code',
-      title: 'No scripts yet',
-      description: 'Create a detection script to start scanning servers.',
-      action: '<a href="/admin/radar/scripts/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + ' New Script</a>'
+      title: t('noScriptsYet'),
+      description: t('noScriptsYetDesc'),
+      action: '<a href="/admin/radar/scripts/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + '<span>' + t('newScriptBtn') + '</span></a>'
     }) %>
   <% } else { %>
-  <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
-    <table class="al-table min-w-full">
+  <div class="al-table-wrapper">
+    <table class="al-table al-table-card">
       <colgroup>
         <col style="min-width:240px">
         <col style="min-width:160px">
         <col style="min-width:100px">
         <col style="min-width:160px">
       </colgroup>
-      <thead class="al-table-head">
+      <thead class="al-table-thead">
         <tr>
-          <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
-          <th class="al-table-th px-3 py-3.5 col-hide">Description</th>
-          <th class="al-table-th px-3 py-3.5 col-hide">Version</th>
-          <th class="al-table-th px-3 py-3.5">Actions</th>
+          <th scope="col" class="al-table-th pl-6"><%= t('name') %></th>
+          <th scope="col" class="al-table-th col-hide"><%= t('description') %></th>
+          <th scope="col" class="al-table-th col-hide"><%= t('version') %></th>
+          <th scope="col" class="al-table-th"><%= t('actions') %></th>
         </tr>
       </thead>
-      <tbody class="divide-y" style="border-color:var(--theme-border)">
+      <tbody class="al-table-tbody">
         <% let scriptIdx = 0; list.forEach(function(s) { %>
-        <tr class="al-table-tr transition-colors" style="--i:<%= scriptIdx++ %>">
-          <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3">
-            <p class="font-medium" style="color:var(--theme-text-strong)"><%= s.name || s.id %></p>
-            <% if (s.filename) { %><p class="text-xs mt-0.5 font-mono" style="color:var(--theme-text-muted)"><%= s.filename %></p><% } %>
+        <tr class="al-table-tr" style="--i:<%= scriptIdx++ %>">
+          <td class="al-table-td pl-6" data-label="<%= t('name') %>">
+            <p class="al-table-cell-strong"><%= s.name || s.id %></p>
+            <% if (s.filename) { %><p class="text-xs mt-0.5 font-mono al-text-muted"><%= s.filename %></p><% } %>
           </td>
-          <td class="al-table-td px-3 py-4 col-hide">
-            <p class="text-xs max-w-sm truncate" style="color:var(--theme-text-muted)"><%= s.description || '—' %></p>
+          <td class="al-table-td col-hide" data-label="<%= t('description') %>">
+            <p class="text-xs max-w-sm truncate al-text-muted"><%= s.description || '—' %></p>
           </td>
-          <td class="al-table-td whitespace-nowrap px-3 py-4 text-sm col-hide" style="color:var(--theme-text-muted)">v<%= s.version || '1.0.0' %></td>
-          <td class="al-table-td whitespace-nowrap px-3 py-4">
+          <td class="al-table-td col-hide text-sm al-text-muted" data-label="<%= t('version') %>">v<%= s.version || '1.0.0' %></td>
+          <td class="al-table-td" data-label="<%= t('actions') %>">
             <div class="flex items-center gap-2">
-              <a href="/admin/radar/scripts/edit/<%= encodeURIComponent(s.id) %>" class="al-btn-secondary inline-flex items-center gap-1.5 !px-2.5 !py-1.5 text-xs">
-                <%- icon('pencil', { class: 'size-3.5', strokeWidth: 1.5 }) %> Edit
+              <a href="/admin/radar/scripts/edit/<%= encodeURIComponent(s.id) %>" class="al-btn-secondary al-btn-sm">
+                <%- icon('pencil', { class: 'size-3.5', strokeWidth: 1.5 }) %><span><%= t('edit') %></span>
               </a>
-              <button type="button" class="al-btn-secondary inline-flex items-center gap-1.5 !px-2.5 !py-1.5 text-xs js-delete-script"
-                data-id="<%= encodeURIComponent(s.id) %>" data-name="<%= s.name || s.id %>"
-                style="color:var(--theme-danger); border-color:color-mix(in srgb, var(--theme-danger) 35%, transparent);">
-                <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %> Delete
+              <button type="button" class="al-btn-danger-outline al-btn-sm js-delete-script"
+                data-id="<%= encodeURIComponent(s.id) %>" data-name="<%= s.name || s.id %>">
+                <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %><span><%= t('delete') %></span>
               </button>
             </div>
           </td>
@@ -85,12 +86,18 @@
 <script nonce="<%- nonce %>">
 (function() {
   var csrfToken = '<%= csrfToken %>';
+  var msgDeleted = <%- JSON.stringify(t('scriptDeleted')) %>;
+  var msgDeleteFailed = <%- JSON.stringify(t('scriptDeleteFailed')) %>;
+  var msgSomethingWrong = <%- JSON.stringify(t('somethingWentWrong')) %>;
+  var titleConfirm = <%- JSON.stringify(t('deleteScriptTitle')) %>;
+  var labelConfirm = <%- JSON.stringify(t('delete')) %>;
 
   document.querySelectorAll('.js-delete-script').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var id = btn.dataset.id;
       var name = btn.dataset.name;
       if (!id) return;
+      var body = <%- JSON.stringify(t('deleteScriptBody')) %>.replace('{{name}}', name);
       var run = function() {
         fetch('/admin/radar/scripts/' + id + '/delete', {
           method: 'POST',
@@ -98,20 +105,20 @@
         })
           .then(function(r) { return r.json(); })
           .then(function(res) {
-            if (res.success) { showToast('Script deleted.', 'success'); window.location.reload(); }
-            else { showToast(res.message || 'Failed to delete script.', 'error'); }
+            if (res.success) { showToast(msgDeleted, 'success'); window.location.reload(); }
+            else { showToast(res.message || msgDeleteFailed, 'error'); }
           })
-          .catch(function() { showToast('Something went wrong.', 'error'); });
+          .catch(function() { showToast(msgSomethingWrong, 'error'); });
       };
       if (window.modal && window.modal.confirm) {
         window.modal.confirm({
-          title: 'Delete Script',
-          body: 'Delete "' + name + '"? Scans will no longer use it.',
+          title: titleConfirm,
+          body: body,
           danger: true,
-          confirmLabel: 'Delete',
+          confirmLabel: labelConfirm,
           onConfirm: run,
         });
-      } else if (window.confirm('Delete "' + name + '"?')) {
+      } else if (window.confirm(body)) {
         run();
       }
     });

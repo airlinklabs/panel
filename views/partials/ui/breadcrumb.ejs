@@ -4,7 +4,7 @@
 const crumbs = typeof items !== 'undefined' ? items : [];
 %>
 <% if (crumbs.length > 0) { %>
-  <nav aria-label="Breadcrumb" class="al-breadcrumb">
+  <nav aria-label="<%= t('breadcrumbNav') %>" class="al-breadcrumb">
     <ol class="flex items-center text-sm gap-1">
       <% crumbs.forEach(function(crumb, idx) { %>
         <li class="flex items-center">

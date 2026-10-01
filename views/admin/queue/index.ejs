@@ -1,67 +1,71 @@
-<%- include('../../layouts/admin', { title: 'Queue Management' }) %>
+<%- include('../../layouts/admin', { title: t('queueManagementTitle') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
-    { label: 'Queue Management' }
+    { label: t('breadcrumbQueue') }
   ] }) %>
+</div>
 
-  <div class="flex items-start justify-between gap-4 mt-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Queue Management</h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">View and manage the runtime start queue.</p>
-    </div>
+<div class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('queueManagementTitle') %></h1>
+    <p class="al-page-desc"><%= t('queueManagementDesc') %></p>
+  </div>
+  <div>
     <button type="button" id="refreshBtn" class="al-btn-secondary">
       <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
-      Refresh
+      <%= t('refresh') %>
     </button>
   </div>
+</div>
 
-  <div class="al-card mt-5 overflow-hidden">
-    <h2 class="al-card-header">Queued Server Starts</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
-        <thead style="background:var(--theme-bg-secondary)">
-          <tr>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Server</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Node</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">User</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Position</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Priority</th>
-            <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="queueTableBody" class="divide-y divide-[var(--theme-border)]">
-          <% if (entries && entries.length > 0) { %>
-            <% entries.forEach(function(entry) { %>
-              <tr class="hover:bg-[var(--theme-bg-secondary)] transition" data-server-id="<%= entry.serverId %>">
-                <td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-strong)"><%= entry.serverId %></td>
-                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">Node #<%= entry.nodeId %></td>
-                <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">#<%= entry.userId %></td>
-                <td class="px-5 py-3 text-xs tabular-nums" style="color:var(--theme-text-muted)"><%= entry.position %> / <%= entry.total %></td>
-                <td class="px-5 py-3">
-                  <% if (entry.priority) { %>
-                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">Priority</span>
-                  <% } else { %>
-                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Normal</span>
-                  <% } %>
-                </td>
-                <td class="px-5 py-3">
-                  <div class="flex gap-1">
-                    <button class="al-btn-secondary text-xs kick-btn" data-server-id="<%= entry.serverId %>">Kick</button>
-                    <button class="al-btn-secondary text-xs ban-btn" data-user-id="<%= entry.userId %>">Ban</button>
-                  </div>
-                </td>
-              </tr>
-            <% }); %>
-          <% } else { %>
-            <tr><td colspan="6" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">Queue is empty.</td></tr>
-          <% } %>
-        </tbody>
-      </table>
+<div class="al-page-body">
+  <div class="al-card al-card-flush">
+    <div class="al-card-header">
+      <span class="al-card-header-title"><%= t('queueCardTitle') %></span>
     </div>
+    <table class="al-table">
+      <thead class="al-table-thead">
+        <tr>
+          <th scope="col" class="al-table-th"><%= t('serverColumn') %></th>
+          <th scope="col" class="al-table-th"><%= t('node') %></th>
+          <th scope="col" class="al-table-th"><%= t('user') %></th>
+          <th scope="col" class="al-table-th"><%= t('queuePosition') %></th>
+          <th scope="col" class="al-table-th"><%= t('queuePriority') %></th>
+          <th scope="col" class="al-table-th"><%= t('actions') %></th>
+        </tr>
+      </thead>
+      <tbody id="queueTableBody">
+        <% if (entries && entries.length > 0) { %>
+          <% entries.forEach(function(entry) { %>
+            <tr class="al-table-tr" data-server-id="<%= entry.serverId %>">
+              <td class="al-table-td"><span class="al-table-cell-strong font-mono text-xs"><%= entry.serverId %></span></td>
+              <td class="al-table-td">#<%= entry.nodeId %></td>
+              <td class="al-table-td">#<%= entry.userId %></td>
+              <td class="al-table-td tabular-nums"><%= entry.position %> / <%= entry.total %></td>
+              <td class="al-table-td">
+                <% if (entry.priority) { %>
+                  <span class="al-badge al-badge-warning"><%- icon('zap', { size: 10, class: 'shrink-0' }) %> <%= t('queuePriorityHigh') %></span>
+                <% } else { %>
+                  <span class="al-badge al-badge-neutral"><%= t('queuePriorityNormal') %></span>
+                <% } %>
+              </td>
+              <td class="al-table-td">
+                <div class="flex gap-2">
+                  <button class="al-btn-secondary al-btn-sm kick-btn" data-server-id="<%= entry.serverId %>"><%= t('queueKick') %></button>
+                  <button class="al-btn-secondary al-btn-sm ban-btn" data-user-id="<%= entry.userId %>"><%= t('queueBan') %></button>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr><td colspan="6" class="al-table-empty al-table-td"><%= t('queueEmpty') %></td></tr>
+        <% } %>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -74,7 +78,7 @@
   document.querySelectorAll('.kick-btn').forEach(function(btn) {
     btn.addEventListener('click', async function() {
       var serverId = btn.dataset.serverId;
-      if (!confirm('Kick server ' + serverId + ' from the queue?')) return;
+      if (!confirm('<%= t('queueKickConfirm') %>'.replace('{{id}}', serverId))) return;
       try {
         var resp = await fetch('/admin/queue/' + encodeURIComponent(serverId) + '/kick', {
           method: 'POST',
@@ -85,7 +89,7 @@
           btn.closest('tr').remove();
         }
       } catch (e) {
-        alert('Failed to kick from queue');
+        showToast('<%= t('queueKickFailed') %>', 'error');
       }
     });
   });
@@ -93,7 +97,7 @@
   document.querySelectorAll('.ban-btn').forEach(function(btn) {
     btn.addEventListener('click', async function() {
       var userId = btn.dataset.userId;
-      if (!confirm('Ban user #' + userId + ' from the queue for 30 minutes?')) return;
+      if (!confirm('<%= t('queueBanConfirm') %>'.replace('{{id}}', userId))) return;
       try {
         var resp = await fetch('/admin/queue/users/' + encodeURIComponent(userId) + '/ban', {
           method: 'POST',
@@ -102,10 +106,10 @@
         });
         var data = await resp.json();
         if (data.banned) {
-          alert('User banned from queue');
+          showToast('<%= t('queueBanSuccess') %>', 'success');
         }
       } catch (e) {
-        alert('Failed to ban user');
+        showToast('<%= t('queueBanFailed') %>', 'error');
       }
     });
   });

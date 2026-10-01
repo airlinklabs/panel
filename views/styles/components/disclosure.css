@@ -1,0 +1,83 @@
+/* Disclosure — collapsible section used by permission pickers
+   (`views/admin/apikeys/index.ejs`). Grid-row animation so the panel
+   grows without a height measurement; reduced-motion users get the end
+   state with no transition.
+
+   `.al-perm-tile` is the selectable option tile inside a disclosure —
+   label + checkbox, accent tint when checked. */
+@layer components {
+  .al-disclosure {
+    border: 1px solid var(--theme-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .al-disclosure-trigger,
+  .al-disclosure-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    text-align: left;
+    background: var(--theme-bg-secondary);
+    transition: background-color 0.15s ease;
+  }
+
+  button.al-disclosure-trigger {
+    cursor: pointer;
+  }
+
+  button.al-disclosure-trigger:hover {
+    background: var(--theme-bg-hover);
+  }
+
+  .al-disclosure-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.15s ease;
+    opacity: 0;
+    background: var(--theme-bg-card);
+  }
+
+  .al-disclosure-panel.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .al-disclosure-panel > div {
+    overflow: hidden;
+    min-height: 0;
+    border-top: 1px solid var(--theme-border);
+    padding: 0.75rem 1rem;
+  }
+
+  .al-perm-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 0.5rem;
+    background: var(--theme-bg-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .al-perm-tile:hover {
+    border-color: var(--theme-border-strong, var(--theme-border));
+  }
+
+  .al-perm-tile:has(:checked) {
+    border-color: var(--theme-accent);
+    background: var(--theme-accent-subtle);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .al-disclosure-panel {
+    transition: none;
+  }
+}

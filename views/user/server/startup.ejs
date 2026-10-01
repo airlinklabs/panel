@@ -1,65 +1,70 @@
 <%- include('../../layouts/user', { title: t('startup') }) %>
 
-<div class="px-4 sm:px-8 pt-4 pb-8">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('dashboard'), url: '/' },
-    { label: server.name || 'Server', url: '/server/' + server.UUID },
+    { label: server.name || t('server'), url: '/server/' + server.UUID },
     { label: t('startup') }
   ] }) %>
+</div>
 
-  <div class="flex flex-wrap items-start justify-between gap-4 mt-4">
-    <div class="flex-1 min-w-0">
-      <h1 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= server.name %></h1>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">
-        <% if (server.node) { %><span class="flex items-center gap-1"><%- icon('server', { class: 'w-3 h-3' }) %> <%= server.node.name %></span><% } %>
-        <span class="flex items-center gap-1"><%- icon('hash', { class: 'w-3 h-3' }) %> <%= server.UUID %></span>
-      </div>
-    </div>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= server.name %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
   </div>
+</header>
 
+<div class="al-page-body">
   <% if (server.Suspended) { %>
-  <div class="mt-4 flex items-center gap-2.5 rounded-xl px-4 py-3" style="background:var(--theme-warning-bg);border:1px solid color-mix(in srgb, var(--theme-warning) 20%, transparent)">
-    <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0', style: 'color:var(--theme-warning)' }) %>
-    <p class="text-sm font-medium" style="color:var(--theme-warning)"><%= t('serverSuspended') %></p>
+  <div class="al-alert-warning mb-4" role="alert">
+    <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0">
+      <p class="al-alert-title"><%= t('serverSuspended') %></p>
+      <p class="al-alert-body"><%= t('serverSuspendedDesc') %></p>
+    </div>
   </div>
   <% } %>
 
   <!-- Startup Command -->
-  <div class="al-card overflow-hidden mt-6">
-    <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
-      <div>
-        <h3 class="text-[15px] font-semibold" style="color:var(--theme-text-strong)"><%= t('startupCommand') || 'Startup Command' %></h3>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= t('startupCommandDesc') || 'Customize the command used to start your server.' %></p>
+  <div class="al-form-card mb-4">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('startupCommand') %></h2>
+        <p class="al-card-subtitle"><%= t('startupCommandDesc') %></p>
       </div>
-      <% if (!server.allowStartupEdit) { %>
-      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:color-mix(in srgb, var(--theme-danger) 25%, transparent)">
-        <%- icon('circle-x', { class: 'mr-1.5 h-3 w-3', strokeWidth: 2 }) %>
-        <%= t('editingDisabled') || 'Editing Disabled' %>
-      </span>
-      <% } else { %>
-      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent)">
-        <%- icon('circle-check', { class: 'mr-1.5 h-3 w-3', strokeWidth: 2 }) %>
-        <%= t('editingEnabled') || 'Editing Enabled' %>
-      </span>
-      <% } %>
+      <div class="al-card-header-actions">
+        <% if (!server.allowStartupEdit) { %>
+        <span class="al-badge al-badge-offline">
+          <%- icon('circle-x', { class: 'size-3', strokeWidth: 2 }) %>
+          <%= t('editingDisabled') %>
+        </span>
+        <% } else { %>
+        <span class="al-badge al-badge-online">
+          <%- icon('circle-check', { class: 'size-3', strokeWidth: 2 }) %>
+          <%= t('editingEnabled') %>
+        </span>
+        <% } %>
+      </div>
     </div>
     <form id="startupCommandForm">
       <%- include('../../partials/csrf') %>
-      <div class="p-5">
-        <label for="startCommand" class="block text-[13px] font-medium mb-2" style="color:var(--theme-text-muted)"><%= t('startupCommand') || 'Startup Command' %></label>
-        <textarea id="startCommand" name="startCommand" rows="3"
-          class="al-input w-full <%= !server.allowStartupEdit ? 'opacity-50 cursor-not-allowed' : '' %>"
-          <%= !server.allowStartupEdit ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
-        <% if (!server.allowStartupEdit) { %>
-        <p class="mt-2 text-xs" style="color:var(--theme-danger)"><%= t('startupCommandDisabled') || 'Startup command editing is disabled for this server.' %></p>
-        <% } else { %>
-        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandHint') || 'Use $ALVKT(VARIABLE_NAME) to reference environment variables.' %></p>
-        <% } %>
+      <div class="al-card-body">
+        <%- include('../../partials/ui/form-field', {
+          type: 'textarea', name: 'startCommand', id: 'startCommand',
+          label: t('startupCommand'), value: server.StartCommand,
+          readonly: !server.allowStartupEdit,
+          helpText: server.allowStartupEdit ? t('startupCommandHint') : t('startupCommandDisabled'),
+          cls: server.allowStartupEdit ? '' : 'opacity-50 cursor-not-allowed'
+        }) %>
       </div>
-      <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-        <button type="submit" id="startupCommandSubmit" class="al-btn-primary rounded-xl px-6 py-2.5 text-sm font-semibold shadow-sm <%= !server.allowStartupEdit ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !server.allowStartupEdit ? 'disabled' : '' %>>
-          <span id="cmdSaveLabel"><%= t('saveCommand') || 'Save Command' %></span>
-          <span id="cmdSavingLabel" style="display:none">Saving...</span>
+      <div class="al-card-footer">
+        <button type="submit" id="startupCommandSubmit" class="al-btn-primary <%= !server.allowStartupEdit ? 'opacity-50 cursor-not-allowed' : '' %> min-h-11" <%= !server.allowStartupEdit ? 'disabled' : '' %>>
+          <span id="cmdSaveLabel"><%= t('saveCommand') %></span>
+          <span id="cmdSavingLabel" style="display:none"><%= t('saving') %></span>
         </button>
         <span id="cmdSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
       </div>
@@ -67,21 +72,22 @@
   </div>
 
   <!-- Docker Image -->
-  <div class="al-card overflow-hidden mt-4">
-    <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
-      <div>
-        <h3 class="text-[15px] font-semibold" style="color:var(--theme-text-strong)"><%= t('dockerImageLabel') || 'Docker Image' %></h3>
-        <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= t('dockerImageDesc') || 'Change the Docker image used by your server.' %></p>
+  <div class="al-form-card mb-4">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('dockerImageLabel') %></h2>
+        <p class="al-card-subtitle"><%= t('dockerImageDesc') %></p>
       </div>
-      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-info-bg);color:var(--theme-info);--tw-ring-color:color-mix(in srgb, var(--theme-info) 25%, transparent)">
-        <%- icon('info', { class: 'mr-1.5 h-3 w-3', strokeWidth: 2 }) %>
-        <%= t('requiresRestart') || 'Requires Restart' %>
-      </span>
+      <div class="al-card-header-actions">
+        <span class="al-badge al-badge-info">
+          <%- icon('info', { class: 'size-3', strokeWidth: 2 }) %>
+          <%= t('requiresRestart') %>
+        </span>
+      </div>
     </div>
     <form id="startupDockerForm">
       <%- include('../../partials/csrf') %>
-      <div class="p-5">
-        <label for="dockerImage" class="block text-[13px] font-medium mb-2" style="color:var(--theme-text-muted)"><%= t('dockerImageLabel') || 'Docker Image' %></label>
+      <div class="al-card-body">
         <%
           let currentDockerImage = '';
           try {
@@ -96,22 +102,24 @@
               arr.forEach(function(obj) { Object.keys(obj).forEach(function(k) { availableDockerImages.push(k); }); });
             }
           } catch (e) { availableDockerImages = []; }
+
+          const dockerOptions = availableDockerImages.map(function(image) {
+            return { value: image, label: image, selected: image === currentDockerImage };
+          });
         %>
-        <select id="dockerImage" name="dockerImage" class="al-input w-full">
-          <% if (availableDockerImages.length > 0) { %>
-            <% availableDockerImages.forEach(function(image) { %>
-              <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
-            <% }); %>
-          <% } else { %>
-            <option value="" disabled selected><%= t('noDockerImages') || 'No Docker images available' %></option>
-          <% } %>
-        </select>
-        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= t('dockerImageHint') || 'Changing the Docker image will restart your server if it\'s currently running.' %></p>
+        <%- include('../../partials/ui/form-field', {
+          type: 'select', name: 'dockerImage', id: 'dockerImage',
+          label: t('dockerImageLabel'), value: currentDockerImage,
+          placeholder: dockerOptions.length ? '' : t('noDockerImages'),
+          options: dockerOptions,
+          helpText: t('dockerImageHint'),
+          cls: 'min-h-11'
+        }) %>
       </div>
-      <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-        <button type="submit" id="dockerSubmit" class="al-btn-primary rounded-xl px-6 py-2.5 text-sm font-semibold shadow-sm">
-          <span id="dockerSaveLabel"><%= t('updateDockerImage') || 'Update Docker Image' %></span>
-          <span id="dockerSavingLabel" style="display:none">Updating...</span>
+      <div class="al-card-footer">
+        <button type="submit" id="dockerSubmit" class="al-btn-primary min-h-11">
+          <span id="dockerSaveLabel"><%= t('updateDockerImage') %></span>
+          <span id="dockerSavingLabel" style="display:none"><%= t('updating') %></span>
         </button>
         <span id="dockerSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
       </div>
@@ -119,42 +127,50 @@
   </div>
 
   <!-- Startup Variables -->
-  <div class="al-card p-5 mt-4">
-    <h3 class="text-[15px] font-semibold mb-4" style="color:var(--theme-text-strong)"><%= t('serverVariables') || 'Server Variables' %></h3>
-    <p class="text-[13px] mb-4" style="color:var(--theme-text-muted)"><%= t('serverVariablesDesc') || 'Configure environment variables for your server.' %></p>
+  <div class="al-form-card">
+    <div class="al-card-header">
+      <div class="min-w-0">
+        <h2 class="al-card-title"><%= t('serverVariables') %></h2>
+        <p class="al-card-subtitle"><%= t('serverVariablesDesc') %></p>
+      </div>
+    </div>
     <form id="startupVariablesForm">
       <%- include('../../partials/csrf') %>
-      <div id="variablesContainer" class="space-y-4">
-        <% if (serverVariables && serverVariables.length > 0) { %>
-          <% serverVariables.forEach(function(variable) { %>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-            <div>
-              <label class="block text-[13px] font-medium mb-1" style="color:var(--theme-text-muted)" for="var_<%= variable.env %>"><%= variable.name %></label>
-              <p class="text-xs" style="color:var(--theme-text-muted)">ENV: <%= variable.env %></p>
+      <div class="al-card-body">
+        <div id="variablesContainer" class="space-y-4">
+          <% if (serverVariables && serverVariables.length > 0) { %>
+            <% serverVariables.forEach(function(variable) { %>
+            <div class="al-panel">
+              <div class="al-panel-head">
+                <div>
+                  <label class="al-form-label mb-1" for="var_<%= variable.env %>"><%= variable.name %></label>
+                  <p class="text-xs al-text-muted"><%= t('environmentLabel') %>: <span class="font-mono"><%= variable.env %></span></p>
+                </div>
+                <div class="sm:w-2/3">
+                  <% if (variable.type === 'boolean') { %>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
+                      <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                      <span class="ms-3 text-sm font-medium al-text-muted" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? t('enabled') : t('disabled') %></span>
+                    </label>
+                  <% } else if (variable.type === 'number') { %>
+                    <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input min-h-11" aria-label="<%= variable.name %>">
+                  <% } else { %>
+                    <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input min-h-11" aria-label="<%= variable.name %>">
+                  <% } %>
+                </div>
+              </div>
             </div>
-            <div class="md:col-span-2">
-              <% if (variable.type === 'boolean') { %>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
-                  <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                  <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? (t('enabled') || 'Enabled') : (t('disabled') || 'Disabled') %></span>
-                </label>
-              <% } else if (variable.type === 'number') { %>
-                <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input w-full" aria-label="<%= variable.name %>">
-              <% } else { %>
-                <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input w-full" aria-label="<%= variable.name %>">
-              <% } %>
-            </div>
-          </div>
-          <% }); %>
-        <% } else { %>
-          <p style="color:var(--theme-text-muted)"><%= t('noVariables') || 'No variables available for this server.' %></p>
-        <% } %>
+            <% }); %>
+          <% } else { %>
+            <p class="al-text-muted"><%= t('noVariables') %></p>
+          <% } %>
+        </div>
       </div>
-      <div class="mt-6 flex items-center gap-3">
-        <button type="submit" id="variablesSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium">
-          <span id="varSaveLabel"><%= t('saveVariables') || 'Save Variables' %></span>
-          <span id="varSavingLabel" style="display:none">Saving...</span>
+      <div class="al-card-footer">
+        <button type="submit" id="variablesSubmit" class="al-btn-primary min-h-11">
+          <span id="varSaveLabel"><%= t('saveVariables') %></span>
+          <span id="varSavingLabel" style="display:none"><%= t('saving') %></span>
         </button>
         <span id="varSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
       </div>
@@ -167,10 +183,21 @@
   var serverId = '<%= server.UUID %>';
   var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
   var serverVariables = <%- JSON.stringify(typeof serverVariables !== 'undefined' ? serverVariables : []) %>;
+  var msg = <%- JSON.stringify({
+    savedPrefix: t('savedTimeAgo'),
+    saved: t('startupCommandSaved'),
+    saveFailed: t('failedToSaveCommand'),
+    dockerSaved: t('dockerImageUpdated'),
+    dockerFailed: t('failedToUpdateDocker'),
+    varsSaved: t('variablesSaved'),
+    varsFailed: t('failedToSaveVariables'),
+    enabled: t('enabled'),
+    disabled: t('disabled')
+  }) %>;
 
   function savedSpan(el) {
     var now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    el.textContent = 'Saved ' + now;
+    el.textContent = msg.savedPrefix + now;
     el.style.display = '';
     setTimeout(function() { el.style.display = 'none'; }, 3000);
   }
@@ -182,7 +209,6 @@
   var cmdSavingLabel = document.getElementById('cmdSavingLabel');
   var cmdSaved = document.getElementById('cmdSaved');
   var cmdSaving = false;
-  var cmdTimer = null;
 
   cmdForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -198,9 +224,9 @@
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ startCommand: document.getElementById('startCommand').value })
     }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.success !== false) { savedSpan(cmdSaved); showToast('Startup command saved.', 'success'); }
-      else showToast(d.error || 'Failed to save command.', 'error');
-    }).catch(function() { showToast('Failed to save command.', 'error'); })
+      if (d.success !== false) { savedSpan(cmdSaved); showToast(msg.saved, 'success'); }
+      else showToast(d.error || msg.saveFailed, 'error');
+    }).catch(function() { showToast(msg.saveFailed, 'error'); })
     .finally(function() {
       cmdSaving = false;
       cmdBtn.disabled = false;
@@ -231,9 +257,9 @@
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ dockerImage: image })
     }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.success !== false) { savedSpan(dockerSaved); showToast('Docker image updated.', 'success'); }
-      else showToast(d.error || 'Failed to update Docker image.', 'error');
-    }).catch(function() { showToast('Failed to update Docker image.', 'error'); })
+      if (d.success !== false) { savedSpan(dockerSaved); showToast(msg.dockerSaved, 'success'); }
+      else showToast(d.error || msg.dockerFailed, 'error');
+    }).catch(function() { showToast(msg.dockerFailed, 'error'); })
     .finally(function() {
       dockerSaving = false;
       dockerBtn.disabled = false;
@@ -279,9 +305,9 @@
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ variables: variables })
     }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.success !== false) { savedSpan(varSaved); showToast('Variables saved.', 'success'); }
-      else showToast(d.error || 'Failed to save variables.', 'error');
-    }).catch(function() { showToast('Failed to save variables.', 'error'); })
+      if (d.success !== false) { savedSpan(varSaved); showToast(msg.varsSaved, 'success'); }
+      else showToast(d.error || msg.varsFailed, 'error');
+    }).catch(function() { showToast(msg.varsFailed, 'error'); })
     .finally(function() {
       varSaving = false;
       varBtn.disabled = false;
@@ -294,7 +320,7 @@
   document.querySelectorAll('#variablesContainer input[type="checkbox"]').forEach(function(cb) {
     cb.addEventListener('change', function() {
       var label = document.getElementById('label_' + this.name.replace('var_', ''));
-      if (label) label.textContent = this.checked ? 'Enabled' : 'Disabled';
+      if (label) label.textContent = this.checked ? msg.enabled : msg.disabled;
     });
   });
 })();

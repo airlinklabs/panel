@@ -1,0 +1,201 @@
+/* Image store — catalogue table + drill-down panels for the admin image
+   manager. Markup lives in `views/admin/images/store-panel.ejs`, included
+   by `views/admin/images/{index,store}.ejs`. Was a `<style>` block in the
+   template; every colour is a theme token (no hex, no `html.dark`
+   overrides — tokens already switch with the theme). */
+@layer components {
+  .modal-sheet { display: flex; flex-direction: column; }
+
+  .modal-two-col {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .modal-left {
+    width: 250px;
+    min-width: 180px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--theme-border);
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal-right {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .modal-single-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .grp-img-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--theme-border);
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  .grp-img-row:hover {
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border-strong);
+  }
+
+  /* Rendered markdown from the image catalogue README. */
+  .md-body {
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--theme-text-muted);
+  }
+
+  .md-body h1,
+  .md-body h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-text-strong);
+    margin: 0 0 6px;
+  }
+
+  .md-body h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--theme-text-muted);
+    margin: 10px 0 3px;
+  }
+
+  .md-body p { margin: 0 0 8px; }
+
+  .md-body a {
+    color: var(--theme-accent-text);
+    text-decoration: none;
+  }
+
+  .md-body a:hover { text-decoration: underline; }
+
+  .md-body code {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 11px;
+    background: var(--theme-bg-secondary);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--theme-text-muted);
+  }
+
+  .md-body pre {
+    background: var(--theme-bg-secondary);
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    margin: 0 0 8px;
+  }
+
+  .md-body pre code { background: none; padding: 0; }
+
+  .md-body ul,
+  .md-body ol { padding-left: 16px; margin: 0 0 8px; }
+
+  .md-body li { margin-bottom: 2px; }
+
+  .md-body hr {
+    border: none;
+    border-top: 1px solid var(--theme-border);
+    margin: 10px 0;
+  }
+
+  .md-body strong { color: var(--theme-text-strong); }
+
+  /* Catalogue category chips (game / application / generic). */
+  .cat-game {
+    background: color-mix(in srgb, var(--theme-accent) 14%, transparent);
+    color: var(--theme-accent-text);
+  }
+
+  .cat-application {
+    background: color-mix(in srgb, var(--theme-info) 14%, transparent);
+    color: var(--theme-info);
+  }
+
+  .cat-generic {
+    background: color-mix(in srgb, var(--theme-success) 14%, transparent);
+    color: var(--theme-success);
+  }
+
+  /* Sortable catalogue header. */
+  .sortable-th {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.12s;
+  }
+
+  .sortable-th:hover { color: var(--theme-text-strong); }
+
+  .sortable-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: color 0.12s;
+  }
+
+  .sortable-btn:hover { color: var(--theme-text-strong); }
+
+  .group-hdr-tr td {
+    background: var(--theme-bg-secondary);
+    border-bottom: 1px solid var(--theme-border);
+  }
+
+  #listEl {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+  }
+
+  #listEl thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  #listEl thead th { background: var(--theme-table-header-bg, var(--theme-bg)); }
+
+  #listBody td:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .err-box {
+    background: var(--theme-danger-bg);
+    border: 1px solid var(--theme-danger-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+
+  .err-txt {
+    font-size: 11.5px;
+    color: var(--theme-danger);
+  }
+}

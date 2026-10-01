@@ -1,12 +1,12 @@
 <% if (typeof total !== 'undefined' && typeof pageSize !== 'undefined' && total > pageSize) { %>
-<div data-pagination class="flex items-center justify-between gap-3 px-4 py-3" data-total="<%= total %>" data-page-size="<%= pageSize %>">
+<div data-pagination class="flex flex-wrap items-center justify-between gap-3 px-4 py-3" data-total="<%= total %>" data-page-size="<%= pageSize %>" data-count-template="<%= t('paginationRange') %>" data-count-none="<%= t('paginationNone') %>">
   <p class="text-xs shrink-0" data-pagination-count style="color:var(--theme-text-muted)"></p>
-  <div class="flex items-center gap-1" role="navigation" aria-label="<%= t('pagination') %>">
-    <button type="button" data-page="prev" class="p-2 rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted)" aria-label="<%= t('previousPage') %>">
+  <div class="flex items-center gap-1 max-sm:mx-auto" role="navigation" aria-label="<%= t('pagination') %>">
+    <button type="button" data-page="prev" class="inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)] max-sm:min-h-11 max-sm:min-w-11" style="color:var(--theme-text-muted)" aria-label="<%= t('previousPage') %>">
       <%- icon('chevron-left', { class: 'w-4 h-4' }) %>
     </button>
     <span class="flex items-center gap-1" data-pagination-window></span>
-    <button type="button" data-page="next" class="p-2 rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted)" aria-label="<%= t('nextPage') %>">
+    <button type="button" data-page="next" class="inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[var(--theme-bg-hover)] max-sm:min-h-11 max-sm:min-w-11" style="color:var(--theme-text-muted)" aria-label="<%= t('nextPage') %>">
       <%- icon('chevron-right', { class: 'w-4 h-4' }) %>
     </button>
   </div>
@@ -36,6 +36,8 @@
     let filtered = rows;
     const countEl = root.querySelector('[data-pagination-count]');
     const windowEl = root.querySelector('[data-pagination-window]');
+    const countTpl = root.getAttribute('data-count-template') || '';
+    const countNone = root.getAttribute('data-count-none') || '';
 
     function setFilter(predicate) {
       filtered = predicate ? rows.filter(predicate) : rows;
@@ -59,11 +61,20 @@
         row.style.display = (idx >= start && idx < end) ? '' : 'none';
       });
 
-      if (countEl) countEl.textContent = total > 0 ? (start + 1) + '\u2013' + end + ' of ' + total : '0 of 0';
+      if (countEl) {
+        countEl.textContent = total > 0
+          ? countTpl
+            .replace(/\{\{start\}\}/g, String(start + 1))
+            .replace(/\{\{end\}\}/g, String(end))
+            .replace(/\{\{total\}\}/g, String(total))
+          : countNone;
+      }
 
       if (!windowEl) return;
       windowEl.innerHTML = '';
-      const MAX_BUTTONS = 5;
+      // Phone: fewer page buttons + a wrapping row so the bar never
+      // overflows a 390px viewport (count + prev/next + window).
+      const MAX_BUTTONS = (window.matchMedia && window.matchMedia('(max-width: 639px)').matches) ? 3 : 5;
       let lo = Math.max(1, page - 2);
       let hi = Math.min(pages, lo + MAX_BUTTONS - 1);
       lo = Math.max(1, hi - MAX_BUTTONS + 1);
@@ -73,7 +84,7 @@
         b.type = 'button';
         b.textContent = label;
         b.dataset.page = target;
-        b.className = 'min-w-[40px] h-10 px-1.5 rounded-lg text-xs font-medium transition-colors' +
+        b.className = 'h-10 min-w-10 px-1.5 rounded-lg text-xs font-medium transition-colors max-sm:min-h-11 max-sm:min-w-11' +
           (active ? '' : ' hover:bg-[var(--theme-bg-hover)]');
         b.style.color = active ? 'var(--theme-accent-text)' : 'var(--theme-text-muted)';
         if (active) b.style.background = 'var(--theme-accent)';

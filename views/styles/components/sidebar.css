@@ -30,6 +30,54 @@
     color: var(--theme-accent-text) !important;
   }
 
+  /* ── Sidebar link chrome ───────────────────────────────────────
+     Used by: views/partials/admin-sidebar.ejs, views/partials/user-sidebar.ejs.
+     Owns nav-link colour (was per-link inline style + a <style> block in the
+     partials — views ship no <style> and no hex), plus the JS-toggled states. */
+  html #pc-sidebar .nav-link {
+    color: var(--theme-nav-text);
+    transition: none;
+    /* Old-panel density (px-4 mx-4 gap-x-3 text-sm) leaves ~144px for the
+       label; at the active pill's bold weight a long label ("Back to
+       Dashboard") measures ~146px and wrapped. Labels stay on one line and
+       spill into the 16px padding instead. */
+    white-space: nowrap;
+  }
+  html #pc-sidebar .nav-link:hover {
+    color: var(--theme-nav-text-active);
+  }
+  /* Moved verbatim from the partial <style> blocks */
+  #sidebar-main-view .sidebar-view-item,
+  #sidebar-server-view .server-anim-in {
+    opacity: 1;
+  }
+
+  /* Account / credits rows: the partial script toggles .sidebar-active so the
+     pill paints from theme tokens — the old inline hex writes are gone.
+     Children carry their own inline colours, so they need !important here. */
+  html #pc-sidebar .sidebar-active {
+    background: var(--theme-accent, #171717) !important;
+    color: var(--theme-accent-text, #f0f0f0) !important;
+    border-radius: 0.75rem !important;
+  }
+  html #pc-sidebar .sidebar-active .sidebar-label,
+  html #pc-sidebar .sidebar-active .sidebar-account-name,
+  html #pc-sidebar .sidebar-active .sidebar-account-name span,
+  html #pc-sidebar .sidebar-active #sidebar-description {
+    color: var(--theme-accent-text, #f0f0f0) !important;
+  }
+  html #pc-sidebar .sidebar-active .logo-bg {
+    background: var(--theme-accent-text, #f0f0f0) !important;
+  }
+
+  /* Logout: muted at rest, danger on hover (old-panel treatment) */
+  html #pc-sidebar .sidebar-logout {
+    color: var(--theme-nav-text);
+  }
+  html #pc-sidebar .sidebar-logout:hover {
+    color: var(--theme-danger);
+  }
+
   /* Sidebar background and vertical divider (starts below the topbar so it
      doesn't show between sidebar and topbar — only between sidebar and content) */
   #pc-sidebar2 {

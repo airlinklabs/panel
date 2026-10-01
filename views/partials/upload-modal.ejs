@@ -1,5 +1,7 @@
 <!-- Reusable upload modal with drag-and-drop support. -->
-<div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+<div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none"
+  data-upload-file="<%= t('uploadFile') %>" data-accepted="<%= t('accepted') %>"
+  data-uploading="<%= t('uploading') %>" data-upload="<%= t('uploadBtn') %>">
   <div class="absolute inset-0" onclick="closeUploadModal()"></div>
   <div id="uploadModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full shadow-xl max-h-[85vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border);">
@@ -79,8 +81,8 @@
   window.clearUploadModalSelection = clearUploadModalSelection;
 
   function openUploadModal(opts) {
-    titleEl.textContent = opts.title || (window.__i18n && window.__i18n.uploadFile || "Upload file");
-    acceptHint.textContent = opts.accept ? (window.__i18n && window.__i18n.accepted || "Accepted: ") + opts.accept : '';
+    titleEl.textContent = opts.title || overlay.getAttribute('data-upload-file');
+    acceptHint.textContent = opts.accept ? overlay.getAttribute('data-accepted') + opts.accept : '';
     fileInput.accept = opts.accept || '';
     currentOnFile = opts.onFile || null;
     clearUploadModalSelection();
@@ -121,14 +123,14 @@
   confirmBtn.addEventListener('click', async function() {
     if (!currentFile || !currentOnFile) return;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = (window.__i18n && window.__i18n.uploading) || "Uploading...";
+    confirmBtn.textContent = overlay.getAttribute('data-uploading');
     try {
       await currentOnFile(currentFile);
       closeUploadModal();
     } catch (err) {
       console.error('Upload failed:', err);
       confirmBtn.disabled = false;
-      confirmBtn.textContent = (window.__i18n && window.__i18n.uploadBtn) || "Upload";
+      confirmBtn.textContent = overlay.getAttribute('data-upload');
     }
   });
 

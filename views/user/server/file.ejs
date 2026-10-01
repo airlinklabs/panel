@@ -39,12 +39,12 @@ const serverUUID = server.UUID;
     <p class="al-page-desc break-all"><%= t('editingFileIn', { path: filePath }) %></p>
   </div>
   <div>
-    <a class="al-btn-secondary al-btn-sm" href="/server/<%= serverUUID %>/files">
+    <a class="al-btn-secondary al-btn-sm min-h-11" href="/server/<%= serverUUID %>/files">
       <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
       <%= t('backToFiles') %>
     </a>
     <% if (file.type !== 'directory') { %>
-      <a class="al-btn-primary al-btn-sm" href="/server/<%= serverUUID %>/files/download<%= filePath.split('/').map(encodeURIComponent).join('/') %>">
+      <a class="al-btn-primary al-btn-sm min-h-11" href="/server/<%= serverUUID %>/files/download<%= filePath.split('/').map(encodeURIComponent).join('/') %>">
         <%- icon('download', { class: 'size-4', strokeWidth: 2 }) %>
         <%= t('download') %>
       </a>
@@ -67,8 +67,8 @@ const serverUUID = server.UUID;
 
     <div class="al-card">
       <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-        <h2 class="al-editor-path text-sm font-medium min-w-0" style="color:var(--theme-text-strong)">
-          <a class="hover:text-[var(--theme-text-strong)] transition" href="/server/<%= serverUUID %>/files" style="color:var(--theme-text-muted)">/home/container/</a>
+        <h2 class="al-editor-path text-sm font-medium min-w-0 al-text-strong">
+          <a class="hover:text-[var(--theme-text-strong)] transition al-text-muted" href="/server/<%= serverUUID %>/files">/home/container/</a>
           <%
             if (filePath) {
               const parts = filePath.split('/');
@@ -76,17 +76,17 @@ const serverUUID = server.UUID;
               parts.forEach(function(part, index) {
                 curBuild += part;
                 if (index < parts.length - 1) { %>
-                  <a href="/server/<%= serverUUID %>/files?path=<%= curBuild %>" class="hover:text-[var(--theme-text-strong)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span style="color:var(--theme-text-muted)">/</span>
+                  <a href="/server/<%= serverUUID %>/files?path=<%= curBuild %>" class="hover:text-[var(--theme-text-strong)] transition al-text-muted"><%= part %></a><span class="al-text-muted">/</span>
                 <% curBuild += '/';
                 } else { %>
-                  <span style="color:var(--theme-text-strong)"><%= part %></span>
+                  <span class="al-text-strong"><%= part %></span>
                 <% }
               });
             }
           %>
         </h2>
         <div class="flex shrink-0">
-          <button id="saveBtn" class="al-btn-primary al-btn-sm min-w-24" type="button">
+          <button id="saveBtn" class="al-btn-primary al-btn-sm min-w-24 min-h-11" type="button">
             <%- icon('save', { class: 'size-4', strokeWidth: 2 }) %>
             <%= t('saveBtn') %>
           </button>
@@ -96,7 +96,7 @@ const serverUUID = server.UUID;
         <div class="al-editor-shell" id="editor-container"></div>
         <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
           <div class="flex items-center gap-3 whitespace-nowrap">
-            <div id="editor-status"><%= t('editorLineColumn') %></div>
+            <div id="editor-status"><%= t('editorLineColumnInit') %></div>
             <div id="file-info" class="al-editor-stat"><%= t('loadingEllipsis') %></div>
           </div>
           <div class="flex flex-wrap items-center gap-3">

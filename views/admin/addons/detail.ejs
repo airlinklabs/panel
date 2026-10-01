@@ -1,37 +1,38 @@
-<%- include('../../layouts/admin', { title: addon.name || 'Addon' }) %>
+<%- include('../../layouts/admin', { title: addon.name || t('addonFallbackTitle') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<%- include('../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: t('addonsTitle'), href: '/admin/addons' },
-  { label: addon.name || 'Addon' }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('addonsTitle'), url: '/admin/addons' },
+    { label: addon.name || t('addonFallbackTitle') }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title"><%= addon.name || 'Addon' %></h1>
+    <h1 class="al-page-title"><%= addon.name || t('addonFallbackTitle') %></h1>
     <p class="al-page-desc"><%= addon.description || '' %></p>
-    <div class="flex items-center gap-3 mt-2">
+    <div class="flex flex-wrap items-center gap-3 mt-2">
       <% if (addon.version) { %><span class="text-xs" style="color:var(--theme-text-muted)">v<%= addon.version %></span><% } %>
-      <% if (addon.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= addon.author %></span><% } %>
+      <% if (addon.author) { %><span class="text-xs" style="color:var(--theme-text-muted)"><%= t('byAuthor', { author: addon.author }) %></span><% } %>
       <% if (addon.enabled) { %>
-      <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">Enabled</span>
+      <span class="al-badge al-badge-online"><%= t('enabled') %></span>
       <% } else { %>
-      <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);box-shadow:inset 0 0 0 1px var(--theme-border)">Disabled</span>
+      <span class="al-badge al-badge-neutral"><%= t('disabled') %></span>
       <% } %>
     </div>
   </div>
-  <div class="flex gap-2 shrink-0">
-    <a href="/admin/addons" class="al-btn-secondary inline-flex items-center gap-1.5">
-      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+  <div>
+    <a href="/admin/addons" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('back') %></span>
     </a>
-    <button type="button" id="addonToggleBtn" class="al-btn-secondary inline-flex items-center gap-1.5" data-slug="<%= addon.slug %>" data-enabled="<%= addon.enabled %>">
-      <%- icon(addon.enabled ? 'pause' : 'play', { class: 'size-4', strokeWidth: 1.5 }) %>
-      <%= addon.enabled ? 'Disable' : 'Enable' %>
+    <button type="button" id="addonToggleBtn" class="al-btn-secondary" data-slug="<%= addon.slug %>" data-enabled="<%= addon.enabled %>">
+      <%- icon(addon.enabled ? 'pause' : 'play', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= addon.enabled ? t('disable') : t('enable') %></span>
     </button>
-    <button type="button" id="addonUninstallBtn" class="al-btn-danger inline-flex items-center gap-1.5" data-slug="<%= addon.slug %>" data-name="<%= addon.name %>">
-      <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %> Uninstall
+    <button type="button" id="addonUninstallBtn" class="al-btn-danger" data-slug="<%= addon.slug %>" data-name="<%= addon.name %>">
+      <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('uninstall') %></span>
     </button>
   </div>
 </div>
@@ -41,24 +42,29 @@
   <% if (addon.settings && Object.keys(addon.settings).length > 0) { %>
   <!-- Settings -->
   <div class="al-card">
-    <h2 class="al-card-header">Settings</h2>
-    <div class="p-4 space-y-4">
+    <div class="al-card-header">
+      <p class="al-card-header-title"><%= t('settings') %></p>
+    </div>
+    <div class="al-card-body">
       <form id="addonSettingsForm" class="space-y-4">
         <% Object.entries(addon.settings).forEach(function([key, value]) { %>
-        <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= key %></label>
+        <div class="al-form-field max-w-md">
+          <label class="al-form-label"><%= key %></label>
           <% if (typeof value === 'boolean') { %>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" name="<%= key %>" class="sr-only peer" <%= value ? 'checked' : '' %>>
-            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+          <label class="al-setting-row">
+            <span class="al-setting-copy"><span class="al-setting-title"><%= key %></span></span>
+            <span class="al-setting-control">
+              <input type="checkbox" name="<%= key %>" class="sr-only peer" <%= value ? 'checked' : '' %>>
+              <span class="al-toggle-track"><span class="al-toggle-dot"></span></span>
+            </span>
           </label>
           <% } else { %>
-          <input type="text" name="<%= key %>" value="<%= value %>" class="al-input max-w-md">
+          <input type="text" name="<%= key %>" value="<%= value %>" class="al-form-input">
           <% } %>
         </div>
         <% }); %>
-        <button type="submit" class="al-btn-primary inline-flex items-center gap-1.5">
-          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Settings
+        <button type="submit" class="al-btn-primary">
+          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('saveSettings') %></span>
         </button>
       </form>
     </div>
@@ -68,17 +74,19 @@
   <% if (addon.capabilities && addon.capabilities.length > 0) { %>
   <!-- Capabilities -->
   <div class="al-card">
-    <h2 class="al-card-header">Capabilities</h2>
-    <div class="p-4 space-y-3">
+    <div class="al-card-header">
+      <p class="al-card-header-title"><%= t('capabilities') %></p>
+    </div>
+    <div class="al-card-body">
       <% addon.capabilities.forEach(function(cap) { %>
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= cap.name || cap %></p>
-          <% if (cap.description) { %><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= cap.description %></p><% } %>
+      <div class="al-setting-row">
+        <div class="al-setting-copy">
+          <p class="al-setting-title"><%= cap.name || cap %></p>
+          <% if (cap.description) { %><p class="al-setting-desc"><%= cap.description %></p><% } %>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer capability-toggle" data-slug="<%= addon.slug %>" data-capability="<%= cap.name || cap %>" <%= cap.enabled ? 'checked' : '' %>>
-          <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+        <label class="al-setting-control">
+          <input type="checkbox" class="sr-only peer capability-toggle" data-slug="<%= addon.slug %>" data-capability="<%= cap.name || cap %>" aria-label="<%= cap.name || cap %>" <%= cap.enabled ? 'checked' : '' %>>
+          <span class="al-toggle-track"><span class="al-toggle-dot"></span></span>
         </label>
       </div>
       <% }); %>
@@ -89,12 +97,14 @@
   <% if (addon.commands && addon.commands.length > 0) { %>
   <!-- Commands -->
   <div class="al-card">
-    <h2 class="al-card-header">Commands</h2>
-    <div class="p-4">
+    <div class="al-card-header">
+      <p class="al-card-header-title"><%= t('commands') %></p>
+    </div>
+    <div class="al-card-body">
       <div class="flex flex-wrap gap-2">
         <% addon.commands.forEach(function(cmd) { %>
         <button type="button" class="al-btn-secondary addon-command-btn" data-slug="<%= addon.slug %>" data-command="<%= cmd.name || cmd %>">
-          <%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= cmd.name || cmd %>
+          <%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %><span><%= cmd.name || cmd %></span>
         </button>
         <% }); %>
       </div>
@@ -107,6 +117,21 @@
 <script nonce="<%- nonce %>">
 (function() {
   var csrfToken = '<%= csrfToken %>';
+  var msgApplying = <%- JSON.stringify(t('applyingChanges')) %>;
+  var msgUpdated = <%- JSON.stringify(t('addonUpdated')) %>;
+  var msgRemoving = <%- JSON.stringify(t('removingFiles')) %>;
+  var msgUninstalled = <%- JSON.stringify(t('addonUninstalled')) %>;
+  var msgWentWrong = <%- JSON.stringify(t('somethingWentWrong')) %>;
+  var msgActionFailed = <%- JSON.stringify(t('addonActionFailed')) %>;
+  var msgSaved = <%- JSON.stringify(t('settingsSaved')) %>;
+  var msgSaveFailed = <%- JSON.stringify(t('failedToSave')) %>;
+  var msgCapability = <%- JSON.stringify(t('capabilityUpdated')) %>;
+  var msgUninstallTitle = <%- JSON.stringify(t('uninstallAddonTitle')) %>;
+  var msgUninstallBody = <%- JSON.stringify(t('uninstallAddonBody')) %>;
+  var msgUninstallAction = <%- JSON.stringify(t('uninstall')) %>;
+  var msgRunning = <%- JSON.stringify(t('runningCommand')) %>;
+  var msgCommandDone = <%- JSON.stringify(t('commandCompleted')) %>;
+  var msgCommandFailed = <%- JSON.stringify(t('commandFailed')) %>;
 
   // Toggle
   var toggleBtn = document.getElementById('addonToggleBtn');
@@ -114,14 +139,14 @@
     toggleBtn.addEventListener('click', function() {
       var slug = this.dataset.slug;
       var enabled = this.dataset.enabled === 'true';
-      showProgressToast('Applying changes...');
+      showProgressToast(msgApplying);
       fetch('/admin/addons/toggle/' + slug, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify({ enabled: (!enabled).toString() }),
       }).then(function(r) { return r.json(); }).then(function(data) {
-        if (data.success) { showToast('Addon updated', 'success'); window.location.reload(); }
-        else showToast(data.message || 'Failed', 'error');
-      }).catch(function() { showToast('Something went wrong.', 'error'); });
+        if (data.success) { showToast(msgUpdated, 'success'); window.location.reload(); }
+        else showToast(data.message || msgActionFailed, 'error');
+      }).catch(function() { showToast(msgWentWrong, 'error'); });
     });
   }
 
@@ -133,16 +158,16 @@
       var name = this.dataset.name;
       window.modal && window.modal.confirm
         ? window.modal.confirm({
-            title: 'Uninstall Addon',
-            body: 'Uninstall "' + name + '"? This cannot be undone.',
-            danger: true, confirmLabel: 'Uninstall',
+            title: msgUninstallTitle,
+            body: msgUninstallBody.replace('{{name}}', name),
+            danger: true, confirmLabel: msgUninstallAction,
             onConfirm: function() {
-              showProgressToast('Removing files...');
+              showProgressToast(msgRemoving);
               fetch('/admin/addons/uninstall/' + slug, { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } })
                 .then(function(r) { return r.json(); }).then(function(data) {
-                  if (data.success) { showToast('Uninstalled', 'success'); window.location.href = '/admin/addons'; }
-                  else showToast(data.message || 'Failed', 'error');
-                }).catch(function() { showToast('Something went wrong.', 'error'); });
+                  if (data.success) { showToast(msgUninstalled, 'success'); window.location.href = '/admin/addons'; }
+                  else showToast(data.message || msgActionFailed, 'error');
+                }).catch(function() { showToast(msgWentWrong, 'error'); });
             }
           })
         : null;
@@ -165,9 +190,9 @@
         method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify(data),
       }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) { showToast('Settings saved.', 'success'); }
-        else { showToast(res.message || 'Failed to save.', 'error'); }
-      }).catch(function() { showToast('Failed to save.', 'error'); });
+        if (res.success) { showToast(msgSaved, 'success'); }
+        else { showToast(res.message || msgSaveFailed, 'error'); }
+      }).catch(function() { showToast(msgSaveFailed, 'error'); });
     });
   }
 
@@ -180,9 +205,9 @@
         method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify({ capability: capability, enabled: this.checked }),
       }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) { showToast('Capability updated.', 'success'); }
-        else { showToast(res.message || 'Failed.', 'error'); }
-      }).catch(function() { showToast('Failed.', 'error'); });
+        if (res.success) { showToast(msgCapability, 'success'); }
+        else { showToast(res.message || msgActionFailed, 'error'); }
+      }).catch(function() { showToast(msgActionFailed, 'error'); });
     });
   });
 
@@ -191,13 +216,13 @@
     btn.addEventListener('click', function() {
       var slug = this.dataset.slug;
       var command = this.dataset.command;
-      showProgressToast('Running ' + command + '...');
+      showProgressToast(msgRunning.replace('{{command}}', command));
       fetch('/admin/addons/command/' + slug + '/' + command, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
       }).then(function(r) { return r.json(); }).then(function(data) {
-        if (data.success) { showToast(command + ' completed.', 'success'); }
-        else { showToast(data.message || command + ' failed.', 'error'); }
-      }).catch(function() { showToast(command + ' failed.', 'error'); });
+        if (data.success) { showToast(msgCommandDone.replace('{{command}}', command), 'success'); }
+        else { showToast(data.message || msgCommandFailed.replace('{{command}}', command), 'error'); }
+      }).catch(function() { showToast(msgCommandFailed.replace('{{command}}', command), 'error'); });
     });
   });
 })();

@@ -2,13 +2,15 @@
 
 <%- include('../../partials/flash-messages') %>
 
-<%- include('../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: t('addonsTitle'), href: '/admin/addons' },
-  { label: 'Store' }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('addonsTitle'), url: '/admin/addons' },
+    { label: t('storeTab') }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4">
+<div class="al-page-header">
   <div>
     <h1 class="al-page-title"><%= t('addonStoreTitle') %></h1>
     <p class="al-page-desc"><%= t('addonStoreDesc') %></p>
@@ -16,20 +18,18 @@
 </div>
 
 <div class="al-page-body">
-  <div class="flex">
-    <a href="/admin/addons" class="px-3 py-2 mr-4 text-sm font-medium" style="color:var(--theme-text-muted)">Installed <% if (typeof addons !== 'undefined') { %><span class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= addons.length %></span><% } %></a>
-    <span class="px-3 py-2 text-sm font-medium rounded-lg" style="background:var(--theme-primary);color:var(--theme-accent-text)">Store</span>
-  </div>
+  <nav class="al-segmented mb-5" role="group" aria-label="<%= t('addonsViews') %>">
+    <a href="/admin/addons" class="al-segmented-btn"><%= t('installedTab') %><span class="ml-1 text-xs al-text-muted"><%= typeof addons !== 'undefined' && addons ? addons.length : 0 %></span></a>
+    <a href="/admin/addons/store" class="al-segmented-btn" aria-current="page"><%= t('storeTab') %></a>
+  </nav>
 
-  <div id="storeContent" class="mt-5">
-    <div class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border);">
-        <%- icon('package', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
-      </div>
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Addon Store</h3>
-      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted)">Browse and install addons from the marketplace.</p>
-      <a href="/admin/addons" class="mt-5 al-btn-secondary">Back to Addons</a>
-    </div>
+  <div id="storeContent">
+    <%- include('../../partials/empty-state', {
+      iconName: 'package',
+      title: t('addonStoreTitle'),
+      description: t('addonStoreEmptyDesc'),
+      action: '<a href="/admin/addons" class="al-btn-secondary">' + t('backToAddons') + '</a>'
+    }) %>
   </div>
 </div>
 

@@ -1,21 +1,14 @@
-<!-- Mount list fragment — replaces the card body on create/delete -->
-<div id="admin-mounts-list" class="al-card">
-  <h2 class="al-card-header"><%= t('allMounts') %></h2>
+<!-- Mount list fragment — replaces the mounts table on create/delete -->
+<div id="admin-mounts-list">
   <% if (mounts.length === 0) { %>
-    <div class="flex flex-col items-center justify-center py-20 text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-        <%- icon('folder', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
-      </div>
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noMountsYet') %></h3>
-      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);"><%= t('noMountsYetDesc') %></p>
-      <div class="mt-5">
-        <a href="/api/v2/admin/mounts/new" class="al-btn-primary">
-          <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('newMount') %></span>
-        </a>
-      </div>
-    </div>
+    <%- include('../../../partials/empty-state', {
+      iconName: 'folder',
+      title: t('noMountsYet'),
+      description: t('noMountsYetDesc'),
+      action: '<a href="/admin/mounts/new" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }).toString() + ' ' + t('newMount') + '</a>'
+    }) %>
   <% } else { %>
-    <div class="-mx-4 overflow-x-auto">
+    <div class="al-card al-card-flush">
       <table class="al-table">
         <colgroup>
           <col style="min-width:160px">
@@ -24,43 +17,42 @@
           <col style="min-width:110px">
           <col style="min-width:110px">
         </colgroup>
-        <thead class="al-table-head">
+        <thead class="al-table-thead">
           <tr>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountSourceLabel') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountTargetLabel') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountReadOnlyLabel') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
+            <th scope="col" class="al-table-th"><%= t('mountName') %></th>
+            <th scope="col" class="al-table-th"><%= t('mountSource') %></th>
+            <th scope="col" class="al-table-th"><%= t('mountTarget') %></th>
+            <th scope="col" class="al-table-th"><%= t('mountMode') %></th>
+            <th scope="col" class="al-table-th"><%= t('mountActions') %></th>
           </tr>
         </thead>
         <tbody>
-          <% mounts.forEach(m => { %>
+          <% mounts.forEach(function(m) { %>
           <tr class="al-table-tr" data-mount-id="<%= m.id %>">
-            <td class="al-table-td sm:pl-6">
-              <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
+            <td class="al-table-td">
+              <span class="al-table-cell-strong"><%= m.name %></span>
             </td>
             <td class="al-table-td">
-              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
+              <code class="al-chip al-chip-mono max-w-full truncate" title="<%= m.source %>"><%= m.source %></code>
             </td>
             <td class="al-table-td">
-              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
+              <code class="al-chip al-chip-mono max-w-full truncate" title="<%= m.target %>"><%= m.target %></code>
             </td>
             <td class="al-table-td">
-              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" <%= m.readOnly ? 'style="background:var(--theme-warning-bg);color:var(--theme-warning)"' : 'style="background:var(--theme-success-bg);color:var(--theme-success)"' %>>
-                <%= m.readOnly ? t('mountReadOnlyLabel') : t('mountReadWriteLabel') %>
+              <span class="<%= m.readOnly ? 'al-badge al-badge-warning' : 'al-badge al-badge-online' %>">
+                <%= m.readOnly ? t('mountReadOnlyMode') : t('mountReadWrite') %>
               </span>
             </td>
             <td class="al-table-td">
-              <div class="flex gap-3">
-                <button
-                  onclick="if(confirm('<%= (req.translations && req.translations.deleteMountConfirmList) || 'Delete this mount? Servers using it will no longer be able to attach it.' %>')) { fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('<%= (req.translations && req.translations.mountDeleted) || 'Mount deleted.', %>', 'success'); window.location.reload(); } else { showToast('<%= (req.translations && req.translations.failedToDeleteMount) || 'Failed to delete.', %>', 'error'); } }).catch(() => { showToast('<%= (req.translations && req.translations.networkError) || 'Network error.', %>', 'error'); }); }"
-                  type="button"
-                  class="al-btn-ghost"
-                  style="color:var(--theme-danger);"
-                  aria-label="<%= t('ariaDeleteMount') %>">
-                  <%- icon('trash-2', { size: 16 }) %>
-                </button>
-              </div>
+              <% var deleteConfirm = t('mountDeleteConfirm').replace('{{name}}', m.name); %>
+              <button
+                type="button"
+                class="al-btn-ghost al-btn-icon-only"
+                style="color:var(--theme-danger);"
+                aria-label="<%= t('mountDeleteAria') %>"
+                onclick="if(confirm(<%= JSON.stringify(deleteConfirm) %>)) { fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(function(r) { if (r.ok) { showToast(<%= JSON.stringify(t('mountDeleted')) %>, 'success'); window.location.reload(); } else { showToast(<%= JSON.stringify(t('mountDeleteFailed')) %>, 'error'); } }).catch(function() { showToast(<%= JSON.stringify(t('networkError')) %>, 'error'); }); }">
+                <%- icon('trash-2', { size: 16 }) %>
+              </button>
             </td>
           </tr>
           <% }) %>

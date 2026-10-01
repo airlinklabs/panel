@@ -1,18 +1,18 @@
 <!-- Mount create form -->
 <div id="mountCreateForm" style="display:none">
   <form id="mountCreateFormEl" class="flex flex-col">
-    <div id="mountCreateError" class="rounded-xl px-4 py-3 mb-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger);display:none"></div>
+    <div id="mountCreateError" class="al-alert-danger mb-3" style="display:none"></div>
     <div class="space-y-4">
       <div>
-        <label for="mountName" class="al-label"><%= t('name') %></label>
-        <input id="mountName" name="name" class="al-input w-full" placeholder="Shared plugins" required>
+        <label for="mountName" class="al-form-label"><%= t('name') %></label>
+        <input id="mountName" name="name" class="al-input w-full" placeholder="<%= t('mountNamePlaceholder') %>" required>
       </div>
       <div>
-        <label for="mountSource" class="al-label"><%= t('mountSourceLabel') %></label>
+        <label for="mountSource" class="al-form-label"><%= t('mountSourceLabel') %></label>
         <input id="mountSource" name="source" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins" required>
       </div>
       <div>
-        <label for="mountTarget" class="al-label"><%= t('mountTargetLabel') %></label>
+        <label for="mountTarget" class="al-form-label"><%= t('mountTargetLabel') %></label>
         <input id="mountTarget" name="target" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins" required>
       </div>
       <label class="flex items-center gap-2.5 text-sm cursor-pointer select-none" style="color:var(--theme-text-strong)">
@@ -21,11 +21,11 @@
       </label>
     </div>
     <div class="flex gap-2 pt-4">
-      <button type="button" onclick="window.modal.close()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+      <button type="button" onclick="window.modal.close()" class="al-btn-secondary flex-1">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="submit" id="mountCreateSubmit" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+      <button type="submit" id="mountCreateSubmit" class="al-btn-primary flex-1">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
         <span id="mountCreateSubmitText"><%= t('mountCreateBtn') %></span>
       </button>
@@ -48,36 +48,36 @@
     var source = form.elements.source.value.trim();
     var target = form.elements.target.value.trim();
     if (!name || !source || !target) {
-      errEl.textContent = 'All fields are required.';
+      errEl.textContent = <%- JSON.stringify(t('errorAllFieldsRequired')) %>;
       errEl.style.display = '';
       return;
     }
     errEl.style.display = 'none';
     saving = true;
     submitBtn.disabled = true;
-    submitText.textContent = '<%= t("mountCreating") %>';
+    submitText.textContent = <%- JSON.stringify(t('mountCreating')) %>;
     fetch('/api/v2/admin/mounts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
       body: JSON.stringify({ name: name, source: source, target: target, readOnly: form.elements.readOnly.checked }),
     }).then(function(res) {
       if (res.ok) {
-        showToast('Mount created.', 'success');
+        showToast(<%- JSON.stringify(t('mountCreated')) %>, 'success');
         window.modal.close();
         setTimeout(function() { window.location.reload(); }, 300);
       } else {
-        return res.json().catch(function() { return { error: 'Failed to create mount.' }; }).then(function(data) {
-          errEl.textContent = data.error || data.message || 'Failed to create mount.';
+        return res.json().catch(function() { return { error: <%- JSON.stringify(t('mountCreateFailed')) %> }; }).then(function(data) {
+          errEl.textContent = data.error || data.message || <%- JSON.stringify(t('mountCreateFailed')) %>;
           errEl.style.display = '';
         });
       }
     }).catch(function() {
-      errEl.textContent = 'Network error. Try again.';
+      errEl.textContent = <%- JSON.stringify(t('networkError')) %>;
       errEl.style.display = '';
     }).finally(function() {
       saving = false;
       submitBtn.disabled = false;
-      submitText.textContent = '<%= t("mountCreateBtn") %>';
+      submitText.textContent = <%- JSON.stringify(t('mountCreateBtn')) %>;
     });
   });
 
@@ -87,7 +87,7 @@
     errEl.style.display = 'none';
     saving = false;
     submitBtn.disabled = false;
-    submitText.textContent = '<%= t("mountCreateBtn") %>';
+    submitText.textContent = <%- JSON.stringify(t('mountCreateBtn')) %>;
   });
 })();
 </script>

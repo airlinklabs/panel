@@ -95,8 +95,10 @@
         <% let srvIdx = 0; servers.forEach(function(server) { %>
         <tr style="--i:<%= srvIdx++ %>" class="al-table-tr cursor-pointer server-row" data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
           <td class="al-table-td w-10">
-            <input type="checkbox" class="server-checkbox al-form-checkbox cursor-pointer"
-              value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>" data-name="<%= server.name %>">
+            <label class="al-form-check-label">
+              <input type="checkbox" class="server-checkbox al-form-checkbox cursor-pointer"
+                value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>" data-name="<%= server.name %>">
+            </label>
           </td>
           <td class="al-table-td">
             <div class="flex items-center gap-2">
@@ -177,7 +179,7 @@
 
       document.querySelectorAll('.server-row').forEach((row) => {
         row.addEventListener('click', (e) => {
-          if (['A', 'BUTTON', 'INPUT'].includes(e.target.tagName) || e.target.closest('a, button')) return;
+          if (['A', 'BUTTON', 'INPUT', 'LABEL'].includes(e.target.tagName) || e.target.closest('a, button, label')) return;
           var cb = row.querySelector('.server-checkbox');
           cb.checked = !cb.checked;
           if (window.animateCheckbox) window.animateCheckbox(cb);

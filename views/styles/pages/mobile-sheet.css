@@ -1,0 +1,60 @@
+/* Mobile "more" sheet — the slide-up panel behind #mobile-more-btn.
+   Used by: views/partials/bottom-nav.ejs
+
+   ⚠ UNLAYERED ON PURPOSE — do NOT wrap this in `@layer components`.
+   The element ships `opacity-0 pointer-events-none` as Tailwind utilities,
+   and `utilities` is the HIGHEST cascade layer, while this sheet's
+   `.open` / `.closing` states set `opacity` and `pointer-events` by hand.
+   Inside a layer those utilities would outrank it no matter how specific
+   the `#mobile-more-sheet.open` selector is, and the sheet could never
+   open. Unlayered rules beat every layer, so the states win — exactly as
+   they did when this CSS lived in an inline <style> block in the partial.
+   Same reasoning as pages/motion.css.
+   ──────────────────────────────────────────────────────────────────── */
+
+#mobile-more-sheet {
+  translate: none;
+  transform: translateY(16px);
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+#mobile-more-sheet.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+#mobile-more-sheet.closing {
+  transform: translateY(16px);
+  opacity: 0;
+  transition: transform 180ms cubic-bezier(0.4, 0, 1, 1), opacity 180ms cubic-bezier(0.4, 0, 1, 1);
+}
+.sheet-pill {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--theme-text-muted);
+  opacity: 0.35;
+  margin: 0 auto;
+}
+.sheet-pill:active,
+#mobile-more-sheet.dragging .sheet-pill {
+  opacity: 0.55;
+  transform: scaleX(1.25);
+}
+.sheet-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  max-height: calc(100vh - 130px);
+}
+.sheet-scroll::-webkit-scrollbar {
+  display: none;
+}
+#mobile-more-sheet .sheet-item {
+  transition: background-color 150ms, color 150ms;
+}
+#mobile-more-sheet .sheet-item.sheet-active {
+  background: var(--theme-accent);
+  color: var(--theme-text-on-accent, #fff);
+}

@@ -291,6 +291,19 @@ Old anatomy: `rounded-xl` box, icon, `<h3>` title, `<p>` body. Match that.
 `.al-theme-switch` (`role="switch"`, `aria-checked`) ·
 `.al-theme-switch-track` · `.al-theme-switch-thumb`
 
+**Search overlay** (added with the colour-token pass — `search.js` emits these
+names and must never emit colour utilities again):
+`.al-search-group` (section label, `--theme-text-muted`) ·
+`.al-search-result` (row, `--theme-text`) ·
+`.al-search-result[aria-selected="true"]` (keyboard-active row —
+`--theme-accent-subtle` bg + `--theme-text-strong`, owned by CSS, not JS) ·
+`.al-search-result:hover` (`--theme-bg-hover`) · `.al-search-icon` ·
+`.al-search-sub` (`--theme-text-faint`) · `.al-search-remove` ·
+`.al-search-empty-title` / `.al-search-empty-hint` · `.al-search-mark`
+(inline highlight — `color-mix(in srgb, var(--theme-primary) 30%, transparent)`).
+The hook class used to be `search-result`; it is `.al-search-result` at all
+three `querySelectorAll` sites now — keep them in sync if you rename again.
+
 #### Auth — `views/styles/pages/auth.css`
 `.al-auth` (split shell) · `.al-auth-form` · `.al-auth-visual` ·
 `.al-auth-logo` · `.al-auth-title` · `.al-auth-subtitle` ·
@@ -301,9 +314,16 @@ Old anatomy: `rounded-xl` box, icon, `<h3>` title, `<p>` body. Match that.
 `.al-breadcrumb` · `.al-state-panel` / `.al-state-icon` / `.al-skeleton` ·
 `.al-sheet-*` (bottom sheet / overlay) · `.al-modal-overlay` / `.al-dialog*` ·
 `.al-toggle-track` / `.al-toggle-dot` · `.al-radio-*` · `.al-action-*` (loading /
-success / error button states) · `.al-tabs`-family `.tab-btn` ·
-`.al-pagination` · `.al-surface` / `.al-surface-raised` ·
+success / error button states) · tabs: **no `.al-tabs` class exists** — the root
+is the `data-al-tabs` *attribute* (bound by `al-tabs.js`) and the styled part is
+its `.tab-btn` children (`components/tab.css`) ·
+`.al-surface` / `.al-surface-raised` ·
 `.al-text-muted` / `.al-text-strong`
+
+> **No `.al-pagination` class exists** (an older draft of this list claimed one).
+> `partials/pagination.ejs` is Tailwind utilities + `data-pagination`; its count
+> line is driven by `data-count-template`/`-none`. Do not invent the class — if
+> pagination styling ever needs a home, that is a new file via `import.mjs`.
 
 #### Added by Batch 0 & Batch 4 — **reuse these before inventing anything**
 Every file below is already registered in `main.css` and wrapped in
@@ -326,6 +346,27 @@ Every file below is already registered in `main.css` and wrapped in
 
 If you need one of these and it does not exist, it has not landed yet — grep
 first, and only then create your own with a *new* name.
+
+#### Added by Batch 2 (server console & files) — **reuse these on server views**
+
+| File | Classes | What it is |
+|---|---|---|
+| `components/console-panel.css` | `.al-console-bar` · `.al-console-screen` · `.al-console-inputbar` · `.al-console-input` · `.al-console-prompt` · `.al-console-chip` · `.al-console-actions` · `.al-console-label` · `.al-console-status` · `.al-console-notice` · `.al-console-readonly` | The terminal shell: bar → screen → input strip. All geometry lives here; the view only picks the ids the terminal island binds to. `.al-stat-grid canvas { height: 1.5rem }` keeps Chart.js doughnuts from stretching the stat cards. Used by `manage.ejs`, `console.ejs`. |
+| `components/file-manager.css` | `.al-file-panel` · `.al-file-pathbar` / `-path` / `-sep` / `-current` · `.al-file-search` / `-input` / `-clear` · `.al-file-row` · `.al-file-icon` · `.al-file-link` · `.al-file-actions` · `.al-editor-shell` / `-toolbar` / `-frame` / `-status` / `-stat` / `-path` | File manager: path strip → filter row → file table → selection action bar, plus the editor frame around Monaco. `.al-file-actions` is a fixed bar above the 52px mobile bottom nav. Used by `files.ejs`, `files-rows.ejs`, `file.ejs`, `file-detail.ejs`. |
+
+#### Added by Batch 6 (admin system) — **reuse these on admin views**
+
+| File | Classes | What it is |
+|---|---|---|
+| `components/segmented.css` | `.al-segmented-btn[aria-current="page"]` | The pressed surface for a **link** segment. `components/button.css` keys `.al-segmented` off `aria-pressed`, which is only valid on `<button>`; a segment that navigates to another route carries `aria-current="page"` instead and gets the identical pressed style from here. Used by `views/admin/addons/index.ejs`, `views/admin/addons/store.ejs`. |
+
+#### Added by Batch 8 (errors + shared partials) & the sidebar extraction — **reuse these**
+
+| File | Classes | What it is |
+|---|---|---|
+| `components/error-state.css` | `.al-error-state` · `.al-error-code` · `.al-error-title` · `.al-error-body` · `.al-error-actions` | The centred status hero: `.al-icon-tile -lg -round -danger` → `.al-error-code` (the big `404`) → `h1` → body → action row. Used by `views/errors/{403,404,500,generic}.ejs`; actions are `partials/ui/button.ejs` output. Reuse for any full-page status screen. |
+| `components/sidebar.css` *(extended)* | `#pc-sidebar .nav-link` (+`:hover`) · `#pc-sidebar .sidebar-active` (+` #sidebar-description` / ` .logo-bg`) · `#pc-sidebar .sidebar-logout` (+`:hover`) · `.sidebar-label` · `.sidebar-account-name` · `.sidebar-view-item` · `#sidebar-server-view .server-anim-in` | Batch 8b pulled these out of the two sidebar partials' `<style>` blocks (the last sanctioned ones). Scoped to the `#pc-sidebar` / `#sidebar-server-view` ids, so they beat utilities deliberately. **Never re-add a `<style>` block to a sidebar** — put new sidebar rules here. |
+| `pages/mobile-sheet.css` *(unlayered by design)* | `.sheet-pill` · `.sheet-scroll` | The bottom nav's horizontal pill strip and its scroll container. This file — like `pages/motion.css` — sits **outside `@layer components`** on purpose: utilities would otherwise win over its state rules. Do not wrap it, do not "fix" it. Used by `partials/bottom-nav.ejs`. |
 
 ### 3.5 Which partial when
 
@@ -617,8 +658,18 @@ Everything lives in `.agents/ui-shots/` (gitignored). Full recipes in
 ```sh
 sh .agents/ui-shots/restart.sh
 ```
-**Required after every `.ejs` edit and every `storage/lang/en/lang.json` edit** —
-`app.set('view cache', true)` is unconditional and nodemon only watches `src/`.
+**Required after every `.ejs` edit, every `storage/lang/en/lang.json` edit —
+and after every `npx vite build`.** Two independent reasons:
+- `app.set('view cache', true)` is unconditional and nodemon only watches `src/`.
+- **The Vite manifest is read once at startup**
+  (`src/handlers/templateConfig.ts:51`), so `assetUrl()` keeps resolving the
+  *previous* `panel-*.css` hash after a rebuild. Vite never deletes old hashed
+  bundles (`public/assets/css/` accumulates them), so the page silently loads
+  the **stale stylesheet with no 404 to warn you**. Symptom: your CSS edit
+  "doesn't take" in the browser/probe even though the rule is in the file —
+  `curl -s localhost:3000/login | grep -o 'assets/css/panel-[^"]*'` and compare
+  against `ls public/assets/css/`.
+
 Logs: `/tmp/opencode/panel-dev.log`. Port 3000.
 
 ### 7.2 Capture
@@ -629,14 +680,42 @@ MOBILE=1 VW=390 VH=844 THEME=light node .agents/ui-shots/capture.mjs <out> /
 ```
 Env: `EMAIL` `PASSWORD` `VW` `VH` `THEME` `MOBILE` `FULL` `WAIT` `BASE` `LOGIN=0`.
 
+Recipes:
+```sh
+# route list held in a file: zsh does NOT word-split unquoted vars (unlike sh) —
+# use ${=R} or capture.mjs receives ONE path and dies ENAMETOOLONG on the filename
+R=$(tr '\n' ' ' < routes.txt)
+THEME=light VW=1440 VH=900 node .agents/ui-shots/capture.mjs /tmp/ui/light-all ${=R}
+
+# offline: render -> serve (:3999) -> capture; the path must start with /render
+node .agents/ui-shots/render.mjs user/server/files /tmp/x.html
+node .agents/ui-shots/serve.mjs /tmp/x.html &
+BASE=http://localhost:3999 LOGIN=0 THEME=light node .agents/ui-shots/capture.mjs /tmp/ui/off /render/server-files
+```
+
 ### 7.3 Diagnostics
 ```sh
 node .agents/ui-shots/routes.mjs   /a /b /c      # status + title + h1
 node .agents/ui-shots/diag.mjs     <url>         # overflow offenders
 node .agents/ui-shots/diag2.mjs    <url>         # computed styles
+node .agents/ui-shots/probe.mjs    /path         # status/title/h1/body, THEME-aware
 node .agents/ui-shots/render.mjs   views/path /tmp/x.html   # offline render
 node .agents/ui-shots/serve.mjs    /tmp/x.html               # :3999
+node .agents/ui-shots/touch.mjs    /a /b /c      # 44px floor + overflow, @390
+node .agents/ui-shots/harvest-ids.mjs            # scrape real ids/slugs for capture lists
+node .agents/ui-shots/measure-targets.mjs /p <selector>...  # rect + markup dump for flagged targets
+node .agents/ui-shots/search-sheet.mjs           # overlay z-index + target hit-test @390
+node .agents/ui-shots/search-colours.mjs         # overlay computed colours, dark+light × 1440/390
+node .agents/ui-shots/audit.mjs [--file <f>]     # raw-en/raw-svg/hex/style gate; exit 0 = clean
 ```
+
+Traps:
+- **`touch.mjs` with no paths checks nothing and exits 0.** Always pass routes.
+- **`search-sheet.mjs` seeds `recentSearches`** so the `.al-search-remove`
+  buttons exist; without history the empty-query state has no rows to hit-test.
+- `.agents/ui-shots/*.js|mjs` written from `/tmp` will not resolve
+  `@playwright/test` — ESM resolves from the file's own path. Keep tools inside
+  `.agents/ui-shots/`.
 
 `render.mjs` **auto-stubs missing locals**: it retries on
 `X is not defined` / `X is not a function`, guessing a default
@@ -648,9 +727,13 @@ view stops rendering offline, you broke it.
 
 ### 7.4 Assets
 After CSS/JS edits: `npx vite build` regenerates
-`public/.vite/manifest.json` and `public/assets/css/panel-*.css`. The running
-server reads the manifest from disk, so a rebuild is enough — no restart needed
-for CSS, **restart needed for EJS.**
+`public/.vite/manifest.json` and `public/assets/css/panel-*.css`.
+**Then restart (§7.1) — for CSS as well as EJS.** *(This section used to claim
+"a rebuild is enough, no restart needed for CSS"; that is wrong. The manifest
+is read once at startup, and old hashed bundles are never deleted, so the page
+silently keeps loading the previous `panel-*.css`. Proof: build, `curl -s
+localhost:3000/login | grep -o 'assets/css/panel-[^"]*'`, compare the hash to
+`ls public/assets/css/`.)*
 
 ---
 
@@ -798,7 +881,7 @@ Verified against the running dev server (admin session). `SID` =
 `partials/user-sidebar.ejs` · `partials/admin-sidebar.ejs` ·
 `partials/search-overlay.ejs` · `views/styles/components/{topbar,sidebar}.css`
 
-### Batch 1 — user pages  ⟵ **IN FLIGHT** (`views/user/dashboard.ejs` + `partials/server-card.ejs` already DONE by Batch 0)
+### Batch 1 — user pages  ⟵ **DONE** (`views/user/dashboard.ejs` + `partials/server-card.ejs` were already DONE by Batch 0)
 | Route | View | Old reference |
 |---|---|---|
 | `/` | `views/user/dashboard.ejs` | `ref/panel/views/user/dashboard.ejs` |
@@ -809,7 +892,7 @@ Verified against the running dev server (admin session). `SID` =
 | `/my-images/new` | `views/user/my-images/new.ejs` | — |
 | `/my-images/edit/:id` | `views/user/my-images/edit.ejs` | — |
 
-### Batch 2 — server console & files  ⟵ **IN FLIGHT**
+### Batch 2 — server console & files  ⟵ **DONE**
 `SID` = the seeded server id above.
 
 | Route | View |
@@ -823,7 +906,7 @@ Verified against the running dev server (admin session). `SID` =
 | `/server/SID/startup` | `views/user/server/startup.ejs` (+ startup-*.ejs fragments) |
 | `/server/SID/backups` | `views/user/server/backups.ejs` **⚠ route 500s on this seed — render offline with `render.mjs` and screenshot via `serve.mjs`** |
 
-### Batch 3 — server sub-pages  ⟵ **IN FLIGHT**
+### Batch 3 — server sub-pages  ⟵ **DONE**
 | Route | View |
 |---|---|
 | `/server/SID/players` | `views/user/server/players.ejs` |
@@ -839,14 +922,14 @@ Verified against the running dev server (admin session). `SID` =
 `/admin/users/create` · `/admin/users/edit/:id` · `/admin/users/view/:id`
 Views under `views/admin/{overview,servers,nodes,users}/`.
 
-### Batch 5 — admin data  ⟵ **IN FLIGHT** (`activity`, `analytics` already DONE by Batch 4b)
+### Batch 5 — admin data  ⟵ **DONE** (`activity`, `analytics` had been done by Batch 4b)
 `/admin/activity` · `/admin/analytics` · `/admin/apikeys` · `/admin/api/docs` ·
 `/admin/databases` · `/admin/databases/create` · `/admin/images` ·
 `/admin/images/edit/:id` · `/admin/images/store` · `/admin/mounts` ·
 `/admin/mounts/new` · `/admin/playerstats` · `/admin/queue`
 Views under `views/admin/{activity,analytics,apikeys,databases,images,mounts,playerstats,queue}/`.
 
-### Batch 6 — admin system  ⟵ **NOT STARTED**
+### Batch 6 — admin system  ⟵ **DONE** (ported by Batch 6; two routes unreachable — see backend findings 4/5)
 `/admin/settings` · `/admin/security` · `/admin/menu` · `/admin/addons` ·
 `/admin/addons/store` · `/admin/addons/:slug` · `/admin/radar` ·
 `/admin/radar/scripts` · `/admin/radar/scripts/create` ·
@@ -854,18 +937,88 @@ Views under `views/admin/{activity,analytics,apikeys,databases,images,mounts,pla
 Views under `views/admin/{settings,security,menu,addons,radar}/`.
 *(Routes probed: `/admin/menu`, `/admin/security`, `/admin/queue`, `/admin/radar/scripts` all 200. `/admin/nodes/stats` is 404 — the real route is `/admin/node/:id/stats`.)*
 
-### Batch 7 — fragments (HTMX) — **id-sensitive**  ⟵ **NOT STARTED** (except `fragments/admin/users/*`, done by 4b, and `fragments/user/server/*`, split between Batches 2 and 3)
+### Batch 7 — fragments (HTMX) — **id-sensitive**  ⟵ **DONE** (`admin/users/*` done by 4b; `admin/{apikeys,databases,images,mounts,locations}/*` done by 5; `user/server/*` split between Batches 2 and 3; leftovers `admin/nodes/node-table`, `auth/error-banner`, `shared/error-banner`, `user/two-factor-recovery-codes` closed in the same pass)
 `views/fragments/**` — 19 files. These are returned by partial routes, so
 capture them offline via `render.mjs` + `serve.mjs`.
 **Constraint:** keep them shell-free and preserve ids
 `admin-users-list`, `admin-user-row-<id>`, `admin-users-create-form`, and
 `role="alert" aria-live="assertive"` where present (`tests/adminUsersHtmx.test.ts`).
 
-### Batch 8 — errors & remaining  ⟵ **NOT STARTED**
-`views/errors/{403,404,500,generic}.ejs` (offline-render them),
-`views/partials/empty-state.ejs`, `pagination.ejs`, `stat-card.ejs`,
-`status-badge.ejs`, `flash-messages.ejs`, `toast.ejs`, `global-modal.ejs`,
-`upload-modal.ejs`, `head-meta.ejs`.
+### Batch 8 — errors & remaining  ⟵ **DONE** — split into two sub-batches, captured offline to avoid cross-interference
+
+**8a (done)** — `views/errors/{403,404,500,generic}.ejs` +
+`views/partials/{empty-state,pagination,stat-card,status-badge,flash-messages,toast,head-meta}.ejs`.
+Shipped `components/error-state.css` (§3.4) and keys `paginationRange` /
+`paginationNone`.
+
+**8b (done)** — `views/partials/{admin-sidebar,user-sidebar,search-overlay,global-modal,upload-modal}.ejs`
++ `components/sidebar.css` (+48). Both sidebars' `<style>` blocks extracted;
+modals' raw `'Confirm'` / `'Error'` / `"Upload file"` literals became SSR
+`data-*` values; keys `brandName` / `accepted` / `uploading`.
+
+**Shared infrastructure is now free** — no other batch is rendering against
+these files, so they can be edited directly. Capture them offline
+(`render.mjs` → `serve.mjs` → `capture.mjs`): `pagination` and `flash-messages`
+need live state to appear, `status-badge`/`head-meta` have no consumers (§14).
+
+### Batch 9 — shared-JS colour tokens  ⟵ **DONE**
+`public/javascript/shared/search.js` baked 35 `neutral-*` + `yellow-*` utilities
+into its markup strings (the last colour literals outside views). All colour
+moved into `.al-search-*` classes in `components/topbar.css` (§3.4); the hook
+class was renamed `search-result` to `al-search-result` at all three
+`querySelectorAll` sites; the keyboard-active row's colours are CSS-owned now.
+Probe `.agents/ui-shots/search-colours.mjs`: **102 checks, 0 findings**, dark +
+light × 1440 + 390, both entry points. Orchestrator follow-ups landed:
+`?v=7` cache-bust (§14 #14) and the 44px `.al-search-remove` floor (§14 #16).
+
+### Touch-floor completion — full 50-route sweep  ⟵ **DONE**
+`touch.mjs` had only ever seen 13 routes; the full list found three real
+defects (all fixed) plus two harness traps (documented in §7.3):
+`/server/SID/console` `.xterm-helper-textarea` (library focus proxy — exempted),
+`/admin/servers` label-less 16px checkbox (label-wrapped, and touch.mjs now
+measures a checkbox through its label) + 16–20px cell links (floored in
+`table.css`), `/admin/nodes/create` ~20px "All" labels (floored in
+`field.css`). `/admin/node/1/configure` is excluded from the gate — text
+endpoint, no `h1` (§11 #12).
+
+
+### Backend findings to report at the end (NOT to fix here)
+Raised by Batch 5 — outside the UI-only boundary, logged for the final report:
+1. `src/modules/admin/images.ts:614-618` — `GET /admin/images/store` and
+   `GET /admin/images/approvals` both redirect to hash anchors on
+   `/admin/images`, so `views/admin/images/{store,approvals}.ejs` are
+   **unreachable** as pages (ported anyway; no page-level captures possible).
+2. ❌ **disproved as written** (probe, 2026-10-01) — the claim was "GET
+   `/admin/mounts/new` renders the fragment `fragments/admin/mounts/mount-create-form`,
+   so `views/admin/mounts/new.ejs` never renders with a layout". Live check:
+   **200 with full chrome** (sidebar, topbar, breadcrumb, `h1 New mount`) — the
+   *page* route `src/modules/pages/admin/mounts.ts:40` → `admin/mounts/new`
+   wins the mount order. What is actually true: `src/modules/admin/mounts.ts:51`
+   registers the **same path** for the HTMX fragment, **without** the
+   `HX-Request` guard such routes normally carry. It is currently unreachable
+   dead code (the UI opens the form with plain `<a href="/admin/mounts/new">`,
+   no `hx-get` anywhere), and it would swallow the page if module registration
+   order ever flipped — same latent class as finding 4.
+3. `src/modules/admin/{images,mounts}.ts` render `admin/images/images` /
+   `admin/mounts/mounts` while the files on disk are `index.ejs` — works only
+   because of `installRenderResolver` (`src/app.ts:455`).
+4. Raised by Batch 6 — `src/modules/pages/admin/addons.ts:61` registers
+   `/admin/addons/:slug` **before** `/admin/addons/store` (line 200), so
+   `GET /admin/addons/store` is swallowed by the detail route: it renders
+   `admin/addons/detail` with `addon: {}` (h1 falls back to `Addon`).
+   `views/admin/addons/store.ejs` is unreachable — ported anyway and captured
+   offline (`render.mjs` + `serve.mjs`).
+5. Raised by Batch 6 — `src/modules/pages/admin/radar.ts:64` does
+   `scripts: Array.isArray(data) ? data : []` while
+   `src/modules/admin/radar.ts:133` answers `res.json({ success: true, scripts })`.
+   The page therefore always receives `[]`, `/admin/radar/scripts` always shows
+   the empty state (three real scripts exist in `storage/radar/*.json`), and the
+   table markup never renders live. Fix one side: `(data?.scripts ?? [])` in the
+   page route, or `res.json(scripts)` in the API.
+6. Raised by Batch 6 — there is no `GET /admin/radar/scripts/:id` (only `POST`
+   `src/modules/pages/admin/radar.ts:140`), so `/admin/radar/scripts/edit/:id`
+   always 404s and `views/admin/radar/scripts/edit.ejs` never renders live —
+   captured offline.
 
 ### Already done — do not redo
 `views/auth/*` (login, register, 2fa-verify, forgot-password, reset-password),
@@ -890,6 +1043,19 @@ capture them offline via `render.mjs` + `serve.mjs`.
    screenshots. Ignore it; it is not part of the design.
 10. **`motion.css` stays unlayered** so its reduced-motion overrides win.
 11. **CSP:** `fontSrc ['self','data:']` (no font CDNs), `styleSrc ['self','unsafe-inline']`, `imgSrc ['self','data:','blob:','https:']`, `scriptSrc` strict-dynamic + nonce. Inline `<style>` in a view is allowed (that is why `.al-auth`'s page CSS was legal), but **prefer a component file**.
+12. **`/admin/node/:id/configure` is not a UI page.** It answers `200` with a
+    bare text command (`configure --panel "…" --key "…"`); the nodes pages
+    `fetch()` it (`views/admin/nodes/index.ejs:331`) and put it in a toast, with
+    the `<a href>` kept only as a no-JS fallback. Do not route it into a capture
+    list — it has no layout, no `<h1>` and nothing to port.
+13. **`/admin/node/:id/stats` 502s on this seed.** The page route
+    (`src/modules/pages/admin/nodes.ts:176`) does `Promise.all([apiGet(node),
+    apiGet(node stats)])`, and the stats API calls the node's daemon
+    (`api/v2/admin/nodes.ts:335`), which is not running here — the rejected
+    promise reaches `next(err)` and the error handler answers **502**. Same
+    class as quirk 7: **not a UI bug**. `views/admin/nodes/stats.ejs` renders
+    correctly offline (`render.mjs admin/nodes/stats` → 194 KB, `h1` present),
+    so capture it offline.
 12. **`/vendor` serves `node_modules` directly**, so `assetUrl('/vendor/…')` works without a build.
 13. **Do not remove `hidden lg:block` on the sidebar**, `overflow-y-auto` on `#page-content`, or the `<main>` element — tests assert them.
 14. **Include roots are only `layouts/`, `partials/`, `partials/ui/`.** The old
@@ -915,9 +1081,10 @@ node_modules/** — tooling belongs in .agents/
 
 ---
 
-## 13. In-flight — Batch 0 (shell), pick up from here
+## 13. Batch 0 record — shell & shared chrome (DONE)
 
-Work already started on the shell; finish it before any page batch.
+Historical record of the shell pass (all batches now complete). Kept for the
+shell's design decisions — consult before touching shared chrome.
 
 **Done:**
 - Foundation CSS rewritten (`typography`, `reset`, `button`, `card`, `table`,
@@ -991,6 +1158,121 @@ what "done" looks like for a batch.
      readable (name first, then stats).
 
 ---
+
+## 14. Orchestrator shell-fix queue
+
+Filed by page agents against shared files they may not touch. Applied → ✅,
+queued → ⏳, rejected after investigation → ❌.
+
+| # | Request | Status | Note |
+|---|---|---|---|
+| 1 | `partials/ui/form-field.ejs` — accept `minlength`/`maxlength`/`pattern`/`rows` | ✅ applied | Callers can stop hand-rolling fields for these attributes. |
+| 2 | `partials/ui/form-field.ejs` — `<%-` on label/options/help/error meant unescaped output (DB-sourced option labels) | ✅ applied | All six output sites now `<%= %>`; verified no caller was passing intentional markup. |
+| 3 | `pages/page-layout.css` — mobile `.al-page-header > div:last-child` right-aligned a *lone* child | ✅ applied | Now `:last-child:not(:first-child)`, mirroring the desktop rule at line 16. B1's per-view `justify-start` workarounds are now redundant but harmless — leave them. |
+| 4 | `.al-btn` (36px), `.al-btn-sm`, `.tab-btn` (40px), `.al-form-input`/`-select` (38px), breadcrumb crumbs (**20px**), the mobile logo link (28px) and `/credits`' small links (**16px**) were all under the 44px phone floor | ✅ **applied (post-wave pass, all batches done)** | Phone-only `@media (max-width: 639px)` blocks added to `button.css` (whole variant family incl. `-sm`/`-link`), `field.css` (`.al-input`/`.al-form-input`/`-select`) and `tab.css` (`.tab-btn`); `breadcrumb.css` gained its first real rule (crumb links → `inline-flex min-h-11`); `bottom-nav.ejs` logo link `min-h-11`; `credits.ejs` contributor + license links `min-h-11`. `.al-btn-icon-only` already carried `min-h-[44px]` at every width. Desktop unchanged — every rule is phone-scoped. Proven by `.agents/ui-shots/touch.mjs` (below). |
+| 5 | `views/errors/error.ejs` is missing, so every render failure 500s opaquely | ❌ **claim disproved** | `src/handlers/errorPages.ts:getErrorView` maps 403/404/500 and falls back to `errors/generic`; it never reads `errors/error` (deliberately deleted — see the comment at line 97). No action. |
+| 6 | `icon-tile.css:47` / `image-store.css:86` used `color: var(--theme-accent)` for *text* — in `default-dark` that token is `rgba(255,255,255,0.08)`, a background tint, so accent text was invisible | ✅ **applied** | Both now `var(--theme-accent-text)`. `chip`/`avatar` had the same bug and B3 fixed them. `color-mix(… --theme-accent …)` uses for backgrounds/borders are correct and were left alone. |
+| 7 | `.col-hide` (0,1,0) lost to `.al-table-card tbody td { display:flex }` (0,1,2), so the column never hid on phones — and views were written against the documented `lg` breakpoint while the rule sat in `max-width: 639px` | ✅ **applied** | Moved to its own `@media (max-width: 1023px)` with a `.al-table-card .col-hide` companion term for specificity. Matches the documented contract. |
+| 8 | `tests/islands.test.ts` asserts the **raw English** `Failed to initialize the server console.` and `Console unavailable` in `views/user/server/console.ejs` | ✅ **resolved after B2 stopped** | Switched to English-msgid keys — `t('Console unavailable')` / `t('Failed to initialize the server console.')` — same precedent as `Activity Log`, then removed the superseded `consoleUnavailableTitle`/`consoleUnavailableBody`. Verified at render (0 `<<MISSING:`), full suite **1064/1064**. |
+| 9 | `.al-table-tr` and `.al-table-row` are both defined aliases, now used inconsistently across views | ✅ **resolved** | Standardised on the documented `.al-table-tr` (3 deviant files: `partials/ui/table.ejs`, `admin/nodes/index.ejs`, `fragments/admin/nodes/node-table.ejs`); the alias was dropped from `table.css:34-45`. Verified `grep -rn 'al-table-row' views/` → 0, and no reference existed in `tests/`, `public/`, `src/`. |
+| 10 | `partials/head-meta.ejs` was an **orphan** — both layouts hand-wrote its meta block, and `auth.ejs` had silently drifted (no `viewport-fit`) | ✅ **wired** | `layouts/base.ejs` → `include('../partials/head-meta', { viewportFit: true })`, `layouts/auth.ejs` → `include('../partials/head-meta')`, each replacing its inline block (base's duplicate `csrf-token` meta removed). The `viewportFit` flag exists because only base pads `env(safe-area-inset-*)`; auth matches the old panel — both now documented inside the partial. **Proof:** offline render of `auth/login` `<head>` **byte-identical** before/after (2861→2861); dashboard `<head>` identical except `csrf-token` moved next to the other metas (1 meta, same value); live `/login` serves the real token; suite 1064/1064. Two traps recorded in the partial: an EJS comment must not contain a literal `%>` (it closes the comment), and the final tag keeps its trailing-dash trim marker. |
+| 11 | `partials/status-badge.ejs` has **zero consumers** — pages render `.al-badge-*` inline | ✅ **kept** | It is the §3.5 "Status chip" entry point: maps status → `.al-badge-*` + `.al-dot-*` + a localized label in one place. Wiring pages onto it is a cross-page refactor with no visual payoff — deferred, not rejected. Do not delete. |
+| 12 | §3.4 documented `.al-pagination`, but no such class exists | ✅ **doc fixed** | §3.4 now states plainly that `pagination.ejs` is utilities + `data-pagination` and that the class must not be invented. |
+| 13 | `button.css`'s "legacy aliases" (`.al-ui-surface` / `.al-ui-button` / `.al-ui-button-primary` / `.al-ui-muted`) were the **only** `@apply` under `views/styles/` using raw palette colours (`bg-white`, `neutral-*`) — with **zero** consumers repo-wide | ✅ **deleted** | Dead code carrying a colour-rule violation; removal changes no behaviour. Verified after deletion: `grep -rn '@apply' views/styles/ \| grep -E 'neutral-\|gray-\|bg-white\|text-white' \| grep -v tokens/` → **0**, build 137.40 kB. |
+| 14 | search-colour agent's one `requested-but-not-made`: `search.js?v=6` → `?v=7` in `partials/search-overlay.ejs:60` (its `views/**` was off-limits) | ✅ **applied** | The file changed, so the cache-bust is load-bearing — without it phones keep running the grey-utility version. |
+| 15 | search agent's closing observation: "at 390 the bottom nav (z-50) covers the sheet's last ~53px, so `.al-search-remove` can't be pointer-reached" | ❌ **disproved** | New harness `.agents/ui-shots/search-sheet.mjs` hit-tests it: overlay computes `z-index: 70` (`sheet.css:35`, `!important`, ≤639px) vs nav `50`, and `elementFromPoint` at the panel's bottom edge **and** at the remove button's centre returns elements *inside* `#searchPanel` (`inNav:false`, `reachable:true`). The nav only *geometrically* overlaps; it paints behind the scrim. |
+| 16 | …but the same hit-test found the real defect: `.al-search-remove` measures **20×36px** on phones — under the 44px floor (§4.5) and WCAG 2.5.8's 24×24 width | ✅ **fixed** | Phone-scoped `@media (max-width: 639px)` block in `topbar.css` (`min-width/min-height: 2.75rem` + flex centre) — same contract as §14 #4, desktop keeps 20×36. Re-hit-tested: **44×44, reachable:true**. Trap that hid it: `touch.mjs` can't see overlay content (hidden until opened). |
+
+### Batch 7 findings — triaged
+| Finding | Verdict |
+|---|---|
+| Both error banners receive **hardcoded English** `message`/`hint` from `src/modules/user/twoFactor.ts` and `src/modules/admin/{users,nodes,images,locations,apiKeys}.ts` | ✅ **valid** → Phase 6 (backend i18n is explicitly allowed there). The fragments themselves are clean; the copy arrives from the server. |
+| `views/user/2fa-setup.ejs` is missing, so `GET /account/2fa/setup` 500s | ❌ **disproved** — the route answers **200 with JSON** (`{"secret","otpauthUrl"}`). `src/modules/pages/user/index.ts:135` registers that path first and proxies the internal API; `twoFactor.ts:122`'s `res.render('user/2fa-setup')` is **dead code that never runs**. `account.ejs:setup2FA()` consumes the JSON and writes the otpauth URL into `#qr-container`. **Do not create the view.** Latent risk only: if module registration order ever flips, that render runs and 500s (same class of issue as the `images`/`mounts` resolver note). |
+| `views/partials/flash-messages.ejs` still has a raw `aria-label="Dismiss"` | ✅ **valid, closed by Batch 8a** → now `t('dismissNotification')`; the whole partial is done (Batch 8a report). |
+
+**Harness addition:** `.agents/ui-shots/probe.mjs <url>` — logs in with Playwright and
+prints status, final URL, `<title>`, first `<h1>`, trimmed body text, and counts
+of QR images / alerts. Use it to answer "what does this route actually return?"
+before believing a render-path claim. Import is `@playwright/test`, **not**
+`playwright`.
+
+### Wave-end reconciliation (all batches reported)
+1. `tests/islands.test.ts` was the sole red test → fixed via msgid keys (#8). **Full suite 1064/1064.**
+2. `views/styles/main.css` verified: **39 component files on disk, 39 imports, no orphans.**
+3. Catalog verified after Batch 8: **2898 keys, sorted** (2896 → +`paginationRange`,
+   +`paginationNone` from 8a), no key left orphaned by a rename.
+4. `npx vite build` clean after every change in this list.
+5. B6's `form-field.ejs` request was **already satisfied** — its brief predated fix #1.
+   Its dropped `maxlength="120|500|20"` (+ `rows="2"`) on the radar script fields were
+   **restored** from git history (`name`→120, `description`→500, `version`→20), rendered
+   and verified.
+6. B6's `breadcrumb.ejs` `aria-label="Breadcrumb"` → `t('breadcrumbNav')`, key added.
+
+### Harness: `.agents/ui-shots/touch.mjs <path...>`
+Logs in, walks each route at 390×844 and reports **interactive elements under the
+44px floor** (skipping `sr-only`/hidden), horizontal overflow, and `<h1>` count.
+Exits non-zero on any finding, so it can gate a batch. `VW`/`VH`/`THEME` env like
+`capture.mjs`. Last run: **13/13 routes clean, 0 under-44, 0 overflow, 1×`h1` each.**
+
+### ⚠ Every light-theme capture taken before this note is invalid
+`.agents/ui-shots/capture.mjs` only passed `colorScheme` to the browser context.
+The server renders `class="dark"` and `theme-init.js` reads
+`localStorage['al-theme']` **first**, so `THEME=light` still produced dark shots.
+Fixed: `capture.mjs` now seeds `localStorage['al-theme']` via `addInitScript`
+before any page script runs (verified — dark `html.h-full.dark` bg `rgb(20,20,20)`,
+light `html.h-full` bg `rgb(255,255,255)`).
+
+**Consequence:** every batch's light captures were stale. **Re-swept
+2026-10-01** (fix verified in `capture.mjs`): 50 routes × desktop 1440 +
+mobile 390 → `/tmp/ui/light-all` (100 files), auth pages anonymous →
+`/tmp/ui/light-auth` (6), daemon-dependent views offline (`files`,
+`node stats`, `backups`) → `/tmp/ui/light-offline` (6). Dark captures were
+unaffected by the seeding bug.
+
+`probe.mjs <path>` is theme-aware via the same env (`THEME=light|dark`) and
+prints `html` class + computed `body` background — use it to assert a theme
+without opening a PNG.
+
+### Backend findings from page agents (report at the end, do NOT fix here)
+1. **`window.__i18n` bridge — ✅ FIXED (Phase 6, shipped by the orchestrator).**
+   `i18nMiddleware` (`src/app.ts:361`) used to install a get-only `Proxy` over
+   `{}`, and `layouts/base.ejs` does `JSON.stringify(req.translations)` —
+   `JSON.stringify` on a Proxy with no `ownKeys` trap yields `{}`, so every
+   `window.__i18n.x || 'English'` fallback in client JS was **live English**.
+   `src/services/i18n.ts` now traps `ownKeys`/`getOwnPropertyDescriptor`,
+   **scoped to the locale's own overrides**, so `en` still serialises to `{}`
+   (English output byte-identical, tests unaffected) while a locale with real
+   overrides ships them. Empty-locale `''` values are filtered at merge, so a
+   missing translation falls back to English instead of blanking or leaking a
+   raw key. Verified: `de` renders the same English body as `en` (the shipped
+   locale files still hold ~682-685 **empty** values — there are no real
+   translations yet, see the Phase 6 note below). SSR-injecting copy with
+   `<%= t('key') %>` / `<%- JSON.stringify(t('key')).replace(/</g, '\\x3c') %>`
+   (as `views/user/{account,create-server,my-images/*}.ejs`'s `*_I18N` objects
+   do) remains the preferred pattern for client-side strings.
+2. `src/modules/user/images.ts` maps GET `/my-images*` → `/account#images`
+   ("Phase 12") *behind* the pages controller. Mount-order-dependent; if it
+   ever flips, those pages die silently.
+3. `account.ejs` carries a `removeAvatar()` handler with no route calling it
+   from the UI — dead code, needs a product decision.
+4. Raised by Batch 8a — `src/handlers/errorPages.ts:127-131`: `ERROR_INFO`
+   titles/messages plus the fallbacks `` `Error ${statusCode}` `` and
+   `'The panel could not complete this request.'` are English literals passed
+   as `errorTitle`/`errorMessage`. `views/errors/generic.ejs` displays them
+   above its own `t()` fallback, so non-English users see English here → Phase 6.
+5. Raised by Batch 8a — `req.session.flash` messages are set as English in
+   `src/modules/pages/admin/servers.ts` (4 sites); `partials/flash-messages.ejs`
+   renders `flash.message` **verbatim** (the chrome around it is translated).
+   Same class as Batch 7's banner finding → Phase 6.
+6. Raised by Batch 8a — toast payloads (`data.message` / `data.error` from the
+   polled job APIs) surface untranslated in `partials/toast.ejs`; the toast's
+   own strings are already SSR-`t()` injected → Phase 6 for the API copy.
+7. `uiComponentHandler` hardcodes sidebar labels `'Core'`,
+   `'Infrastructure'` and `label:'Dashboard'` server-side, so those nav labels
+   bypass `t()` entirely → Phase 6.
+8. Every shipped locale file carries **682-685 empty values** — the plumbing
+   works end to end, but there is no translated content in `de`/`es`/… yet →
+   Phase 6 (translation pass).
 
 *Last updated: see git history. Update §3.4 and §13 whenever you introduce a
 component — the next agent depends on it.*

@@ -51,7 +51,9 @@
     .al-page-header {
       gap: 0.75rem;
     }
-    .al-page-header > div:last-child {
+    /* Mirror the desktop rule at :16 — a header with a single child has no
+       action column, so it must not get the right-align treatment. */
+    .al-page-header > div:last-child:not(:first-child) {
       align-self: stretch;
       justify-content: flex-end;
       flex-wrap: wrap;

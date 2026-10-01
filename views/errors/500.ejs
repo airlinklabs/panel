@@ -1,33 +1,22 @@
 <%- include('../layouts/auth', { title: '500 — ' + t('serverError') }) %>
 
-<div class="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 pt-24 pb-32">
-  <div class="w-full max-w-sm text-center">
-    <div class="mb-6">
-      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
-        style="background:var(--theme-bg-secondary);">
-        <%- icon('server-crash', { class: 'w-10 h-10', style: 'color:var(--theme-danger);' }) %>
-      </div>
-      <h1 class="text-6xl font-bold mb-2" style="color:var(--theme-text-strong);">500</h1>
-      <h2 class="text-xl font-semibold mb-3" style="color:var(--theme-text-strong);">
-        <%= t('serverErrorTitle') %>
-      </h2>
-      <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted);">
-        <%= t('serverErrorMessage') %>
-      </p>
-    </div>
+<div class="al-error-state">
+  <div class="al-icon-tile al-icon-tile-lg al-icon-tile-round al-icon-tile-danger">
+    <%- icon('server-crash') %>
+  </div>
+  <p class="al-error-code">500</p>
+  <h1 class="al-error-title"><%= t('serverErrorTitle') %></h1>
+  <p class="al-error-body"><%= t('serverErrorMessage') %></p>
 
-    <div class="flex items-center justify-center gap-3 mt-8">
-      <%- include('../partials/ui/button', {
-        href: '/',
-        label: t('goHome'),
-        variant: 'secondary'
-      }) %>
-      <%- include('../partials/ui/button', {
-        href: 'javascript:location.reload()',
-        label: t('tryAgain'),
-        variant: 'ghost'
-      }) %>
-    </div>
+  <div class="al-error-actions">
+    <%- include('../partials/ui/button', {
+      href: '/',
+      label: t('goHome'),
+      variant: 'secondary'
+    }) %>
+    <button type="button" class="al-btn al-btn-ghost" onclick="location.reload()">
+      <span><%= t('tryAgain') %></span>
+    </button>
   </div>
 </div>
 

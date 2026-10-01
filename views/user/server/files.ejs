@@ -56,23 +56,23 @@ function escAttr(val) {
     </p>
   </div>
   <div>
-    <button id="createFile" type="button" class="al-btn-secondary">
+    <button id="createFile" type="button" class="al-btn-secondary min-h-11">
       <%- icon('file-plus', { class: 'size-4' }) %>
       <%= t('newFile') %>
     </button>
-    <button id="createFolder" type="button" class="al-btn-secondary">
+    <button id="createFolder" type="button" class="al-btn-secondary min-h-11">
       <%- icon('folder-plus', { class: 'size-4' }) %>
       <%= t('newFolder') %>
     </button>
-    <button id="uploadFile" type="button" class="al-btn-secondary">
+    <button id="uploadFile" type="button" class="al-btn-secondary min-h-11">
       <%- icon('upload', { class: 'size-4' }) %>
       <%= t('uploadFile') %>
     </button>
-    <button id="pullFile" type="button" class="al-btn-secondary">
+    <button id="pullFile" type="button" class="al-btn-secondary min-h-11">
       <%- icon('download', { class: 'size-4' }) %>
       <%= t('pullFromUrl') %>
     </button>
-    <button id="refreshFiles" type="button" class="al-btn-secondary">
+    <button id="refreshFiles" type="button" class="al-btn-secondary min-h-11">
       <%- icon('refresh-cw', { class: 'size-4' }) %>
       <%= t('refresh') %>
     </button>
@@ -106,7 +106,7 @@ function escAttr(val) {
     <div class="al-file-search">
       <%- icon('search', { size: 14, class: 'shrink-0' }) %>
       <input id="fileSearchInput" type="text" placeholder="<%= t('filterFiles') %>"
-        class="al-file-search-input"
+        class="al-file-search-input min-h-11"
         autocomplete="off" spellcheck="false"
         aria-label="<%= t('filterFiles') %>">
       <button type="button" id="clearFileSearch" class="al-file-search-clear hidden" aria-label="<%= t('clearSearchFilter') %>">
@@ -135,18 +135,18 @@ function escAttr(val) {
 <div id="floatingActionBar" class="al-file-actions translate-y-full">
   <div class="flex items-center gap-2.5">
     <%- icon('check-square', { size: 16, class: 'shrink-0' }) %>
-    <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)"></span>
+    <span id="selectedFilesCount" class="text-sm font-medium al-text-strong"></span>
   </div>
   <div class="flex items-center gap-2">
-    <button type="button" id="massRenameBtn" class="al-btn-secondary al-btn-sm">
+    <button type="button" id="massRenameBtn" class="al-btn-secondary al-btn-sm min-h-11">
       <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
       <%= t('rename') %>
     </button>
-    <button type="button" id="massArchiveBtn" class="al-btn-primary al-btn-sm">
+    <button type="button" id="massArchiveBtn" class="al-btn-primary al-btn-sm min-h-11">
       <%- icon('file-archive', { size: 14, class: 'shrink-0' }) %>
       <%= t('archive') %>
     </button>
-    <button type="button" id="massDeleteBtn" class="al-btn-danger al-btn-sm">
+    <button type="button" id="massDeleteBtn" class="al-btn-danger al-btn-sm min-h-11">
       <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
       <%= t('delete') %>
     </button>
@@ -171,15 +171,15 @@ function escAttr(val) {
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
-      <input type="text" id="FileName" data-mode="file" class="al-input font-mono" placeholder="<%= t('fileNamePlaceholder') %>" aria-label="<%= t('newFile') %>">
+      <input type="text" id="FileName" data-mode="file" class="al-input min-h-11 font-mono" placeholder="<%= t('fileNamePlaceholder') %>" aria-label="<%= t('newFile') %>">
       <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" id="cancelCreateFile" class="al-btn-secondary al-btn-sm">
+      <button type="button" id="cancelCreateFile" class="al-btn-secondary al-btn-sm min-h-11">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="button" id="confirmCreateFile" class="al-btn-primary al-btn-sm">
+      <button type="button" id="confirmCreateFile" class="al-btn-primary al-btn-sm min-h-11">
         <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('create') %>
       </button>
@@ -200,17 +200,17 @@ function escAttr(val) {
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
-      <input type="text" id="newFileName" class="al-input font-mono" placeholder="<%= t('renamePlaceholder') %>" aria-label="<%= t('rename') %>">
+      <input type="text" id="newFileName" class="al-input min-h-11 font-mono" placeholder="<%= t('renamePlaceholder') %>" aria-label="<%= t('rename') %>">
       <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
       <input type="hidden" id="currentFileName">
       <input type="hidden" id="currentFilePath">
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" id="cancelRename" class="al-btn-secondary al-btn-sm">
+      <button type="button" id="cancelRename" class="al-btn-secondary al-btn-sm min-h-11">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="button" id="confirmRename" class="al-btn-primary al-btn-sm">
+      <button type="button" id="confirmRename" class="al-btn-primary al-btn-sm min-h-11">
         <%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('rename') %>
       </button>
@@ -232,15 +232,15 @@ function escAttr(val) {
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
       <label for="pullUrlInput" class="al-form-label"><%= t('fileUrl') %></label>
-      <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
-      <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
+      <input type="url" id="pullUrlInput" class="al-input min-h-11 w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
+      <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden al-text-muted"></p>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" id="cancelPullFile" class="al-btn-secondary al-btn-sm">
+      <button type="button" id="cancelPullFile" class="al-btn-secondary al-btn-sm min-h-11">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="button" id="pullButton" class="al-btn-primary al-btn-sm">
+      <button type="button" id="pullButton" class="al-btn-primary al-btn-sm min-h-11">
         <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('pull') %>
       </button>
@@ -258,14 +258,14 @@ function escAttr(val) {
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
-      <p id="massDeleteMessage" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+      <p id="massDeleteMessage" class="text-xs leading-relaxed al-text-muted"></p>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" id="cancelMassDelete" class="al-btn-secondary al-btn-sm">
+      <button type="button" id="cancelMassDelete" class="al-btn-secondary al-btn-sm min-h-11">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('cancel') %>
       </button>
-      <button type="button" id="confirmMassDelete" class="al-btn-danger al-btn-sm">
+      <button type="button" id="confirmMassDelete" class="al-btn-danger al-btn-sm min-h-11">
         <%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>
         <%= t('delete') %>
       </button>

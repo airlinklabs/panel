@@ -12,6 +12,13 @@
       color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
       opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* ── Touch floor: tabs are controls too (40px base). ───────────────── */
+  @media (max-width: 639px) {
+    .tab-btn {
+      min-height: 44px;
+    }
+  }
+
   .tab-btn:hover:not([aria-selected="true"]) {
     color: var(--theme-text);
     opacity: 1;

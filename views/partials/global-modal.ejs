@@ -6,7 +6,8 @@
                     window.modal.close(). The node is always restored to its
                     page position on close so getElementById works for the
                     next step of a multi-step flow. -->
-<div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+<div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true"
+  data-confirm-label="<%= t('confirm') %>" data-error-label="<%= t('error') %>">
   <div class="absolute inset-0" id="globalModalBackdrop"></div>
   <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div id="globalModalHeader" class="al-sheet-header" style="border-color:var(--theme-border);">
@@ -18,8 +19,8 @@
       <p id="globalModalBody" class="text-xs leading-relaxed" style="color:var(--theme-text-muted);"></p>
     </div>
     <div id="globalModalFooter" class="al-sheet-footer justify-end" style="border-color:var(--theme-border);">
-      <button type="button" id="globalModalCancel" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
-      <button type="button" id="globalModalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl text-white transition"></button>
+      <button type="button" id="globalModalCancel" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+      <button type="button" id="globalModalConfirm" class="al-btn-primary"></button>
     </div>
   </div>
 </div>
@@ -104,10 +105,10 @@
     lastFocused = document.activeElement;
     title.textContent = opts.title || '';
     body.textContent  = opts.body || '';
-    confirmBtn.textContent = opts.confirmLabel || 'Confirm';
-    confirmBtn.className = opts.danger
-      ? 'px-4 py-2 text-xs font-medium rounded-xl text-white transition al-btn-danger'
-      : 'px-4 py-2 text-xs font-medium rounded-xl text-white transition al-btn-primary';
+    /* Label comes from the catalog via data-confirm-label (SSR); the button
+       class pair switches only the colour role — geometry lives in button.css. */
+    confirmBtn.textContent = opts.confirmLabel || overlay.getAttribute('data-confirm-label');
+    confirmBtn.className = opts.danger ? 'al-btn-danger' : 'al-btn-primary';
 
     currentResolve = opts.onConfirm || null;
     onCloseHook = opts.onClose || null;
@@ -208,7 +209,7 @@
 
   function alertFn(message) {
     if (message && typeof message === 'object') open(message);
-    else open({ title: 'Error', body: String(message || '') });
+    else open({ title: overlay.getAttribute('data-error-label'), body: String(message || '') });
   }
 
   window.modal = { confirm: open, alert: alertFn, show: show, close: close };

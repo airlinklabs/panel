@@ -1,26 +1,32 @@
 <!-- Server settings form fragment — vanilla JS auto-save -->
-<div id="server-settings-form" class="al-card p-5">
-  <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.serverSettings || 'Server Settings' %></h2>
-  <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
+<div id="server-settings-form" class="al-card">
+  <div class="al-card-header">
+    <div class="min-w-0">
+      <h2 class="al-card-title"><%= t('serverSettings') %></h2>
+      <p class="al-card-subtitle"><%= t('serverSettingsDesc') %></p>
+    </div>
+  </div>
 
   <form id="serverSettingsFormEl">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <div>
-        <label for="serverName" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.serverName || 'Server Name' %></label>
-        <input type="text" id="serverName" name="name" class="al-input">
+    <div class="al-card-body">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'name', id: 'serverName',
+          label: t('serverName'), value: '', cls: 'min-h-11'
+        }) %>
+        <%- include('../../../partials/ui/form-field', {
+          type: 'text', name: 'description', id: 'serverDescription',
+          label: t('description'), value: '', cls: 'min-h-11'
+        }) %>
       </div>
-      <div>
-        <label for="serverDescription" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)">Description</label>
-        <input type="text" id="serverDescription" name="description" class="al-input">
+      <div class="mt-5 flex items-center gap-3">
+        <button type="submit" id="settingsSubmit" class="al-btn-primary min-h-11">
+          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <span id="settingsSaveLabel"><%= t('saveSettings') %></span>
+          <span id="settingsSavingLabel" style="display:none"><%= t('saving') %></span>
+        </button>
+        <span id="settingsSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
       </div>
-    </div>
-    <div class="mt-5 flex items-center gap-3">
-      <button type="submit" id="settingsSubmit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
-        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <span id="settingsSaveLabel"><%= req.translations.saveSettings || 'Save Settings' %></span>
-        <span id="settingsSavingLabel" style="display:none">Saving...</span>
-      </button>
-      <span id="settingsSaved" class="text-xs" style="color:var(--theme-success);display:none"></span>
     </div>
   </form>
 </div>
@@ -36,13 +42,18 @@
   var savedSpan = document.getElementById('settingsSaved');
   var saving = false;
   var debounceTimer = null;
+  var msg = <%- JSON.stringify({
+    savedPrefix: t('savedTimeAgo'),
+    saved: t('settingsSaved'),
+    saveFailed: t('failedToSaveSettings')
+  }) %>;
 
   nameInput.value = '<%= server.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>';
   descInput.value = '<%= (server.description || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>';
 
   function updateSaved() {
     var now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    savedSpan.textContent = 'Saved ' + now;
+    savedSpan.textContent = msg.savedPrefix + now;
     savedSpan.style.display = '';
     setTimeout(function() { savedSpan.style.display = 'none'; }, 3000);
   }
@@ -58,13 +69,13 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: nameInput.value, description: descInput.value }),
     }).then(function(res) { return res.json(); }).then(function(data) {
-      if (data.success || res.ok) {
+      if (data.success) {
         updateSaved();
-        showToast('Server settings saved.', 'success');
+        showToast(msg.saved, 'success');
       } else {
-        showToast(data.error || 'Failed to save settings.', 'error');
+        showToast(data.error || msg.saveFailed, 'error');
       }
-    }).catch(function() { showToast('Failed to save settings.', 'error'); })
+    }).catch(function() { showToast(msg.saveFailed, 'error'); })
     .finally(function() {
       saving = false;
       submitBtn.disabled = false;

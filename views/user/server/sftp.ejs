@@ -31,28 +31,28 @@
           <p class="al-form-label"><%= t('host') %></p>
           <div class="flex items-center gap-2">
             <code id="sftp-host" class="al-chip al-chip-mono">—</code>
-            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-host"><%= t('copy') %></button>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm min-h-11" data-copy-from="#sftp-host"><%= t('copy') %></button>
           </div>
         </div>
         <div>
           <p class="al-form-label"><%= t('port') %></p>
           <div class="flex items-center gap-2">
             <code id="sftp-port" class="al-chip al-chip-mono">—</code>
-            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-port"><%= t('copy') %></button>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm min-h-11" data-copy-from="#sftp-port"><%= t('copy') %></button>
           </div>
         </div>
         <div>
           <p class="al-form-label"><%= t('username') %></p>
           <div class="flex items-center gap-2">
             <code id="sftp-username" class="al-chip al-chip-mono">—</code>
-            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-username"><%= t('copy') %></button>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm min-h-11" data-copy-from="#sftp-username"><%= t('copy') %></button>
           </div>
         </div>
         <div>
           <p class="al-form-label"><%= t('password') %></p>
           <div class="flex items-center gap-2">
             <code id="sftp-password" class="al-chip al-chip-mono">—</code>
-            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-password"><%= t('copy') %></button>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm min-h-11" data-copy-from="#sftp-password"><%= t('copy') %></button>
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@
     </div>
     <div class="al-card-body">
       <div id="sftp-activity">
-        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('loadingActivity') %></p>
+        <p class="text-xs al-text-muted"><%= t('loadingActivity') %></p>
       </div>
     </div>
   </div>
@@ -138,10 +138,10 @@
       el.innerHTML = activities.slice(0, 10).map(a => `
         <div class="flex items-center justify-between py-2 border-b" style="border-color:var(--theme-border);">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs shrink-0" style="color:var(--theme-text-strong);">${a.action || '—'}</span>
-            <span class="text-xs truncate" style="color:var(--theme-text-muted);">${a.path || ''}</span>
+            <span class="text-xs shrink-0 al-text-strong">${a.action || '—'}</span>
+            <span class="text-xs truncate al-text-muted">${a.path || ''}</span>
           </div>
-          <span class="text-[10px] shrink-0" style="color:var(--theme-text-muted);">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
+          <span class="text-[10px] shrink-0 al-text-muted">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
         </div>
       `).join('');
     } catch (e) {

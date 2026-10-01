@@ -35,6 +35,14 @@
     overflow: hidden;
   }
 
+  /* Chart.js rewrites its canvas to the card's aspect ratio (a doughnut
+     goes square), which stretches the stat row to ~320px. The sparkline
+     band is a fixed 1.5rem — the height the view already asks for — so the
+     four stat cards stay a single compact row. */
+  .al-stat-grid canvas {
+    height: 1.5rem !important;
+  }
+
   .al-console-inputbar {
     position: relative;
     display: flex;
@@ -105,6 +113,10 @@
   @media (max-width: 767px) {
     .al-console-screen {
       height: 19rem;
+    }
+    /* Chip is a control in the bar — keep the 44px mobile floor. */
+    .al-console-chip {
+      min-height: 2.75rem;
     }
   }
 }

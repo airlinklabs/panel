@@ -1,78 +1,83 @@
-<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Players' }) %>
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + t('players') }) %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);"><%= t('players') %></span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name || t('server'), url: '/server/' + server.UUID },
+    { label: t('players') }
+  ] }) %>
+</div>
 
-<div class="px-6 sm:px-8 pb-12" data-server-uuid="<%= server.UUID %>">
-
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold" style="color:var(--theme-text);"><%= t('players') %></h1>
-    <button id="refreshPlayersBtn" type="button" class="al-btn-secondary px-3 py-1.5 rounded-xl text-xs font-medium inline-flex items-center gap-1.5">
-      <%- icon('refresh-cw', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> <%= t('refresh') %>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= server.name || t('server') %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
+  </div>
+  <div>
+    <button id="refreshPlayersBtn" type="button" class="al-btn-secondary min-h-11">
+      <%- icon('refresh-cw', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('refresh') %>
     </button>
   </div>
+</header>
+
+<div class="al-page-body" data-server-uuid="<%= server.UUID %>">
 
   <!-- Online Players -->
-  <div class="al-card p-4 mb-6">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Online</h2>
-      <span id="online-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-success-bg);color:var(--theme-success);">0</span>
+  <div class="al-card">
+    <div class="al-card-header">
+      <div class="min-w-0"><h2 class="al-card-title"><%= t('online') %></h2></div>
+      <span id="online-count" class="al-badge al-badge-online">0</span>
     </div>
-    <div id="online-players">
-      <p class="text-xs" style="color:var(--theme-text-muted);">No players online</p>
+    <div class="al-card-body">
+      <div id="online-players" class="hidden"></div>
+      <div id="online-empty"><%- include('../../partials/empty-state', { iconName: 'users', title: t('noPlayersOnline') }) %></div>
     </div>
   </div>
 
   <!-- Banned Players -->
-  <div class="al-card p-4">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Banned</h2>
-      <span id="banned-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-danger-bg);color:var(--theme-danger);">0</span>
+  <div class="al-card mt-4">
+    <div class="al-card-header">
+      <div class="min-w-0"><h2 class="al-card-title"><%= t('banned') %></h2></div>
+      <span id="banned-count" class="al-badge al-badge-offline">0</span>
     </div>
-    <div id="banned-players">
-      <p class="text-xs" style="color:var(--theme-text-muted);">No banned players</p>
+    <div class="al-card-body">
+      <div id="banned-players" class="hidden"></div>
+      <div id="banned-empty"><%- include('../../partials/empty-state', { iconName: 'shield-off', title: t('noBannedPlayers') }) %></div>
     </div>
   </div>
 
   <!-- Whitelist (if enabled) -->
-  <div class="al-card p-4 mt-6 hidden" id="whitelist-card">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Whitelisted</h2>
-      <span id="whitelist-count" class="text-xs px-2 py-0.5 rounded-full" style="background:var(--theme-info-bg, var(--theme-bg-secondary));color:var(--theme-info, var(--theme-text-muted));">0</span>
+  <div class="al-card mt-4 hidden" id="whitelist-card">
+    <div class="al-card-header">
+      <div class="min-w-0"><h2 class="al-card-title"><%= t('whitelisted') %></h2></div>
+      <span id="whitelist-count" class="al-badge al-badge-info">0</span>
     </div>
-    <div id="whitelisted-players">
-      <p class="text-xs" style="color:var(--theme-text-muted);">No whitelisted players</p>
+    <div class="al-card-body">
+      <div id="whitelisted-players" class="hidden"></div>
+      <div id="whitelisted-empty"><%- include('../../partials/empty-state', { iconName: 'list-checks', title: t('noWhitelistedPlayers') }) %></div>
     </div>
   </div>
 
 </div>
 
 <!-- Player Action Modal -->
-<div id="player-modal" class="fixed inset-0 z-50 hidden" style="background:rgba(0,0,0,0.5);display:none;">
-  <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="al-card p-6 w-full max-w-md" style="background:var(--theme-bg);border:1px solid var(--theme-border);">
-      <div class="flex items-center justify-between mb-4">
-        <h3 id="modal-title" class="text-sm font-semibold" style="color:var(--theme-text-strong);"></h3>
-        <button id="modal-close" type="button" class="text-xs" style="color:var(--theme-text-muted);">✕</button>
-      </div>
-      <p id="modal-desc" class="text-xs mb-4" style="color:var(--theme-text-muted);"></p>
-      <div class="flex justify-end gap-2">
-        <button id="modal-cancel" type="button" class="al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium">Cancel</button>
-        <button id="modal-confirm" type="button" class="al-btn-danger px-3 py-1.5 rounded-lg text-xs font-medium">Confirm</button>
-      </div>
+<div id="player-modal" class="al-sheet-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="al-sheet-panel w-full sm:max-w-md flex flex-col rounded-2xl shadow-xl" style="background:var(--theme-bg-card);">
+    <div class="al-sheet-header">
+      <div class="min-w-0"><h3 id="modal-title" class="al-card-title"></h3></div>
+      <button id="modal-close" type="button" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
+        <%- icon('x', { class: 'w-5 h-5' }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <p id="modal-desc" class="text-sm" style="color:var(--theme-text-muted)"></p>
+    </div>
+    <div class="al-sheet-footer justify-end">
+      <button id="modal-cancel" type="button" class="al-btn-secondary al-btn-sm min-h-11"><%= t('cancel') %></button>
+      <button id="modal-confirm" type="button" class="al-btn-danger al-btn-sm min-h-11"><%= t('confirm') %></button>
     </div>
   </div>
 </div>
@@ -80,29 +85,70 @@
 <script type="module" nonce="<%- nonce %>">
   const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
   const modal = document.getElementById('player-modal');
+  const T = <%- JSON.stringify({
+    kick: t('kick'),
+    ban: t('ban'),
+    pardon: t('pardon'),
+    whitelistRemove: t('removeFromWhitelist'),
+    confirmKick: t('confirmKick'),
+    confirmBan: t('confirmBan'),
+    confirmPardon: t('confirmPardon'),
+    confirmWhitelistRemove: t('confirmWhitelistRemove'),
+    noPlayersOnline: t('noPlayersOnline'),
+    noBannedPlayers: t('noBannedPlayers'),
+    noWhitelistedPlayers: t('noWhitelistedPlayers'),
+    playerKicked: t('playerKicked'),
+    playerBanned: t('playerBanned'),
+    playerPardoned: t('playerPardoned'),
+    playerWhitelistRemoved: t('playerWhitelistRemoved')
+  }) %>;
   let currentPlayer = null;
   let currentAction = null;
 
-  function renderPlayerCard(player, actions) {
+  const actionMeta = {
+    kick: { label: T.kick, confirm: T.confirmKick, success: T.playerKicked },
+    ban: { label: T.ban, confirm: T.confirmBan, success: T.playerBanned },
+    pardon: { label: T.pardon, confirm: T.confirmPardon, success: T.playerPardoned },
+    'whitelist-remove': { label: T.whitelistRemove, confirm: T.confirmWhitelistRemove, success: T.playerWhitelistRemoved }
+  };
+
+  function setList(listEl, emptyEl, html) {
+    listEl.innerHTML = html;
+    listEl.classList.toggle('hidden', !html);
+    emptyEl.classList.toggle('hidden', !!html);
+  }
+
+  function renderPlayerRow(player, actions) {
     return `
-      <div class="flex items-center justify-between py-2 border-b" style="border-color:var(--theme-border);">
-        <div class="flex items-center gap-2 min-w-0">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-bg-secondary);">
-            <img src="https://mc-heads.net/avatar/${player.uuid || player.name}/24" alt="" class="w-6 h-6 rounded" onerror="this.parentElement.innerHTML='<span class=text-xs>${(player.name||'?')[0]}</span>'">
-          </div>
+      <div class="flex items-center justify-between gap-3 py-3 border-t first:border-t-0" style="border-color:var(--theme-border)">
+        <div class="flex items-center gap-3 min-w-0">
+          <img src="https://mc-heads.net/avatar/${player.uuid || player.name}/32" alt="" class="w-8 h-8 rounded-full shrink-0" style="background:var(--theme-bg-secondary)" onerror="this.outerHTML='<span class=\'al-avatar al-avatar-sm\'>${(player.name||'?').slice(0,1)}</span>'">
           <div class="min-w-0">
-            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);">${player.name || '—'}</p>
-            <p class="text-[10px] truncate" style="color:var(--theme-text-muted);">${player.uuid || ''}</p>
+            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">${player.name || '—'}</p>
+            <p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">${player.uuid || ''}</p>
           </div>
         </div>
-        <div class="flex items-center gap-1 shrink-0">
+        <div class="flex items-center gap-2 shrink-0">
           ${actions.map(a => `
-            <button type="button" class="player-action-btn al-btn-secondary px-2 py-1 rounded-lg text-[10px] font-medium" data-player="${player.name || player.uuid}" data-action="${a.action}">
+            <button type="button" class="player-action-btn al-btn-secondary al-btn-sm min-h-11" data-player="${player.name || player.uuid}" data-action="${a.action}">
               ${a.label}
             </button>
           `).join('')}
         </div>
       </div>`;
+  }
+
+  function wireActions() {
+    document.querySelectorAll('.player-action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentPlayer = btn.dataset.player;
+        currentAction = btn.dataset.action;
+        const meta = actionMeta[currentAction] || { label: currentAction, confirm: '' };
+        document.getElementById('modal-title').textContent = meta.label;
+        document.getElementById('modal-desc').textContent = (meta.confirm || '').replace('{{name}}', currentPlayer);
+        modal.style.display = 'flex';
+      });
+    });
   }
 
   async function loadPlayers() {
@@ -117,49 +163,36 @@
       document.getElementById('online-count').textContent = online.length;
       document.getElementById('banned-count').textContent = banned.length;
 
-      const onlineEl = document.getElementById('online-players');
-      if (online.length) {
-        onlineEl.innerHTML = online.map(p => renderPlayerCard(p, [
-          { action: 'kick', label: 'Kick' },
-          { action: 'ban', label: 'Ban' },
-        ])).join('');
-      } else {
-        onlineEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No players online</p>';
-      }
+      setList(
+        document.getElementById('online-players'),
+        document.getElementById('online-empty'),
+        online.length ? online.map(p => renderPlayerRow(p, [
+          { action: 'kick', label: T.kick },
+          { action: 'ban', label: T.ban },
+        ])).join('') : ''
+      );
 
-      const bannedEl = document.getElementById('banned-players');
-      if (banned.length) {
-        bannedEl.innerHTML = banned.map(p => renderPlayerCard(p, [
-          { action: 'pardon', label: 'Pardon' },
-        ])).join('');
-      } else {
-        bannedEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No banned players</p>';
-      }
+      setList(
+        document.getElementById('banned-players'),
+        document.getElementById('banned-empty'),
+        banned.length ? banned.map(p => renderPlayerRow(p, [
+          { action: 'pardon', label: T.pardon },
+        ])).join('') : ''
+      );
 
       if (whitelisted.length > 0 || d.whitelistEnabled) {
         document.getElementById('whitelist-card').classList.remove('hidden');
         document.getElementById('whitelist-count').textContent = whitelisted.length;
-        const wlEl = document.getElementById('whitelisted-players');
-        if (whitelisted.length) {
-          wlEl.innerHTML = whitelisted.map(p => renderPlayerCard(p, [
-            { action: 'whitelist-remove', label: 'Remove' },
-          ])).join('');
-        } else {
-          wlEl.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No whitelisted players</p>';
-        }
+        setList(
+          document.getElementById('whitelisted-players'),
+          document.getElementById('whitelisted-empty'),
+          whitelisted.length ? whitelisted.map(p => renderPlayerRow(p, [
+            { action: 'whitelist-remove', label: T.whitelistRemove },
+          ])).join('') : ''
+        );
       }
 
-      // Attach action listeners
-      document.querySelectorAll('.player-action-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentPlayer = btn.dataset.player;
-          currentAction = btn.dataset.action;
-          const actionLabels = { kick: 'Kick', ban: 'Ban', pardon: 'Pardon', 'whitelist-remove': 'Remove from whitelist' };
-          document.getElementById('modal-title').textContent = `${actionLabels[currentAction] || currentAction} Player`;
-          document.getElementById('modal-desc').textContent = `Are you sure you want to ${currentAction} ${currentPlayer}?`;
-          modal.style.display = 'flex';
-        });
-      });
+      wireActions();
     } catch (e) {
       console.error('Failed to load players', e);
     }
@@ -174,7 +207,8 @@
       });
       const data = await res.json();
       if (data.success !== false) {
-        if (window.showToast) window.showToast(`Player ${currentAction}ed`, 'success');
+        const meta = actionMeta[currentAction];
+        if (window.showToast) window.showToast(meta ? meta.success : currentAction, 'success');
         loadPlayers();
       }
     } catch (e) {

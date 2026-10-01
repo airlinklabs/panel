@@ -168,6 +168,26 @@
 
   /* ── Icon-only buttons need a practical target; the accessible name is
         enforced by markup (aria-label / sr-only text), not by content. ── */
+  /* ── Touch floor: 44px targets on phones (WCAG 2.5.8 / §4.5) ─────────
+     Base `.al-btn` computes to 36px (0.5rem*2 padding + 1.25rem line-height)
+     and `.al-btn-sm` to ~36px — both under the floor. `.al-btn-icon-only`
+     already declares min-h-[44px] at every width; this gives the rest of the
+     family the same contract. Phone-only, so desktop density is untouched.
+     Ownership: Batch 0 (shared, applies to every page). */
+  @media (max-width: 639px) {
+    .al-btn,
+    .al-btn-primary,
+    .al-btn-secondary,
+    .al-btn-danger,
+    .al-btn-success,
+    .al-btn-danger-outline,
+    .al-btn-ghost,
+    .al-btn-link,
+    .al-btn-sm {
+      min-height: 44px;
+    }
+  }
+
   .al-btn-icon-only {
     @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-xl;
     box-shadow: none;
@@ -292,22 +312,5 @@
   input[type="submit"]:disabled,
   input[type="button"]:disabled {
     cursor: not-allowed;
-  }
-
-  /* Legacy aliases — kept for backward compat */
-  .al-ui-surface {
-    @apply border border-neutral-200 bg-white dark:border-neutral-700/50 dark:bg-neutral-900/60;
-  }
-
-  .al-ui-button {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/10 dark:bg-white/5 dark:text-neutral-100 dark:hover:bg-white/10 dark:active:bg-white/15;
-  }
-
-  .al-ui-button-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 active:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-55 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 dark:active:bg-neutral-300;
-  }
-
-  .al-ui-muted {
-    @apply text-neutral-600 dark:text-neutral-400;
   }
 }

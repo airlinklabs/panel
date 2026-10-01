@@ -1,6 +1,19 @@
 @layer components {
   /* ── Breadcrumb ─────────────────────────────────────────────── */
-  /* Breadcrumb styles are handled via Tailwind utilities in the template.
-     This file exists as a placeholder for any future bespoke breadcrumb CSS.
-     If no bespoke styles are needed, this file can be removed. */
+  /* Layout lives in partials/ui/breadcrumb.ejs (Tailwind utilities); this
+     file owns the one thing utilities can't express without a component
+     hook: the phone touch floor.
+
+     Crumb links rendered 20px tall — under WCAG 2.5.8's 24px AA minimum,
+     let alone our 44px phone floor. Expanding them only below 640px keeps
+     desktop density unchanged; each `li` is `flex items-center`, so the
+     current-page span (which is not interactive) simply centres in the
+     taller row. */
+  @media (max-width: 639px) {
+    .al-breadcrumb a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
 }

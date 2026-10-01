@@ -44,7 +44,7 @@
 
   .al-icon-tile-accent {
     background: color-mix(in srgb, var(--theme-accent) 14%, transparent);
-    color: var(--theme-accent);
+    color: var(--theme-accent-text);
     border-color: color-mix(in srgb, var(--theme-accent) 28%, transparent);
   }
 
