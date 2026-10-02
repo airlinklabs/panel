@@ -5,7 +5,7 @@
 <div class="al-page-crumbs">
   <%- include('../../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
-    { label: t('breadcrumbRadar'), url: '/admin/radar' },
+    { label: t('breadcrumbRadar'), url: '/admin/servers#radar' },
     { label: t('scripts') }
   ] }) %>
 </div>
@@ -16,7 +16,7 @@
     <p class="al-page-desc"><%= t('radarScriptsDesc') %></p>
   </div>
   <div class="flex gap-2 shrink-0">
-    <a href="/admin/radar" class="al-btn-secondary">
+    <a href="/admin/servers#radar" class="al-btn-secondary">
       <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('back') %></span>
     </a>
     <a href="/admin/radar/scripts/create" class="al-btn-primary">

@@ -14,7 +14,6 @@ import adminOverview from './admin/overview';
 import adminAnalytics from './admin/analytics';
 import adminPlayerStats from './admin/playerStats';
 import adminActivity from './admin/activity';
-import adminMenu from './admin/menu';
 import adminQueue from './admin/queue';
 
 import authPages from './auth/index';
@@ -42,7 +41,6 @@ export const pageModules = [
   adminAnalytics,
   adminPlayerStats,
   adminActivity,
-  adminMenu,
   adminQueue,
 
   authPages,

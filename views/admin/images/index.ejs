@@ -31,20 +31,20 @@
   <% } %>
 
   <div class="mt-5" data-al-tabs data-tabs-default="installed" data-tabs-hash>
-    <div role="tablist" class="flex gap-1 mb-6">
-      <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+    <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+      <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="al-segmented-btn">
         <%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('installed') %>
         <span id="tabCountInstalled" class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= images ? images.length : 0 %></span>
       </button>
-      <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="al-segmented-btn">
         <%- icon('clock', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('approvals') %>
         <% if (pending && pending.length > 0) { %>
           <span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning)"><%= pending.length %></span>
         <% } %>
       </button>
-      <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="al-segmented-btn">
         <%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= t('storeTab') %>
       </button>

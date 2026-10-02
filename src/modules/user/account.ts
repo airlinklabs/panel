@@ -593,34 +593,8 @@ const accountModule: Module = {
       },
     );
 
-    router.get(
-      '/credits',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const [user, settings] = await Promise.all([
-            prisma.users.findUnique({ where: { id: userId } }),
-            await getSettings(),
-          ]);
-          if (!user) {
-            return res.redirect('/login');
-          }
-          const pkg = JSON.parse(
-            fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
-          );
-          res.render('user/credits', {
-            user,
-            req,
-            settings,
-            version: pkg.version,
-          });
-        } catch (error) {
-          logger.error('Error loading credits page:', error);
-          res.redirect('/');
-        }
-      },
-    );
+    // No `/credits` route here — the page was removed at the user's request.
+    // (`pages/user/index.ts` had a second copy of the same route; also gone.)
 
     return router;
   },

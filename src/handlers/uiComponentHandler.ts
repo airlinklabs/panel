@@ -330,23 +330,8 @@ export function initializeDefaultUIComponents(): void {
     url: '/create-server',
     priority: 99,
   });
-  uiComponentStore.addSidebarItem({
-    id: 'my-images',
-    label: 'My Images',
-    icon: icon('images', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/my-images',
-    priority: 98,
-    matchPrefix: '/my-images',
-  });
-  // `/credits` rendered 200 with zero in-links — markSpecialLinks() already had
-  // an `onCredits` active-state branch for a link nothing ever emitted.
-  uiComponentStore.addSidebarItem({
-    id: 'credits',
-    label: 'Credits',
-    icon: icon('heart-handshake', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/credits',
-    priority: 97,
-  });
+  // No `my-images` entry: the list lives as the Images tab of /account. No
+  // `credits` entry: the page is gone (its material lived in package.json).
 
   // ── Admin: Core ─────────────────────────────────────────────────────────
   uiComponentStore.addSidebarItem({
@@ -387,15 +372,7 @@ export function initializeDefaultUIComponents(): void {
     isAdminItem: true,
     section: 'infrastructure',
   });
-  uiComponentStore.addSidebarItem({
-    id: 'admin-queue',
-    label: 'Queue Management',
-    icon: icon('list-ordered', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/admin/queue',
-    priority: 79,
-    isAdminItem: true,
-    section: 'infrastructure',
-  });
+  // No `admin-queue` entry: Queue Management is the Queue tab of /admin/servers.
   uiComponentStore.addSidebarItem({
     id: 'admin-activity',
     label: 'Activity Log',
@@ -414,17 +391,8 @@ export function initializeDefaultUIComponents(): void {
     isAdminItem: true,
     section: 'infrastructure',
   });
-  // `/admin/radar` was an island: it linked only to /admin/radar/scripts, which
-  // linked only back. Nothing in any nav reached either.
-  uiComponentStore.addSidebarItem({
-    id: 'admin-radar',
-    label: 'Radar',
-    icon: icon('radar', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/admin/radar',
-    priority: 74,
-    isAdminItem: true,
-    section: 'infrastructure',
-  });
+  // No `admin-radar` entry: Radar's scan UI is the Radar tab of /admin/servers.
+  // `/admin/radar/scripts` stays a real page and is linked from that tab.
 
   // ── Admin: Extensions ───────────────────────────────────────────────────
   uiComponentStore.addSidebarItem({
@@ -474,15 +442,7 @@ export function initializeDefaultUIComponents(): void {
     isAdminItem: true,
     section: 'configuration',
   });
-  uiComponentStore.addSidebarItem({
-    id: 'admin-playerstats',
-    label: 'Player Statistics',
-    icon: icon('chart-line', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/admin/playerstats',
-    priority: 57,
-    isAdminItem: true,
-    section: 'configuration',
-  });
+  // No `admin-playerstats` entry: Player Statistics is a tab of /admin/analytics.
   uiComponentStore.addSidebarItem({
     id: 'admin-databases',
     label: 'Databases',
@@ -501,17 +461,8 @@ export function initializeDefaultUIComponents(): void {
     isAdminItem: true,
     section: 'configuration',
   });
-  // The Menu Manager — the admin's own server-menu editor. It had no entry, so
-  // the tool for editing the nav could only be reached by editing the nav.
-  uiComponentStore.addSidebarItem({
-    id: 'admin-menu',
-    label: 'Menu Manager',
-    icon: icon('list-tree', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
-    url: '/admin/menu',
-    priority: 52,
-    isAdminItem: true,
-    section: 'configuration',
-  });
+  // No `admin-menu` entry: the Menu Manager page was removed at the user's
+  // request. Server menu items are registered in code (below).
 
   // ── Server menu items ──────────────────────────────────────────────────
   uiComponentStore.addServerMenuItem({

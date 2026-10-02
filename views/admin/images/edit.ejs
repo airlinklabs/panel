@@ -59,23 +59,23 @@
   <% } %>
 
   <div data-al-tabs data-tabs-default="general" data-tabs-hash>
-    <div role="tablist" class="flex gap-1 mb-6">
-      <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+    <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+      <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="al-segmented-btn">
         <%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('general') %>
       </button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="al-segmented-btn">
         <%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('dockerImages') %>
       </button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="al-segmented-btn">
         <%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('variables') %>
       </button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="al-segmented-btn">
         <%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('installScript') %>
       </button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="al-segmented-btn">
         <%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('settings') %>
       </button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+      <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="al-segmented-btn">
         <%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('rawJson') %>
       </button>
     </div>
@@ -254,7 +254,9 @@
         }
       }
       window._rebindTabHandlers = function() {
-        var active = document.querySelector('.tab-btn[aria-selected="true"]');
+        // Class-agnostic: this page's tabs were restyled from .tab-btn to
+        // .al-segmented-btn, and the state lives on aria-selected either way.
+        var active = document.querySelector('[role="tab"][aria-selected="true"]');
         if (active) rebind(active.dataset.tab);
       };
       document.addEventListener('al:tabs-change', function(e) {

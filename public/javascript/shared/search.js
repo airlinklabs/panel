@@ -241,7 +241,7 @@
           },
           {
             label: tx('adminPlayerStatsTitle', 'Player Stats'),
-            url: '/admin/playerstats',
+            url: '/admin/analytics#playerstats',
             kw: 'players analytics stats leaderboard top',
           },
           {
@@ -295,9 +295,14 @@
             kw: 'radar scan scripts virustotal virus total',
           },
           {
-            label: tx('navMenu', 'Menu'),
-            url: '/admin/menu',
-            kw: 'menu navigation sidebar items',
+            label: tx('queueManagementTitle', 'Queue Management'),
+            url: '/admin/servers#queue',
+            kw: 'queue pending priority kick ban waiting',
+          },
+          {
+            label: tx('serverScanTitle', 'Server Scan'),
+            url: '/admin/servers#radar',
+            kw: 'radar scan server virustotal virus total security',
           },
         );
       }

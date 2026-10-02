@@ -5,7 +5,7 @@
 <div class="al-page-crumbs">
   <%- include('../../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
-    { label: t('breadcrumbRadar'), url: '/admin/radar' },
+    { label: t('breadcrumbRadar'), url: '/admin/servers#radar' },
     { label: t('scripts'), url: '/admin/radar/scripts' },
     { label: (typeof script !== 'undefined' && script && script.name) ? script.name : t('editScriptCrumb') }
   ] }) %>

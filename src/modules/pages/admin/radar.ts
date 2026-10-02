@@ -26,33 +26,8 @@ const module: Module = {
   router: () => {
     const router = Router();
 
-    router.get(
-      '/admin/radar',
-      isAuthenticated(true, 'airlink.admin.radar.view'),
-      async (req, res, next) => {
-        try {
-          const data = await apiGet(req, '/admin/radar');
-          const radar = asObject(data);
-          // The tab view reads `settings.virusTotalApiKey`; accept either a
-          // nested `{ settings: {...} }` payload or the settings row itself.
-          const nested = radar.settings;
-          const settings =
-            nested !== null &&
-            typeof nested === 'object' &&
-            !Array.isArray(nested)
-              ? (nested as Record<string, unknown>)
-              : radar;
-          res.render('admin/radar/index', {
-            radar,
-            settings,
-            user: req.session?.user,
-            req,
-          });
-        } catch (err) {
-          next(err);
-        }
-      },
-    );
+    // The radar index page itself now lives on /admin/servers (Radar tab);
+    // the scripts pages, JSON proxies and mutations below are unchanged.
 
     router.get(
       '/admin/radar/scripts',
@@ -100,16 +75,16 @@ const module: Module = {
       },
     );
 
-    // The VirusTotal tab lives on the radar index page now.
+    // The VirusTotal tab lives on the Radar tab of /admin/servers now.
     router.get(
       '/admin/radar/virustotal',
       isAuthenticated(true, 'airlink.admin.radar.virustotal.view'),
       (_req, res) => {
-        res.redirect('/admin/radar#virustotal');
+        res.redirect('/admin/servers#radar');
       },
     );
 
-    // JSON proxy for the VT hash-lookup fetch on the radar index page.
+    // JSON proxy for the VT hash-lookup fetch on the Radar tab of /admin/servers.
     router.get(
       '/admin/radar/virustotal/scan/:hash',
       isAuthenticated(true, 'airlink.admin.radar.virustotal.view'),

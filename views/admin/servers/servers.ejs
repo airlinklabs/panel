@@ -24,6 +24,20 @@
 
 <div class="al-page-body">
 
+  <div data-al-tabs data-tabs-default="servers" data-tabs-hash>
+
+    <!-- Tab bar -->
+    <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+      <button type="button" role="tab" id="tab-servers" data-tab="servers" aria-controls="panel-servers" aria-selected="true" tabindex="0" class="al-segmented-btn"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('adminServersTitle') %></button>
+      <button type="button" role="tab" id="tab-queue" data-tab="queue" aria-controls="panel-queue" aria-selected="false" tabindex="-1" class="al-segmented-btn"><%- icon('list-ordered', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('breadcrumbQueue') %></button>
+      <% if (showRadar) { %>
+      <button type="button" role="tab" id="tab-radar" data-tab="radar" aria-controls="panel-radar" aria-selected="false" tabindex="-1" class="al-segmented-btn"><%- icon('radar', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('adminRadarTitle') %></button>
+      <% } %>
+    </div>
+
+    <!-- ── Servers ─────────────────────────────────────────────────── -->
+    <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel">
+
   <!-- Sentinel — watched to know when toolbar scrolls off screen -->
   <div id="toolbarSentinel" class="h-px w-full" aria-hidden="true"></div>
 
@@ -153,7 +167,137 @@
     <% } %>
   </div>
 
-</div>
+    </div><!-- /#panel-servers -->
+
+    <!-- ── Queue ───────────────────────────────────────────────────── -->
+    <div id="panel-queue" role="tabpanel" aria-labelledby="tab-queue" data-tab-panel="queue" class="tab-panel space-y-5" hidden>
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="min-w-0">
+          <p class="al-section-title"><%= t('queueManagementTitle') %></p>
+          <p class="al-page-desc"><%= t('queueManagementDesc') %></p>
+        </div>
+        <button type="button" id="refreshBtn" class="al-btn-secondary shrink-0">
+          <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <%= t('refresh') %>
+        </button>
+      </div>
+
+      <div class="al-card al-card-flush">
+        <div class="al-card-header">
+          <span class="al-card-header-title"><%= t('queueCardTitle') %></span>
+        </div>
+        <table class="al-table">
+          <thead class="al-table-thead">
+            <tr>
+              <th scope="col" class="al-table-th"><%= t('serverColumn') %></th>
+              <th scope="col" class="al-table-th"><%= t('node') %></th>
+              <th scope="col" class="al-table-th"><%= t('user') %></th>
+              <th scope="col" class="al-table-th"><%= t('queuePosition') %></th>
+              <th scope="col" class="al-table-th"><%= t('queuePriority') %></th>
+              <th scope="col" class="al-table-th"><%= t('actions') %></th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+            <% if (entries && entries.length > 0) { %>
+              <% entries.forEach(function(entry) { %>
+                <tr class="al-table-tr" data-server-id="<%= entry.serverId %>">
+                  <td class="al-table-td"><span class="al-table-cell-strong font-mono text-xs"><%= entry.serverId %></span></td>
+                  <td class="al-table-td">#<%= entry.nodeId %></td>
+                  <td class="al-table-td">#<%= entry.userId %></td>
+                  <td class="al-table-td tabular-nums"><%= entry.position %> / <%= entry.total %></td>
+                  <td class="al-table-td">
+                    <% if (entry.priority) { %>
+                      <span class="al-badge al-badge-warning"><%- icon('zap', { size: 10, class: 'shrink-0' }) %> <%= t('queuePriorityHigh') %></span>
+                    <% } else { %>
+                      <span class="al-badge al-badge-neutral"><%= t('queuePriorityNormal') %></span>
+                    <% } %>
+                  </td>
+                  <td class="al-table-td">
+                    <div class="flex gap-2">
+                      <button class="al-btn-secondary al-btn-sm kick-btn" data-server-id="<%= entry.serverId %>"><%= t('queueKick') %></button>
+                      <button class="al-btn-secondary al-btn-sm ban-btn" data-user-id="<%= entry.userId %>"><%= t('queueBan') %></button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } else { %>
+              <tr><td colspan="6" class="al-table-empty al-table-td"><%= t('queueEmpty') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% if (showRadar) { %>
+    <!-- ── Radar ───────────────────────────────────────────────────── -->
+    <div id="panel-radar" role="tabpanel" aria-labelledby="tab-radar" data-tab-panel="radar" class="tab-panel space-y-5" hidden>
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="min-w-0">
+          <p class="al-section-title"><%= t('adminRadarTitle') %></p>
+          <p class="al-page-desc"><%= t('radarDesc') %></p>
+        </div>
+        <a href="/admin/radar/scripts" class="al-btn-secondary shrink-0">
+          <%- icon('file-code', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('scripts') %></span>
+        </a>
+      </div>
+
+      <!-- Server scan -->
+      <div class="al-card">
+        <div class="al-card-header">
+          <div class="min-w-0">
+            <p class="al-card-header-title"><%= t('serverScanTitle') %></p>
+            <p class="al-card-header-desc"><%= t('serverScanDesc') %></p>
+          </div>
+        </div>
+        <div class="al-card-body">
+          <div class="al-form-field max-w-md">
+            <label for="scanServerId" class="al-form-label"><%= t('serverId') %></label>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" id="scanServerId" placeholder="<%= t('enterServerIdPlaceholder') %>" class="al-form-input flex-1 min-w-[12rem]">
+              <button type="button" id="scanBtn" class="al-btn-primary">
+                <%- icon('scan', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('scanAction') %></span>
+              </button>
+            </div>
+          </div>
+          <div id="scanResult" class="mt-4 hidden"></div>
+        </div>
+      </div>
+
+      <!-- Scan history -->
+      <div class="al-card">
+        <div class="al-card-header">
+          <p class="al-card-header-title"><%= t('scanHistoryTitle') %></p>
+        </div>
+        <div class="al-card-body">
+          <div id="scanHistory" class="text-sm al-text-muted"><%= t('noRecentScans') %></div>
+        </div>
+      </div>
+
+      <!-- VirusTotal hash scan -->
+      <div class="al-card">
+        <div class="al-card-header">
+          <div class="min-w-0">
+            <p class="al-card-header-title"><%= t('vtHashScanTitle') %></p>
+            <p class="al-card-header-desc"><%= t('vtHashScanDesc') %></p>
+          </div>
+        </div>
+        <div class="al-card-body">
+          <div class="al-form-field max-w-lg">
+            <label for="vtHashInput" class="al-form-label"><%= t('fileHash') %></label>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" id="vtHashInput" placeholder="<%= t('vtHashPlaceholder') %>" class="al-form-input flex-1 min-w-[12rem] font-mono">
+              <button type="button" id="vtScanBtn" class="al-btn-primary">
+                <%- icon('search', { class: 'size-4', strokeWidth: 1.5 }) %><span><%= t('lookUpAction') %></span>
+              </button>
+            </div>
+          </div>
+          <div id="vtScanResult" class="mt-4 hidden"></div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+  </div><!-- /data-al-tabs -->
 
 <script nonce="<%- nonce %>">
 (function() {
@@ -280,5 +424,122 @@
   window.deleteServer = function(id, name) { sm.deleteServer(id, name); };
 })();
 </script>
+
+<script nonce="<%- nonce %>">
+(function() {
+  document.getElementById('refreshBtn').addEventListener('click', function() {
+    window.location.reload();
+  });
+
+  document.querySelectorAll('.kick-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var serverId = btn.dataset.serverId;
+      if (!confirm('<%= t('queueKickConfirm') %>'.replace('{{id}}', serverId))) return;
+      try {
+        var resp = await fetch('/admin/queue/' + encodeURIComponent(serverId) + '/kick', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        var data = await resp.json();
+        if (data.removed) {
+          btn.closest('tr').remove();
+        }
+      } catch (e) {
+        showToast('<%= t('queueKickFailed') %>', 'error');
+      }
+    });
+  });
+
+  document.querySelectorAll('.ban-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var userId = btn.dataset.userId;
+      if (!confirm('<%= t('queueBanConfirm') %>'.replace('{{id}}', userId))) return;
+      try {
+        var resp = await fetch('/admin/queue/users/' + encodeURIComponent(userId) + '/ban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ minutes: 30 })
+        });
+        var data = await resp.json();
+        if (data.banned) {
+          showToast('<%= t('queueBanSuccess') %>', 'success');
+        }
+      } catch (e) {
+        showToast('<%= t('queueBanFailed') %>', 'error');
+      }
+    });
+  });
+})();
+</script>
+
+<% if (showRadar) { %>
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+  var msgScanning = <%- JSON.stringify(t('scanningInProgress')) %>;
+  var msgScanOk = <%- JSON.stringify(t('scanCompleteNoThreats')) %>;
+  var msgScanFailed = <%- JSON.stringify(t('scanFailedMsg')) %>;
+  var msgScanRequestFailed = <%- JSON.stringify(t('scanRequestFailed')) %>;
+  var msgEnterServerId = <%- JSON.stringify(t('enterServerId')) %>;
+  var msgEnterHash = <%- JSON.stringify(t('enterFileHash')) %>;
+  var msgLookingUp = <%- JSON.stringify(t('lookingUp')) %>;
+  var msgMalicious = <%- JSON.stringify(t('maliciousDetected')) %>;
+  var msgFileFlagged = <%- JSON.stringify(t('fileFlagged')) %>;
+  var msgClean = <%- JSON.stringify(t('scanClean')) %>;
+  var msgNoThreats = <%- JSON.stringify(t('noThreatsFound')) %>;
+  var msgLookupFailed = <%- JSON.stringify(t('lookupFailed')) %>;
+
+  // Scan server
+  var scanBtn = document.getElementById('scanBtn');
+  if (scanBtn) {
+    scanBtn.addEventListener('click', function() {
+      var serverId = document.getElementById('scanServerId')?.value?.trim();
+      if (!serverId) { showToast(msgEnterServerId, 'error'); return; }
+      var resultEl = document.getElementById('scanResult');
+      resultEl.classList.remove('hidden');
+      resultEl.innerHTML = '<p class="al-text-muted">' + msgScanning + '</p>';
+      fetch('/admin/radar/scan/' + serverId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+          resultEl.innerHTML = '<div class="al-alert-success"><p class="al-alert-title">' + msgScanOk + '</p></div>';
+        } else {
+          resultEl.innerHTML = '<div class="al-alert-danger"><p class="al-alert-title">' + (res.message || msgScanFailed) + '</p></div>';
+        }
+      }).catch(function() {
+        resultEl.innerHTML = '<div class="al-alert-danger"><p class="al-alert-title">' + msgScanRequestFailed + '</p></div>';
+      });
+    });
+  }
+
+  // VT hash scan
+  var vtScanBtn = document.getElementById('vtScanBtn');
+  if (vtScanBtn) {
+    vtScanBtn.addEventListener('click', function() {
+      var hash = document.getElementById('vtHashInput')?.value?.trim();
+      if (!hash) { showToast(msgEnterHash, 'error'); return; }
+      var resultEl = document.getElementById('vtScanResult');
+      resultEl.classList.remove('hidden');
+      resultEl.innerHTML = '<p class="al-text-muted">' + msgLookingUp + '</p>';
+      fetch('/admin/radar/virustotal/scan/' + encodeURIComponent(hash), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.malicious) {
+          resultEl.innerHTML = '<div class="al-alert-danger"><p class="al-alert-title">' + msgMalicious + '</p><p class="al-alert-body">' + (data.message || msgFileFlagged) + '</p></div>';
+        } else {
+          resultEl.innerHTML = '<div class="al-alert-success"><p class="al-alert-title">' + msgClean + '</p><p class="al-alert-body">' + (data.message || msgNoThreats) + '</p></div>';
+        }
+      }).catch(function() {
+        resultEl.innerHTML = '<div class="al-alert-danger"><p class="al-alert-title">' + msgLookupFailed + '</p></div>';
+      });
+    });
+  }
+})();
+</script>
+<% } %>
+
+</div>
 
 <%- include('../../layouts/admin-footer') %>

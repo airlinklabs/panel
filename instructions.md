@@ -745,7 +745,13 @@ Run these in order. All must pass before you report a page done.
 # 1. Build
 npx vite build
 
-# 2. Full test suite (1064 tests, ~2 min)
+# 2. Full test suite (~2 min). Current tree: 1046 tests.
+#    The number is NOT stable — tests/migration-invariants.test.ts emits one
+#    it() per .ejs file in three separate loops, so deleting a view removes
+#    three tests. Phase 15 was 1064/1064 with 119 views; Phase 16 deleted six
+#    views (§16.1, §16.2) → 1046/1046 with 113 views. Verify the *files* line
+#    (`Test Files  58 passed | 1 skipped`), not the test count, against a
+#    passing run — and never edit tests/ to make a number match.
 npx vitest run
 
 # 3. Detector on your changed targets only
@@ -1622,6 +1628,218 @@ edit: `sh .agents/ui-shots/restart.sh`. After any `vite build`: restart again.
 6. The legacy `features:` render locals in `src/modules/user/server/*.ts` are
    now **inert** for navigation (the nav reads `navFeatures`). Harmless; do not
    "fix" them by wiring them back up — that reopens the F2 problem.
+
+## 16. Phase 16 — consolidation: deletions, tab merges, one tab component
+
+Requested in one go: *delete Credits, Menu Manager and My Images; fold Queue
+and Radar into the admin Servers page as tabs (drop Radar's API-key card — it
+already lives in Settings); fold Player Statistics into Analytics as a tab; and
+make every tab bar use the Account page's segmented control.*
+
+### 16.1 Pages deleted (and every link repointed)
+
+| Page | View | Page route(s) | Why it was deletable |
+|---|---|---|---|
+| `/credits` | `views/user/credits.ejs` | `pages/user/index.ts` **and** a second copy in `user/account.ts` | Content was `package.json` + a contributor list; the nav entry was added in Phase 15 and is now removed again |
+| `/my-images` (index only) | `views/user/my-images/index.ejs` | `pages/user/index.ts` | `account.ejs:200-262` already renders the same list as the **Images** tab. `new.ejs` / `edit.ejs` are **kept** |
+| `/admin/menu` (Menu Manager) | `views/admin/menu/index.ejs` | `pages/admin/menu.ts` (full module) **and** a shadowed duplicate `src/modules/admin/menu.ts` | Both are gone, plus their `pages/index.ts` import/registration and their `registry.ts` import/entry |
+
+What had to be repointed — the full list, because these are exactly the links
+that would otherwise 404:
+
+* `views/user/my-images/{new,edit}.ejs` — 7 occurrences. Back/cancel `href`s
+  and the post-save `window.location.href = '/account#images'`. `account.ejs`
+  has hash routing (`:549-553`) so `#images` lands on the Images tab.
+* `views/partials/{admin,user}-sidebar.ejs:191-201` — `markSpecialLinks()` had
+  an `onCredits` branch that highlighted the sidebar **logo** for `/credits`.
+  Its only consumer was that branch, so the block is gone.
+* `views/layouts/base.ejs:5-7` — `wallpaperExcluded` no longer special-cases
+  `/credits`; `/admin/overview` still is.
+* `public/javascript/shared/search.js` — the hardcoded page catalog had
+  `navMenu → /admin/menu` (replaced by `Queue Management → /admin/servers#queue`
+  and `Server Scan → /admin/servers#radar`) and `adminPlayerStatsTitle →
+  /admin/playerstats` (now `/admin/analytics#playerstats`). Hash targets work:
+  the catalog already used `/admin/images#store`.
+* `views/styles/components/credits-bg.css` deleted + its `@import` dropped from
+  `views/styles/main.css`; the `sidebar.css:55` comment no longer says "credits".
+* `src/handlers/uiComponentHandler.ts` — 6 nav entries removed: `my-images`,
+  `credits`, `admin-queue`, `admin-radar`, `admin-playerstats`, `admin-menu`,
+  each replaced by a one-line comment naming where the functionality moved.
+
+**Kept on purpose:** `src/modules/user/images.ts:84-93` — the legacy
+`GET /my-images → 302 /account#images` redirect was already there (Phase 12).
+With the real route gone it is no longer shadowed, so old bookmarks degrade to
+a redirect instead of a 404. Its `/my-images/new` and `/my-images/edit/:id`
+siblings stay shadowed by `pages/user/index.ts`, which is correct.
+
+### 16.2 Tab merges
+
+Both merges are **server-side**, not lazy. `al-tabs.js` offers `data-tab-src`
+for lazy panels, but it injects with `innerHTML`, which does **not** execute
+inline `<script>` — and both absorbed pages are built out of inline scripts.
+`data-tab-src` is documented at `al-tabs.js:29` and used by **zero** views; it
+is a trap for exactly this case.
+
+#### `/admin/servers` → `Servers | Queue | Radar`
+
+* **Route** (`pages/admin/servers.ts`): `Promise.all` of servers + queue;
+  queue wrapped in `.catch(() => [])` so a runtime-queue hiccup cannot 500 the
+  admin's own list. **No radar fetch** — see below.
+* **`showRadar` gate**: `/admin/servers` is `airlink.admin.servers.view`,
+  `/admin/radar` *was* `airlink.admin.radar.view`. The tab button, the panel
+  and the radar script are all wrapped in `<% if (showRadar) { %>`. Effective
+  perms come from `req.panelUser?.permissions` — **not** `req.session.user`,
+  whose type has no permissions field — narrowed with `Array.isArray`, and an
+  **empty list means unrestricted admin** (mirrors `authUtil.ts`). Helper is
+  `hasPermission` from `handlers/utils/auth/roles.ts:66`, because it handles
+  `'*'` / `.*` / parent-group the way `authUtil` does; the sibling in
+  `handlers/permissions.ts:122` does not grant `'*'`.
+  Queue needs no gate: it inherited this route's permission.
+* **Radar payload dropped.** The panel's markup is entirely static — scan
+  form, `#scanHistory` placeholder, VT hash lookup. The old page only consumed
+  `/admin/radar`'s payload for the VirusTotal **settings card**, which Settings
+  owns. So the fetch is gone, and with it the hazard: passing the subsystem's
+  `settings` row as a render local **shadows `res.locals.settings`**, which
+  `layouts/base.ejs` reads for theme/logo. Keep the rule stated at the top of
+  `pages/admin/servers.ts`: *named locals only, never spread* — EJS reserves
+  `settings` and `filename`.
+* **Dropped from Radar:** the `virusTotalSettingsTitle` card (`#vtEnabled`,
+  `#vtApiKey`, `#vtSaveBtn`) and its `vtSaveBtn` handler. Kept: server-scan
+  card, scan-history card, VT **hash-lookup** card, and a link to
+  `/admin/radar/scripts` at the top of the panel (those pages still exist).
+  The old `scans | virustotal` inner tab row was flattened into two card
+  groups — **never nest a second `data-al-tabs` root inside a panel.**
+* **Queue refresh button kept** as the panel's header row action.
+* `views/admin/queue/index.ejs` and `views/admin/radar/index.ejs` deleted.
+* Breadcrumbs **and** the back button in `views/admin/radar/scripts/*.ejs`
+  repointed `/admin/radar` → `/admin/servers#radar`.
+* Routes removed: `GET /admin/queue` and `GET /admin/radar` from their page
+  modules only. All POSTs, and every `/admin/radar/scripts*` route, survive.
+
+#### `/admin/analytics` → 4th tab `Player Statistics`
+
+* **Payload collision is real: both APIs return a key named `servers`.**
+  Analytics returns a summary object, playerstats returns an array. So the
+  analytics payload keeps being spread and playerstats is passed as a single
+  `playerStats` local — never spread. The panel reads
+  `playerStats.{totalPlayers,totalMaxPlayers,onlineServers,servers,historicalData}`.
+* Gated identically on `airlink.admin.playerstats.view` (no fetch, no button,
+  no panel when absent); `data-tabs-default="servers"` is unaffected.
+* **Chart.js**: only playerstats loads `chart.umd.min.js`. It moved onto the
+  analytics page, gated with the panel, **before** the `new Chart(...)` script.
+  Confirm exactly one `<script … chart.umd.min.js>` after any edit here.
+* **`#refreshBtn` already existed** on analytics → the absorbed one became
+  `playerStatsRefreshBtn` (markup + script).
+* `views/admin/playerstats/index.ejs` deleted; only the page-render route was
+  removed from `pages/admin/playerStats.ts` — the `search`/`lookup` JSON routes
+  still serve the panel.
+* Route payload failure is tolerated (page renders with defaults).
+
+### 16.2a The shadow-route trap — check this on *every* route deletion
+
+The `pages/` tree mounts **first** so it wins over legacy modules registered
+on the same path (`modulesLoader.ts:16-20`). Deleting a *page* route therefore
+**unshadows** whatever legacy route sits behind it, and the legacy copy is
+usually the broken one. For each deletion in this pass:
+
+| Deleted page | Was shadowing | What appeared behind it | Fix |
+|---|---|---|---|
+| `/credits` | `user/account.ts` (2nd copy of same route) | — | both removed |
+| `/my-images` | `src/modules/user/images.ts` legacy `GET` | `302 /account#images` | **kept on purpose** — better than 404 |
+| `/admin/playerstats` | `src/modules/admin/playerStats.ts` | `GET` rendering `admin/playerstats/playerstats.ejs` — **a view that never existed**; caught and redirect. Would have started 500ing | route removed from the legacy module |
+| `/admin/menu` | `src/modules/admin/menu.ts` | same broken pattern (`admin/menu/menu.ejs`) | see below |
+| `/admin/queue` | `src/modules/admin/servers.ts` | root-path `GET /admin/queue` returning `{"entries":[…]}` — a *second* queue shape beside `GET /api/v2/admin/queue`'s `{success,data:[…]}` | route removed; nothing ever fetched the root URL. Its POST kick/ban/unban siblings stayed — the Queue tab's script calls them |
+
+**`src/modules/admin/menu.ts` is deliberately restored as a redirect stub.**
+Deleting it outright is what it looks like, and it *would* be right except for
+`tests/featureRegistry.test.ts:50-55`, which asserts the admin block is
+contiguous with `admin/users` at **index 17** — i.e. exactly 18 `admin/*`
+modules — and `tests/**` is off-limits. Registry order is a real contract
+(first match wins in Express), so the honest fix is to keep a module in its
+alphabetical slot. The module now registers two 302s (`/admin/menu` →
+`/admin/overview`, `/menu` → `/`) instead of two failing renders, which is a
+better answer for old bookmarks than a 404 anyway.
+`src/modules/user/images.ts` is the same pattern and predates this pass.
+
+`tests/featureRegistry.test.ts:30` also requires **every** `.ts` file under
+`src/modules/` that looks like a module (`export default` + `info:` + `router:`)
+to be registered, counting `FEATURE_REGISTRY + pageModules` against a
+directory scan — so a deleted file and its deleted registration must be
+**paired**. Deleting one without the other fails the test from two directions.
+
+### 16.3 One tab component: `al-segmented`
+
+Two tab styles existed. `views/user/account.ejs` uses `.al-segmented` /
+`.al-segmented-btn` (`views/styles/components/button.css:229-260`), which
+renders a padded pill group with a `--theme-bg-secondary` trough and an inset
+hairline on the active segment. Everything else used `.tab-btn`
+(`views/styles/components/tab.css`), an underline-flavoured row that relied on
+`opacity: 0.75` for the inactive state.
+
+**The switch is markup-only, because `al-tabs.js` never reads a class.** It
+selects `[role="tab"][data-tab]` and `[role="tabpanel"][data-tab-panel]` and
+toggles `aria-selected` / `hidden` (`public/javascript/shared/al-tabs.js:96,102,159,163`).
+So the whole restyle is:
+
+1. `class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex
+   items-center gap-2"` → `class="al-segmented-btn"` — **do not keep the
+   padding/size utilities**; they live in the utilities layer and would beat the
+   component's own `padding: .375rem .75rem` / `font-size: .875rem`.
+2. Tablist wrapper `class="flex gap-1 mb-6 [flex-wrap]"` → `class="al-segmented
+   mb-6 flex-wrap max-w-full"`. `max-w-full` matters: `.al-segmented` is
+   `inline-flex`, so without a cap a 6-tab bar (Security, Image Edit) overflows
+   the viewport instead of wrapping.
+3. `views/styles/components/button.css` — the active selector now covers both
+   state attributes: `.al-segmented-btn[aria-pressed="true"],
+   .al-segmented-btn[aria-selected="true"]`. `aria-pressed` is what Account's
+   hand-rolled switcher writes; `aria-selected` is what `al-tabs.js` writes.
+   Both are needed; neither alone is enough.
+
+Converted in this pass: `admin/{settings,nodes,security}/index.ejs`,
+`admin/images/{index,edit,store}.ejs` (6 files, 23 buttons) — plus the two new
+tab bars in §16.2. `admin/images/store.ejs` has no `data-al-tabs` root: it is a
+route switch (an `<a>` to `/admin/images` + a static "current" button), which is
+exactly what `views/styles/components/segmented.css` anticipates.
+
+**`.tab-btn` in `tab.css` must stay.** The modrinth addon
+(`storage/addons/modrinth/views/{admin,desktop/admin,mobile/admin}.ejs`) uses
+`class="tab-btn …"` in its markup *and* `document.querySelectorAll('.tab-btn')`
+in its script, and `storage/` is tracked. Same reason `tests/` must not be
+touched: nothing asserts on the class, but the addon does.
+
+One selector in the panel itself did key on the old class —
+`admin/images/edit.ejs:257` used `.tab-btn[aria-selected="true"]` inside
+`window._rebindTabHandlers`. It is now `[role="tab"][aria-selected="true"]`,
+which is both style-independent and correct for any future restyle. Grep for
+`querySelector`/`getElementById` next to `tab-btn` whenever you change a tab
+class.
+
+`grep -rn tab-btn views/` should now only ever return ids
+(`id="tab-btn-nodes"` etc. — those are element ids, not classes), the comment
+in `images/edit.ejs`, and `styles/components/tab.css`.
+
+### 16.4 Deferred (known, deliberate, not done)
+
+* **Orphaned i18n keys.** `credits`, `menuManagerTitle`, and the keys used
+  only by the three deleted index views still sit in
+  `storage/lang/*/lang.json` (2901 keys, sorted). Removing them means proving
+  no view, script or test still emits them — a full `t()` sweep across 65
+  pages, for keys nothing can fail on. Pruning needs its own pass.
+* **`POST /api/v2/admin/radar/virustotal` `{enabled, apiKey}` mode** is now
+  posted by nobody (Settings writes `virusTotalApiKey` through its own
+  endpoint). Left in place for addon compatibility; comment updated at
+  `api/v2/admin/misc.ts:1141`.
+* **`GET /api/v2/admin/radar`** has no page consumer any more (§16.2). Kept as
+  an endpoint; the comment says so plainly rather than pretending.
+* **`#scanHistory` never had a data source** — it renders
+  `t('noRecentScans')` statically on every load and nothing ever fills it.
+  Pre-existing (inherited verbatim from `views/admin/radar/index.ejs`), not a
+  regression from this pass, but it *is* a dead card the user may notice now
+  that Radar is a tab on the busiest admin page.
+* **Duplicate root-path queue POSTs** — `pages/admin/queue.ts` (wins) and
+  `src/modules/admin/servers.ts` both register `/admin/queue/:serverId/kick`
+  and the ban/unban pair. Pre-existing duplication; only the redundant *GET*
+  was removed in this pass.
 
 *Last updated: see git history. Update §3.4 and §13 whenever you introduce a
 component — the next agent depends on it.*

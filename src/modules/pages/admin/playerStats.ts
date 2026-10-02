@@ -16,26 +16,6 @@ const module: Module = {
     const router = Router();
 
     router.get(
-      '/admin/playerstats',
-      isAuthenticated(true, 'airlink.admin.playerstats.view'),
-      async (req, res, next) => {
-        try {
-          const data = (await apiGet(req, '/admin/playerstats')) as Record<
-            string,
-            unknown
-          >;
-          res.render('admin/playerstats/index', {
-            ...data,
-            user: req.session?.user,
-            req,
-          });
-        } catch (err) {
-          next(err);
-        }
-      },
-    );
-
-    router.get(
       '/admin/playerstats/search',
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req, res, next) => {

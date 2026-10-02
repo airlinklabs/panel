@@ -246,7 +246,8 @@
   .al-segmented-btn:hover {
     color: var(--theme-text-strong);
   }
-  .al-segmented-btn[aria-pressed="true"] {
+  .al-segmented-btn[aria-pressed="true"],
+  .al-segmented-btn[aria-selected="true"] {
     background: var(--theme-bg-card);
     color: var(--theme-text-strong);
     font-weight: 500;

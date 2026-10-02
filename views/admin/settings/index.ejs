@@ -26,11 +26,11 @@
 <div class="al-page-body" data-al-tabs data-tabs-default="appearance" data-tabs-hash>
 
   <!-- Tab bar -->
-  <div role="tablist" class="flex gap-1 mb-6 flex-wrap">
-    <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('theme') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navServers') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('securityTitle') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('features') %></button>
+  <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+    <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="al-segmented-btn"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('theme') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="al-segmented-btn"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navServers') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="al-segmented-btn"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('securityTitle') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="al-segmented-btn"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('features') %></button>
   </div>
 
   <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->

@@ -52,7 +52,7 @@
     opacity: 1;
   }
 
-  /* Account / credits rows: the partial script toggles .sidebar-active so the
+  /* Account rows: the partial script toggles .sidebar-active so the
      pill paints from theme tokens — the old inline hex writes are gone.
      Children carry their own inline colours, so they need !important here. */
   html #pc-sidebar .sidebar-active {

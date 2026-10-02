@@ -159,25 +159,10 @@ const module: Module = {
       }
     });
 
-    // Credits page — the view is fed by res.locals (templateConfig), no API
-    router.get('/credits', isAuthenticated(false), (req, res) => {
-      res.render('user/credits', { user: req.session?.user, req });
-    });
+    // No `/credits` route: the page was removed at the user's request.
 
-    // My Images
-    router.get('/my-images', isAuthenticated(false), async (req, res, next) => {
-      try {
-        const images = await apiGet(req, '/account/images', { timeoutMs: 15000 }).catch(() => []);
-        res.render('user/my-images/index', {
-          images: Array.isArray(images) ? images : [],
-          user: req.session?.user,
-          req,
-        });
-      } catch (err) {
-        next(err);
-      }
-    });
-
+    // No `/my-images` index route: the list is the Images tab of /account.
+    // The create/edit flows below still exist and return to /account#images.
     router.get('/my-images/new', isAuthenticated(false), async (req, res, next) => {
       try {
         res.render('user/my-images/new', { user: req.session?.user, req });

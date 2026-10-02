@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { isAuthenticated } from '../../../handlers/utils/auth/authUtil';
+import { hasPermission } from '../../../handlers/utils/auth/roles';
 import {
   apiGet,
   apiPost,
@@ -7,6 +8,11 @@ import {
   apiDelete,
 } from '../../../handlers/internalApiClient';
 import type { Module } from '../../../handlers/moduleInit';
+
+// Note: API payloads are handed to EJS as named locals only — never spread
+// into res.render. EJS reserves `settings`/`filename` internally (passing a
+// subsystem's row as `settings` would shadow the global one layouts/base.ejs
+// reads for theme/logo) and circular objects blow up the render.
 
 const module: Module = {
   info: {
@@ -21,7 +27,7 @@ const module: Module = {
     const router = Router();
 
     // -----------------------------------------------------------------------
-    // GET /admin/servers — List servers
+    // GET /admin/servers — List servers (+ Queue and Radar tabs)
     // -----------------------------------------------------------------------
     router.get(
       '/admin/servers',
@@ -32,13 +38,41 @@ const module: Module = {
           const perPage = req.query.perPage || '25';
           const search = req.query.search || '';
           const qs = `?page=${page}&perPage=${perPage}${search ? `&search=${search}` : ''}`;
-          const result = (await apiGet(
-            req,
-            `/api/v2/admin/servers${qs}`,
-          )) as any;
+
+          // Radar rides along on this page but keeps its own gate: the old
+          // /admin/radar route required airlink.admin.radar.view, so the tab
+          // is only rendered for admins that still hold it. An empty
+          // permissions list means unrestricted admin (same rule the
+          // isAuthenticated middleware applies).
+          const perms = req.panelUser?.permissions;
+          const userPerms: string[] = Array.isArray(perms)
+            ? (perms as unknown as string[])
+            : [];
+          const showRadar =
+            userPerms.length === 0 ||
+            hasPermission(userPerms, 'airlink.admin.radar.view');
+
+          // Queue reuses this route's permission, so no extra gate — but the
+          // queue read must never take the whole page down.
+          //
+          // No radar fetch: the Radar tab's markup is entirely static (server
+          // scan form, static history placeholder, VT hash lookup) — the old
+          // /admin/radar page only consumed its payload for the VirusTotal
+          // settings card, which Settings already owns. Fetching it here would
+          // be a wasted round trip and, worse, passing its `settings` row as a
+          // render local would shadow res.locals.settings that layouts/base.ejs
+          // reads for theme/logo.
+          const [result, queueData] = await Promise.all([
+            apiGet(req, `/api/v2/admin/servers${qs}`),
+            apiGet(req, '/admin/queue').catch(() => []),
+          ]);
+          const servers = (result as any) || [];
+
           res.render('admin/servers/servers', {
-            servers: result || [],
-            meta: result.meta,
+            servers,
+            meta: servers.meta,
+            entries: Array.isArray(queueData) ? queueData : [],
+            showRadar,
             user: req.session?.user,
             req,
           });

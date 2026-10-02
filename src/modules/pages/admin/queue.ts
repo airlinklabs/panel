@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { isAuthenticated } from '../../../handlers/utils/auth/authUtil';
-import { apiGet, apiPost } from '../../../handlers/internalApiClient';
+import { apiPost } from '../../../handlers/internalApiClient';
 import type { Module } from '../../../handlers/moduleInit';
 
 const module: Module = {
@@ -15,25 +15,8 @@ const module: Module = {
   router: () => {
     const router = Router();
 
-    router.get(
-      '/admin/queue',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
-      async (req, res, next) => {
-        try {
-          const data = (await apiGet(req, '/admin/queue')) as Record<
-            string,
-            unknown
-          >;
-          res.render('admin/queue/index', {
-            entries: data,
-            user: req.session?.user,
-            req,
-          });
-        } catch (err) {
-          next(err);
-        }
-      },
-    );
+    // The queue page itself now lives on /admin/servers (Queue tab); only the
+    // mutation endpoints the panel's queue script calls are kept here.
 
     router.post(
       '/admin/queue/:serverId/kick',

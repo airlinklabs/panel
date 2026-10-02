@@ -24,10 +24,13 @@
 
 <div class="al-page-body space-y-5">
   <div data-al-tabs data-tabs-default="servers" data-tabs-hash>
-    <div role="tablist" class="flex gap-1 mb-6 flex-wrap">
-      <button type="button" id="tab-servers" aria-controls="panel-servers" data-tab="servers" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabServers') %></button>
-      <button type="button" id="tab-nodes" aria-controls="panel-nodes" data-tab="nodes" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabNodes') %></button>
-      <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabActivity') %></button>
+    <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+      <button type="button" id="tab-servers" aria-controls="panel-servers" data-tab="servers" tabindex="0" class="al-segmented-btn" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabServers') %></button>
+      <button type="button" id="tab-nodes" aria-controls="panel-nodes" data-tab="nodes" tabindex="-1" class="al-segmented-btn" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabNodes') %></button>
+      <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="al-segmented-btn" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabActivity') %></button>
+      <% if (showPlayerStats) { %>
+      <button type="button" id="tab-playerstats" aria-controls="panel-playerstats" data-tab="playerstats" tabindex="-1" class="al-segmented-btn" role="tab" aria-selected="false"><%- icon('users', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('playerStatsTitle') %></button>
+      <% } %>
     </div>
 
     <div id="loading-state" class="flex items-center gap-3 py-12 al-text-muted" aria-live="polite">
@@ -198,6 +201,103 @@
         </div>
       </section>
     </div>
+
+    <!-- PLAYER STATISTICS TAB -->
+    <% if (showPlayerStats) { %>
+    <div id="panel-playerstats" role="tabpanel" aria-labelledby="tab-playerstats" data-tab-panel="playerstats" class="tab-panel space-y-5" hidden>
+      <div class="flex items-center justify-end">
+        <button type="button" id="playerStatsRefreshBtn" class="al-btn-secondary">
+          <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <%= t('playerStatsRefresh') %>
+        </button>
+      </div>
+      <% var psServers = playerStats?.servers || []; %>
+      <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="al-card">
+          <div class="flex items-center justify-between">
+            <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('totalPlayers') %></dt>
+            <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)"><%- icon('users', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %></div>
+          </div>
+          <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= playerStats?.totalPlayers ?? 0 %></dd>
+          <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('playersAcrossServers') %></p>
+        </div>
+        <div class="al-card">
+          <div class="flex items-center justify-between">
+            <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('maxCapacity') %></dt>
+            <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)"><%- icon('database', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %></div>
+          </div>
+          <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= playerStats?.totalMaxPlayers ?? 0 %></dd>
+          <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('totalPlayerCapacity') %></p>
+        </div>
+        <div class="al-card">
+          <div class="flex items-center justify-between">
+            <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('onlineServers') %></dt>
+            <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)"><%- icon('server', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %></div>
+          </div>
+          <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= playerStats?.onlineServers ?? 0 %></dd>
+          <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('serversCurrentlyOnline') %></p>
+        </div>
+        <div class="al-card">
+          <div class="flex items-center justify-between">
+            <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('utilization') %></dt>
+            <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)"><%- icon('activity', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %></div>
+          </div>
+          <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">
+            <%= playerStats?.totalMaxPlayers > 0 ? Math.round((playerStats.totalPlayers / playerStats.totalMaxPlayers) * 100) : 0 %>%
+          </dd>
+          <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('playerCapacityUtilization') %></p>
+        </div>
+      </dl>
+
+      <div class="al-card mt-6">
+        <div class="al-card-header">
+          <span class="al-card-header-title"><%= t('playerCountHistory') %></span>
+          <span class="text-xs" style="color:var(--theme-text-muted)"><%= t('playerDataCollectedEvery5min') %></span>
+        </div>
+        <div class="h-60">
+          <canvas id="playerChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <div class="al-card al-card-flush mt-6">
+        <div class="al-card-header">
+          <span class="al-card-header-title"><%= t('serverPlayerCounts') %></span>
+        </div>
+        <table class="al-table">
+          <thead class="al-table-thead">
+            <tr>
+              <th scope="col" class="al-table-th"><%= t('serverColumn') %></th>
+              <th scope="col" class="al-table-th"><%= t('statusColumn') %></th>
+              <th scope="col" class="al-table-th"><%= t('players') %></th>
+              <th scope="col" class="al-table-th"><%= t('version') %></th>
+            </tr>
+          </thead>
+          <tbody id="serverTableBody">
+            <% if (psServers.length > 0) { %>
+              <% psServers.forEach(function(s) { %>
+                <tr class="al-table-tr">
+                  <td class="al-table-td">
+                    <div class="al-table-cell-strong"><%= s.serverName %></div>
+                    <div class="text-xs" style="color:var(--theme-text-muted)"><%= s.serverId %></div>
+                  </td>
+                  <td class="al-table-td">
+                    <span class="<%= s.online ? 'al-badge al-badge-online' : 'al-badge al-badge-offline' %>">
+                      <%= s.online ? t('online') : t('offline') %>
+                    </span>
+                  </td>
+                  <td class="al-table-td whitespace-nowrap"><%= s.playerCount %> / <%= s.maxPlayers %></td>
+                  <td class="al-table-td whitespace-nowrap" style="color:var(--theme-text-muted)"><%= s.version %></td>
+                </tr>
+              <% }); %>
+            <% } %>
+            <% if (psServers.length === 0) { %>
+              <tr><td colspan="4" class="al-table-empty al-table-td"><%= t('playerStatsLoading') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
   </div>
 </div>
 
@@ -274,5 +374,70 @@
   });
 })();
 </script>
+
+<% if (showPlayerStats) { %>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/vendor/chart.js/dist/chart.umd.min.js') %>"></script>
+<script nonce="<%- nonce %>">
+(function() {
+  var historicalData = <%- JSON.stringify(playerStats?.historicalData || []) %>;
+  var totalPlayers = <%= playerStats?.totalPlayers || 0 %>;
+
+  var rootStyle = getComputedStyle(document.documentElement);
+  var token = function(name) { return rootStyle.getPropertyValue(name).trim(); };
+  var withAlpha = function(color, alpha) {
+    if (color && color.charAt(0) === '#') {
+      var n = Math.round(alpha * 255).toString(16);
+      return color + (n.length < 2 ? '0' + n : n);
+    }
+    return color;
+  };
+
+  var CHART_TICK_COLOR = token('--theme-text');
+  var CHART_GRID_COLOR = token('--theme-border');
+  var CHART_LINE_COLOR = token('--theme-text-muted');
+
+  var ctx = document.getElementById('playerChart');
+  if (ctx && historicalData.length > 0) {
+    var labels = historicalData.map(function(e) { return new Date(e.timestamp).toISOString(); });
+    var playerCounts = historicalData.map(function(e) { return e.totalPlayers; });
+    labels.push(new Date().toISOString());
+    playerCounts.push(totalPlayers);
+
+    new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: <%- JSON.stringify(t('totalPlayers')) %>,
+          data: playerCounts,
+          backgroundColor: withAlpha(CHART_LINE_COLOR, 0.2),
+          borderColor: CHART_LINE_COLOR,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: CHART_TICK_COLOR } } },
+        scales: {
+          x: { grid: { color: CHART_GRID_COLOR }, ticks: { color: CHART_TICK_COLOR, maxTicksLimit: 10 } },
+          y: { position: 'right', beginAtZero: true, grid: { color: CHART_GRID_COLOR }, ticks: { color: CHART_TICK_COLOR } }
+        }
+      }
+    });
+  }
+
+  var playerStatsRefreshBtn = document.getElementById('playerStatsRefreshBtn');
+  if (playerStatsRefreshBtn) {
+    playerStatsRefreshBtn.addEventListener('click', function() {
+      window.location.reload();
+    });
+  }
+})();
+</script>
+<% } %>
 
 <%- include('../../layouts/admin-footer') %>

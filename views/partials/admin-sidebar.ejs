@@ -193,13 +193,8 @@
     if (account) {
       account.classList.toggle('sidebar-active', path === '/account' || path.startsWith('/account/'));
     }
-    const logo = document.getElementById('sidebar-logo-link');
-    const logoBlock = document.getElementById('sidebar-logo-block');
-    if (logo || logoBlock) {
-      const onCredits = path === '/credits' || path.startsWith('/credits/');
-      if (logoBlock) logoBlock.classList.toggle('sidebar-active', onCredits);
-      if (logo) logo.classList.toggle('sidebar-active', onCredits);
-    }
+    // The sidebar logo used to highlight on `/credits`; that page is gone,
+    // so the logo no longer has an active state of its own.
   }
 
   if (document.getElementById('pc-sidebar')) {

@@ -1140,8 +1140,12 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/radar/virustotal — dual mode.
-//   { enabled, apiKey? } → save VT config (views/admin/radar/index.ejs)
-//   { hash }             → legacy VirusTotal hash lookup
+//   { enabled, apiKey? } → save VT config. Nothing posts this since the
+//     Radar tab dropped its VirusTotal settings card (Admin → Settings owns
+//     virusTotalApiKey); the mode is kept so the endpoint stays backward
+//     compatible for addons.
+//   { hash }             → legacy VirusTotal hash lookup (still used by the
+//     Radar tab's hash-lookup card)
 // ---------------------------------------------------------------------------
 router.post(
   '/radar/virustotal',
@@ -1192,9 +1196,11 @@ router.post(
 
 // ======================== RADAR (page data + script CRUD) ========================
 
-// GET /api/v2/admin/radar — page payload for views/admin/radar/index.ejs.
-// The tab view reads `settings.virusTotalApiKey`; the page controller prefers
-// a nested `settings` object when it is one, hence the wrapper.
+// GET /api/v2/admin/radar — radar page payload (settings row + script list).
+// No page consumes it as a whole since Radar became a tab on /admin/servers:
+// that tab's markup is static, and Settings owns the VirusTotal key. Kept as
+// an endpoint because the per-feature calls (scan, virustotal/scan, scripts)
+// sit alongside it and an empty key check is cheap.
 router.get('/radar', async (_req, res) => {
   const settings = await getSettings();
   const scripts = await listRadarScripts().catch(() => []);
@@ -1495,7 +1501,7 @@ function sendVtOutcome(res: Response, outcome: VtLookupOutcome): void {
 }
 
 // GET /api/v2/admin/radar/virustotal/scan/:hash — verdict JSON for a hash.
-// views/admin/radar/index.ejs reads `malicious` (truthy = bad) and `message`.
+// views/admin/servers/servers reads `malicious` (truthy = bad) and `message`.
 router.get('/radar/virustotal/scan/:hash', async (req, res) => {
   const hash = String(req.params.hash);
   if (!VT_HASH_RE.test(hash)) {

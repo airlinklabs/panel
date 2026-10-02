@@ -25,11 +25,11 @@
 </div>
 
 <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
-  <div role="tablist" class="flex gap-1 mb-6">
-    <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+  <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+    <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="al-segmented-btn">
       <%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('nodes') %>
     </button>
-    <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2">
+    <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="al-segmented-btn">
       <%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('locationsTab') %>
     </button>
   </div>

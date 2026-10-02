@@ -1,4 +1,3 @@
-import { getSettings } from '../../handlers/settingsCache';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import type { Module } from '../../handlers/moduleInit';
@@ -17,10 +16,6 @@ import { DAEMON_TIMEOUT_SHORT_MS } from '../../config/daemonTimeouts';
 
 registerPermission('airlink.admin.playerstats.view');
 
-interface ErrorMessage {
-  message?: string;
-}
-
 const adminModule: Module = {
   info: {
     name: 'Admin Player Stats Module',
@@ -34,44 +29,12 @@ const adminModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get(
-      '/admin/playerstats',
-      isAuthenticated(true, 'airlink.admin.playerstats.view'),
-      async (req: Request, res: Response) => {
-        const errorMessage: ErrorMessage = {};
-        const settings = await getSettings();
-
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
-
-          const servers = await prisma.server.findMany({
-            include: { node: true },
-          });
-
-          res.render('admin/playerstats/playerstats', {
-            errorMessage,
-            user,
-            servers,
-            req,
-            settings,
-          });
-        } catch (error: unknown) {
-          logger.error('Error fetching player stats:', error);
-          errorMessage.message = 'Error fetching player statistics.';
-          return res.render('admin/playerstats/playerstats', {
-            errorMessage,
-            user: req.session?.user,
-            servers: [],
-            req,
-            settings,
-          });
-        }
-      },
-    );
+    // No legacy `GET /admin/playerstats` page route here. It rendered
+    // `admin/playerstats/playerstats` — a view that has never existed — and
+    // only ever worked because `pages/admin/playerStats.ts` mounted first and
+    // shadowed it. Player Statistics is now the Player Statistics tab of
+    // /admin/analytics, so with that shadow gone this route would have started
+    // 500'ing. The JSON API below is untouched.
 
     router.get(
       '/api/admin/playerstats',

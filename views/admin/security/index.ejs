@@ -18,13 +18,13 @@
 
 <div class="al-page-body" data-al-tabs data-tabs-default="overview" data-tabs-hash>
 
-  <div role="tablist" class="flex gap-1 mb-6 flex-wrap">
-    <button type="button" role="tab" aria-selected="true" aria-controls="panel-overview" id="tab-overview" data-tab="overview" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('overview') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-2fa" id="tab-2fa" data-tab="2fa" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('key-round', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('twoFa') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-captcha" id="tab-captcha" data-tab="captcha" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('bot', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('captcha') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-logins" id="tab-logins" data-tab="logins" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('log-in', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('logins') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-passwords" id="tab-passwords" data-tab="passwords" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('lock', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('passwords') %></button>
-    <button type="button" role="tab" aria-selected="false" aria-controls="panel-registration" id="tab-registration" data-tab="registration" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('registration') %></button>
+  <div role="tablist" class="al-segmented mb-6 flex-wrap max-w-full">
+    <button type="button" role="tab" aria-selected="true" aria-controls="panel-overview" id="tab-overview" data-tab="overview" class="al-segmented-btn"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('overview') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-2fa" id="tab-2fa" data-tab="2fa" tabindex="-1" class="al-segmented-btn"><%- icon('key-round', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('twoFa') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-captcha" id="tab-captcha" data-tab="captcha" tabindex="-1" class="al-segmented-btn"><%- icon('bot', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('captcha') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-logins" id="tab-logins" data-tab="logins" tabindex="-1" class="al-segmented-btn"><%- icon('log-in', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('logins') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-passwords" id="tab-passwords" data-tab="passwords" tabindex="-1" class="al-segmented-btn"><%- icon('lock', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('passwords') %></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-registration" id="tab-registration" data-tab="registration" tabindex="-1" class="al-segmented-btn"><%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('registration') %></button>
   </div>
 
   <!-- Overview -->

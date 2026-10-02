@@ -1437,45 +1437,16 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
-      '/admin/queue',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
-      async (req: Request, res: Response) => {
-        try {
-          const entries = runtimeStartQueue.listQueueForAdmin();
-          if (entries.length === 0) {
-            res.json({ entries: [] });
-            return;
-          }
-
-          const serverIds = [...new Set(entries.map((e) => e.serverId))];
-          const userIds = [...new Set(entries.map((e) => e.userId))];
-          const [servers, users] = await Promise.all([
-            prisma.server.findMany({
-              where: { UUID: { in: serverIds } },
-              select: { UUID: true, name: true },
-            }),
-            prisma.users.findMany({
-              where: { id: { in: userIds } },
-              select: { id: true, username: true },
-            }),
-          ]);
-          const serverName = new Map(servers.map((s) => [s.UUID, s.name]));
-          const userName = new Map(users.map((u) => [u.id, u.username]));
-
-          res.json({
-            entries: entries.map((e) => ({
-              ...e,
-              serverName: serverName.get(e.serverId) || null,
-              userName: userName.get(e.userId) || null,
-            })),
-          });
-        } catch (error: unknown) {
-          logger.error(logT('log.errorFetchingRuntimeQueue'), error);
-          res.status(500).json({ error: 'Failed to fetch runtime queue' });
-        }
-      },
-    );
+    // No `GET /admin/queue` here. This module's root-path copy returned
+    // `{entries:[…]}` with serverName/userName joined in, while the real API
+    // `GET /api/v2/admin/queue` (src/modules/api/v2/admin/misc.ts) returns
+    // `{success, data:[…]}` — two shapes for one resource. Nothing ever
+    // fetched this root URL; the Queue tab reads the v2 API through
+    // pages/admin/servers.ts. It was only reachable as a page until the
+    // Queue page was folded into /admin/servers, so leaving it would have
+    // served raw JSON at a URL that used to be HTML.
+    // The POST kick/ban/unban routes below are kept: the Queue tab's script
+    // still calls them.
 
     router.post(
       '/admin/queue/:serverId/kick',

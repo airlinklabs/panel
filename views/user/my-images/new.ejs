@@ -2,7 +2,7 @@
 
 <div class="al-page-header">
   <div class="flex items-start gap-2 min-w-0 justify-start flex-nowrap">
-    <a href="/my-images" class="al-btn al-btn-ghost al-btn-icon-only shrink-0" title="<%= t('back') %>" aria-label="<%= t('back') %>">
+    <a href="/account#images" class="al-btn al-btn-ghost al-btn-icon-only shrink-0" title="<%= t('back') %>" aria-label="<%= t('back') %>">
       <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
     </a>
     <div class="min-w-0">
@@ -65,7 +65,7 @@
       <button type="submit" id="submitBtn" class="al-btn al-btn-primary">
         <%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('submitImage') %>
       </button>
-      <a href="/my-images" class="al-btn al-btn-ghost"><%= t('cancel') %></a>
+      <a href="/account#images" class="al-btn al-btn-ghost"><%= t('cancel') %></a>
     </div>
   </form>
 </div>
@@ -96,7 +96,7 @@
         body: JSON.stringify(data)
       });
 
-      if (r.ok) { showToast(NEW_IMAGE_I18N.imageSubmitted, 'success'); window.location.href = '/my-images'; }
+      if (r.ok) { showToast(NEW_IMAGE_I18N.imageSubmitted, 'success'); window.location.href = '/account#images'; }
       else { var err = await r.text(); showToast(err, 'error'); btn.disabled = false; }
     } catch(err) {
       showToast(NEW_IMAGE_I18N.failedToSubmitImage, 'error');

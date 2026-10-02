@@ -2,8 +2,7 @@
 <html class="h-full" lang="<%= (req && req.lang) || 'en' %>">
 <%
 const wallpaperExcluded = req && req.path && (
-  req.path.startsWith('/admin/overview') ||
-  req.path.startsWith('/credits')
+  req.path.startsWith('/admin/overview')
 );
 %>
 <head>
