@@ -3,7 +3,7 @@
 
 # Airlink Panel
 
-**Open-source game server management — v2.0.0-rc1**
+**Open-source game server management — v2.0.0-rc1-beta**
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
