@@ -6,6 +6,7 @@ import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { renderErrorPage } from '../../errorPages';
 import { parsePermissions, subUserHasPermission } from './authorization';
+import { getImageFeaturesOrNull } from '../../imageFeatures';
 import { logT } from '../../../services/i18n';
 
 export const SUBUSER_PERMISSIONS = [
@@ -159,6 +160,41 @@ async function findSubUser(serverId: string, userId: number) {
   });
 }
 
+/**
+ * Publish the image's declared feature allow-list as `res.locals.navFeatures`.
+ *
+ * `string[]` = the image declared an allow-list, use it to filter the
+ * feature-gated nav entries (`players`, `worlds`). `null` = undeclared — the
+ * image publishes no `features` at all — and the nav must then show everything.
+ *
+ * Deliberately *not* the `features` render local: `res.render(view, { ...data })`
+ * spreads API bodies that already carry their own `features`
+ * (`src/modules/api/v2/startup.ts`), which would silently override it with `[]`.
+ * A name no API returns — `navFeatures` — is set once here and cannot collide.
+ * The rewritten page controllers under `src/modules/pages/**` never pass
+ * `features` at all, which is why the sidebar lost Players/Worlds on every page
+ * they own (instructions.md §15.3 F2).
+ */
+function setNavFeatures(
+  res: Response,
+  server: { image?: { info?: string | null } | null } | null,
+): void {
+  // Express always provides `res.locals`, but guard anyway: a fixture without
+  // it must not turn a navigation decision into an authentication failure.
+  if (!res.locals) {
+    return;
+  }
+  try {
+    res.locals.navFeatures = server
+      ? getImageFeaturesOrNull(server.image)
+      : null;
+  } catch (error) {
+    logger.error(logT('log.authServerMiddlewareError'), error);
+    // Fail open: an unresolvable image must not hide nav entries.
+    res.locals.navFeatures = null;
+  }
+}
+
 export const isAuthenticatedForServer =
   (serverIdParam = 'id') =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -177,16 +213,28 @@ export const isAuthenticatedForServer =
           return;
         }
 
+        // One query that both authorizes and resolves the nav's feature
+        // allow-list. It runs *before* the admin short-circuit because admins
+        // skip the ownership check below and would otherwise never get
+        // `navFeatures` — they are the account most likely to have declared a
+        // feature list to begin with. Costs admins one lookup it did not
+        // previously make, and costs everyone else nothing (this replaces the
+        // ownership query rather than adding to it).
+        const serverId = req.params[serverIdParam];
+        const server = await prisma.server.findUnique({
+          where: { UUID: getParamAsString(serverId) },
+          select: {
+            ownerId: true,
+            Suspended: true,
+            image: { select: { info: true } },
+          },
+        });
+        setNavFeatures(res, server);
+
         if (user.isAdmin) {
           next();
           return;
         }
-
-        const serverId = req.params[serverIdParam];
-        const server = await prisma.server.findUnique({
-          where: { UUID: getParamAsString(serverId) },
-          select: { ownerId: true, Suspended: true },
-        });
 
         if (server && server.ownerId === userId) {
           if (server.Suspended) {

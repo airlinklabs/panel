@@ -584,6 +584,42 @@ export type AdminCreateDbHostBody = z.infer<typeof adminCreateDbHostBody>;
 // Admin — Images
 // ---------------------------------------------------------------------------
 
+/**
+ * `Images.info` is a `@db.Text` JSON blob; the feature allow-list lives at
+ * `info.features` (§15.3 F2 — a *missing* `features` key means undeclared and
+ * every feature-gated menu item is shown). The image edit form posts the
+ * object it round-trips from `state.info`; older/API clients post encoded
+ * JSON. Both must land on the column as a string, and an omitted field stays
+ * omitted — `info: undefined` is "leave the column alone", not "clear it".
+ */
+const imageInfoField = z
+  .union([z.string(), z.record(z.string(), z.unknown())])
+  .nullable()
+  .optional()
+  .transform((value) =>
+    typeof value === 'object' && value !== null
+      ? JSON.stringify(value)
+      : value,
+  );
+
+/**
+ * `variables` / `scripts` / `portRequirements` are `Json` columns and the
+ * image edit form posts native JSON — the shape every reader in `src/`
+ * expects (`Array.isArray(image.variables)`, `parseImagePortRequirements`,
+ * …). Keep accepting the encoded strings the schema historically required;
+ * they pass through untouched, so an existing client writes exactly what it
+ * wrote before.
+ */
+const imageJsonListField = z
+  .union([z.string(), z.array(z.unknown())])
+  .nullable()
+  .optional();
+
+const imageJsonObjectField = z
+  .union([z.string(), z.record(z.string(), z.unknown())])
+  .nullable()
+  .optional();
+
 export const adminCreateImageBody = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
@@ -594,7 +630,7 @@ export const adminCreateImageBody = z.object({
   variables: z.string().optional(),
   startup_done: z.string().optional(),
   config_files: z.string().optional(),
-  info: z.string().optional(),
+  info: imageInfoField,
   scripts: z.string().optional(),
   portRequirements: z.string().optional(),
 });
@@ -607,12 +643,12 @@ export const adminUpdateImageBody = z.object({
   dockerImages: z.string().nullable().optional(),
   startup: z.string().nullable().optional(),
   stop: z.string().nullable().optional(),
-  variables: z.string().nullable().optional(),
+  variables: imageJsonListField,
   startup_done: z.string().nullable().optional(),
   config_files: z.string().nullable().optional(),
-  info: z.string().nullable().optional(),
-  scripts: z.string().nullable().optional(),
-  portRequirements: z.string().nullable().optional(),
+  info: imageInfoField,
+  scripts: imageJsonObjectField,
+  portRequirements: imageJsonListField,
 });
 export type AdminUpdateImageBody = z.infer<typeof adminUpdateImageBody>;
 

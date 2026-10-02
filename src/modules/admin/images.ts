@@ -57,6 +57,47 @@ function normalizeImageData(raw: Record<string, unknown>) {
   };
 }
 
+/**
+ * `Images.info` is a `@db.Text` JSON blob. The create form posts the object it
+ * built from the "Restrict features" group (or no `info` at all when the switch
+ * is off), API clients may post encoded JSON. Anything else serialises to `{}` —
+ * an `info` object *without* a `features` key means "features undeclared" and
+ * every feature-gated menu item is shown (§15.3 F2).
+ */
+function serializeInfoField(value: unknown): string {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return JSON.stringify(parsed);
+      }
+    } catch {
+      // fall through — never store a blob the edit form cannot parse back
+    }
+  }
+  return '{}';
+}
+
+/**
+ * A `Json` column read back for the edit form. Rows written through the
+ * string-only DTO (or an egg import) hold JSON *text*; native rows hold the
+ * parsed value. The form needs the parsed value either way: a populated row
+ * that renders as `[]` would be overwritten with `[]` on the next save.
+ */
+function parseJsonColumn(value: unknown): unknown {
+  if (typeof value !== 'string' || !value.trim()) {
+    return value;
+  }
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
 const adminModule: Module = {
   info: {
     name: 'Admin Module for Images',
@@ -267,7 +308,8 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const { name, description, author, authorName, startup } = req.body;
+          const { name, description, author, authorName, startup, info } =
+            req.body;
 
           if (!name || !startup) {
             res
@@ -287,7 +329,7 @@ const adminModule: Module = {
             config_files: '',
             meta: JSON.stringify({ version: 'AL_V1' }),
             dockerImages: [],
-            info: JSON.stringify({ features: [] }),
+            info: serializeInfoField(info),
             scripts: {},
             variables: [],
             portRequirements: JSON.stringify([]),
@@ -328,7 +370,7 @@ const adminModule: Module = {
           const settings = await getSettings();
 
           let dockerImages: Record<string, string> = {};
-          const dockerRaw = image.dockerImages;
+          const dockerRaw = parseJsonColumn(image.dockerImages);
           if (Array.isArray(dockerRaw)) {
             for (const obj of dockerRaw) {
               if (typeof obj === 'object' && obj !== null) {
@@ -339,13 +381,15 @@ const adminModule: Module = {
             dockerImages = dockerRaw as Record<string, string>;
           }
 
-          const variables: unknown[] = Array.isArray(image.variables)
-            ? image.variables
+          const parsedVariables = parseJsonColumn(image.variables);
+          const variables: unknown[] = Array.isArray(parsedVariables)
+            ? parsedVariables
             : [];
 
           let scripts: Record<string, unknown> = {};
-          if (image.scripts && typeof image.scripts === 'object') {
-            scripts = image.scripts as Record<string, unknown>;
+          const parsedScripts = parseJsonColumn(image.scripts);
+          if (parsedScripts && typeof parsedScripts === 'object') {
+            scripts = parsedScripts as Record<string, unknown>;
           }
 
           let info: Record<string, unknown> = {};
@@ -355,13 +399,20 @@ const adminModule: Module = {
             info = {};
           }
 
+          // `portRequirements` lives in a `Json` column: native rows arrive as
+          // an array, rows written through `JSON.stringify` as JSON text. Read
+          // both — an unreadable row would render as `[]` and the next save
+          // would overwrite the stored ports with `[]`.
+          const parsedPorts = parseJsonColumn(image.portRequirements);
           let portRequirements: unknown[] = [];
-          try {
-            portRequirements = JSON.parse(
-              String(image.portRequirements || '[]'),
-            );
-          } catch {
-            portRequirements = [];
+          if (Array.isArray(parsedPorts)) {
+            portRequirements = parsedPorts;
+          } else {
+            try {
+              portRequirements = JSON.parse(String(parsedPorts || '[]'));
+            } catch {
+              portRequirements = [];
+            }
           }
 
           const parsedImage = {

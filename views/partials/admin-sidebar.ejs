@@ -98,10 +98,12 @@
               const srvMenuItems = global.uiComponentStore.getServerMenuItems();
               const srvIsAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
               const srvIsSub = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
+              // `navFeatures` (published by isAuthenticatedForServer): null =
+              // image declares nothing, so hide nothing; an array filters.
               const srvEntries = srvMenuItems.filter(function(item) {
                 if (item.isAdminItem && !srvIsAdmin) return false;
                 if (item.ownerOnly && srvIsSub) return false;
-                if (item.feature && !(typeof features !== 'undefined' && features && features.includes(item.feature))) return false;
+                if (item.feature && typeof navFeatures !== 'undefined' && Array.isArray(navFeatures) && navFeatures.indexOf(item.feature) === -1) return false;
                 return true;
               }).map(function(item) {
                 return { item, url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id) };

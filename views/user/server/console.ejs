@@ -18,6 +18,19 @@
   </div>
 </header>
 
+<% /* console.ejs replaced manage.ejs as the server landing page (§15.3 F4), so
+     it inherits manage's suspension notice. Kept outside #console-root because
+     the island owns that subtree and replaces it wholesale on mount failure. */ %>
+<% if (server.Suspended) { %>
+<div class="al-alert-warning mb-4" role="alert">
+  <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+  <div class="min-w-0">
+    <p class="al-alert-title"><%= t('serverSuspended') %></p>
+    <p class="al-alert-body"><%= t('serverSuspendedDesc') %></p>
+  </div>
+</div>
+<% } %>
+
 <div id="console-root" class="al-page-body"
   data-server-uuid="<%= server.UUID %>"
   data-server-name="<%= server.name %>"
@@ -125,7 +138,7 @@
     const config = {
       serverUUID: root.dataset.serverUuid,
       serverName: root.dataset.serverName,
-      serverSuspended: false,
+      serverSuspended: <%= !!server.Suspended %>,
       serverMemory: Number(root.dataset.serverMemory) || 0,
       serverCpu: Number(root.dataset.serverCpu) || 0,
       serverStorage: Number(root.dataset.serverStorage) || 0,

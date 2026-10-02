@@ -33,9 +33,37 @@
 <nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="<%= t('mobileNavigation') %>" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
   <div class="flex items-stretch h-[52px] px-1.5">
     <%
-    const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+    // On a server page the bar must carry the *server* menu. The desktop
+    // sidebar that normally holds it is `hidden lg:flex`, and nothing else
+    // below lg exposed Files/Players/Worlds/Schedules/Settings — so those pages
+    // were unreachable from a phone or a narrow window (instructions.md §15.3).
+    // Dashboard keeps slot 1 as the escape hatch, exactly as the desktop server
+    // view does; the rest of the items fall through to the "More" sheet.
+    const bnPath = (typeof req !== 'undefined' && req && (req.path || req.originalUrl || '')) || '';
+    const bnIsServerPage = typeof server !== 'undefined' && server != null && bnPath.indexOf('/server/') === 0;
+    let bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+    if (bnIsServerPage && global.uiComponentStore) {
+      const bnIsAdmin = typeof user !== 'undefined' && user != null && user.isAdmin === true;
+      const bnIsSub = typeof req !== 'undefined' && req && req.subUser ? true : false;
+      const bnFeatures = typeof navFeatures !== 'undefined' ? navFeatures : null;
+      const bnServer = server;
+      const bnServerItems = global.uiComponentStore.getServerMenuItems().filter(function(item) {
+        if (item.isAdminItem && !bnIsAdmin) return false;
+        if (item.ownerOnly && bnIsSub) return false;
+        if (item.feature && Array.isArray(bnFeatures) && bnFeatures.indexOf(item.feature) === -1) return false;
+        return true;
+      }).map(function(item) {
+        const bnUrl = (item.url || '#').replace(':uuid', bnServer.UUID).replace(':id', bnServer.id);
+        return { label: item.label, icon: item.icon, url: bnUrl, matchPrefix: bnUrl };
+      });
+      bottomNavItems = [{
+        label: t('dashboard'),
+        icon: icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }),
+        url: '/',
+        matchPrefix: ''
+      }].concat(bnServerItems);
+    }
     const navToShow = (bottomNavItems || []).slice(0, 4);
-    const mT = (typeof req !== 'undefined' && req && req.translations) || {};
     %>
 
     <% navToShow.forEach(function(item) { %>
@@ -174,26 +202,55 @@
     }, { passive: true });
   }
 
-  function markActiveSheetItems() {
+  // Exact-or-slug prefix match. `'/'` must never behave as a prefix (it would
+  // match every path), and `/server/<uuid>` must not swallow a sibling UUID.
+  function pathMatches(path, value) {
+    if (!value) return false;
+    if (path === value) return true;
+    if (value === '/') return false;
+    return path.indexOf(value + '/') === 0;
+  }
+
+  // Longest match wins. A server page is several entries deep
+  // (/server/:uuid → /server/:uuid/files → …) and only the deepest one is the
+  // current page; the previous "every prefix that matches" rule lit all of them.
+  function markActiveCollection(nodes, onClass, onStyle) {
     const path = window.location.pathname;
-    document.querySelectorAll('#mobile-more-sheet .sheet-item[data-match-prefix]').forEach(function(item) {
-      const prefix = item.getAttribute('data-match-prefix');
-      if (prefix && path.startsWith(prefix)) item.classList.add('sheet-active');
-      else item.classList.remove('sheet-active');
+    let best = null;
+    let bestLen = -1;
+    nodes.forEach(function (node) {
+      const href = node.getAttribute('href') || '';
+      const prefix = node.getAttribute('data-match-prefix') || '';
+      const matched = pathMatches(path, href) || pathMatches(path, prefix);
+      const key = prefix.length > href.length ? prefix : href;
+      if (matched && key.length > bestLen) {
+        bestLen = key.length;
+        best = node;
+      }
+    });
+    nodes.forEach(function (node) {
+      const on = node === best;
+      if (onClass) node.classList.toggle(onClass, on);
+      if (onStyle) node.style.color = on ? onStyle : '';
     });
   }
 
-  function markActiveMobile(path) {
-    document.querySelectorAll('.mobile-nav-link[data-match-prefix]').forEach(function(link) {
-      const prefix = link.getAttribute('data-match-prefix');
-      if (prefix && path.startsWith(prefix)) {
-        link.classList.add('active-mobile');
-        link.style.color = 'var(--theme-nav-text-active)';
-      } else {
-        link.classList.remove('active-mobile');
-        link.style.color = '';
-      }
-    });
+  function markActiveSheetItems() {
+    markActiveCollection(
+      Array.prototype.slice.call(
+        document.querySelectorAll('#mobile-more-sheet .sheet-item[href]'),
+      ),
+      'sheet-active',
+      '',
+    );
+  }
+
+  function markActiveMobile() {
+    markActiveCollection(
+      Array.prototype.slice.call(document.querySelectorAll('.mobile-nav-link[href]')),
+      'active-mobile',
+      'var(--theme-nav-text-active)',
+    );
   }
 
   markActiveMobile(window.location.pathname);

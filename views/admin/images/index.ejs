@@ -275,6 +275,28 @@
         <label class="al-form-label"><%= t('description') %></label>
         <textarea class="al-input" name="description" rows="2" placeholder="<%= t('imageDescriptionPlaceholder') %>" style="resize:none;"></textarea>
       </div>
+      <div class="col-span-2">
+        <p class="al-form-label"><%= t('features') %></p>
+        <label class="al-form-check" for="create-restrict-features">
+          <input type="checkbox" id="create-restrict-features" class="al-form-checkbox" aria-describedby="create-restrict-features-help" onchange="imageManagerState.toggleCreateFeatureList(this.checked)">
+          <span class="al-form-check-label" id="create-restrict-features-label"><%= t('restrictFeatures') %></span>
+        </label>
+        <p id="create-restrict-features-help" class="al-form-help mt-1.5"><%= t('restrictFeaturesHelp') %></p>
+        <div id="create-feature-list" class="mt-3 space-y-3" role="group" aria-labelledby="create-restrict-features-label" hidden>
+          <label class="al-form-check" for="create-feature-players">
+            <input type="checkbox" id="create-feature-players" class="al-form-checkbox" value="players" disabled>
+            <span class="al-form-check-label"><%= t('players') %></span>
+          </label>
+          <label class="al-form-check" for="create-feature-worlds">
+            <input type="checkbox" id="create-feature-worlds" class="al-form-checkbox" value="worlds" disabled>
+            <span class="al-form-check-label"><%= t('worlds') %></span>
+          </label>
+          <label class="al-form-check" for="create-feature-eula">
+            <input type="checkbox" id="create-feature-eula" class="al-form-checkbox" value="eula" disabled>
+            <span class="al-form-check-label"><%= t('eula') %></span>
+          </label>
+        </div>
+      </div>
     </div>
     <div class="flex gap-2 pt-1">
       <button type="button" onclick="imageManagerState.closeCreate()" class="al-btn-secondary flex-1">
@@ -513,21 +535,52 @@ function imageManager() {
       };
       r.readAsText(file);
     },
+    toggleCreateFeatureList: function(enabled) {
+      var list = document.getElementById('create-feature-list');
+      if (list) list.hidden = !enabled;
+      ['players', 'worlds', 'eula'].forEach(function(key) {
+        var input = document.getElementById('create-feature-' + key);
+        if (input) input.disabled = !enabled;
+      });
+    },
     submitCreateImage: function(e) {
       var form = e.target;
       var data = Object.fromEntries(new FormData(form));
       if (!data.name || !data.startup) { showToast(<%- JSON.stringify(t('nameStartupRequired')) %>, 'error'); return; }
+      // `info` is not a form control: build it from the "Restrict features"
+      // group, and leave the `features` key out entirely when the switch is
+      // off (§15.3 F2 — undeclared means every feature-gated item shows).
+      var master = document.getElementById('create-restrict-features');
+      if (master && master.checked) {
+        var features = [];
+        ['players', 'worlds', 'eula'].forEach(function(key) {
+          var input = document.getElementById('create-feature-' + key);
+          if (input && input.checked) features.push(key);
+        });
+        data.info = JSON.stringify({ features: features });
+      }
       var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
       fetch('/admin/images/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify(data),
-      }).then(function(r) { return r.json(); }).then(function(result) {
-        if (result.success !== false) {
+      }).then(function(r) {
+        var contentType = r.headers.get('content-type') || '';
+        if (contentType.indexOf('application/json') !== -1) return r.json();
+        // The route answers 302 → HTML: follow it to the new image's editor.
+        if (r.ok && r.redirected) return { redirectTo: r.url };
+        return r.text().then(function(text) { return { success: false, error: text.trim() }; });
+      }).then(function(result) {
+        if (result && result.redirectTo) {
+          showToast(<%- JSON.stringify(t('imageCreated')) %>, 'success');
+          window.location.href = result.redirectTo;
+        } else if (result && result.success === true) {
           showToast(<%- JSON.stringify(t('imageCreated')) %>, 'success');
           imageManagerState.closeCreate();
           window.location.reload();
-        } else { showToast(result.error || result.message || <%- JSON.stringify(t('failedCreateImage')) %>, 'error'); }
+        } else {
+          showToast((result && (result.error || result.message)) || <%- JSON.stringify(t('failedCreateImage')) %>, 'error');
+        }
       }).catch(function() { showToast(<%- JSON.stringify(t('networkError')) %>, 'error'); });
     }
   };

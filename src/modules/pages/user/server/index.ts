@@ -27,7 +27,15 @@ const module: Module = {
   router: (applyWs) => {
     const router = Router();
 
-    // Server management page
+    // Server management page.
+    //
+    // This renders the console view, not `user/server/manage`: manage.ejs is a
+    // stripped shell whose `<div id="terminal">` is never mounted (no island
+    // import, no xterm.css), while console.ejs is the complete page — stats,
+    // sparklines, power, queue banner and the mounted terminal. The sidebar's
+    // "Console" entry and every dashboard server card link here, so landing on
+    // a dead terminal was the panel's first impression (instructions.md §15.3 F4).
+    // `/server/:id/console` renders this same view and stays as an alias.
     router.get(
       '/server/:id',
       isAuthenticatedForServer('id'),
@@ -38,7 +46,7 @@ const module: Module = {
             req,
             `/servers/${req.params.id}`,
           )) as Record<string, unknown>;
-          res.render('user/server/manage', {
+          res.render('user/server/console', {
             ...data,
             server: data,
             user: req.session?.user,

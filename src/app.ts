@@ -447,6 +447,17 @@ app.use(async (_req, res, next) => {
     res.locals.settings = null;
   }
 
+  // `create-server` is the one sidebar item with a runtime gate: it is seeded
+  // unconditionally in uiComponentHandler, then dropped here when the panel
+  // does not let users create servers — otherwise the nav advertises a flow
+  // whose POST handler 403s (src/modules/user/createServer.ts). This has to
+  // run *after* getSettings(), because the sidebar is assembled above.
+  if (!res.locals.settings?.allowUserCreateServer) {
+    res.locals.regularMenuItems = (
+      res.locals.regularMenuItems || []
+    ).filter((item: { id: string }) => item.id !== 'create-server');
+  }
+
   next();
 });
 

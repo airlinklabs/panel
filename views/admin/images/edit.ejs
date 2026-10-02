@@ -1,5 +1,33 @@
 <%- include('../../layouts/admin', { title: t('adminEditImageTitle') }) %>
 
+<%
+  // Declared feature allow-list for this image (§15.3 F2): `info` without a
+  // `features` key means UNDECLARED — every feature-gated menu item is shown.
+  // The editor must mirror that exactly, so the key is what drives the switch.
+  var featureInfo = {};
+  if (image && image.info) {
+    if (typeof image.info === 'object' && !Array.isArray(image.info)) {
+      featureInfo = image.info;
+    } else if (typeof image.info === 'string') {
+      try {
+        var parsedFeatureInfo = JSON.parse(image.info);
+        if (parsedFeatureInfo && typeof parsedFeatureInfo === 'object' && !Array.isArray(parsedFeatureInfo)) {
+          featureInfo = parsedFeatureInfo;
+        }
+      } catch (featureInfoError) {}
+    }
+  }
+  // Match `getImageFeaturesOrNull()` exactly: only a real array counts as
+  // declared — a `features` key of any other shape reads back as "show all".
+  var featuresDeclared = Array.isArray(featureInfo.features);
+  var declaredFeatures = featuresDeclared ? featureInfo.features : [];
+  var featureOptions = [
+    { id: 'players', label: t('players') },
+    { id: 'worlds', label: t('worlds') },
+    { id: 'eula', label: t('eula') }
+  ];
+%>
+
 <div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('admin'), url: '/admin/overview' },
@@ -97,6 +125,27 @@
               <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="<%= t('startupDonePlaceholder') %>" class="al-form-input font-mono">
               <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('startupDoneSignalHint') %></p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="al-card">
+        <div class="al-card-header">
+          <h2 class="al-card-title"><%= t('features') %></h2>
+        </div>
+        <div class="al-card-body">
+          <label class="al-form-check" for="field-restrict-features">
+            <input type="checkbox" id="field-restrict-features" class="al-form-checkbox" aria-describedby="field-restrict-features-help"<%= featuresDeclared ? ' checked' : '' %>>
+            <span class="al-form-check-label" id="field-restrict-features-label"><%= t('restrictFeatures') %></span>
+          </label>
+          <p id="field-restrict-features-help" class="al-form-help mt-1.5"><%= t('restrictFeaturesHelp') %></p>
+          <div id="feature-list" class="mt-3 space-y-3" role="group" aria-labelledby="field-restrict-features-label"<%= featuresDeclared ? '' : ' hidden' %>>
+            <% featureOptions.forEach(function(option) { %>
+            <label class="al-form-check" for="field-feature-<%= option.id %>">
+              <input type="checkbox" id="field-feature-<%= option.id %>" class="al-form-checkbox" value="<%= option.id %>"<%= featuresDeclared && declaredFeatures.indexOf(option.id) !== -1 ? ' checked' : '' %><%= featuresDeclared ? '' : ' disabled' %>>
+              <span class="al-form-check-label"><%= option.label %></span>
+            </label>
+            <% }); %>
           </div>
         </div>
       </div>
@@ -275,6 +324,76 @@ function imageEditor() {
 
   function escHtml(str) { return window.escHtml ? window.escHtml(str) : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  var FEATURE_KEYS = ['players', 'worlds', 'eula'];
+
+  // `info` comes off the edit route as an object, but the raw/API paths hand
+  // back the encoded JSON string — normalize before anything reads or merges.
+  function readInfoObject(value) {
+    var info = value;
+    if (typeof info === 'string') {
+      try { info = JSON.parse(info); } catch (e) { info = null; }
+    }
+    if (!info || typeof info !== 'object' || Array.isArray(info)) info = {};
+    return info;
+  }
+
+  // An undeclared allow-list collapses the group: hidden, and its checkboxes
+  // leave the tab order so they cannot be toggled while invisible.
+  function setFeatureControlsEnabled(declared) {
+    var list = document.getElementById('feature-list');
+    if (list) list.hidden = !declared;
+    FEATURE_KEYS.forEach(function(key) {
+      var input = document.getElementById('field-feature-' + key);
+      if (input) input.disabled = !declared;
+    });
+  }
+
+  // The switch and its checkboxes are a view onto `info.features`, nothing
+  // more: this only rewrites the inputs from `state.info`.
+  function renderFeatureControls() {
+    var info = readInfoObject(state.info);
+    var declared = Array.isArray(info.features);
+    var selected = declared ? info.features : [];
+    var master = document.getElementById('field-restrict-features');
+    if (master) master.checked = declared;
+    setFeatureControlsEnabled(declared);
+    FEATURE_KEYS.forEach(function(key) {
+      var input = document.getElementById('field-feature-' + key);
+      if (input) input.checked = selected.indexOf(key) !== -1;
+    });
+  }
+
+  // Merge, never replace: every other key in `info` survives, and feature
+  // values this form does not model are kept in the allow-list untouched.
+  function syncFeaturesFromForm() {
+    var info = readInfoObject(state.info);
+    var master = document.getElementById('field-restrict-features');
+    if (!master || !master.checked) {
+      delete info.features;
+      state.info = info;
+      return;
+    }
+    var checked = {};
+    FEATURE_KEYS.forEach(function(key) {
+      var input = document.getElementById('field-feature-' + key);
+      checked[key] = !!(input && input.checked);
+    });
+    var existing = Array.isArray(info.features) ? info.features : [];
+    var selected = [];
+    existing.forEach(function(value) {
+      if (Object.prototype.hasOwnProperty.call(checked, value)) {
+        if (checked[value] && selected.indexOf(value) === -1) selected.push(value);
+      } else if (selected.indexOf(value) === -1) {
+        selected.push(value);
+      }
+    });
+    FEATURE_KEYS.forEach(function(key) {
+      if (checked[key] && selected.indexOf(key) === -1) selected.push(key);
+    });
+    info.features = selected;
+    state.info = info;
+  }
+
   function renderDockerImages() {
     var list = document.getElementById('docker-images-list');
     list.innerHTML = '';
@@ -415,6 +534,7 @@ function imageEditor() {
       config: { stop: state.stop, startup: { done: state.startup_done }, files: {}, logs: {} },
       docker_images: state.docker_images, variables: state.variables,
       scripts: { installation: state.scripts.installation || null }, portRequirements: state.portRequirements,
+      info: readInfoObject(state.info),
     }, null, 2);
   }
 
@@ -457,6 +577,13 @@ function imageEditor() {
       document.getElementById('field-startup').value = state.startup;
       document.getElementById('field-stop').value = state.stop;
       document.getElementById('field-startup-done').value = state.startup_done;
+      renderFeatureControls();
+      var masterToggle = document.getElementById('field-restrict-features');
+      if (masterToggle) {
+        masterToggle.addEventListener('change', function() {
+          setFeatureControlsEnabled(masterToggle.checked);
+        });
+      }
       var installScript = state.scripts.installation || {};
       document.getElementById('field-install-container').value = installScript.container || '';
       document.getElementById('field-install-entrypoint').value = installScript.entrypoint || 'bash';
@@ -489,6 +616,7 @@ function imageEditor() {
         state.startup = document.getElementById('field-startup').value.trim();
         state.stop = document.getElementById('field-stop').value.trim();
         state.startup_done = document.getElementById('field-startup-done').value.trim();
+        syncFeaturesFromForm();
         await saveState();
       };
       window.tabLabels['general'] = <%- JSON.stringify(t('save')) %>;
@@ -499,12 +627,14 @@ function imageEditor() {
         state.startup = originalData.startup;
         state.stop = originalData.stop;
         state.startup_done = originalData.startup_done;
+        state.info = JSON.parse(JSON.stringify(originalData.info || {}));
         document.getElementById('field-name').value = state.name;
         document.getElementById('field-description').value = state.description;
         document.getElementById('field-author').value = state.author;
         document.getElementById('field-startup').value = state.startup;
         document.getElementById('field-stop').value = state.stop;
         document.getElementById('field-startup-done').value = state.startup_done;
+        renderFeatureControls();
       };
 
       window.tabHandlers['docker'] = async function() {

@@ -229,20 +229,15 @@ export function getServerStatusInput(
   };
 }
 
-export function getImageFeatures(
-  image: { info?: string | null } | null | undefined,
-): string[] {
-  if (!image) {
-    return [];
-  }
-  try {
-    const info =
-      typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
-    return Array.isArray(info?.features) ? info.features : [];
-  } catch {
-    return [];
-  }
-}
+// Feature allow-list parsing lives in `handlers/imageFeatures.ts` (a leaf
+// module) so the auth middleware can use it without pulling in this file's
+// daemon/realtime dependency graph. Re-exported here because every existing
+// call site imports it from `./shared`.
+export {
+  getImageFeatures,
+  getImageFeaturesOrNull,
+} from '../../../handlers/imageFeatures';
+export type { ImageWithInfo } from '../../../handlers/imageFeatures';
 
 export function buildEnvVariables(
   variables: string | null | ServerVariable[],

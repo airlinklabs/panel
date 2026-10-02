@@ -320,6 +320,33 @@ export function initializeDefaultUIComponents(): void {
     priority: 100,
     matchPrefix: '/server',
   });
+  // `create-server` is the only item here with a runtime gate: it is dropped in
+  // src/app.ts when settings.allowUserCreateServer is false, because the whole
+  // create flow POSTs back 403 in that state (see src/modules/user/createServer.ts).
+  uiComponentStore.addSidebarItem({
+    id: 'create-server',
+    label: 'Create Server',
+    icon: icon('plus', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/create-server',
+    priority: 99,
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'my-images',
+    label: 'My Images',
+    icon: icon('images', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/my-images',
+    priority: 98,
+    matchPrefix: '/my-images',
+  });
+  // `/credits` rendered 200 with zero in-links — markSpecialLinks() already had
+  // an `onCredits` active-state branch for a link nothing ever emitted.
+  uiComponentStore.addSidebarItem({
+    id: 'credits',
+    label: 'Credits',
+    icon: icon('heart-handshake', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/credits',
+    priority: 97,
+  });
 
   // ── Admin: Core ─────────────────────────────────────────────────────────
   uiComponentStore.addSidebarItem({
@@ -361,6 +388,15 @@ export function initializeDefaultUIComponents(): void {
     section: 'infrastructure',
   });
   uiComponentStore.addSidebarItem({
+    id: 'admin-queue',
+    label: 'Queue Management',
+    icon: icon('list-ordered', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/queue',
+    priority: 79,
+    isAdminItem: true,
+    section: 'infrastructure',
+  });
+  uiComponentStore.addSidebarItem({
     id: 'admin-activity',
     label: 'Activity Log',
     icon: icon('activity', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
@@ -375,6 +411,17 @@ export function initializeDefaultUIComponents(): void {
     icon: icon('box', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
     url: '/admin/images',
     priority: 76,
+    isAdminItem: true,
+    section: 'infrastructure',
+  });
+  // `/admin/radar` was an island: it linked only to /admin/radar/scripts, which
+  // linked only back. Nothing in any nav reached either.
+  uiComponentStore.addSidebarItem({
+    id: 'admin-radar',
+    label: 'Radar',
+    icon: icon('radar', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/radar',
+    priority: 74,
     isAdminItem: true,
     section: 'infrastructure',
   });
@@ -410,11 +457,29 @@ export function initializeDefaultUIComponents(): void {
     section: 'configuration',
   });
   uiComponentStore.addSidebarItem({
+    id: 'admin-security',
+    label: 'Security',
+    icon: icon('shield', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/security',
+    priority: 59,
+    isAdminItem: true,
+    section: 'configuration',
+  });
+  uiComponentStore.addSidebarItem({
     id: 'admin-analytics',
     label: 'Analytics',
     icon: icon('chart-column', { class: 'w-5 h-5 mt-0.5' }),
     url: '/admin/analytics',
     priority: 58,
+    isAdminItem: true,
+    section: 'configuration',
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-playerstats',
+    label: 'Player Statistics',
+    icon: icon('chart-line', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/playerstats',
+    priority: 57,
     isAdminItem: true,
     section: 'configuration',
   });
@@ -433,6 +498,17 @@ export function initializeDefaultUIComponents(): void {
     icon: icon('box', { class: 'w-5 h-5 mt-0.5' }),
     url: '/admin/mounts',
     priority: 54,
+    isAdminItem: true,
+    section: 'configuration',
+  });
+  // The Menu Manager — the admin's own server-menu editor. It had no entry, so
+  // the tool for editing the nav could only be reached by editing the nav.
+  uiComponentStore.addSidebarItem({
+    id: 'admin-menu',
+    label: 'Menu Manager',
+    icon: icon('list-tree', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/menu',
+    priority: 52,
     isAdminItem: true,
     section: 'configuration',
   });
@@ -486,6 +562,15 @@ export function initializeDefaultUIComponents(): void {
     group: 'manage',
   });
   uiComponentStore.addServerMenuItem({
+    id: 'logs',
+    label: 'Logs',
+    icon: icon('scroll-text', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
+    url: '/server/:uuid/logs',
+    priority: 72,
+    isDefault: true,
+    group: 'run',
+  });
+  uiComponentStore.addServerMenuItem({
     id: 'startup',
     label: 'Startup',
     icon: icon('play', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
@@ -527,6 +612,15 @@ export function initializeDefaultUIComponents(): void {
     icon: icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
     url: '/server/:uuid/settings',
     priority: 60,
+    isDefault: true,
+    group: 'settings',
+  });
+  uiComponentStore.addServerMenuItem({
+    id: 'sftp',
+    label: 'SFTP',
+    icon: icon('key-round', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
+    url: '/server/:uuid/sftp',
+    priority: 58,
     isDefault: true,
     group: 'settings',
   });

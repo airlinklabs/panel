@@ -1274,5 +1274,354 @@ without opening a PNG.
    works end to end, but there is no translated content in `de`/`es`/… yet →
    Phase 6 (translation pass).
 
+---
+
+## 15. Phase 15 — functional pass: hidden pages, dead console, unclosed views
+
+Phase 0-14 made the panel **look** right. This phase makes it **work**: every
+rendered page must be reachable from the nav, every full page must be a
+well-formed document, and the console the sidebar links to must actually be a
+console.
+
+### 15.1 The survey harness (rebuilt — lives in the repo now)
+
+`/tmp` was swept mid-session and took the probe scripts with it, so the harness
+moved to its documented home. **Never put harness state in `/tmp`.**
+
+| file | purpose |
+|---|---|
+| `.agents/ui-shots/routes.mjs` | paren-balanced scan of `src/modules/**` → `routes.json` (every `router.get` that calls `res.render`) |
+| `.agents/ui-shots/graph.mjs` | BFS over the *served* HTML from nav shells → `graph.json` (in-links, reachability, status per route) |
+| `.agents/ui-shots/login.sh` | writes `.agents/ui-shots/cookies.txt` (curl jar) |
+| `.agents/ui-shots/probe.mjs` | status code per route |
+
+```sh
+sh .agents/ui-shots/login.sh
+cd .agents/ui-shots && node routes.mjs && node graph.mjs
+```
+
+`graph.mjs` reads **both** `href` and JS navigation (`location=`, `window.open`,
+`fetch`, `data-url`) — `href`-only crawling reports false orphans
+(`/admin/node/:id/stats`, `/account/2fa/setup` are onclick-driven).
+
+**Route pattern → concrete path:** `:id`/`:uuid`/`:serverId` → server UUID
+`11111111-2222-4333-8444-555555555555` (DB id **3**, not 1), other scalars → `1`.
+Probe artefacts (not bugs): `/admin/addons/nope`,
+`/admin/radar/scripts/edit/1`, `/admin/location/1/nodes`,
+`/server/<uuid>/files/edit/README.md`, `/admin/servers/edit/1`.
+`/admin/images/store/panel`, `/server/<uuid>/files/{list,detail}`,
+`/admin/location/:id/nodes` are **fragments** rendered inline — they must *not*
+have nav links. `/menu` is a 302 alias of `/admin/menu`.
+
+### 15.2 Root cause of the 502s — the daemon, not the panel
+
+Every `502` came from `:3001` being down (files / power / stats / console all
+proxy to the daemon; `errorPages.ts` turns the failed `daemonRequest` into 502).
+**The panel has no way to start its own daemon.**
+
+```sh
+cd /home/tmz/repos/airlink/daemon && bun src/app.ts start &
+# logs: ${XDG_STATE_HOME:-~/.local/state}/airlink/daemon.log
+```
+
+`.agents/ui-shots/restart.sh` now (a) logs outside `/tmp` and (b) starts the
+daemon if `:3001` is not answering. **Restart with `sh .agents/ui-shots/restart.sh`
+— a bare `curl` against a stopped daemon looks identical to a panel bug.**
+
+### 15.3 Defect list — what was found, why, and the fix
+
+#### F1 — five admin pages had no sidebar entry at all
+`initializeDefaultUIComponents()` (`src/handlers/uiComponentHandler.ts`) is the
+single source of nav. It seeded 12 admin items; these five exist, render 200,
+and were reachable only by typing the URL:
+
+| route | view | title key |
+|---|---|---|
+| `/admin/menu` | `admin/menu` | `menuManagerTitle` = Menu Manager |
+| `/admin/queue` | `admin/queue` | `queueManagementTitle` = Queue Management |
+| `/admin/playerstats` | `admin/playerstats` | `playerStatsTitle` = Player Statistics |
+| `/admin/security` | `admin/security` | `securityTitle` = Security |
+| `/admin/radar` | `admin/radar` | `adminRadarTitle` = Radar |
+
+`/admin/radar` was an **island** — `/admin/radar` ⇄ `/admin/radar/scripts` ⇄
+`/admin/radar` and nothing else. Fix = new `addSidebarItem()` entries.
+
+Sections are one of `core | infrastructure | extensions | configuration`
+(`getAdminSidebarGroups()`), priorities are descending and already carry 100/90/
+88/86/80/78/76/70/68/60/58/56/54 — insert, do not renumber.
+
+#### F2 — two server pages had no menu entry; two more were feature-gated shut
+Server menu defaults (`addServerMenuItem`) covered console/files/players/
+schedules/worlds/startup/backups/subusers/databases/settings/admin. Missing:
+
+* `logs` → `/server/:uuid/logs` (view `user/server/logs`, 200, zero in-links)
+* `sftp` → `/server/:uuid/sftp` (view `user/server/sftp`, 200, zero in-links)
+
+And `players` / `worlds` carry `feature: 'players' | 'worlds'`, filtered in both
+sidebars by:
+
+```js
+if (item.feature && !(typeof features !== 'undefined' && features && features.includes(item.feature))) return false;
+```
+
+`features` comes from `getImageFeatures(server.image)` → `image.info.features`.
+**The seed image (Minecraft, id 1) has `info = null`, and there is no admin UI
+anywhere to set `info.features`** → `features = []` → the two flagship game-panel
+pages are hidden on every server page, forever. That is the reported
+"worlds/players are hidden".
+
+**Decided semantics (do not "correct" these):**
+
+* `info` absent / not an object / no `features` key ⇒ **undeclared ⇒ the
+  feature-gated menu items are SHOWN.** Undeclared must never hide a page.
+* `info.features` present as an array ⇒ it is an allow-list and filters.
+
+**As-built (this diverged from the first plan — read this, not the plan):**
+
+The obvious fix — make every route pass `getImageFeaturesOrNull()` as its
+`features` render local — turned out to be unworkable. `modulesLoader.ts:19`
+mounts `src/modules/pages/**` **first**, and those rewritten controllers shadow
+the legacy routes for `/server/:id`, `/files`, `/backups`, `/settings`,
+`/startup`, `/worlds`, `/players`, `/schedules`, `/databases`, `/subusers`.
+**The legacy handlers that computed `features` never run.** Worse, the few that
+do reach a render (`api/v2/startup.ts` returns `features` in its JSON body, and
+the startup route spreads that body into `res.render`) would override the local
+with `[]`. Fixing it per-route means editing ~20 call sites across two module
+trees, most of them dead, and any future route silently opts out again.
+
+So the allow-list is resolved in **one** place instead:
+
+| piece | where | why |
+|---|---|---|
+| `getImageFeaturesOrNull()` / `getImageFeatures()` | `src/handlers/imageFeatures.ts` (new, leaf — no imports) | `handlers/` not `modules/user/server/`, so the auth middleware can use it without pulling in the daemon/realtime dependency graph |
+| `getImageFeaturesOrNull()` re-export | `src/modules/user/server/shared.ts` | every existing call site imports from `./shared`; the export surface is unchanged |
+| `attachServerFeatures()` → `res.locals.navFeatures` | `src/handlers/utils/auth/serverAuthUtil.ts`, called in `isAuthenticatedForServer` **before** the admin short-circuit | that middleware is the one thing every server page already runs *and* the one thing that knows the server id. Admins previously skipped the ownership query entirely, which is why the call sits above the branch |
+| filter | `views/partials/{admin,user}-sidebar.ejs` | `if (item.feature && Array.isArray(navFeatures) && !navFeatures.includes(item.feature)) return false;` |
+
+**The local is `navFeatures`, not `features`, on purpose.** Route handlers
+spread API bodies into `res.render`, so any name an API also emits gets
+overwritten with `[]`. No API returns `navFeatures`. The old `features` render
+local still exists on the legacy paths and is now simply **not read by the
+nav** — leave those call sites alone, they are dead for these URLs anyway.
+
+`src/modules/api/v2/startup.ts` keeps `getImageFeatures()` and its `string[]`
+contract — a JSON body must not change to `null`. Nothing in the API shape
+changed.
+
+#### F3 — `/credits` and `/create-server` had no link anywhere
+`/credits` renders 200 and `markSpecialLinks()` in the sidebar JS even has an
+`onCredits` active-state branch for it, but **no `<a>` points at it** — the
+active-state code was written for a link that was never added. `/create-server`
+is only linked when `settings.allowUserCreateServer` is true (default **false**).
+
+Fix = user sidebar entries `credits` + `create-server`, with `create-server`
+filtered out in `src/app.ts` when `allowUserCreateServer` is false (the sidebar
+is built before `getSettings()` resolves — filter after). Also add `my-images`,
+which currently lives only behind `/account`.
+
+#### F4 — the sidebar "Console" link pointed at a page with a dead terminal
+Two handlers registered `GET /server/:id`. `src/modules/pages/user/server/index.ts`
+mounts **first** (`modulesLoader.ts:19` puts `pageModules` ahead of
+`registeredModules()`), so it wins and renders `user/server/manage`.
+`src/modules/user/server/console.ts`'s identical route is **shadowed dead code**.
+
+* `views/user/server/manage.ejs` (116 lines) — power buttons + `<div id="terminal">`
+  with **no island mount and no `xterm.css`** ⇒ an empty black box. It also
+  receives **no `features` local**, so even a declared image would not have shown
+  players/worlds here.
+* `views/user/server/console.ejs` (156 lines) — stats cards, sparklines, power,
+  queue banner, daemon-offline banner, desktop + mobile terminals, mounts
+  `islands/server-console.js`, includes the footer. It is complete. It is also
+  unreachable: nav Console → `/server/:uuid` → manage, and `/server/:uuid/console`
+  has **zero in-links**.
+
+**Decision: `/server/:id` renders `user/server/console`; `/server/:id/console`
+stays as the same view (alias). `manage.ejs` stays only for the error paths that
+still `res.render('user/server/manage', …)`.** Do not merge the two views and do
+not mount a second island into `manage.ejs`.
+
+**As-built:** `/server/:id` now renders `user/server/console`; `/server/:id/console`
+is the same view (200, kept as an alias so existing bookmarks and
+`markSpecialLinks` keep working). Verified: `console-root` + `server-console.js`
++ `xterm.css` all present, `</main></body></html>` exactly once.
+
+Two things the landing page had to inherit from `manage.ejs`:
+
+1. the **suspension notice** — added to `console.ejs` *outside* `#console-root`,
+   because the island owns that subtree and replaces it wholesale on mount
+   failure;
+2. `serverSuspended` in the island config, which was **hardcoded `false`**. The
+   island reads it to disable start/restart/stop (`server-console.js:1132/1173/
+   1219`), so a suspended server was showing live power buttons. Now
+   `!!server.Suspended`.
+
+`manage.ejs` is now **unreachable** — its three remaining render sites
+(`user/server/console.ts:53,92`, `user/server/power.ts:45`) are all shadowed.
+It is kept (it still backs error states in code that could be un-shadowed) but
+it is no longer the landing page. See §15.5.
+
+**Feature gating needed no per-route work here**: `navFeatures` comes from the
+auth middleware (F2), so every server page — this one included — has it.
+
+#### F5 — six "full" views never closed their own document
+`layouts/base.ejs` opens `<body>` and emits the head/nav chrome; **the view is
+responsible for closing the document.** `layouts/user-footer.ejs` closes
+`</main>` + the layout divs and includes `base-footer.ejs`, which loads
+`realtime.js`, `realtime-client` and `upload-modal` and then emits
+`</body></html>`.
+
+Missing the include ⇒ unclosed `<main>`, **no realtime client**, **no upload
+modal**, no `</html>`:
+
+`user/server/{manage,databases,schedules,settings,startup,subusers}.ejs`
+
+`files-rows.ejs` is an AJAX **fragment** (`{ html }` JSON) and
+`admin/images/store-panel.ejs` is a server-side include — both correctly have no
+footer. A view that ends in `include('…-footer')` is full-page; anything else
+must not.
+
+Check: `grep -L 'layouts/user-footer\|layouts/admin-footer' views/**/*.ejs`
+should list only fragments.
+
+#### F6 — image features could never be set (the half-built feature behind F2)
+`Images.info` is a `String? @db.Text` JSON blob, editable only by round-tripping
+`state.info` through `views/admin/images/edit.ejs`; the form has **no control
+for it**, and `adminCreateImageBody` defaults `info` to `'{}'`. So `features` is
+write-only from the app's point of view. Phase 15 ships the missing editor
+(checkbox group + "restrict" master switch, create + edit) — see §15.4.
+
+#### F7 — below `lg` there was no server navigation at all
+`layouts/user.ejs` wraps the sidebar in `<div class="hidden lg:block">`, and
+`partials/bottom-nav.ejs` only ever rendered `regularMenuItems` — the
+**top-level user** items. The desktop sidebar is the only home of the server
+menu, so on a phone or a narrow window Files / Players / Worlds / Schedules /
+Databases / Subusers / Settings / SFTP were **unreachable from inside a server**.
+(The peak-UI port dropped the old horizontal server tab bar that the reference
+panel put above the content — `ref/panel/views/components/serverTemplate.ejs`.)
+
+Fix, in `views/partials/bottom-nav.ejs`:
+
+* when `req.path` starts with `/server/`, build the bar from
+  `uiComponentStore.getServerMenuItems()` instead, applying the **same**
+  `isAdminItem` / `ownerOnly` / `navFeatures` filter as the sidebars, and
+  prefixing a Dashboard escape-hatch item (slot 1) exactly as the desktop
+  server view does. The remaining items fall through to the "More" sheet's
+  existing `slice(4)`, which is unchanged;
+* `server.UUID` is substituted for `:uuid`, `server.id` for `:id`;
+* each server item sets `matchPrefix` to its own resolved URL so the active
+  state can be computed.
+
+**Active-state rewrite (both bar and sheet).** The old `markActiveMobile` /
+`markActiveSheetItems` marked *every* link whose prefix matched, and never
+matched on `href` at all. Consequences: Dashboard (`matchPrefix: '/server'`) lit
+up on every server page; `/credits`, `/my-images` and any other prefix-less item
+never lit up. Replaced with one shared `markActiveCollection()` — `href` **or**
+prefix must match, exact-or-`prefix + '/'` (so `'/'` never matches everything
+and `/server/<uuid>` never swallows a sibling UUID), **longest match wins** so
+only the deepest entry is current. The "More" sheet now highlights correctly
+too (its admin items previously had an empty prefix and could never match).
+
+Check: fetch any `/server/:uuid` page and read `#mobile-bottom-nav` — it must
+list Dashboard + Console + Files + …, not the dashboard's items.
+
+### 15.4 Delegation — Phase 15 batches (results)
+
+Each batch is one subagent. Read §1, §3, §4, §5 (i18n), §7.4, §8 first.
+**`tests/**` is off-limits.** After any `.ejs` or `storage/lang/*/lang.json`
+edit: `sh .agents/ui-shots/restart.sh`. After any `vite build`: restart again.
+
+* **15.A — image features editor. — DONE.** `views/admin/images/edit.ejs`
+  (+130: Features `.al-card` after Process — master switch + `players`/`worlds`/
+  `eula` group, SSR'd from `image.info`), `views/admin/images/index.ejs` (+59:
+  same block in the `#createContent` **create modal**), `dto.ts` (+46),
+  `admin/images.ts` (+77), `lang.json` (+3 keys: `eula`, `restrictFeatures`,
+  `restrictFeaturesHelp` — catalog 2898 → **2901**, sorted, 0 dups).
+  **`views/admin/images/create.ejs` does not exist** — image creation is the
+  `#createContent` modal in `index.ejs`; §15.4's original `{create,edit}.ejs`
+  guess was wrong.
+
+  Three bugs this batch had to fix *before* the feature could work at all —
+  all pre-existing, all now fixed:
+
+  1. **image save was 400 on every non-string field.** `PUT /api/v2/admin/images/:id`
+     rejected `variables` (array), `info` (object), `scripts` (object) and
+     `portRequirements` (array) against `z.string()`. The edit form's save path
+     was dead, so `info` could never round-trip. Widening `adminUpdateImageBody`
+     was a prerequisite, not a nicety.
+  2. **every successful create reported "network error."** The route answers
+     `res.redirect()` (HTML) while `submitCreateImage()` did `r.json()`. It now
+     follows the redirect to the new image's edit page — which is what the
+     "Create & Edit" button promises — and surfaces real error bodies instead of
+     claiming success on 400s.
+  3. **create defaulted to `info = {"features": []}`** — i.e. *declared empty*,
+     which under §15.3 F2 hides every feature-gated item for **every newly
+     created image**. Now defaults to `'{}'` (undeclared ⇒ show all).
+
+  Design notes worth preserving: the group is `div[role=group]` + `aria-labelledby`
+  rather than `<fieldset>` (the built CSS contains **zero** `fieldset` rules, so
+  UA `border/padding/margin` would leak in); collapsed state is `hidden` plus
+  `disabled` on the inputs so they leave the tab order. Off switch **deletes**
+  the `features` key entirely and preserves every other key in `info`.
+  Verified live after restart: `/admin/images/edit/1` → 200, Features card +
+  `FEATURE_KEYS` present, `players`/`worlds`/`eula` checkboxes with 13 associated
+  labels, all three labels SSR as English, **0 raw-key leaks**.
+* **15.B — the six footer-less views. — DONE.** Exactly `+2` lines at EOF in
+  each of `manage/databases/schedules/settings/startup/subusers.ejs`, placed
+  after the last `<script>` (and, for `subusers`, after its modals), matching
+  `console.ejs:156`. Verified: `</main>`/`</body>`/`</html>` emitted by none of
+  the six, `layouts/base` included by none. `grep -L` now lists only fragments,
+  partials, layouts, `files-rows.ejs` and `store-panel.ejs`. **No other
+  same-class omission** — breadcrumbs and `<h1>` are present in all six, and
+  `flash-messages` is *not* a per-view include (`base.ejs:104` emits it).
+* **15.C — nav + feature plumbing (orchestrator). — DONE.** F1 `uiComponentHandler`
+  (+94: `admin-queue`/`admin-radar`/`admin-security`/`admin-playerstats`/
+  `admin-menu`, server `logs`+`sftp`, user `create-server`/`my-images`/`credits`);
+  F2 `src/handlers/imageFeatures.ts` (new) + `attachServerFeatures()` in
+  `serverAuthUtil.ts` + the lenient sidebar filter; F3 `app.ts` (+11) gating
+  `create-server` *after* `getSettings()`; F4 `pages/user/server/index.ts` →
+  `user/server/console` + the console.ejs suspension fixes; F7 `bottom-nav.ejs`
+  (+93). Untracked new file: `src/handlers/imageFeatures.ts`.
+* **15.D — verification sweep.** `graph.mjs` zero-in-links went **24 → 12**, and
+  every one of the 12 is explained: probe artefacts that 404
+  (`/admin/addons/nope`, `/admin/radar/scripts/edit/1`, `/admin/servers/edit/1`,
+  `/server/…/files/edit/README.md`, `/my-images/edit/1`),
+  fragments (`/admin/images/store/panel`, `/admin/location/1/nodes`,
+  `/server/…/files/{list,detail}`), the `/menu` → `/admin/menu` alias, the
+  now-intentional `/server/:id/console` alias, and `/create-server` (correctly
+  hidden — `allowUserCreateServer` is false). **0 genuine orphans.** All six
+  server pages render `</main></body></html>` exactly once.
+
+### 15.5 Known gaps recorded but NOT fixed in Phase 15
+
+1. **Menu Manager edits do not survive a restart.** The store is in-memory and
+   `initializeDefaultUIComponents()` re-seeds defaults over it on every boot;
+   `POST /api/v2/admin/menu` only mutates memory. Fixing needs storage (a
+   `Json` column on `settings` + a prisma migration + a load step *after*
+   seeding) — deliberately deferred, do not half-do it.
+2. `uiComponentHandler` labels are English literals (§14 finding 7) — they
+   cannot call `t()` because the store is built once at boot, not per request.
+3. `src/modules/user/server/console.ts` `/server/:id` is now shadowed *twice*;
+   the whole legacy module is dead for that path but still owns `/ws-token`.
+   Consolidating it is a separate refactor.
+4. **`views/user/server/manage.ejs` is unreachable** (see F4) — kept for the
+   `res.render('user/server/manage', …)` error paths in `console.ts:53,92` and
+   `power.ts:45`, which are themselves shadowed. Those paths also pass **no
+   `server` local and no `errorMessage`** — `manage.ejs:1` dereferences
+   `server.name` on line 1, so they would 500 *and* drop the message if they
+   ever became reachable. Revisit when consolidating (§15.5.3).
+5. **The admin Settings "panel features" toggles are written and read
+   nowhere.** `sftpEnabled`, `backupsEnabled`, `schedulesEnabled`,
+   `databasesEnabled`, `fileManagerEnabled`, `consoleEnabled`,
+   `playerTrackingEnabled` are saved by `src/modules/admin/settings.ts` and
+   rendered by `views/admin/settings/index.ejs:667-717` — and **no route and no
+   nav item consults any of them**. Wiring them is a real feature, but it is a
+   *product* decision that Phase 15 deliberately did not make: `playerTrackingEnabled`
+   defaults to **false**, so gating on it would hide the Players page by default
+   — re-creating the exact bug this phase removed. Needs an owner to say which
+   flag gates which page and what each default should be.
+6. The legacy `features:` render locals in `src/modules/user/server/*.ts` are
+   now **inert** for navigation (the nav reads `navFeatures`). Harmless; do not
+   "fix" them by wiring them back up — that reopens the F2 problem.
+
 *Last updated: see git history. Update §3.4 and §13 whenever you introduce a
 component — the next agent depends on it.*
