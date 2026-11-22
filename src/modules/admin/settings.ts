@@ -96,6 +96,59 @@ function validateThemeCustomizations(value: any): string | null {
   return null;
 }
 
+function saveTheme(themesDir: string, info: any, light: string, dark: string, customizations: any): string {
+  const themeId  = randomUUID();
+  const themeDir = path.join(themesDir, themeId);
+  fs.mkdirSync(themeDir, { recursive: true });
+  fs.writeFileSync(path.join(themeDir, 'info.json'), JSON.stringify(info, null, 2));
+  fs.writeFileSync(path.join(themeDir, 'light.css'), light);
+  fs.writeFileSync(path.join(themeDir, 'dark.css'), dark);
+  if (customizations) fs.writeFileSync(path.join(themeDir, 'customizations.json'), JSON.stringify(customizations));
+  return themeId;
+}
+
+const THEME_STORE_REPO = /^[\w.-]+\/[\w.-]+$/.test(process.env.THEME_STORE_REPO || '') ? String(process.env.THEME_STORE_REPO) : 'airlinklabs/themes';
+const THEME_STORE_RAW  = `https://raw.githubusercontent.com/${THEME_STORE_REPO}/main`;
+const THEME_STORE_API  = `https://api.github.com/repos/${THEME_STORE_REPO}`;
+const THEME_STORE_HEADERS = { 'User-Agent': 'airlink-panel' };
+
+async function fetchThemeStoreFile(slug: string, file: string, limit: number): Promise<string | null> {
+  const res = await fetch(`${THEME_STORE_RAW}/${slug}/${file}`, { headers: THEME_STORE_HEADERS });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Could not download ${file} (HTTP ${res.status}).`);
+  const text = await res.text();
+  if (text.length > limit) throw new Error(`${file} is too large.`);
+  return text;
+}
+
+const THEME_STORE_IMAGE_TYPES: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', svg: 'image/svg+xml' };
+
+function themeStoreImagePath(value: any): string {
+  if (typeof value !== 'string') return '';
+  const clean = value.trim().replace(/^\.?\//, '');
+  if (!/^[\w./-]+\.(png|jpe?g|gif|webp|avif|svg)$/i.test(clean) || clean.split('/').some((part) => !part || part === '.' || part === '..')) return '';
+  return clean;
+}
+
+function themeStoreImages(slug: string, info: any): string[] {
+  const list = Array.isArray(info.images) ? info.images : (info.preview ? [info.preview] : []);
+  return list.map(themeStoreImagePath).filter(Boolean).slice(0, 6).map((file: string) => `/admin/themes/store/image/${slug}/${file}`);
+}
+
+function installedStoreThemes(): Set<string> {
+  const ids = new Set<string>();
+  const dir = path.join(process.cwd(), 'public', 'themes', 'user');
+  if (!fs.existsSync(dir)) return ids;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    try {
+      const info = JSON.parse(fs.readFileSync(path.join(dir, entry.name, 'info.json'), 'utf-8'));
+      if (typeof info?.storeId === 'string') ids.add(info.storeId);
+    } catch { continue; }
+  }
+  return ids;
+}
+
 function installThemeZip(zipPath: string): { success: boolean; error?: string } {
   const themesDir = path.join(process.cwd(), 'public', 'themes', 'user');
   const tempDir   = path.join(process.cwd(), 'public', 'uploads', 'theme-zips', 'tmp-' + Date.now());
@@ -122,13 +175,7 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     } else {
       delete info.customizations;
     }
-    const themeId  = randomUUID();
-    const themeDir = path.join(themesDir, themeId);
-    fs.mkdirSync(themeDir, { recursive: true });
-    fs.writeFileSync(path.join(themeDir, 'info.json'), JSON.stringify(info, null, 2));
-    fs.copyFileSync(lightPath, path.join(themeDir, 'light.css'));
-    fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
-    if (customizations) fs.writeFileSync(path.join(themeDir, 'customizations.json'), JSON.stringify(customizations));
+    saveTheme(themesDir, info, fs.readFileSync(lightPath, 'utf-8'), fs.readFileSync(darkPath, 'utf-8'), customizations);
     return { success: true };
   } catch (err: any) {
     if (err instanceof SyntaxError) return { success: false, error: 'info.json contains invalid JSON.' };
@@ -513,6 +560,163 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error resetting settings:', error);
           res.status(500).json({ success: false, error: 'Failed to reset settings.' });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/themes/store',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) return res.redirect('/login');
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/themes/store', { user, req, settings });
+        } catch (error) {
+          logger.error('Error rendering theme store:', error);
+          res.redirect('/admin/settings');
+        }
+      },
+    );
+
+    router.get(
+      '/admin/themes/store/list',
+      isAuthenticated(true),
+      async (_req: Request, res: Response) => {
+        try {
+          const contentsRes = await fetch(`${THEME_STORE_API}/contents`, {
+            headers: { ...THEME_STORE_HEADERS, 'Accept': 'application/vnd.github+json' },
+          });
+          if (contentsRes.status === 404) {
+            res.json({ success: true, available: false, repo: THEME_STORE_REPO, themes: [] });
+            return;
+          }
+          if (!contentsRes.ok) {
+            res.status(502).json({ success: false, message: `Failed to fetch the theme list from GitHub (HTTP ${contentsRes.status}).` });
+            return;
+          }
+          const contents = await contentsRes.json() as any[];
+          const folders = Array.isArray(contents) ? contents.filter((item: any) => item.type === 'dir' && /^[a-z0-9][a-z0-9-_]*$/i.test(item.name)) : [];
+          const installed = installedStoreThemes();
+          const themes = await Promise.all(folders.map(async (folder: any) => {
+            try {
+              const text = await fetchThemeStoreFile(folder.name, 'info.json', 100000);
+              if (!text) return null;
+              const info = JSON.parse(text);
+              if (!info || typeof info !== 'object' || Array.isArray(info)) return null;
+              return {
+                id: folder.name,
+                name: typeof info.name === 'string' && info.name.trim() ? info.name : folder.name,
+                version: typeof info.version === 'string' ? info.version : '',
+                author: typeof info.author === 'string' ? info.author : '',
+                description: typeof info.description === 'string' ? info.description : '',
+                longDescription: typeof info.longDescription === 'string' ? info.longDescription : (typeof info.description === 'string' ? info.description : ''),
+                images: themeStoreImages(folder.name, info),
+                content: info.content === true,
+                github: `https://github.com/${THEME_STORE_REPO}/tree/main/${folder.name}`,
+                installed: installed.has(folder.name),
+              };
+            } catch {
+              return null;
+            }
+          }));
+          res.json({ success: true, available: true, repo: THEME_STORE_REPO, themes: themes.filter(Boolean) });
+        } catch (error: any) {
+          logger.error('Error fetching theme store list:', error);
+          res.status(500).json({ success: false, message: 'The theme store could not be loaded.' });
+        }
+      },
+    );
+
+    router.get(
+      /^\/admin\/themes\/store\/image\/([a-z0-9][a-z0-9-_]*)\/(.+)$/i,
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const slug = req.params[0];
+        const file = themeStoreImagePath(req.params[1]);
+        const type = THEME_STORE_IMAGE_TYPES[file.split('.').pop()?.toLowerCase() || ''];
+        if (!file || !type) {
+          res.status(404).end();
+          return;
+        }
+        try {
+          const imageRes = await fetch(`${THEME_STORE_RAW}/${slug}/${file}`, { headers: THEME_STORE_HEADERS });
+          if (!imageRes.ok) {
+            res.status(imageRes.status === 404 ? 404 : 502).end();
+            return;
+          }
+          const data = Buffer.from(await imageRes.arrayBuffer());
+          if (data.length > 5000000) {
+            res.status(413).end();
+            return;
+          }
+          res.set({
+            'Content-Type': type,
+            'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+            'X-Content-Type-Options': 'nosniff',
+            'Cache-Control': 'private, max-age=3600',
+          });
+          res.send(data);
+        } catch (error) {
+          logger.error('Error fetching theme store image:', error);
+          res.status(502).end();
+        }
+      },
+    );
+
+    router.post(
+      '/admin/themes/store/install',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const slug = req.body?.slug;
+        if (typeof slug !== 'string' || !/^[a-z0-9][a-z0-9-_]*$/i.test(slug)) {
+          res.status(400).json({ success: false, message: 'Invalid theme.' });
+          return;
+        }
+        if (installedStoreThemes().has(slug)) {
+          res.status(409).json({ success: false, message: 'This theme is already installed.' });
+          return;
+        }
+        try {
+          const [infoText, light, dark, customizationText] = await Promise.all([
+            fetchThemeStoreFile(slug, 'info.json', 100000),
+            fetchThemeStoreFile(slug, 'light.css', 2000000),
+            fetchThemeStoreFile(slug, 'dark.css', 2000000),
+            fetchThemeStoreFile(slug, 'customizations.json', 6000000),
+          ]);
+          if (!infoText || light === null || dark === null) {
+            res.status(422).json({ success: false, message: 'This theme is missing info.json, light.css or dark.css.' });
+            return;
+          }
+          let info: any;
+          try { info = JSON.parse(infoText); } catch { info = null; }
+          if (!info || typeof info !== 'object' || Array.isArray(info)) {
+            res.status(422).json({ success: false, message: 'The theme info.json is not valid.' });
+            return;
+          }
+          let customizations: any = null;
+          if (customizationText !== null) {
+            try { customizations = JSON.parse(customizationText); } catch {
+              res.status(422).json({ success: false, message: 'The theme customizations.json is not valid JSON.' });
+              return;
+            }
+            const error = validateThemeCustomizations(customizations);
+            if (error) {
+              res.status(422).json({ success: false, message: error });
+              return;
+            }
+            info.customizations = 'customizations.json';
+          } else {
+            delete info.customizations;
+          }
+          info.storeId = slug;
+          saveTheme(path.join(process.cwd(), 'public', 'themes', 'user'), info, light, dark, customizations);
+          res.json({ success: true, message: `"${typeof info.name === 'string' && info.name ? info.name : slug}" installed. Choose it under Settings, Appearance.` });
+        } catch (error: any) {
+          logger.error('Error installing theme from store:', error);
+          res.status(502).json({ success: false, message: error?.message || 'The theme could not be installed.' });
         }
       },
     );
