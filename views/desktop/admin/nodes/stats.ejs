@@ -11,8 +11,8 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-theme-i18n="adminNodesTitle"><%= req.translations.adminNodesTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500" data-theme-i18n="adminNodesText"><%= req.translations.adminNodesText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <button onclick="location.href='/admin/nodes'" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
@@ -28,17 +28,17 @@
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
             const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
             %>
-            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>">
+            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>" data-theme-text="{{node.status.label}}" data-theme-bindings="<%= JSON.stringify({"node.status.label":(isOnline ? 'Online' : 'Offline')}) %>">
                 <%= isOnline ? 'Online' : 'Offline' %>
             </p>
-            <p class="text-sm text-neutral-400 mt-2">
+            <p class="text-sm text-neutral-400 mt-2" data-theme-text="Last Update: {{node.lastUpdated}}" data-theme-bindings="<%= JSON.stringify({"node.lastUpdated":(lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A')}) %>">
                 Last Update: <%= lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A' %>
             </p>
         </div>
 
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
         <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Uptime</h2>
-        <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+        <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{node.uptime}}" data-theme-bindings="<%= JSON.stringify({"node.uptime":(isOnline ? stats.uptime : 'N/A')}) %>">
             <%= isOnline ? stats.uptime : 'N/A' %> 
         </p>
         <% if (!isOnline) { %>

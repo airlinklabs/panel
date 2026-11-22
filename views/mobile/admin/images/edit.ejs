@@ -15,7 +15,7 @@
       </a>
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white truncate">Edit Image: <%= image.name %></h1>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white truncate" data-theme-text="Edit Image: {{image.name}}" data-theme-bindings="<%= JSON.stringify({"image.name":(image.name)}) %>">Edit Image: <%= image.name %></h1>
           <p class="mt-0.5 text-xs text-neutral-500">Edit the image configuration or export it as JSON.</p>
         </div>
         <a href="/admin/images/export/<%= image.id %>"

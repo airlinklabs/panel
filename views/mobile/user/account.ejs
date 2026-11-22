@@ -8,8 +8,8 @@
 
     <div class="mb-2 flex items-start justify-between gap-3">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userAccountTitle || 'Account' %></h1>
-        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="userAccountTitle"><%= req.translations.userAccountTitle || 'Account' %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="userAccountText"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
       </div>
       <a href="/credits"
         class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 px-3 py-2 text-xs font-medium text-neutral-600 dark:text-neutral-400 shadow-sm dark:shadow-none transition shrink-0">
@@ -27,7 +27,7 @@
         <img id="avatar-preview"
           src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>"
           alt="Avatar"
-          class="h-14 w-14 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0">
+          class="h-14 w-14 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0" data-theme-image="{{user.avatar}}" data-theme-bindings="<%= JSON.stringify({"user.avatar":(user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username))}) %>">
         <div class="flex flex-col gap-2">
           <label for="avatar-input" class="cursor-pointer inline-block rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition active:scale-95">
             Choose image
@@ -43,30 +43,30 @@
 
     <!-- Account details -->
     <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.updateAccount || 'Account details' %></p>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4" data-theme-i18n="updateAccount"><%= req.translations.updateAccount || 'Account details' %></p>
 
       <form id="change-username-form" action="/change-username" method="POST" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.username || 'Username' %></label>
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5" data-theme-i18n="username"><%= req.translations.username || 'Username' %></label>
         <div class="flex gap-2">
           <input id="username" type="text" name="username" placeholder="<%= user.username %>"
-            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
+            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition" data-theme-text="{{user.name}}" data-theme-bindings="<%= JSON.stringify({"user.name":(user.username)}) %>">
           <button type="submit" id="change-username-btn" disabled
-            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition" data-theme-i18n="update">
             <%= req.translations.update || 'Update' %>
           </button>
         </div>
-        <span id="username-feedback" class="mt-1.5 text-xs text-neutral-400 inline-block"><%= req.translations.checking || 'Checking...' %></span>
+        <span id="username-feedback" class="mt-1.5 text-xs text-neutral-400 inline-block" data-theme-text="{{page.username.feedback}}" data-theme-bindings="<%= JSON.stringify({"page.username.feedback":(""+String(( req.translations.checking || 'Checking...' ) ?? "")+"")}) %>" data-theme-live="page.username.feedback"><%= req.translations.checking || 'Checking...' %></span>
       </form>
 
       <form id="change-email-form" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.email || 'Email' %></label>
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5" data-theme-i18n="email"><%= req.translations.email || 'Email' %></label>
         <div class="flex gap-2">
           <input id="email" type="email" name="email" placeholder="<%= user.email %>"
-            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
+            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition" data-theme-text="{{user.email}}" data-theme-bindings="<%= JSON.stringify({"user.email":(user.email)}) %>">
           <button type="submit"
-            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 transition">
+            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 transition" data-theme-i18n="update">
             <%= req.translations.update || 'Update' %>
           </button>
         </div>
@@ -74,24 +74,24 @@
 
       <form id="change-description-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.description || 'Description' %></label>
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5" data-theme-i18n="description"><%= req.translations.description || 'Description' %></label>
         <textarea id="description" name="description" rows="3"
           class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white resize-none transition"
           placeholder="<%= user.description %>"><%= user.description %></textarea>
-        <button type="submit" class="mt-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+        <button type="submit" class="mt-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition" data-theme-i18n="updateDescription">
           <%= req.translations.updateDescription || 'Update' %>
         </button>
       </form>
 
       <form id="change-password-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5">
         <%- include('../components/csrf') %>
-        <p class="text-xs font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.changePassword || 'Change password' %></p>
-        <div id="current-password-feedback" class="text-xs text-neutral-400 mb-1.5"><%= req.translations.checking || 'Checking...' %></div>
+        <p class="text-xs font-medium text-neutral-800 dark:text-white mb-3" data-theme-i18n="changePassword"><%= req.translations.changePassword || 'Change password' %></p>
+        <div id="current-password-feedback" class="text-xs text-neutral-400 mb-1.5" data-theme-i18n="checking"><%= req.translations.checking || 'Checking...' %></div>
         <input id="currentPassword" type="password" name="currentPassword" placeholder="Current password"
           class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white mb-3 transition">
         <input id="newPassword" type="password" name="newPassword" placeholder="New password" disabled
           class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white mb-3 disabled:opacity-40 transition">
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition" data-theme-i18n="update_password">
           <%= req.translations.update_password || 'Update password' %>
         </button>
       </form>
@@ -99,7 +99,7 @@
 
     <!-- Language -->
     <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.languagePreference || 'Language' %></p>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3" data-theme-i18n="languagePreference"><%= req.translations.languagePreference || 'Language' %></p>
       <form id="language-preference-form">
         <%- include('../components/csrf') %>
         <select id="language" name="language"
@@ -115,7 +115,7 @@
           <option value="ja"  <%= req.lang === 'ja'  ? 'selected' : '' %>>日本語</option>
           <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
         </select>
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition" data-theme-i18n="saveLanguagePreference">
           <%= req.translations.saveLanguagePreference || 'Save' %>
         </button>
       </form>
@@ -123,18 +123,18 @@
 
     <!-- Login history -->
     <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.loginHistory || 'Login history' %></p>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3" data-theme-i18n="loginHistory"><%= req.translations.loginHistory || 'Login history' %></p>
       <div class="space-y-2">
         <% if (loginHistory && loginHistory.length > 0) { %>
           <% loginHistory.forEach(login => { %>
           <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
-            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300"><%= new Date(login.timestamp).toLocaleString() %></p>
-            <p class="text-[11px] text-neutral-500 font-mono mt-0.5"><%= login.ipAddress || 'Unknown IP' %></p>
-            <p class="text-[11px] text-neutral-400 truncate mt-0.5"><%= login.userAgent || 'Unknown device' %></p>
+            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300" data-theme-text="{{login.time}}" data-theme-bindings="<%= JSON.stringify({"login.time":(new Date(login.timestamp).toLocaleString())}) %>"><%= new Date(login.timestamp).toLocaleString() %></p>
+            <p class="text-[11px] text-neutral-500 font-mono mt-0.5" data-theme-text="{{login.ip}}" data-theme-bindings="<%= JSON.stringify({"login.ip":(login.ipAddress || 'Unknown IP')}) %>"><%= login.ipAddress || 'Unknown IP' %></p>
+            <p class="text-[11px] text-neutral-400 truncate mt-0.5" data-theme-text="{{login.device}}" data-theme-bindings="<%= JSON.stringify({"login.device":(login.userAgent || 'Unknown device')}) %>"><%= login.userAgent || 'Unknown device' %></p>
           </div>
           <% }) %>
         <% } else { %>
-        <p class="text-sm text-neutral-400 text-center py-4"><%= req.translations.noLoginHistory || 'No login history available' %></p>
+        <p class="text-sm text-neutral-400 text-center py-4" data-theme-i18n="noLoginHistory"><%= req.translations.noLoginHistory || 'No login history available' %></p>
         <% } %>
       </div>
     </div>

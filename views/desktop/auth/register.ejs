@@ -93,10 +93,10 @@
 
     <div class="mb-8">
       <% if (settings.logo) { %>
-      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
+      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5" data-theme-image="{{panel.logo}}" data-theme-bindings="<%= JSON.stringify({"panel.logo":(settings.logo)}) %>">
       <% } %>
       <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Create account</h1>
-      <p class="text-sm text-neutral-500 mt-1"><%= settings.title %></p>
+      <p class="text-sm text-neutral-500 mt-1" data-theme-text="{{panel.title}}" data-theme-bindings="<%= JSON.stringify({"panel.title":(settings.title)}) %>"><%= settings.title %></p>
     </div>
 
     <% if (req.query.err) { %>
@@ -140,7 +140,7 @@
             </button>
           </div>
           <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
-          <p class="pw-hint" id="pwHint">8+ characters, one letter, one number.</p>
+          <p class="pw-hint" id="pwHint" data-theme-text="{{page.pwHint}}" data-theme-bindings="<%= JSON.stringify({"page.pwHint":("8+ characters, one letter, one number.")}) %>" data-theme-live="page.pwHint">8+ characters, one letter, one number.</p>
         </div>
         <button type="submit" class="auth-submit" id="submitBtn">
           <span class="btn-label">Create account</span>

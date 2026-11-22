@@ -140,7 +140,7 @@
       <div class="mx-8 mt-5 flex items-center justify-between gap-3 flex-wrap mb-1">
         <div class="flex items-center gap-3">
           <input id="imageFilterInput" type="text" placeholder="Search…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
-          <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
+          <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap" data-theme-text="{{page.statusText}}" data-theme-bindings="<%= JSON.stringify({"page.statusText":("")}) %>" data-theme-live="page.statusText"></span>
         </div>
         <div class="vtog">
           <button id="btnAll" onclick="setView('all')">All</button>
@@ -186,8 +186,8 @@
   <div class="modal-box">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <div class="flex items-center gap-2 min-w-0">
-        <p id="grpTitle" class="text-sm font-semibold text-neutral-800 dark:text-white truncate"></p>
-        <span id="grpCount" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
+        <p id="grpTitle" class="text-sm font-semibold text-neutral-800 dark:text-white truncate" data-theme-text="{{page.grpTitle}}" data-theme-bindings="<%= JSON.stringify({"page.grpTitle":("")}) %>" data-theme-live="page.grpTitle"></p>
+        <span id="grpCount" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap" data-theme-text="{{page.grpCount}}" data-theme-bindings="<%= JSON.stringify({"page.grpCount":("")}) %>" data-theme-live="page.grpCount"></span>
       </div>
       <button onclick="closeGroup()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
@@ -211,23 +211,23 @@
   <div class="modal-box narrow">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <div class="flex items-center gap-2 min-w-0">
-        <p id="eggTitle" class="text-sm font-semibold text-neutral-800 dark:text-white truncate"></p>
-        <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"></span>
+        <p id="eggTitle" class="text-sm font-semibold text-neutral-800 dark:text-white truncate" data-theme-text="{{page.eggTitle}}" data-theme-bindings="<%= JSON.stringify({"page.eggTitle":("")}) %>" data-theme-live="page.eggTitle"></p>
+        <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap" data-theme-text="{{page.eggCat}}" data-theme-bindings="<%= JSON.stringify({"page.eggCat":("")}) %>" data-theme-live="page.eggCat"></span>
       </div>
       <button onclick="closeEgg()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="modal-single-body">
-      <p id="eggDesc" class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed"></p>
-      <p id="eggAuthor" class="text-[11px] text-neutral-400 dark:text-neutral-500"></p>
+      <p id="eggDesc" class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed" data-theme-text="{{page.eggDesc}}" data-theme-bindings="<%= JSON.stringify({"page.eggDesc":("")}) %>" data-theme-live="page.eggDesc"></p>
+      <p id="eggAuthor" class="text-[11px] text-neutral-400 dark:text-neutral-500" data-theme-text="{{page.eggAuthor}}" data-theme-bindings="<%= JSON.stringify({"page.eggAuthor":("")}) %>" data-theme-live="page.eggAuthor"></p>
       <div class="flex-1 overflow-y-auto">
         <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-2">README</p>
         <div id="eggReadme" class="md-body"></div>
       </div>
-      <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
+      <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt" data-theme-text="{{page.eggErrTxt}}" data-theme-bindings="<%= JSON.stringify({"page.eggErrTxt":("")}) %>" data-theme-live="page.eggErrTxt"></p></div>
       <button id="eggInstallBtn" onclick="confirmInstall()" type="button"
-        class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition mt-auto">
+        class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition mt-auto" data-theme-text="{{page.eggInstallBtn}}" data-theme-bindings="<%= JSON.stringify({"page.eggInstallBtn":("\r\n        Install\r\n      ")}) %>" data-theme-live="page.eggInstallBtn">
         Install
       </button>
     </div>
@@ -340,9 +340,9 @@ function renderAll(list) {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer';
     tr.innerHTML =
-      `<td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white">${esc(img.name)}</td>` +
+      `<td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white" data-theme-text="{{image.name}}" data-theme-bindings="${JSON.stringify({"image.name":(esc(img.name))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(img.name)}</td>` +
       `<td class="whitespace-nowrap px-3 py-4 text-sm col-hide">${catBadge(img.category)}</td>` +
-      `<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">${esc(img.author||'—')}</td>` +
+      `<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide" data-theme-text="{{image.author}}" data-theme-bindings="${JSON.stringify({"image.author":(esc(img.author||'—'))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(img.author||'—')}</td>` +
       `<td class="whitespace-nowrap px-3 py-4 text-sm">` +
         `<button type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Install</button>` +
       `</td>`;
@@ -395,7 +395,7 @@ function openGroup(group, imgs) {
     const subLabel = img.subGroup && img.subGroup !== img.group ? img.subGroup.replace(img.group + '/', '') : '';
     row.innerHTML =
       `<div class="min-w-0">` +
-        `<p class="text-xs font-medium text-neutral-800 dark:text-white truncate">${esc(img.name)}</p>` +
+        `<p class="text-xs font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{image.name}}" data-theme-bindings="${JSON.stringify({"image.name":(esc(img.name))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(img.name)}</p>` +
         (subLabel ? `<p class="text-[10px] text-neutral-400 font-mono truncate">${esc(subLabel)}</p>` : '') +
       `</div>` +
       `<button type="button" class="flex-shrink-0 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-2 py-1 text-xs font-medium shadow transition">Install</button>`;

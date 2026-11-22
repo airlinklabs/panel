@@ -11,12 +11,12 @@
       <!-- Page header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminServersTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminServersText %></p>
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-theme-i18n="adminServersTitle"><%= req.translations.adminServersTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500" data-theme-i18n="adminServersText"><%= req.translations.adminServersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <button onclick="location.href='/admin/servers/create'" type="button"
-            class="border border-neutral-800/20 dark:border-white/10 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-sm transition">
+            class="border border-neutral-800/20 dark:border-white/10 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-sm transition" data-theme-i18n="createNewServer">
             <%= req.translations.createNewServer %>
           </button>
         </div>
@@ -28,7 +28,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
             <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>
           </svg>
-          <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
+          <p class="text-sm text-emerald-700 dark:text-emerald-400" data-theme-i18n="actionCompleted"><%= req.translations.actionCompleted %></p>
         </div>
       </div>
       <% } %>
@@ -91,11 +91,11 @@
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-6 w-10"></th>
-              <th scope="col" class="py-3.5 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.name %></th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.Owner %></th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.Node %></th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.connection %></th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.Status %></th>
+              <th scope="col" class="py-3.5 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white" data-theme-i18n="name"><%= req.translations.name %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white" data-theme-i18n="Owner"><%= req.translations.Owner %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white" data-theme-i18n="Node"><%= req.translations.Node %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white" data-theme-i18n="connection"><%= req.translations.connection %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white" data-theme-i18n="Status"><%= req.translations.Status %></th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"></th>
             </tr>
           </thead>
@@ -117,27 +117,27 @@
                     <% } %>
                   </span>
                   <div>
-                    <div class="font-medium text-neutral-800 dark:text-white"><%= server.name %></div>
-                    <div class="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5"><%= server.UUID %></div>
+                    <div class="font-medium text-neutral-800 dark:text-white" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name)}) %>"><%= server.name %></div>
+                    <div class="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.id}}" data-theme-bindings="<%= JSON.stringify({"server.id":(server.UUID)}) %>"><%= server.UUID %></div>
                   </div>
                 </div>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
-                <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
+                <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner.username)}) %>">
                   <img class="h-6 w-6 rounded-md object-cover shrink-0"
-                    src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="">
-                  <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline"><%= server.owner.username %></span>
+                    src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="" data-theme-image="{{server.owner.avatar}}" data-theme-bindings="<%= JSON.stringify({"server.owner.avatar":(server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username))}) %>">
+                  <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner.username)}) %>"><%= server.owner.username %></span>
                 </a>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
-                <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline" onclick="event.stopPropagation()"><%= server.node.name %></a>
+                <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline" onclick="event.stopPropagation()" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.node.name}}" data-theme-bindings="<%= JSON.stringify({"server.node.name":(server.node.name)}) %>"><%= server.node.name %></a>
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400" data-theme-text="{{server.node.address}}:{{server.port}}" data-theme-bindings="<%= JSON.stringify({"server.node.address":(server.node.address),"server.port":(JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop())}) %>">
                 <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
-                  <%= server.Suspended ? 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' %>">
+                  <%= server.Suspended ? 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' %>" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Enabled')}) %>">
                   <%= server.Suspended ? 'Suspended' : 'Enabled' %>
                 </span>
               </td>
@@ -184,8 +184,8 @@
 
       <div class="flex justify-between items-start px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
         <div>
-          <h3 class="text-sm font-semibold text-neutral-800 dark:text-white" id="radarScanModalTitle">Radar Scan</h3>
-          <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle">Pick a script and scan the server volume</p>
+          <h3 class="text-sm font-semibold text-neutral-800 dark:text-white" id="radarScanModalTitle" data-theme-text="{{page.radarScanModalTitle}}" data-theme-bindings="<%= JSON.stringify({"page.radarScanModalTitle":("Radar Scan")}) %>" data-theme-live="page.radarScanModalTitle">Radar Scan</h3>
+          <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle" data-theme-text="{{page.radarScanModalSubtitle}}" data-theme-bindings="<%= JSON.stringify({"page.radarScanModalSubtitle":("Pick a script and scan the server volume")}) %>" data-theme-live="page.radarScanModalSubtitle">Pick a script and scan the server volume</p>
         </div>
         <button type="button" onclick="closeRadarScanModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition ml-4 mt-0.5">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -238,7 +238,7 @@
               </button>
             </div>
           </div>
-          <p id="scriptDescription" class="mt-2 text-xs text-neutral-500 italic min-h-4"></p>
+          <p id="scriptDescription" class="mt-2 text-xs text-neutral-500 italic min-h-4" data-theme-text="{{page.scriptDescription}}" data-theme-bindings="<%= JSON.stringify({"page.scriptDescription":("")}) %>" data-theme-live="page.scriptDescription"></p>
         </div>
 
         <!-- VT file scan -->

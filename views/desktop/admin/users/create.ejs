@@ -8,8 +8,8 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateUserText %></p>
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-theme-i18n="adminCreateUserTitle"><%= req.translations.adminCreateUserTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500" data-theme-i18n="adminCreateUserText"><%= req.translations.adminCreateUserText %></p>
         </div>
       </div>
 
@@ -64,7 +64,7 @@
             </div>
 
             <div class="sm:col-span-2 flex justify-end">
-              <button id="createuserBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-5 py-2 text-sm font-medium shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
+              <button id="createuserBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-5 py-2 text-sm font-medium shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed" data-theme-i18n="create">
                 <%= req.translations.create %>
               </button>
             </div>

@@ -5,36 +5,36 @@
 
   <div class="px-4 py-5">
     <div class="mb-5">
-      <a href="/admin/users" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition">
+      <a href="/admin/users" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition" data-theme-i18n="back">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
         </svg>
         <%= req.translations.back || 'Back to Users' %>
       </a>
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminEditUserTitle"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminEditUserText"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
     </div>
 
       <div id="userForm" class="mt-4 w-full">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
           <div class="flex items-center gap-3 mb-4 pb-4 border-b border-neutral-200 dark:border-white/5">
-            <img class="h-11 w-11 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
+            <img class="h-11 w-11 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="" data-theme-image="{{viewedUser.avatar}}" data-theme-bindings="<%= JSON.stringify({"viewedUser.avatar":(dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username))}) %>">
             <div>
-              <p class="text-sm font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= dataUser.email %></p>
+              <p class="text-sm font-semibold text-neutral-800 dark:text-white" data-theme-text="{{viewedUser.name}}" data-theme-bindings="<%= JSON.stringify({"viewedUser.name":(dataUser.username)}) %>"><%= dataUser.username %></p>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400" data-theme-text="{{viewedUser.email}}" data-theme-bindings="<%= JSON.stringify({"viewedUser.email":(dataUser.email)}) %>"><%= dataUser.email %></p>
             </div>
           </div>
           <form id="editUserForm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- User Information Section -->
               <div class="space-y-6">
-                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2" data-theme-i18n="userInformation">
                   <%= req.translations.userInformation || 'User Information' %>
                 </h2>
 
                 <!-- Username -->
                 <div>
-                  <label for="username" class="block text-white text-sm font-medium mb-2">
+                  <label for="username" class="block text-white text-sm font-medium mb-2" data-theme-i18n="username">
                     <%= req.translations.username || 'Username' %>
                   </label>
                   <input
@@ -49,7 +49,7 @@
 
                 <!-- Email -->
                 <div>
-                  <label for="email" class="block text-white text-sm font-medium mb-2">
+                  <label for="email" class="block text-white text-sm font-medium mb-2" data-theme-i18n="email">
                     <%= req.translations.email || 'Email' %>
                   </label>
                   <input
@@ -64,7 +64,7 @@
 
                 <!-- Description -->
                 <div>
-                  <label for="description" class="block text-white text-sm font-medium mb-2">
+                  <label for="description" class="block text-white text-sm font-medium mb-2" data-theme-i18n="description">
                     <%= req.translations.description || 'Description' %>
                   </label>
                   <textarea
@@ -78,7 +78,7 @@
 
               <!-- Security Section -->
               <div class="space-y-6">
-                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2" data-theme-i18n="security">
                   <%= req.translations.security || 'Security' %>
                 </h2>
 
@@ -97,7 +97,7 @@
 
                 <!-- Confirm Password -->
                 <div>
-                  <label for="confirmPassword" class="block text-white text-sm font-medium mb-2">
+                  <label for="confirmPassword" class="block text-white text-sm font-medium mb-2" data-theme-i18n="confirmPassword">
                     <%= req.translations.confirmPassword || 'Confirm Password' %>
                   </label>
                   <input
@@ -114,19 +114,19 @@
                     <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
                       <div class="flex items-center justify-between">
                         <div>
-                          <h3 class="text-sm font-medium text-white">
+                          <h3 class="text-sm font-medium text-white" data-theme-i18n="adminStatus">
                             <%= req.translations.adminStatus || 'Administrator Status' %>
                           </h3>
-                          <p class="text-xs text-neutral-400 mt-1">
+                          <p class="text-xs text-neutral-400 mt-1" data-theme-i18n="adminDescription">
                             <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                           </p>
                         </div>
-                        <label for="isAdmin" class="relative inline-block w-12 h-6">
+                        <label for="isAdmin" class="relative inline-block w-12 h-6" data-theme-text="" data-theme-bindings="<%= JSON.stringify({}) %>">
                           <input type="checkbox" id="isAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %>>
                           <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-blue-500 rounded-full"></span>
                           <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition"></span>
                         </label>
-                        <span class="ms-3 text-sm font-medium text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
+                        <span class="ms-3 text-sm font-medium text-white" id="adminStatusLabel" data-theme-text="{{viewedUser.adminStatus}}" data-theme-bindings="<%= JSON.stringify({"viewedUser.adminStatus":(dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled')}) %>" data-theme-live="viewedUser.adminStatus"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                       </div>
                     </div>
                   </div>
@@ -176,7 +176,7 @@
               <button
                 type="submit"
                 class="md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-6 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
-              >
+               data-theme-i18n="saveChanges">
                 <%= req.translations.saveChanges || 'Save Changes' %>
               </button>
             </div>

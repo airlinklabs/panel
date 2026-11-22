@@ -9,8 +9,8 @@
 
     <div class="flex items-start justify-between mb-4">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminServersTitle %></h1>
-        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminServersText %></p>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminServersTitle"><%= req.translations.adminServersTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminServersText"><%= req.translations.adminServersText %></p>
       </div>
       <button onclick="location.href='/admin/servers/create'" type="button"
         class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition shrink-0">
@@ -26,7 +26,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>
       </svg>
-      <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
+      <p class="text-sm text-emerald-700 dark:text-emerald-400" data-theme-i18n="actionCompleted"><%= req.translations.actionCompleted %></p>
     </div>
     <% } %>
 
@@ -100,11 +100,11 @@
             <% } %>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-neutral-800 dark:text-white truncate server-name"><%= server.name %></p>
-            <p class="text-xs text-neutral-500 font-mono truncate"><%= server.UUID %></p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white truncate server-name" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name)}) %>"><%= server.name %></p>
+            <p class="text-xs text-neutral-500 font-mono truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.id}}" data-theme-bindings="<%= JSON.stringify({"server.id":(server.UUID)}) %>"><%= server.UUID %></p>
           </div>
           <span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0
-            <%= server.Suspended ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' %>">
+            <%= server.Suspended ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' %>" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Enabled')}) %>">
             <%= server.Suspended ? 'Suspended' : 'Enabled' %>
           </span>
         </div>
@@ -112,19 +112,19 @@
         <div class="flex gap-2 mb-3">
           <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Owner</p>
-            <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+            <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-1.5" onclick="event.stopPropagation()" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner.username)}) %>">
               <img class="h-4 w-4 rounded object-cover shrink-0"
-                src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="">
-              <span class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate"><%= server.owner.username %></span>
+                src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="" data-theme-image="{{server.owner.avatar}}" data-theme-bindings="<%= JSON.stringify({"server.owner.avatar":(server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username))}) %>">
+              <span class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner.username)}) %>"><%= server.owner.username %></span>
             </a>
           </div>
           <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Node</p>
-            <a href="/admin/node/<%= server.node.id %>/stats" class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate block" onclick="event.stopPropagation()"><%= server.node.name %></a>
+            <a href="/admin/node/<%= server.node.id %>/stats" class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate block" onclick="event.stopPropagation()" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.node.name}}" data-theme-bindings="<%= JSON.stringify({"server.node.name":(server.node.name)}) %>"><%= server.node.name %></a>
           </div>
           <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Port</p>
-            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %></p>
+            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate" data-theme-text="{{server.node.address}}:{{server.port}}" data-theme-bindings="<%= JSON.stringify({"server.node.address":(server.node.address),"server.port":(JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop())}) %>"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %></p>
           </div>
         </div>
 
@@ -170,8 +170,8 @@
 
     <div class="flex items-start justify-between px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-white/10 shrink-0">
       <div>
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white" id="radarScanModalTitle">Radar Scan</p>
-        <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle">Pick a script and scan the server volume</p>
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white" id="radarScanModalTitle" data-theme-text="{{page.radarScanModalTitle}}" data-theme-bindings="<%= JSON.stringify({"page.radarScanModalTitle":("Radar Scan")}) %>" data-theme-live="page.radarScanModalTitle">Radar Scan</p>
+        <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle" data-theme-text="{{page.radarScanModalSubtitle}}" data-theme-bindings="<%= JSON.stringify({"page.radarScanModalSubtitle":("Pick a script and scan the server volume")}) %>" data-theme-live="page.radarScanModalSubtitle">Pick a script and scan the server volume</p>
       </div>
       <button onclick="closeRadarScanModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition ml-3 shrink-0 mt-0.5">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,7 +205,7 @@
       <div id="builtinPickerSection">
         <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
         <select id="scriptSelect" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white mb-2 focus:outline-none"></select>
-        <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4"></p>
+        <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4" data-theme-text="{{page.scriptDescription}}" data-theme-bindings="<%= JSON.stringify({"page.scriptDescription":("")}) %>" data-theme-live="page.scriptDescription"></p>
         <button id="runScanButton" onclick="runRadarScan()"
           class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">

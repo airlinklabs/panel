@@ -10,7 +10,7 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Server: <%= server.name %></h1>
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-server-uuid="<%= server.UUID %>" data-theme-text="Edit Server: {{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name)}) %>">Edit Server: <%= server.name %></h1>
             <p class="mt-1 tracking-tight text-sm text-neutral-500">Modify server settings and configuration.</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -114,7 +114,7 @@
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
                     <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
+                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel" data-theme-text="{{server.startupEdit.label}}" data-theme-bindings="<%= JSON.stringify({"server.startupEdit.label":(server.allowStartupEdit ? 'Enabled' : 'Disabled')}) %>" data-theme-live="server.startupEdit.label"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
                   </label>
                 </div>
               </div>
@@ -139,8 +139,8 @@
                     </span>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
-                    <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Active')}) %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
+                    <p class="text-xs text-neutral-500" data-server-uuid="<%= server.UUID %>" data-theme-text="Server ID: {{server.id}}" data-theme-bindings="<%= JSON.stringify({"server.id":(server.UUID)}) %>">Server ID: <%= server.UUID %></p>
                   </div>
                 </div>
 
@@ -160,7 +160,7 @@
                     <label class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" name="Suspended" id="suspendServer" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
                       <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
-                      <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
+                      <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Active')}) %>" data-theme-live="server.suspended.label"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
                     </label>
                   </div>
                 </div>
@@ -177,7 +177,7 @@
                   </div>
                   <div>
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
-                    <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
+                    <p class="text-xs text-neutral-500" data-theme-text="{{server.createdAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.createdAtFormatted":(new Date(server.createdAt).toLocaleString())}) %>"><%= new Date(server.createdAt).toLocaleString() %></p>
                   </div>
                 </div>
               </div>

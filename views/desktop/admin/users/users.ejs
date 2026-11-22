@@ -10,12 +10,12 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUsersText %></p>
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-theme-i18n="adminUsersTitle"><%= req.translations.adminUsersTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500" data-theme-i18n="adminUsersText"><%= req.translations.adminUsersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition">
+            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition" data-theme-i18n="createNewUser">
               <%= req.translations.createNewUser %>
             </button>
           </div>
@@ -25,21 +25,21 @@
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
 
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2" data-theme-i18n="totalUsers"><%= req.translations.totalUsers %></h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{users.count}}" data-theme-bindings="<%= JSON.stringify({"users.count":(users.length)}) %>"><%= users.length %></p>
           <% if (onlineUsers.size > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
+            <p class="text-sm text-neutral-400 mt-2" data-theme-text="<%= req.translations.onlineUsers || 'Online Users' %>: {{users.onlineCount}}" data-theme-bindings="<%= JSON.stringify({"users.onlineCount":(onlineUsers.size)}) %>"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
           <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+            <p class="text-sm text-neutral-400 mt-2" data-theme-i18n="noUsersOnline"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
           <% } %>
         </div>
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.admins || 'Admins' %></h2>
-            <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2" data-theme-i18n="admins"><%= req.translations.admins || 'Admins' %></h2>
+            <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{users.adminCount}}" data-theme-bindings="<%= JSON.stringify({"users.adminCount":(users.filter(user => user.isAdmin).length)}) %>"><%= users.filter(user => user.isAdmin).length %></p>
             <% if (onlineUsers.size > 0) { %>
-              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
+              <p class="text-sm text-neutral-400 mt-2" data-theme-text="<%= req.translations.onlineUsers || 'Online Admins' %>: {{users.onlineAdminCount}}" data-theme-bindings="<%= JSON.stringify({"users.onlineAdminCount":(Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length)}) %>"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
             <% } else { %>
-              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+              <p class="text-sm text-neutral-400 mt-2" data-theme-i18n="noUsersOnline"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
             <% } %>
         </div>
       </div>
@@ -56,7 +56,7 @@
               </div>
               <div class="ml-5">
                 <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
-                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
+                <p class="text-sm text-emerald-400/50" data-theme-i18n="actionCompleted"><%= req.translations.actionCompleted %></p>
               </div>
             </div>
           </div>
@@ -68,10 +68,10 @@
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.role %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="name"><%= req.translations.name %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="role"><%= req.translations.role %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="instances"><%= req.translations.instances %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="actions"><%= req.translations.actions %></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
@@ -80,7 +80,7 @@
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                   <div class="flex items-center gap-3">
                     <div class="relative shrink-0">
-                      <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+                      <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="" data-theme-image="{{member.avatar}}" data-theme-bindings="<%= JSON.stringify({"member.avatar":(user.avatar)}) %>">
                       <% if (onlineUsers.has(user.username)) { %>
                         <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -92,16 +92,16 @@
                         </span>
                       <% } %>
                     </div>
-                    <div class="font-medium text-neutral-800 dark:text-white"><%= user.username %></div>
+                    <div class="font-medium text-neutral-800 dark:text-white" data-theme-text="{{member.name}}" data-theme-bindings="<%= JSON.stringify({"member.name":(user.username)}) %>"><%= user.username %></div>
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
                   <div class="mt-1 ml-2 inline-flex items-center rounded-md
                   <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' %>
-                  px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                  px-2 py-1 text-xs font-medium ring-1 ring-inset" data-theme-text="{{member.role}}" data-theme-bindings="<%= JSON.stringify({"member.role":(user.isAdmin ? 'Admin' : 'User')}) %>">
                     <%= user.isAdmin ? 'Admin' : 'User' %>
                   </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= user.servers ? user.servers.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400" data-theme-text="{{member.serverCount}}" data-theme-bindings="<%= JSON.stringify({"member.serverCount":(user.servers ? user.servers.length : 0)}) %>"><%= user.servers ? user.servers.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
                     <a href="/admin/users/view/<%= user.id %>/">

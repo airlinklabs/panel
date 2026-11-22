@@ -29,7 +29,7 @@
           </svg>
           <div>
             <h3 class="text-sm font-medium text-red-400">Error</h3>
-            <p class="text-sm text-red-400/50">
+            <p class="text-sm text-red-400/50" data-theme-text="{{error.message}}" data-theme-bindings="<%= JSON.stringify({"error.message":(errorMessage.message)}) %>">
               <%= errorMessage.message %>
             </p>
           </div>
@@ -53,7 +53,7 @@
                    </svg>
                  </div>
                </div>
-               <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white" data-theme-text="{{page.totalPlayers}}" data-theme-bindings="<%= JSON.stringify({"page.totalPlayers":("\r\n                0\r\n               ")}) %>" data-theme-live="page.totalPlayers">
                 0
                </dd>
                <p class="mt-1 text-sm text-neutral-400">Players across all servers</p>
@@ -70,7 +70,7 @@
                    </svg>
                  </div>
                </div>
-               <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white" data-theme-text="{{page.maxCapacity}}" data-theme-bindings="<%= JSON.stringify({"page.maxCapacity":("\r\n                0\r\n               ")}) %>" data-theme-live="page.maxCapacity">
                 0
                </dd>
                <p class="mt-1 text-sm text-neutral-400">Total player capacity</p>
@@ -89,7 +89,7 @@
                    </svg>
                  </div>
                </div>
-               <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white" data-theme-text="{{page.onlineServers}}" data-theme-bindings="<%= JSON.stringify({"page.onlineServers":("\r\n                0\r\n               ")}) %>" data-theme-live="page.onlineServers">
                 0
                </dd>
                <p class="mt-1 text-sm text-neutral-400">Servers currently online</p>
@@ -105,7 +105,7 @@
                    </svg>
                  </div>
                </div>
-               <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white" data-theme-text="{{page.utilization}}" data-theme-bindings="<%= JSON.stringify({"page.utilization":("\r\n                0%\r\n               ")}) %>" data-theme-live="page.utilization">
                 0%
                </dd>
                <p class="mt-1 text-sm text-neutral-400">Player capacity utilization</p>
@@ -122,7 +122,7 @@
               <canvas id="playerChart" class="w-full h-full"></canvas>
             </div>
             <div class="mt-2 text-xs text-neutral-400 text-center">
-              <p><%= req.translations.refreshDataCollection || 'Double-click the Refresh button to manually trigger data collection' %></p>
+              <p data-theme-i18n="refreshDataCollection"><%= req.translations.refreshDataCollection || 'Double-click the Refresh button to manually trigger data collection' %></p>
             </div>
          </div>
 
@@ -282,8 +282,8 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="ml-4">
-                  <div class="text-sm font-medium text-neutral-800 dark:text-white">${server.serverName}</div>
-                  <div class="text-sm text-neutral-400">${server.serverId}</div>
+                  <div class="text-sm font-medium text-neutral-800 dark:text-white" data-theme-text="{{server.name}}" data-theme-bindings="${JSON.stringify({"server.name":(server.serverName)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${server.serverName}</div>
+                  <div class="text-sm text-neutral-400" data-theme-text="{{server.id}}" data-theme-bindings="${JSON.stringify({"server.id":(server.serverId)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${server.serverId}</div>
                 </div>
               </div>
             </td>
@@ -292,10 +292,10 @@
                 ${statusText}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white" data-theme-text="{{server.players.online}} / {{server.players.limit}}" data-theme-bindings="${JSON.stringify({"server.players.online":(server.playerCount),"server.players.limit":(server.maxPlayers)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">
               ${server.playerCount} / ${server.maxPlayers}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400" data-theme-text="{{server.version}}" data-theme-bindings="${JSON.stringify({"server.version":(server.version || 'Unknown')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">
               ${server.version || 'Unknown'}
             </td>
           `;

@@ -6,8 +6,8 @@
   <div class="px-4 py-5">
 <div class="flex items-start justify-between mb-5">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateNodeTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateNodeText %></p>
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-theme-i18n="adminCreateNodeTitle"><%= req.translations.adminCreateNodeTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500" data-theme-i18n="adminCreateNodeText"><%= req.translations.adminCreateNodeText %></p>
         </div>
       </div>
 
@@ -46,7 +46,7 @@
               </div>
 
               <div class="col-span-2">
-                <button id="createNodeBtn" type="button" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                <button id="createNodeBtn" type="button" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" data-theme-i18n="create">
                     <%= req.translations.create %>
                   </button>
               </div>

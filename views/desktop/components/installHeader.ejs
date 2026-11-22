@@ -23,7 +23,7 @@
     <div class="flex items-center gap-2">
       <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 shrink-0">Installing server</p>
       <span class="text-neutral-300 dark:text-neutral-600">·</span>
-      <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate">Waiting for daemon…</p>
+      <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate" data-theme-text="{{page.installStateText}}" data-theme-bindings="<%= JSON.stringify({"page.installStateText":("Waiting for daemon…")}) %>" data-theme-live="page.installStateText">Waiting for daemon…</p>
     </div>
   </div>
 </div>

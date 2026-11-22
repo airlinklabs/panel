@@ -22,8 +22,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg> 
       <div>
-        <p class="text-neutral-800 dark:text-white"><%= req.translations.connectionError || 'Error' %></p>
-        <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= errorMessage.message %></p>
+        <p class="text-neutral-800 dark:text-white" data-theme-i18n="connectionError"><%= req.translations.connectionError || 'Error' %></p>
+        <p class="text-sm text-neutral-600 dark:text-neutral-400" data-theme-text="{{error.message}}" data-theme-bindings="<%= JSON.stringify({"error.message":(errorMessage.message)}) %>"><%= errorMessage.message %></p>
       </div>
     </div>
       <% } %>
@@ -41,12 +41,12 @@
         <div class="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <div>
-              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.players || 'Players' %></h2>
+              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1" data-theme-i18n="players"><%= req.translations.players || 'Players' %></h2>
               <p class="text-neutral-600 dark:text-neutral-400 text-sm">
                 <% if (typeof serverInfo !== 'undefined') { %>
-                  <span class="font-medium"><%= serverInfo.onlinePlayers || 0 %></span> / <span><%= serverInfo.maxPlayers || 0 %></span> players online
+                  <span class="font-medium" data-theme-text="{{server.players.online}}" data-theme-bindings="<%= JSON.stringify({"server.players.online":(serverInfo.onlinePlayers || 0)}) %>"><%= serverInfo.onlinePlayers || 0 %></span> / <span data-theme-text="{{server.players.limit}}" data-theme-bindings="<%= JSON.stringify({"server.players.limit":(serverInfo.maxPlayers || 0)}) %>"><%= serverInfo.maxPlayers || 0 %></span> players online
                   <% if (serverInfo.version) { %>
-                    • <span class="text-neutral-500">Version: <%= serverInfo.version %></span>
+                    • <span class="text-neutral-500" data-theme-text="Version: {{server.version}}" data-theme-bindings="<%= JSON.stringify({"server.version":(serverInfo.version)}) %>">Version: <%= serverInfo.version %></span>
                   <% } %>
                 <% } else { %>
                   Manage your server's player list
@@ -61,7 +61,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             <span>
-              Refreshing in <span id="refresh-countdown">30</span> seconds
+              Refreshing in <span id="refresh-countdown" data-theme-text="{{server.players.refreshSeconds}}" data-theme-bindings="<%= JSON.stringify({"server.players.refreshSeconds":("30")}) %>" data-theme-live="server.players.refreshSeconds">30</span> seconds
               <button onclick="window.location.reload()" class="ml-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 inline-flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -83,13 +83,12 @@
                   alt="<%= player.name %>'s Avatar"
                   class="rounded-lg border border-neutral-700 mr-4"
                   width="64"
-                  height="64"
-                />
+                  height="64" data-theme-image="https://crafatar.com/avatars/{{player.id}}?size=64&overlay" data-theme-record="player" data-theme-fields="<%= JSON.stringify({name:player.name,id:player.uuid||player.name,ping:player.ping}) %>" />
                 <div>
-                  <p class="text-lg font-bold text-neutral-800 dark:text-white"><%= player.name %></p>
+                  <p class="text-lg font-bold text-neutral-800 dark:text-white" data-theme-text="{{player.name}}" data-theme-record="player" data-theme-fields="<%= JSON.stringify({name:player.name,id:player.uuid||player.id||player.name,ping:player.ping}) %>"><%= player.name %></p>
                   <div class="flex items-center mt-1">
                     <span class="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                    <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.online || 'Online' %></span>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400" data-theme-i18n="online"><%= req.translations.online || 'Online' %></span>
                   </div>
                 </div>
               </div>
@@ -107,7 +106,7 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOffline || 'Server Offline' %></h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300" data-theme-i18n="serverOffline"><%= req.translations.serverOffline || 'Server Offline' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 The server appears to be offline. Start your server to see online players.
               </p>
@@ -128,16 +127,16 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOnline || 'Server is online' %></h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300" data-theme-i18n="serverOnline"><%= req.translations.serverOnline || 'Server is online' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 Your server is running but no players are currently connected. Players will appear here when they join.
               </p>
               <div class="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
                 <div class="flex items-center justify-center gap-4">
-                  <div>
+                  <div data-theme-text="Version: {{server.version}}" data-theme-bindings="<%= JSON.stringify({"server.version":(serverInfo.version)}) %>">
                     <span class="font-semibold">Version:</span> <%= serverInfo.version %>
                   </div>
-                  <div>
+                  <div data-theme-text="Capacity: {{server.players.online}}/{{server.players.limit}}" data-theme-bindings="<%= JSON.stringify({"server.players.online":(serverInfo.onlinePlayers),"server.players.limit":(serverInfo.maxPlayers)}) %>">
                     <span class="font-semibold">Capacity:</span> <%= serverInfo.onlinePlayers %>/<%= serverInfo.maxPlayers %>
                   </div>
                 </div>
@@ -151,7 +150,7 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300" data-theme-i18n="statusUnknown"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 We couldn't determine if your server is online. It may be starting up or in an unusual state.
               </p>
@@ -184,7 +183,10 @@
             const updateTimer = () => {
               const elapsed = Date.now() - startTime;
               const remaining = Math.max(0, Math.floor((refreshInterval - elapsed) / 1000));
-              timerElement.textContent = remaining;
+              if (timerElement.dataset.themeCountdownValue !== String(remaining)) {
+                timerElement.dataset.themeCountdownValue = String(remaining);
+                timerElement.textContent = remaining;
+              }
 
               if (remaining > 0) {
                 requestAnimationFrame(updateTimer);

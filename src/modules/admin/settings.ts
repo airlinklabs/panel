@@ -42,6 +42,60 @@ const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterC
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 
+function validateThemeCustomizations(value: any): string | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || value.version !== 1) return 'Unsupported theme customization format.';
+  const safeSVG = (svg: any) => {
+    if (typeof svg !== 'string' || svg.length > 100000 || !/^\s*<svg[\s/>]/.test(svg) || /<!DOCTYPE|<!ENTITY|<!\[CDATA\[/i.test(svg)) return false;
+    const tags = new Set(['svg','g','path','circle','rect','line','polyline','polygon','ellipse','defs','clipPath','mask','linearGradient','radialGradient','stop','title','desc']);
+    const attributes = new Set(['class','role','aria-hidden','aria-label','focusable','viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','fill-opacity','stroke','stroke-width','stroke-linecap','stroke-linejoin','stroke-miterlimit','stroke-dasharray','stroke-dashoffset','stroke-opacity','opacity','transform','clip-path','clip-rule','mask','id','offset','stop-color','stop-opacity','gradientUnits','gradientTransform','spreadMethod','fx','fy','fr','clipPathUnits','maskUnits','maskContentUnits','preserveAspectRatio','vector-effect']);
+    const text = svg.replace(/<!--[\s\S]*?-->/g, ''), stack: string[] = [];let position = 0, roots = 0, count = 0;
+    for (const token of text.matchAll(/<(\/?)([A-Za-z][\w:-]*)([^<>]*?)>/g)) {
+      if (++count > 2000 || !stack.length && text.slice(position, token.index).trim()) return false;
+      const closing = token[1] === '/', tag = token[2], selfClosing = /\/\s*$/.test(token[3]);
+      if (!tags.has(tag)) return false;
+      if (closing) { if (token[3].trim() || stack.pop() !== tag) return false; }
+      else {
+        if (!stack.length && (tag !== 'svg' || ++roots > 1)) return false;
+        let valid = true;
+        const remaining = token[3].replace(/\/\s*$/, '').replace(/\s+([\w:-]+)\s*=\s*(["'])([\s\S]*?)\2/g, (_all, name, _quote, data) => {
+          if (name === 'xmlns') { if (data !== 'http://www.w3.org/2000/svg') valid = false;return ''; }
+          if (!attributes.has(name) || /[&\\]|(?:javascript:|data:|https?:|\/\/|expression\s*\()/i.test(data) || /url\s*\(/i.test(data) && !/^url\(#[A-Za-z_][\w:.-]*\)$/.test(data.trim())) valid = false;
+          return '';
+        });
+        if (!valid || remaining.trim()) return false;
+        if (!selfClosing) stack.push(tag);
+      }
+      position = token.index + token[0].length;
+    }
+    return roots === 1 && !stack.length && !text.slice(position).trim();
+  };
+  const safeImage = (url: any) => {
+    if (typeof url !== 'string' || !url.trim() || url.length > 3000000 || /[\u0000-\u001f]/.test(url)) return false;
+    if (/^data:image\/(?:png|jpe?g|gif|webp|avif|bmp|x-icon);base64,[a-z0-9+/=]+$/i.test(url)) return true;
+    if (/^data:image\/svg\+xml(?:;base64)?,/i.test(url)) { try { const comma = url.indexOf(',');return safeSVG(/;base64$/i.test(url.slice(0,comma)) ? Buffer.from(url.slice(comma+1),'base64').toString('utf8') : decodeURIComponent(url.slice(comma+1))); } catch { return false; } }
+    try { return ['http:', 'https:'].includes(new URL(url, 'https://airlink.invalid').protocol); } catch { return false; }
+  };
+  for (const mode of ['light', 'dark']) {
+    if (!Array.isArray(value[mode]) || value[mode].length > 500) return 'Each appearance supports up to 500 theme customizations.';
+    for (const item of value[mode]) {
+      if (!item || typeof item !== 'object' || Array.isArray(item) || typeof item.selector !== 'string' || !item.selector.trim() || item.selector.length > 6000) return 'A theme customization needs a valid selector.';
+      if (Object.prototype.hasOwnProperty.call(item, 'match')) {
+        if (!item.match || typeof item.match !== 'object' || Array.isArray(item.match)) return 'Invalid original content match.';
+        for (const [kind, content] of Object.entries(item.match)) if (!['text', 'image', 'icon'].includes(kind) || typeof content !== 'string' || content.length > 3000000) return 'Invalid original content match.';
+      }
+      if (Object.prototype.hasOwnProperty.call(item, 'text') && (typeof item.text !== 'string' || item.text.length > 10000)) return 'Theme text must be at most 10000 characters.';
+      if (Object.prototype.hasOwnProperty.call(item, 'texts')) {
+        if (!item.texts || typeof item.texts !== 'object' || Array.isArray(item.texts) || Object.keys(item.texts).length > 50) return 'Invalid translated theme texts.';
+        for (const [language, text] of Object.entries(item.texts)) if (!/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/.test(language) || typeof text !== 'string' || text.length > 10000) return 'Invalid translated theme texts.';
+      }
+      if (Object.prototype.hasOwnProperty.call(item, 'image') && !safeImage(item.image)) return 'Theme images must use a safe image URL or raster image data.';
+      if (Object.prototype.hasOwnProperty.call(item, 'icon') && !safeSVG(item.icon)) return 'Theme icons must be safe inline SVG geometry.';
+      if (Object.prototype.hasOwnProperty.call(item, 'remove') && typeof item.remove !== 'boolean') return 'Theme removal settings must be true or false.';
+    }
+  }
+  return null;
+}
+
 function installThemeZip(zipPath: string): { success: boolean; error?: string } {
   const themesDir = path.join(process.cwd(), 'public', 'themes', 'user');
   const tempDir   = path.join(process.cwd(), 'public', 'uploads', 'theme-zips', 'tmp-' + Date.now());
@@ -52,16 +106,29 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     const infoPath  = path.join(tempDir, 'info.json');
     const lightPath = path.join(tempDir, 'light.css');
     const darkPath  = path.join(tempDir, 'dark.css');
+    const customizationPath = path.join(tempDir, 'customizations.json');
     if (!fs.existsSync(infoPath))  return { success: false, error: 'Theme zip must contain info.json.' };
     if (!fs.existsSync(lightPath)) return { success: false, error: 'Theme zip must contain light.css.' };
     if (!fs.existsSync(darkPath))  return { success: false, error: 'Theme zip must contain dark.css.' };
     const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+    if (!info || typeof info !== 'object' || Array.isArray(info)) return { success: false, error: 'info.json must contain theme metadata.' };
+    let customizations: any = null;
+    if (fs.existsSync(customizationPath)) {
+      if (fs.statSync(customizationPath).size > 6000000) return { success: false, error: 'customizations.json must be smaller than 6 MB.' };
+      customizations = JSON.parse(fs.readFileSync(customizationPath, 'utf-8'));
+      const error = validateThemeCustomizations(customizations);
+      if (error) return { success: false, error };
+      info.customizations = 'customizations.json';
+    } else {
+      delete info.customizations;
+    }
     const themeId  = randomUUID();
     const themeDir = path.join(themesDir, themeId);
     fs.mkdirSync(themeDir, { recursive: true });
-    fs.copyFileSync(infoPath, path.join(themeDir, 'info.json'));
+    fs.writeFileSync(path.join(themeDir, 'info.json'), JSON.stringify(info, null, 2));
     fs.copyFileSync(lightPath, path.join(themeDir, 'light.css'));
     fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
+    if (customizations) fs.writeFileSync(path.join(themeDir, 'customizations.json'), JSON.stringify(customizations));
     return { success: true };
   } catch (err: any) {
     if (err instanceof SyntaxError) return { success: false, error: 'info.json contains invalid JSON.' };

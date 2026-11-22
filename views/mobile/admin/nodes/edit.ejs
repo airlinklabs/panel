@@ -6,8 +6,8 @@
   <div class="px-4 pt-5 pb-8">
 
     <div class="mb-5">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminEditNodeTitle %></h1>
-      <p class="mt-1 text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminEditNodeTitle"><%= req.translations.adminEditNodeTitle %></h1>
+      <p class="mt-1 text-sm text-neutral-500" data-theme-i18n="adminEditNodeText"><%= req.translations.adminEditNodeText %></p>
     </div>
 
     <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
@@ -76,7 +76,7 @@
           </div>
 
           <button id="updateNodeBtn" type="button"
-            class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition" data-theme-i18n="update">
             <%= req.translations.update %>
           </button>
 

@@ -9,30 +9,30 @@
       <div class="px-12 pt-6 pb-8">
 
         <div class="mb-6">
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminOverviewTitle %></h1>
-          <p class="text-sm text-neutral-500 mt-0.5"><%= req.translations.adminOverviewText %></p>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminOverviewTitle"><%= req.translations.adminOverviewTitle %></h1>
+          <p class="text-sm text-neutral-500 mt-0.5" data-theme-i18n="adminOverviewText"><%= req.translations.adminOverviewText %></p>
         </div>
 
         <!-- Stats grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.users || 'Users' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= userCount %></p>
-            <p class="text-xs text-neutral-500 mt-1"><%= req.translations.totalRegisteredUsers || 'Registered' %></p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1" data-theme-i18n="users"><%= req.translations.users || 'Users' %></p>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{users.count}}" data-theme-bindings="<%= JSON.stringify({"users.count":(userCount)}) %>"><%= userCount %></p>
+            <p class="text-xs text-neutral-500 mt-1" data-theme-i18n="totalRegisteredUsers"><%= req.translations.totalRegisteredUsers || 'Registered' %></p>
           </div>
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.instances || 'Servers' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= instanceCount %></p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1" data-theme-i18n="instances"><%= req.translations.instances || 'Servers' %></p>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{servers.count}}" data-theme-bindings="<%= JSON.stringify({"servers.count":(instanceCount)}) %>"><%= instanceCount %></p>
             <p class="text-xs text-neutral-500 mt-1">Active instances</p>
           </div>
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.nodes || 'Nodes' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodeCount %></p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1" data-theme-i18n="nodes"><%= req.translations.nodes || 'Nodes' %></p>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{nodes.count}}" data-theme-bindings="<%= JSON.stringify({"nodes.count":(nodeCount)}) %>"><%= nodeCount %></p>
             <p class="text-xs text-neutral-500 mt-1">Connected nodes</p>
           </div>
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.images || 'Images' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= imageCount %></p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1" data-theme-i18n="images"><%= req.translations.images || 'Images' %></p>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{images.count}}" data-theme-bindings="<%= JSON.stringify({"images.count":(imageCount)}) %>"><%= imageCount %></p>
             <p class="text-xs text-neutral-500 mt-1">Available images</p>
           </div>
         </div>
@@ -46,7 +46,7 @@
                 <p class="text-sm font-medium text-neutral-800 dark:text-white">Airlink Panel</p>
                 <div class="flex items-center gap-2 mt-1">
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400">v<span class="current-version"></span></span>
-                  <span class="text-[10px] text-neutral-500"><%= process.env.NODE_ENV %></span>
+                  <span class="text-[10px] text-neutral-500" data-theme-text="{{panel.environment}}" data-theme-bindings="<%= JSON.stringify({"panel.environment":(process.env.NODE_ENV)}) %>"><%= process.env.NODE_ENV %></span>
                 </div>
               </div>
             </div>
@@ -57,7 +57,7 @@
                 </svg>
                 Check Updates
               </button>
-              <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
+              <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5" data-theme-i18n="update">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
@@ -70,7 +70,7 @@
             <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
               <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-3">API Response Time</p>
               <div class="flex items-center justify-between mb-2">
-                <span id="apiLatency" class="text-sm font-mono text-neutral-700 dark:text-neutral-300">-- ms</span>
+                <span id="apiLatency" class="text-sm font-mono text-neutral-700 dark:text-neutral-300" data-theme-text="{{page.apiLatency}}" data-theme-bindings="<%= JSON.stringify({"page.apiLatency":("-- ms")}) %>" data-theme-live="page.apiLatency">-- ms</span>
               </div>
               <div class="w-full bg-neutral-200 dark:bg-neutral-700/40 rounded-full h-1.5">
                 <div id="latencyBar" class="bg-neutral-400 dark:bg-neutral-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -79,7 +79,7 @@
 
             <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
               <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Update Status</p>
-              <p class="text-xs text-neutral-500 mb-3"><%= req.translations.sysInfoText %> <span class="text-neutral-700 dark:text-neutral-300 font-medium" id="current-version-inline"></span></p>
+              <p class="text-xs text-neutral-500 mb-3"><%= req.translations.sysInfoText %> <span class="text-neutral-700 dark:text-neutral-300 font-medium" id="current-version-inline" data-theme-text="{{page.current.version.inline}}" data-theme-bindings="<%= JSON.stringify({"page.current.version.inline":("")}) %>" data-theme-live="page.current.version.inline"></span></p>
               <div id="updateStatus" class="text-sm hidden rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60"></div>
               <div id="updateInfo" class="mt-3 hidden"></div>
             </div>

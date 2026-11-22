@@ -6,8 +6,8 @@
   <div class="px-4 py-5">
 <div class="flex items-center justify-between mb-5">
       <div>
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
-          <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminNodesTitle"><%= req.translations.adminNodesTitle %></h1>
+          <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminNodesText"><%= req.translations.adminNodesText %></p>
       </div>
       <a href="/admin/nodes" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition shrink-0">
         Back
@@ -21,17 +21,17 @@
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
             const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
             %>
-            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>">
+            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>" data-theme-text="{{node.status.label}}" data-theme-bindings="<%= JSON.stringify({"node.status.label":(isOnline ? 'Online' : 'Offline')}) %>">
                 <%= isOnline ? 'Online' : 'Offline' %>
             </p>
-            <p class="text-sm text-neutral-400 mt-2">
+            <p class="text-sm text-neutral-400 mt-2" data-theme-text="Last Update: {{node.lastUpdated}}" data-theme-bindings="<%= JSON.stringify({"node.lastUpdated":(lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A')}) %>">
                 Last Update: <%= lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A' %>
             </p>
         </div>
 
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
         <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Uptime</h2>
-        <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+        <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{node.uptime}}" data-theme-bindings="<%= JSON.stringify({"node.uptime":(isOnline ? stats.uptime : 'N/A')}) %>">
             <%= isOnline ? stats.uptime : 'N/A' %> 
         </p>
         <% if (!isOnline) { %>

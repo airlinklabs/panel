@@ -120,8 +120,8 @@
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
-            <p class="text-sm text-neutral-500 mt-0.5"><%= req.translations.userDashboardText %></p>
+            <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="userDashboardTitle"><%= req.translations.userDashboardTitle %></h1>
+            <p class="text-sm text-neutral-500 mt-0.5" data-theme-i18n="userDashboardText"><%= req.translations.userDashboardText %></p>
           </div>
           <div class="flex items-center gap-2">
             <% if (canCreateServer) { %>
@@ -152,8 +152,8 @@
         <!-- Alerts -->
         <% if (req.query.err === 'NOTACTIVEYET') { %>
         <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
-          <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
-          <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
+          <p class="text-sm font-medium text-amber-700 dark:text-amber-400" data-theme-i18n="awaitingInstallation"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
+          <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5" data-theme-i18n="awaitingInstallationDesc"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
         </div>
         <% } %>
         <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
@@ -164,9 +164,9 @@
         <% } %>
         <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
         <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
-          <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
-          <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg transition-colors"><%= req.translations.retry || 'Retry' %></button>
+          <p class="text-sm font-medium text-red-700 dark:text-red-400" data-theme-i18n="connectionError"><%= req.translations.connectionError || 'Connection Error' %></p>
+          <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5" data-theme-i18n="connectionErrorDesc"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg transition-colors" data-theme-i18n="retry"><%= req.translations.retry || 'Retry' %></button>
         </div>
         <% } %>
 
@@ -175,9 +175,9 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4">
             <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd"/>
           </svg>
-          <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || 'No servers yet' %></h2>
+          <h2 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="noServersYet"><%= req.translations.noServersYet || 'No servers yet' %></h2>
           <p class="text-sm text-neutral-500 mt-1">
-            <% if (user.isAdmin) { %><a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
+            <% if (user.isAdmin) { %><a href="/admin/servers/create" class="text-blue-500" data-theme-i18n="createOneNow"><%= req.translations.createOneNow || 'Create one now' %></a>
             <% } else if (canCreateServer) { %><a href="/create-server" class="text-blue-500">Create your first server</a>
             <% } else { %>An admin will assign one to you.<% } %>
           </p>
@@ -199,8 +199,8 @@
                 <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/>
               </svg>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= folder.name %></p>
-                <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
+                <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{folder.name}}" data-theme-bindings="<%= JSON.stringify({"folder.name":(folder.name)}) %>"><%= folder.name %></p>
+                <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5" data-theme-text="{{folder.serverCount}} server{{folder.serversPlural}}" data-theme-bindings="<%= JSON.stringify({"folder.serverCount":(folder.members.length),"folder.serversPlural":(folder.members.length !== 1 ? 's' : '')}) %>"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
               </div>
 
             </div>
@@ -228,11 +228,11 @@
             <a href="../server/<%= server.UUID %>" class="block">
               <div class="flex items-start justify-between mb-3">
                 <div class="min-w-0 flex-1 mr-3">
-                  <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate"><%= server.name %></h3>
+                  <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name)}) %>"><%= server.name %></h3>
                   <% if (server.description) { %>
-                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate"><%= server.description %></p>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.description}}" data-theme-bindings="<%= JSON.stringify({"server.description":(server.description)}) %>"><%= server.description %></p>
                   <% } else { %>
-                    <p class="text-xs text-neutral-400 mt-0.5 truncate italic"><%= req.translations.noDescription || 'No description' %></p>
+                    <p class="text-xs text-neutral-400 mt-0.5 truncate italic" data-theme-i18n="noDescription"><%= req.translations.noDescription || 'No description' %></p>
                   <% } %>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0 <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
@@ -250,24 +250,24 @@
               <div class="flex gap-3 mb-3">
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.ram.percent}}%" data-theme-bindings="<%= JSON.stringify({"server.ram.percent":(server.ramUsage)}) %>"><%= server.ramUsage %>%</p>
                 </div>
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.cpu.percent}}%" data-theme-bindings="<%= JSON.stringify({"server.cpu.percent":(server.cpuUsage)}) %>"><%= server.cpuUsage %>%</p>
                 </div>
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.ram.usedFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.ram.usedFormatted":(server.ramUsed || '0MB')}) %>"><%= server.ramUsed || '0MB' %></p>
                 </div>
               </div>
               <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-white/5">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
-                  <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate"><%= server.owner ? server.owner.username : 'Unknown' %></span>
+                  <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="" data-theme-image="{{server.owner.avatar}}" data-theme-bindings="<%= JSON.stringify({"server.owner.avatar":(server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown'))}) %>">
+                  <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner ? server.owner.username : 'Unknown')}) %>"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 </div>
                 <% if (server.node) { %>
-                <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 ml-2 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>
+                <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 ml-2 truncate max-w-[6rem]" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.node.name}}" data-theme-bindings="<%= JSON.stringify({"server.node.name":(server.node.name || server.node.address)}) %>"><%= server.node.name || server.node.address %></span>
                 <% } %>
               </div>
             </a>
@@ -297,8 +297,8 @@
               <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
               <tr onclick="window.location.href='../server/<%= server.UUID %>';" class="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
                 <td class="py-3.5 pl-6 pr-3">
-                  <p class="text-sm font-medium text-neutral-900 dark:text-white"><%= server.name %></p>
-                  <% if (server.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs"><%= server.description %></p><% } %>
+                  <p class="text-sm font-medium text-neutral-900 dark:text-white" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name)}) %>"><%= server.name %></p>
+                  <% if (server.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.description}}" data-theme-bindings="<%= JSON.stringify({"server.description":(server.description)}) %>"><%= server.description %></p><% } %>
                 </td>
                 <td class="px-3 py-3.5">
                   <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
@@ -306,9 +306,9 @@
                     <%= server.status === 'running' ? 'Running' : 'Stopped' %>
                   </span>
                 </td>
-                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.owner ? server.owner.username : 'Unknown' %></td>
-                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.ramUsage %>%</td>
-                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.cpuUsage %>%</td>
+                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300" data-theme-text="{{server.owner.name}}" data-theme-bindings="<%= JSON.stringify({"server.owner.name":(server.owner ? server.owner.username : 'Unknown')}) %>"><%= server.owner ? server.owner.username : 'Unknown' %></td>
+                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.ram.percent}}%" data-theme-bindings="<%= JSON.stringify({"server.ram.percent":(server.ramUsage)}) %>"><%= server.ramUsage %>%</td>
+                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.cpu.percent}}%" data-theme-bindings="<%= JSON.stringify({"server.cpu.percent":(server.cpuUsage)}) %>"><%= server.cpuUsage %>%</td>
               </tr>
               <% }); %>
             </tbody>
@@ -318,11 +318,11 @@
         <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-2">
           <% if (currentPage > 1) { %>
-          <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
+          <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition" data-theme-i18n="prev"><%= req.translations.prev || 'Prev' %></a>
           <% } %>
-          <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
+          <span class="text-sm text-neutral-500" data-theme-text="{{pagination.current}} / {{pagination.total}}" data-theme-bindings="<%= JSON.stringify({"pagination.current":(currentPage),"pagination.total":(totalPages)}) %>"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-          <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
+          <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition" data-theme-i18n="next"><%= req.translations.next || 'Next' %></a>
           <% } %>
         </div>
         <% } %>
@@ -338,14 +338,14 @@
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;color:#f59e0b;flex-shrink:0;">
     <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146V6Z" clip-rule="evenodd"/>
   </svg>
-  <span id="drag-ghost-name"></span>
+  <span id="drag-ghost-name" data-theme-text="{{page.drag.ghost.name}}" data-theme-bindings="<%= JSON.stringify({"page.drag.ghost.name":("")}) %>" data-theme-live="page.drag.ghost.name"></span>
 </div>
 
 <!-- Folder popup -->
 <div class="folder-popup-overlay" id="folderPopupOverlay">
   <div class="folder-popup">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
-      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
+      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle" data-theme-text="{{page.folderPopupTitle}}" data-theme-bindings="<%= JSON.stringify({"page.folderPopupTitle":("")}) %>" data-theme-live="page.folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
         <button id="deleteFolderBtn" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-100 dark:hover:bg-red-500/10 text-red-400 hover:text-red-500 transition" title="Delete folder">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3.5 h-3.5">
@@ -468,8 +468,8 @@
           const running = s.status === 'running';
           row.innerHTML = `
             <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0">
-              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
-              <span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}">
+              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{server.name}}" data-theme-bindings="${JSON.stringify({"server.name":(s.name)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${s.name}</span>
+              <span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}" data-theme-text="{{server.status.label}}" data-theme-bindings="${JSON.stringify({"server.status.label":(running ? 'Running' : 'Stopped')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">
                 ${running ? 'Running' : 'Stopped'}
               </span>
             </a>

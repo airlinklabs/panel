@@ -33,7 +33,7 @@
     <div>
       <div class="flex items-center gap-2 mb-1">
         <h1 class="text-base font-medium text-neutral-800 dark:text-white">Credits</h1>
-        <span class="text-xs font-mono text-neutral-400 bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-full">v<%= version %></span>
+        <span class="text-xs font-mono text-neutral-400 bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-full" data-theme-text="v{{panel.version}}" data-theme-bindings="<%= JSON.stringify({"panel.version":(version)}) %>">v<%= version %></span>
       </div>
       <p class="text-sm text-neutral-500">The people who build and maintain Airlink.</p>
     </div>
@@ -51,10 +51,10 @@
         <div class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-3">
           <img src="https://github.com/<%= lead.login %>.png?size=64" alt="<%= lead.login %>"
                class="h-10 w-10 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0"
-               onerror="this.src='https://github.com/ghost.png'">
+               onerror="this.src='https://github.com/ghost.png'" data-theme-image="https://github.com/{{contributor.name}}.png?size=64" data-theme-bindings="<%= JSON.stringify({"contributor.name":(lead.login)}) %>">
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-semibold text-neutral-800 dark:text-white truncate"><%= lead.login %></p>
-            <p class="text-xs text-neutral-500"><%= lead.role %></p>
+            <p class="text-sm font-semibold text-neutral-800 dark:text-white truncate" data-theme-text="{{contributor.name}}" data-theme-bindings="<%= JSON.stringify({"contributor.name":(lead.login)}) %>"><%= lead.login %></p>
+            <p class="text-xs text-neutral-500" data-theme-text="{{contributor.role}}" data-theme-bindings="<%= JSON.stringify({"contributor.role":(lead.role)}) %>"><%= lead.role %></p>
           </div>
           <a href="https://github.com/<%= lead.login %>" target="_blank" rel="noopener"
              class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1">
@@ -71,7 +71,7 @@
     <section>
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Contributors</h2>
-        <span id="contrib-cache-label" class="text-xs text-neutral-400"></span>
+        <span id="contrib-cache-label" class="text-xs text-neutral-400" data-theme-text="{{page.contrib.cache.label}}" data-theme-bindings="<%= JSON.stringify({"page.contrib.cache.label":("")}) %>" data-theme-live="page.contrib.cache.label"></span>
       </div>
       <div id="contributors-grid" class="grid grid-cols-2 gap-2">
         <div class="col-span-full flex items-center gap-2 py-2">
@@ -104,8 +104,8 @@
             <% } %>
           </span>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= link.label %></p>
-            <p class="text-xs text-neutral-500 truncate"><%= link.sub %></p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white" data-theme-text="{{link.label}}" data-theme-bindings="<%= JSON.stringify({"link.label":(link.label)}) %>"><%= link.label %></p>
+            <p class="text-xs text-neutral-500 truncate" data-theme-text="{{link.description}}" data-theme-bindings="<%= JSON.stringify({"link.description":(link.sub)}) %>"><%= link.sub %></p>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-neutral-300 dark:text-neutral-600 shrink-0">
             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />

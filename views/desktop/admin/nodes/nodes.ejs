@@ -15,7 +15,7 @@
         }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createButton" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+            <button id="createButton" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2" data-theme-i18n="createNewNode">
               <%= req.translations.createNewNode %>
             </button>
           </div>
@@ -25,26 +25,27 @@
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
 
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= nodes.length %></p>
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2" data-theme-i18n="totalNodes"><%= req.translations.totalNodes %></h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{nodes.count}}" data-theme-bindings="<%= JSON.stringify({"nodes.count":(nodes.length)}) %>"><%= nodes.length %></p>
           <% if (nodes.length > 0) { %>
-          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
+          <p class="text-sm text-neutral-400 mt-2" data-theme-text="<%= req.translations.onlineNodes %>: {{nodes.onlineCount}}" data-theme-bindings="<%= JSON.stringify({"nodes.onlineCount":(nodes.filter(node => node.status === 'Online').length)}) %>"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
           <% } else { %>
-          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable %></p>
+          <p class="text-sm text-neutral-400 mt-2" data-theme-i18n="noNodesAvailable"><%= req.translations.noNodesAvailable %></p>
           <% } %>
         </div>
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white" data-theme-text="{{nodes.serverCount}}" data-theme-bindings="<%= JSON.stringify({"nodes.serverCount":(nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0))}) %>">
             <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
           </p>
           <% if (instance.length > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2">
+            <p class="text-sm text-neutral-400 mt-2" data-theme-text="<%= req.translations.averageInstanceDensity %>:
+              {{nodes.averageServers}}" data-theme-bindings="<%= JSON.stringify({"nodes.averageServers":((nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) / nodes.length).toFixed(2))}) %>">
               <%= req.translations.averageInstanceDensity %>:
               <%= (nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) / nodes.length).toFixed(2) %>
             </p>
           <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noInstancesAvailable %></p>
+            <p class="text-sm text-neutral-400 mt-2" data-theme-i18n="noInstancesAvailable"><%= req.translations.noInstancesAvailable %></p>
           <% } %>
         </div>
       </div>
@@ -61,7 +62,7 @@
               </div>
               <div class="ml-5">
                 <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
-                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
+                <p class="text-sm text-emerald-400/50" data-theme-i18n="actionCompleted"><%= req.translations.actionCompleted %></p>
               </div>
             </div>
           </div>
@@ -95,10 +96,10 @@
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.connection %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="name"><%= req.translations.name %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="connection"><%= req.translations.connection %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="instances"><%= req.translations.instances %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6" data-theme-i18n="actions"><%= req.translations.actions %></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
@@ -116,7 +117,7 @@
                         <span class="flex h-2 w-2 group relative">
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                           <% if (node.error) { %>
-                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 bg-neutral-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 bg-neutral-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" data-theme-text="{{node.error}}" data-theme-bindings="<%= JSON.stringify({"node.error":(node.error)}) %>">
                               <%= node.error %>
                             </div>
                           <% } %>
@@ -128,16 +129,16 @@
                         </span>
                       <% } %>
                     </div>
-                    <div class="font-medium text-neutral-800 dark:text-white"><%= node.name %></div>
+                    <div class="font-medium text-neutral-800 dark:text-white" data-theme-text="{{node.name}}" data-theme-bindings="<%= JSON.stringify({"node.name":(node.name)}) %>"><%= node.name %></div>
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= node.address %>:<%= node.port %>
                   <div class="mt-1 ml-2 inline-flex items-center rounded-md
                   <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-600 dark:text-red-400 ring-red-600/20' %>
-                  px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                  px-2 py-1 text-xs font-medium ring-1 ring-inset" data-theme-text="{{node.version}}" data-theme-bindings="<%= JSON.stringify({"node.version":(node.versionRelease || 'unknown')}) %>">
                     <%= node.versionRelease || 'unknown' %>
                   </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400" data-theme-text="{{node.serverCount}}" data-theme-bindings="<%= JSON.stringify({"node.serverCount":(node.instances ? node.instances.length : 0)}) %>"><%= node.instances ? node.instances.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
                     <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>

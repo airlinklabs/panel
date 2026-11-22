@@ -41,20 +41,20 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-total">—</p>
-          <p class="text-xs mt-1" id="sv-suspended-label"></p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-total" data-theme-text="{{page.sv.total}}" data-theme-bindings="<%= JSON.stringify({"page.sv.total":("—")}) %>" data-theme-live="page.sv.total">—</p>
+          <p class="text-xs mt-1" id="sv-suspended-label" data-theme-text="{{page.sv.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"page.sv.suspended.label":("")}) %>" data-theme-live="page.sv.suspended.label"></p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">RAM alloc</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-ram">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-ram" data-theme-text="{{page.sv.ram}}" data-theme-bindings="<%= JSON.stringify({"page.sv.ram":("—")}) %>" data-theme-live="page.sv.ram">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">CPU alloc</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-cpu">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-cpu" data-theme-text="{{page.sv.cpu}}" data-theme-bindings="<%= JSON.stringify({"page.sv.cpu":("—")}) %>" data-theme-live="page.sv.cpu">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Disk alloc</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-storage">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-storage" data-theme-text="{{page.sv.storage}}" data-theme-bindings="<%= JSON.stringify({"page.sv.storage":("—")}) %>" data-theme-live="page.sv.storage">—</p>
         </div>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
@@ -74,15 +74,15 @@
       <div class="grid grid-cols-3 gap-3">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Nodes</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="nd-total">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="nd-total" data-theme-text="{{page.nd.total}}" data-theme-bindings="<%= JSON.stringify({"page.nd.total":("—")}) %>" data-theme-live="page.nd.total">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online</p>
-          <p class="text-xl font-semibold text-emerald-600 dark:text-emerald-400" id="nd-online">—</p>
+          <p class="text-xl font-semibold text-emerald-600 dark:text-emerald-400" id="nd-online" data-theme-text="{{page.nd.online}}" data-theme-bindings="<%= JSON.stringify({"page.nd.online":("—")}) %>" data-theme-live="page.nd.online">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Offline</p>
-          <p class="text-xl font-semibold text-red-500 dark:text-red-400" id="nd-offline">—</p>
+          <p class="text-xl font-semibold text-red-500 dark:text-red-400" id="nd-offline" data-theme-text="{{page.nd.offline}}" data-theme-bindings="<%= JSON.stringify({"page.nd.offline":("—")}) %>" data-theme-live="page.nd.offline">—</p>
         </div>
       </div>
       <div id="nd-list" class="space-y-3"></div>
@@ -93,20 +93,20 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Users</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-users">—</p>
-          <p class="text-xs text-neutral-500 mt-1" id="ac-admins-label"></p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-users" data-theme-text="{{page.ac.users}}" data-theme-bindings="<%= JSON.stringify({"page.ac.users":("—")}) %>" data-theme-live="page.ac.users">—</p>
+          <p class="text-xs text-neutral-500 mt-1" id="ac-admins-label" data-theme-text="{{page.ac.admins.label}}" data-theme-bindings="<%= JSON.stringify({"page.ac.admins.label":("")}) %>" data-theme-live="page.ac.admins.label"></p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Images</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-images">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-images" data-theme-text="{{page.ac.images}}" data-theme-bindings="<%= JSON.stringify({"page.ac.images":("—")}) %>" data-theme-live="page.ac.images">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Logins (30d)</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-logins">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-logins" data-theme-text="{{page.ac.logins}}" data-theme-bindings="<%= JSON.stringify({"page.ac.logins":("—")}) %>" data-theme-live="page.ac.logins">—</p>
         </div>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
           <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Avg/day</p>
-          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-avg">—</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-avg" data-theme-text="{{page.ac.avg}}" data-theme-bindings="<%= JSON.stringify({"page.ac.avg":("—")}) %>" data-theme-live="page.ac.avg">—</p>
         </div>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
@@ -158,7 +158,7 @@
   function bar(label, value, max) {
     const pct   = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
     const color = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f97316' : '#3b82f6';
-    return `<div><div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5"><span class="truncate max-w-[55%] font-medium">${label}</span><span class="shrink-0 tabular-nums">${fmt(value)} (${max > 0 ? pct+'%' : '—'})</span></div><div class="h-1.5 rounded-full bg-neutral-200 dark:bg-white/5"><div class="h-1.5 rounded-full" style="width:${max>0?pct:0}%;background:${color}"></div></div></div>`;
+    return `<div><div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5"><span class="truncate max-w-[55%] font-medium" data-theme-text="{{image.name}}" data-theme-bindings="${JSON.stringify({'image.name':label}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${label}</span><span class="shrink-0 tabular-nums">${fmt(value)} (${max > 0 ? pct+'%' : '—'})</span></div><div class="h-1.5 rounded-full bg-neutral-200 dark:bg-white/5"><div class="h-1.5 rounded-full" style="width:${max>0?pct:0}%;background:${color}"></div></div></div>`;
   }
 
   function render(data) {
@@ -177,7 +177,7 @@
       : '<p class="text-xs text-neutral-400">No servers yet.</p>';
 
     document.getElementById('sv-heavy').innerHTML = s.topServers.map(sv =>
-      `<div class="flex items-center gap-3 px-4 py-3"><div class="min-w-0 flex-1"><p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${sv.name}</p><p class="text-xs text-neutral-400">${sv.owner}</p></div><div class="text-xs text-neutral-500 tabular-nums shrink-0">${fmt(sv.memory)} MB · ${sv.cpu}%</div></div>`
+      `<div class="flex items-center gap-3 px-4 py-3"><div class="min-w-0 flex-1"><p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium" data-theme-text="{{server.name}}" data-theme-bindings="${JSON.stringify({"server.name":(sv.name)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${sv.name}</p><p class="text-xs text-neutral-400" data-theme-text="{{server.owner.name}}" data-theme-bindings="${JSON.stringify({"server.owner.name":(sv.owner)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${sv.owner}</p></div><div class="text-xs text-neutral-500 tabular-nums shrink-0" data-theme-text="{{server.ram.limit}} MB · {{server.cpu.limit}}%" data-theme-bindings="${JSON.stringify({"server.ram.limit":(fmt(sv.memory)),"server.cpu.limit":(sv.cpu)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${fmt(sv.memory)} MB · ${sv.cpu}%</div></div>`
     ).join('') || '<p class="px-4 py-4 text-sm text-neutral-400">No servers.</p>';
 
     const nodes = data.nodes;
@@ -189,14 +189,14 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-2 h-2 rounded-full shrink-0 ${n.online?'bg-emerald-500':'bg-red-500'}"></span>
-            <div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">${n.name}</p><p class="text-xs font-mono text-neutral-400">${n.address}:${n.port}</p></div>
+            <div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{node.name}}" data-theme-bindings="${JSON.stringify({"node.name":(n.name)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${n.name}</p><p class="text-xs font-mono text-neutral-400" data-theme-text="{{node.address}}:{{node.port}}" data-theme-bindings="${JSON.stringify({"node.address":(n.address),"node.port":(n.port)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${n.address}:${n.port}</p></div>
           </div>
           <span class="text-xs px-2 py-0.5 rounded-md font-medium shrink-0 ml-2 ${n.online?'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20':'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}">${n.online?'Online':'Offline'}</span>
         </div>
         <div class="flex gap-4 mt-3 pt-3 border-t border-neutral-200 dark:border-white/5 text-xs text-neutral-500">
-          <span>${n.serverCount} server${n.serverCount!==1?'s':''}</span>
+          <span data-theme-text="{{node.serverCount}} server{{node.serversPlural}}" data-theme-bindings="${JSON.stringify({"node.serverCount":(n.serverCount),"node.serversPlural":(n.serverCount!==1?'s':'')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${n.serverCount} server${n.serverCount!==1?'s':''}</span>
           ${n.ram>0?`<span>${n.ram>=1024?(n.ram/1024).toFixed(1)+' GB':n.ram+' MB'} RAM</span>`:''}
-          ${n.online&&n.versionRelease?`<span class="font-mono">${n.versionRelease}</span>`:''}
+          ${n.online&&n.versionRelease?`<span class="font-mono" data-theme-text="{{node.version}}" data-theme-bindings="${JSON.stringify({"node.version":(n.versionRelease)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${n.versionRelease}</span>`:''}
         </div>
       </div>`
     ).join('') || '<p class="text-sm text-neutral-400">No nodes.</p>';
@@ -217,7 +217,7 @@
     });
 
     document.getElementById('ac-logins-list').innerHTML = (a.recentLogins||[]).map(l =>
-      `<div class="flex items-center gap-3 px-4 py-3"><span class="text-xs font-mono text-neutral-500 shrink-0">#${l.userId}</span><span class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1">${l.ipAddress||'Unknown'}</span><span class="text-xs text-neutral-400">${new Date(l.timestamp).toLocaleString()}</span></div>`
+      `<div class="flex items-center gap-3 px-4 py-3"><span class="text-xs font-mono text-neutral-500 shrink-0" data-theme-text="#{{login.userId}}" data-theme-bindings="${JSON.stringify({"login.userId":(l.userId)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">#${l.userId}</span><span class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1" data-theme-text="{{login.ip}}" data-theme-bindings="${JSON.stringify({"login.ip":(l.ipAddress||'Unknown')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${l.ipAddress||'Unknown'}</span><span class="text-xs text-neutral-400" data-theme-text="{{login.time}}" data-theme-bindings="${JSON.stringify({"login.time":(new Date(l.timestamp).toLocaleString())}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${new Date(l.timestamp).toLocaleString()}</span></div>`
     ).join('') || '<p class="px-4 py-4 text-sm text-neutral-400">No login history.</p>';
   }
 

@@ -117,18 +117,18 @@
       </div>
 
       <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
-        <a href="/admin/addons" class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed <span class="ml-1 text-xs"><%= addons ? addons.length : 0 %></span></a>
+        <a href="/admin/addons" class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed <span class="ml-1 text-xs" data-theme-text="{{addons.count}}" data-theme-bindings="<%= JSON.stringify({"addons.count":(addons ? addons.length : 0)}) %>"><%= addons ? addons.length : 0 %></span></a>
         <span class="px-1 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</span>
       </div>
 
       <div class="mx-8 mt-5 flex items-center gap-3 flex-wrap mb-1">
         <input id="addonStoreFilterInput" type="text" placeholder="Search addons…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
         <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
-        <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap"></span>
+        <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap" data-theme-text="{{page.statusText}}" data-theme-bindings="<%= JSON.stringify({"page.statusText":("")}) %>" data-theme-live="page.statusText"></span>
       </div>
 
       <div id="loadingEl" class="m-8 space-y-2"><% for(let i=0;i<8;i++){%><div class="sk h-11 w-full"></div><%}%></div>
-      <div id="errorEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p id="errorMsg" class="text-sm text-neutral-500"></p><button onclick="loadStore()" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Retry</button></div>
+      <div id="errorEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p id="errorMsg" class="text-sm text-neutral-500" data-theme-text="{{page.errorMsg}}" data-theme-bindings="<%= JSON.stringify({"page.errorMsg":("")}) %>" data-theme-live="page.errorMsg"></p><button onclick="loadStore()" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Retry</button></div>
       <div id="emptyEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p class="text-sm text-neutral-500">No addons match your search.</p><button id="clearSearch" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Clear</button></div>
 
       <div id="tableWrap" style="display:none" class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
@@ -153,8 +153,8 @@
   <div class="modal-box">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <div class="flex items-center gap-2 min-w-0">
-        <p id="dlgName" class="text-sm font-semibold text-neutral-800 dark:text-white truncate"></p>
-        <span id="dlgStatus" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"></span>
+        <p id="dlgName" class="text-sm font-semibold text-neutral-800 dark:text-white truncate" data-theme-text="{{page.dlgName}}" data-theme-bindings="<%= JSON.stringify({"page.dlgName":("")}) %>" data-theme-live="page.dlgName"></p>
+        <span id="dlgStatus" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap" data-theme-text="{{page.dlgStatus}}" data-theme-bindings="<%= JSON.stringify({"page.dlgStatus":("")}) %>" data-theme-live="page.dlgStatus"></span>
       </div>
       <div class="flex items-center gap-2 ml-3 shrink-0">
         <a id="dlgGh" href="#" target="_blank" rel="noopener" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-1.5 text-xs font-medium shadow transition flex items-center gap-1.5">
@@ -168,13 +168,13 @@
     </div>
     <div class="modal-two-col">
       <div class="modal-left">
-        <p id="dlgMeta" class="text-[11px] text-neutral-400 dark:text-neutral-500"></p>
-        <p id="dlgDesc" class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed"></p>
+        <p id="dlgMeta" class="text-[11px] text-neutral-400 dark:text-neutral-500" data-theme-text="{{page.dlgMeta}}" data-theme-bindings="<%= JSON.stringify({"page.dlgMeta":("")}) %>" data-theme-live="page.dlgMeta"></p>
+        <p id="dlgDesc" class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed" data-theme-text="{{page.dlgDesc}}" data-theme-bindings="<%= JSON.stringify({"page.dlgDesc":("")}) %>" data-theme-live="page.dlgDesc"></p>
         <div id="dlgFeats" class="flex flex-col gap-1"></div>
         <div class="mt-auto flex flex-col gap-2 pt-2">
           <div id="termBox" class="term-box">
             <div class="flex justify-between items-center">
-              <span id="termLabel" class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300">Starting…</span>
+              <span id="termLabel" class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300" data-theme-text="{{page.termLabel}}" data-theme-bindings="<%= JSON.stringify({"page.termLabel":("Starting…")}) %>" data-theme-live="page.termLabel">Starting…</span>
               <span id="termPct" class="text-[10px] text-neutral-400 font-mono">0%</span>
             </div>
             <div class="prog-track"><div id="progFill" class="prog-fill"></div></div>
@@ -182,7 +182,7 @@
           </div>
           <div id="dlgErr" style="display:none" class="err-box"><p id="dlgErrTxt" class="err-txt"></p></div>
           <button id="actionBtn" type="button"
-            class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition">
+            class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition" data-theme-text="{{page.actionBtn}}" data-theme-bindings="<%= JSON.stringify({"page.actionBtn":("\r\n            Install\r\n          ")}) %>" data-theme-live="page.actionBtn">
             Install
           </button>
         </div>
@@ -271,8 +271,8 @@
       tr.className = 'hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer';
       tr.innerHTML =
         `<td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm">` +
-          `<p class="font-medium text-neutral-800 dark:text-white">${esc(addon.name)}</p>` +
-          (addon.description ? `<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate">${esc(addon.description)}</p>` : '') +
+          `<p class="font-medium text-neutral-800 dark:text-white" data-theme-text="{{addon.name}}" data-theme-bindings="${JSON.stringify({"addon.name":(esc(addon.name))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(addon.name)}</p>` +
+          (addon.description ? `<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate" data-theme-text="{{addon.description}}" data-theme-bindings="${JSON.stringify({"addon.description":(esc(addon.description))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(addon.description)}</p>` : '') +
         `</td>` +
         `<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">${esc(addon.author||'—')}${addon.version?' · v'+esc(addon.version):''}</td>` +
         `<td class="whitespace-nowrap px-3 py-4 text-sm col-hide">` +

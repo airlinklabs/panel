@@ -5,8 +5,8 @@
 
   <div class="px-4 py-5">
     <div class="mb-5">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminCreateUserText %></p>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminCreateUserTitle"><%= req.translations.adminCreateUserTitle %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminCreateUserText"><%= req.translations.adminCreateUserText %></p>
     </div>
 
     <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 space-y-4">
@@ -47,7 +47,7 @@
         </label>
       </div>
 
-      <button id="createuserBtn" type="button" class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-800 px-4 py-2.5 text-sm font-medium shadow-md transition hover:bg-neutral-700 dark:hover:bg-neutral-200">
+      <button id="createuserBtn" type="button" class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-800 px-4 py-2.5 text-sm font-medium shadow-md transition hover:bg-neutral-700 dark:hover:bg-neutral-200" data-theme-i18n="create">
         <%= req.translations.create %>
       </button>
 

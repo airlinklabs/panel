@@ -24,13 +24,13 @@
       <!-- Server Settings -->
       <div class="px-8 mt-8">
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverSettings || 'Server Settings' %></h2>
-          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
+          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white" data-theme-i18n="serverSettings"><%= req.translations.serverSettings || 'Server Settings' %></h2>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4" data-theme-i18n="serverSettingsDesc"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
 
           <form id="serverSettingsForm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label for="serverName" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.serverName || 'Server Name' %></label>
+                <label for="serverName" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="serverName"><%= req.translations.serverName || 'Server Name' %></label>
                 <input type="text" id="serverName" name="name" value="<%= server.name %>" class="w-full rounded-xl focus:ring focus:ring-neutral-300 dark:focus:ring-neutral-800/10 focus:border-neutral-400 dark:focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-100 dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5">
               </div>
 
@@ -41,56 +41,56 @@
             </div>
 
             <div class="mt-6">
-              <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-500 transition"><%= req.translations.saveSettings || 'Save Settings' %></button>
+              <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-500 transition" data-theme-i18n="saveSettings"><%= req.translations.saveSettings || 'Save Settings' %></button>
             </div>
           </form>
         </div>
 
         <!-- Server Information -->
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5 mt-8">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverInformation || 'Server Information' %></h2>
+          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white" data-theme-i18n="serverInformation"><%= req.translations.serverInformation || 'Server Information' %></h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.serverId || 'Server ID' %></h3>
-              <p class="text-neutral-400"><%= server.UUID %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="serverId"><%= req.translations.serverId || 'Server ID' %></h3>
+              <p class="text-neutral-400" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.id}}" data-theme-bindings="<%= JSON.stringify({"server.id":(server.UUID)}) %>"><%= server.UUID %></p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.createdAt || 'Created' %></h3>
-              <p class="text-neutral-400"><%= new Date(server.createdAt).toLocaleString() %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="createdAt"><%= req.translations.createdAt || 'Created' %></h3>
+              <p class="text-neutral-400" data-theme-text="{{server.createdAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.createdAtFormatted":(new Date(server.createdAt).toLocaleString())}) %>"><%= new Date(server.createdAt).toLocaleString() %></p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.nodes || 'Node' %></h3>
-              <p class="text-neutral-400"><%= server.node.name %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="nodes"><%= req.translations.nodes || 'Node' %></h3>
+              <p class="text-neutral-400" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.node.name}}" data-theme-bindings="<%= JSON.stringify({"server.node.name":(server.node.name)}) %>"><%= server.node.name %></p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.images || 'Image' %></h3>
-              <p class="text-neutral-400"><%= server.image.name || 'Unknown' %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="images"><%= req.translations.images || 'Image' %></h3>
+              <p class="text-neutral-400" data-theme-text="{{server.image.name}}" data-theme-bindings="<%= JSON.stringify({"server.image.name":(server.image.name || 'Unknown')}) %>"><%= server.image.name || 'Unknown' %></p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.memory || 'Memory' %></h3>
-              <p class="text-neutral-400"><%= server.Memory %> MB</p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="memory"><%= req.translations.memory || 'Memory' %></h3>
+              <p class="text-neutral-400" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.ram.limit}} MB" data-theme-bindings="<%= JSON.stringify({"server.ram.limit":(server.Memory)}) %>"><%= server.Memory %> MB</p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.cpu || 'CPU' %></h3>
-              <p class="text-neutral-400"><%= server.Cpu * 100 %>%</p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="cpu"><%= req.translations.cpu || 'CPU' %></h3>
+              <p class="text-neutral-400" data-theme-text="{{server.cpu.limit}}%" data-theme-bindings="<%= JSON.stringify({"server.cpu.limit":(server.Cpu * 100)}) %>"><%= server.Cpu * 100 %>%</p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.storage || 'Storage' %></h3>
-              <p class="text-neutral-400"><%= server.Storage %> GB</p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="storage"><%= req.translations.storage || 'Storage' %></h3>
+              <p class="text-neutral-400" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.disk.limit}} GB" data-theme-bindings="<%= JSON.stringify({"server.disk.limit":(server.Storage)}) %>"><%= server.Storage %> GB</p>
             </div>
 
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.statusColumn || 'Status' %></h3>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-i18n="statusColumn"><%= req.translations.statusColumn || 'Status' %></h3>
               <p class="text-neutral-400">
                 <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
-                  <%= server.Suspended ? 'bg-yellow-600/10 text-yellow-400 ring-yellow-600/20' : 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' %>">
+                  <%= server.Suspended ? 'bg-yellow-600/10 text-yellow-400 ring-yellow-600/20' : 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' %>" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Active')}) %>">
                   <%= server.Suspended ? 'Suspended' : 'Active' %>
                 </span>
               </p>
@@ -100,7 +100,7 @@
 
         <!-- Danger Zone -->
         <div class="bg-red-950/20 rounded-xl p-6 shadow-lg border border-red-800/20 mt-8">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
+          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white" data-theme-i18n="dangerZone"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
           <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
           <div class="flex items-center justify-between mb-6">
@@ -114,10 +114,10 @@
 
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.reinstallServerDesc || 'Reinstall your server from scratch (all data will be lost)' %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300" data-theme-i18n="reinstallServer"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
+              <p class="text-sm text-neutral-600 dark:text-neutral-400" data-theme-i18n="reinstallServerDesc"><%= req.translations.reinstallServerDesc || 'Reinstall your server from scratch (all data will be lost)' %></p>
             </div>
-            <button id="reinstallButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.reinstall || 'Reinstall' %></button>
+            <button id="reinstallButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" data-theme-i18n="reinstall"><%= req.translations.reinstall || 'Reinstall' %></button>
           </div>
         </div>
       </div>

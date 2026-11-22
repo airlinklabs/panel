@@ -18,7 +18,7 @@
       </svg>
       <div>
         <p class="text-xs font-medium text-red-700 dark:text-red-400">Error</p>
-        <p class="text-xs text-red-600 dark:text-red-400/70 mt-0.5"><%= errorMessage.message %></p>
+        <p class="text-xs text-red-600 dark:text-red-400/70 mt-0.5" data-theme-text="{{error.message}}" data-theme-bindings="<%= JSON.stringify({"error.message":(errorMessage.message)}) %>"><%= errorMessage.message %></p>
       </div>
     </div>
     <% } %>
@@ -42,9 +42,9 @@
         %>
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
-            <img class="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-600 shrink-0" src="<%= iconPath %>" alt="World icon" />
+            <img class="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-600 shrink-0" src="<%= iconPath %>" alt="World icon" data-theme-image="{{world.icon}}" data-theme-bindings="<%= JSON.stringify({"world.icon":(iconPath)}) %>" />
             <div class="min-w-0">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= world.name %></p>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{world.name}}" data-theme-record="world" data-theme-fields="<%= JSON.stringify({name:world.name,id:world.name,path:world.folder||world.name,type:world.type,size:world.size,seed:world.seed,loaded:world.loaded}) %>"><%= world.name %></p>
               <p class="text-xs text-neutral-500">Minecraft World</p>
             </div>
           </div>

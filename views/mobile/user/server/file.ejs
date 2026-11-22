@@ -14,7 +14,7 @@
       <%- include('../../components/serverTemplate') %>
 
       <!-- Daemon Offline Warning -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
+      <%if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) {%>
       <div class="mx-4 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,13 +23,13 @@
         </div>
         <div>
           <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
-          <p class="text-xs text-red-400"><%= errorMessage.message %></p>
+          <p class="text-xs text-red-400" data-theme-text="{{error.message}}" data-theme-bindings="<%= JSON.stringify({"error.message":(errorMessage.message)}) %>"><%= errorMessage.message %></p>
           <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
             Retry Connection
           </button>
         </div>
       </div>
-      <% } %>
+      <%}%>
 
       <div class="flex flex-col gap-4 mt-4">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden w-full">
@@ -38,27 +38,21 @@
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
                 <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/home/container/</a>
-              <%
-                  if (file.path) {
+              <%if (file.path) {
                       const parts = file.path.split('/');
                       let currentPath = '';
 
                       parts.forEach((part, index) => {
                           currentPath += part;
 
-                          if (index < parts.length - 1) {
-                              %>
-                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
-                              <%
-                              currentPath += '/';
-                          } else {
-                              %>
-                              <span class="text-neutral-100"><%= part %></span>
-                              <%
-                          }
+                          if (index < parts.length - 1) {%>
+                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition" data-theme-text="{{file.directoryName}}" data-theme-bindings="<%= JSON.stringify({"file.directoryName":(part)}) %>"><%= part %></a>/
+                              <%currentPath += '/';
+                          } else {%>
+                              <span class="text-neutral-100" data-theme-text="{{file.directoryName}}" data-theme-bindings="<%= JSON.stringify({"file.directoryName":(part)}) %>"><%= part %></span>
+                              <%}
                       });
-                  }
-              %>
+                  }%>
               </h2>
               <div class="flex space-x-2">
                 <button id="saveBtn" class="px-4 py-2 bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white rounded-xl hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 transition-colors duration-200 shadow-sm border border-neutral-300 dark:border-neutral-600 flex items-center">
@@ -73,8 +67,8 @@
               <div class="h-[490px]" id="editor-container"></div>
               <div class="flex justify-between items-center px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 border-t border-neutral-300 dark:border-neutral-600 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
                 <div class="flex items-center space-x-3">
-                  <div id="editor-status">Line: 1, Column: 1</div>
-                  <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300">Loading...</div>
+                  <div id="editor-status" data-theme-text="{{page.editor.status}}" data-theme-bindings="<%= JSON.stringify({"page.editor.status":("Line: 1, Column: 1")}) %>" data-theme-live="page.editor.status">Line: 1, Column: 1</div>
+                  <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300" data-theme-text="{{page.file.info}}" data-theme-bindings="<%= JSON.stringify({"page.file.info":("Loading...")}) %>" data-theme-live="page.file.info">Loading...</div>
                 </div>
                 <div class="flex space-x-4">
                   <div class="flex items-center">
@@ -106,8 +100,7 @@
 <%- include('../../components/toast')%>
 
 <script src="/monaco/vs/loader.js"></script>
-<%
-    const fileExtension = file.extension;
+<%const fileExtension = file.extension;
     const language = fileExtension === 'js' ? 'javascript'
                        : fileExtension === 'json' ? 'json'
                        : fileExtension === 'html' ? 'html'
@@ -127,8 +120,7 @@
                        : fileExtension === 'pl' ? 'perl'
                        : fileExtension === 'yml' ? 'yaml'
                        : fileExtension === 'xml' ? 'xml'
-                       : 'plaintext';
-%>
+                       : 'plaintext';%>
 <script>
 require.config({
   paths: {

@@ -65,17 +65,17 @@
                     <% backups.forEach(backup => { %>
                       <tr data-backup-id="<%= backup.UUID %>">
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm font-medium text-neutral-900 dark:text-white">
+                          <div class="text-sm font-medium text-neutral-900 dark:text-white" data-theme-text="{{backup.name}}" data-theme-record="backup" data-theme-fields="<%= JSON.stringify({name:backup.name,id:backup.UUID||backup.id||backup.name,size:backup.size,createdAt:backup.createdAt}) %>">
                             <%= backup.name %>
                           </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                          <div class="text-sm text-neutral-500 dark:text-neutral-400" data-theme-text="{{backup.sizeFormatted}}" data-theme-bindings="<%= JSON.stringify({"backup.sizeFormatted":(backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown')}) %>">
                             <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown' %>
                           </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                          <div class="text-sm text-neutral-500 dark:text-neutral-400" data-theme-text="{{backup.date}} {{backup.time}}" data-theme-bindings="<%= JSON.stringify({"backup.date":(new Date(backup.createdAt).toLocaleDateString()),"backup.time":(new Date(backup.createdAt).toLocaleTimeString())}) %>">
                             <%= new Date(backup.createdAt).toLocaleDateString() %> <%= new Date(backup.createdAt).toLocaleTimeString() %>
                           </div>
                         </td>
@@ -295,7 +295,7 @@ function addBackupRow(backup) {
 
   const nameTd = document.createElement('td');
   nameTd.className = 'px-6 py-4 whitespace-nowrap';
-  nameTd.innerHTML = `<div class="text-sm font-medium text-neutral-900 dark:text-white">${backup.name}</div>`;
+  nameTd.innerHTML = `<div class="text-sm font-medium text-neutral-900 dark:text-white" data-theme-text="{{backup.name}}" data-theme-bindings="${JSON.stringify({"backup.name":(backup.name)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${backup.name}</div>`;
   tr.appendChild(nameTd);
 
   const sizeTd = document.createElement('td');

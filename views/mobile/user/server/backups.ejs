@@ -34,8 +34,9 @@
         <div class="px-4 py-3" data-backup-id="<%= backup.UUID %>">
           <div class="flex items-start justify-between gap-3 mb-2">
             <div class="min-w-0">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= backup.name %></p>
-              <p class="text-xs text-neutral-500 mt-0.5">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{backup.name}}" data-theme-record="backup" data-theme-fields="<%= JSON.stringify({name:backup.name,id:backup.UUID||backup.id||backup.name,size:backup.size,createdAt:backup.createdAt}) %>"><%= backup.name %></p>
+              <p class="text-xs text-neutral-500 mt-0.5" data-theme-text="{{backup.sizeFormatted}}
+                &amp;middot; {{backup.date}}" data-theme-bindings="<%= JSON.stringify({"backup.sizeFormatted":(backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size'),"backup.date":(new Date(backup.createdAt).toLocaleDateString())}) %>">
                 <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size' %>
                 &middot; <%= new Date(backup.createdAt).toLocaleDateString() %>
               </p>

@@ -93,7 +93,7 @@
  <div class="px-8 mt-8">
     <% sections.forEach(section => { %>
       <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mb-6">
-        <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= section.title %></h2>
+        <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white" data-theme-text="{{section.title}}" data-theme-bindings="<%= JSON.stringify({"section.title":(section.title)}) %>"><%= section.title %></h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <%
@@ -116,13 +116,13 @@
               if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
           %>
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= item.label %></h3>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" data-theme-text="{{item.label}}" data-theme-bindings="<%= JSON.stringify({"item.label":(item.label)}) %>"><%= item.label %></h3>
               <% if (item.type === 'link') { %>
-                <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></a>
+                <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition" data-theme-text="{{item.value}}" data-theme-bindings="<%= JSON.stringify({"item.value":(value)}) %>"><%= value %></a>
               <% } else if (item.type === 'button') { %>
-                <button onclick="<%= item.onClick %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></button>
+                <button onclick="<%= item.onClick %>" class="text-neutral-400 hover:text-neutral-300 transition" data-theme-text="{{item.value}}" data-theme-bindings="<%= JSON.stringify({"item.value":(value)}) %>"><%= value %></button>
               <% } else { %>
-                <p class="text-neutral-400"><%= value %></p>
+                <p class="text-neutral-400" data-theme-text="{{item.value}}" data-theme-bindings="<%= JSON.stringify({"item.value":(value)}) %>"><%= value %></p>
               <% } %>
             </div>
           <% }); %>

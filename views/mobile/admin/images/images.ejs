@@ -8,8 +8,8 @@
 
     <div class="flex items-start justify-between mb-5">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminImagesTitle %></h1>
-        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminImagesText %></p>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminImagesTitle"><%= req.translations.adminImagesTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminImagesText"><%= req.translations.adminImagesText %></p>
       </div>
       <div class="flex gap-2 shrink-0">
         <a href="/admin/images/store" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
@@ -38,10 +38,10 @@
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= image.name %></p>
-              <p class="text-xs text-neutral-500 truncate">by <%= image.author %></p>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{image.name}}" data-theme-bindings="<%= JSON.stringify({"image.name":(image.name)}) %>"><%= image.name %></p>
+              <p class="text-xs text-neutral-500 truncate" data-theme-text="by {{image.author}}" data-theme-bindings="<%= JSON.stringify({"image.author":(image.author)}) %>">by <%= image.author %></p>
             </div>
-            <p class="text-xs text-neutral-500 shrink-0"><%= new Date(image.createdAt).toLocaleDateString() %></p>
+            <p class="text-xs text-neutral-500 shrink-0" data-theme-text="{{image.createdAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"image.createdAtFormatted":(new Date(image.createdAt).toLocaleDateString())}) %>"><%= new Date(image.createdAt).toLocaleDateString() %></p>
           </div>
           <div class="flex gap-2 justify-end">
             <a href="/admin/images/edit/<%= image.id %>">

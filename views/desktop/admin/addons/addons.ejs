@@ -20,7 +20,7 @@
       </div>
 
       <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
-        <span class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Installed <span class="ml-1 text-xs text-neutral-400"><%= addons ? addons.length : 0 %></span></span>
+        <span class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Installed <span class="ml-1 text-xs text-neutral-400" data-theme-text="{{addons.count}}" data-theme-bindings="<%= JSON.stringify({"addons.count":(addons ? addons.length : 0)}) %>"><%= addons ? addons.length : 0 %></span></span>
         <a href="/admin/addons/store" class="px-1 py-2.5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Store</a>
       </div>
 
@@ -57,19 +57,19 @@
                 data-slug="<%= addon.slug %>"
                 data-search="<%= (addon.name + ' ' + (addon.description||'') + ' ' + (addon.author||'')).toLowerCase() %>">
               <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm">
-                <p class="font-medium text-neutral-800 dark:text-white"><%= addon.name %></p>
-                <% if (addon.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate"><%= addon.description %></p><% } %>
+                <p class="font-medium text-neutral-800 dark:text-white" data-theme-text="{{addon.name}}" data-theme-bindings="<%= JSON.stringify({"addon.name":(addon.name)}) %>"><%= addon.name %></p>
+                <% if (addon.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate" data-theme-text="{{addon.description}}" data-theme-bindings="<%= JSON.stringify({"addon.description":(addon.description)}) %>"><%= addon.description %></p><% } %>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm col-hide">
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= addon.enabled ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500 ring-neutral-300 dark:ring-white/10' %>">
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= addon.enabled ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500 ring-neutral-300 dark:ring-white/10' %>" data-theme-text="{{addon.status.label}}" data-theme-bindings="<%= JSON.stringify({"addon.status.label":(addon.enabled ? 'Enabled' : 'Disabled')}) %>">
                   <%= addon.enabled ? 'Enabled' : 'Disabled' %>
                 </span>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
                   <button onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
-                    class="toggle-btn rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">
+                    class="toggle-btn rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition" data-theme-text="{{addon.toggleLabel}}" data-theme-bindings="<%= JSON.stringify({"addon.toggleLabel":(addon.enabled ? 'Disable' : 'Enable')}) %>">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
                   <button onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"

@@ -4,12 +4,12 @@
   <div id="globalModalPanel" class="relative bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl shadow-2xl w-full transform translate-y-full transition-transform duration-200">
     <div class="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full mx-auto mt-3 mb-1"></div>
     <div class="px-5 pt-3 pb-4">
-      <p id="globalModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white leading-snug"></p>
-      <p id="globalModalBody" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
+      <p id="globalModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white leading-snug" data-theme-text="{{page.globalModalTitle}}" data-theme-bindings="<%= JSON.stringify({"page.globalModalTitle":("")}) %>" data-theme-live="page.globalModalTitle"></p>
+      <p id="globalModalBody" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed" data-theme-text="{{page.globalModalBody}}" data-theme-bindings="<%= JSON.stringify({"page.globalModalBody":("")}) %>" data-theme-live="page.globalModalBody"></p>
     </div>
     <div class="flex gap-2 px-5 pb-6">
       <button id="globalModalCancel" class="flex-1 py-2.5 text-sm font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-      <button id="globalModalConfirm" class="flex-1 py-2.5 text-sm font-medium rounded-xl text-white transition"></button>
+      <button id="globalModalConfirm" class="flex-1 py-2.5 text-sm font-medium rounded-xl text-white transition" data-theme-text="{{page.globalModalConfirm}}" data-theme-bindings="<%= JSON.stringify({"page.globalModalConfirm":("")}) %>" data-theme-live="page.globalModalConfirm"></button>
     </div>
   </div>
 </div>

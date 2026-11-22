@@ -286,7 +286,7 @@
         <!-- Tab bar -->
         <div class="flex border-b border-neutral-800 mb-6">
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
-            Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
+            Installed <span class="ml-1 text-xs text-neutral-700" data-theme-text="{{addons.count}}" data-theme-bindings="<%= JSON.stringify({"addons.count":(addons ? addons.length : 0)}) %>"><%= addons ? addons.length : 0 %></span>
           </a>
           <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</a>
         </div>
@@ -314,7 +314,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-9 h-9 text-neutral-800 mx-auto mb-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
           </svg>
-          <p id="storeErrorMsg" class="text-sm text-neutral-600">Failed to load addon store.</p>
+          <p id="storeErrorMsg" class="text-sm text-neutral-600" data-theme-text="{{page.storeErrorMsg}}" data-theme-bindings="<%= JSON.stringify({"page.storeErrorMsg":("Failed to load addon store.")}) %>" data-theme-live="page.storeErrorMsg">Failed to load addon store.</p>
           <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
         </div>
 
@@ -341,10 +341,10 @@
         <div class="s-icon" id="mIcon"></div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <span id="mName" class="text-sm font-semibold text-neutral-800 dark:text-white"></span>
-            <span id="mStatus" class="s-badge"></span>
+            <span id="mName" class="text-sm font-semibold text-neutral-800 dark:text-white" data-theme-text="{{page.mName}}" data-theme-bindings="<%= JSON.stringify({"page.mName":("")}) %>" data-theme-live="page.mName"></span>
+            <span id="mStatus" class="s-badge" data-theme-text="{{page.mStatus}}" data-theme-bindings="<%= JSON.stringify({"page.mStatus":("")}) %>" data-theme-live="page.mStatus"></span>
           </div>
-          <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
+          <p id="mMeta" class="text-xs text-neutral-600 mt-0.5" data-theme-text="{{page.mMeta}}" data-theme-bindings="<%= JSON.stringify({"page.mMeta":("")}) %>" data-theme-live="page.mMeta"></p>
         </div>
         <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
@@ -359,7 +359,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
-          <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
+          <span id="mActionLabel" data-theme-text="{{page.mActionLabel}}" data-theme-bindings="<%= JSON.stringify({"page.mActionLabel":(""+String(( req.translations.install || 'Install' ) ?? "")+"")}) %>" data-theme-live="page.mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
         <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="m-btn-gh">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
@@ -381,7 +381,7 @@
     <div class="m-body">
 
       <div class="m-pane on" id="m-pane-overview">
-        <p id="mDesc" class="text-sm text-neutral-500 leading-relaxed mb-4"></p>
+        <p id="mDesc" class="text-sm text-neutral-500 leading-relaxed mb-4" data-theme-text="{{page.mDesc}}" data-theme-bindings="<%= JSON.stringify({"page.mDesc":("")}) %>" data-theme-live="page.mDesc"></p>
         <div id="mFeatures"></div>
       </div>
 
@@ -389,8 +389,8 @@
         <!-- Live progress — only visible while installing -->
         <div id="mProgress" class="m-progress" style="display:none;">
           <div class="m-prog-top">
-            <span class="m-prog-label" id="mProgLabel">Installing...</span>
-            <span class="m-prog-pct" id="mProgPct">0%</span>
+            <span class="m-prog-label" id="mProgLabel" data-theme-text="{{page.mProgLabel}}" data-theme-bindings="<%= JSON.stringify({"page.mProgLabel":("Installing...")}) %>" data-theme-live="page.mProgLabel">Installing...</span>
+            <span class="m-prog-pct" id="mProgPct" data-theme-text="{{page.mProgPct}}" data-theme-bindings="<%= JSON.stringify({"page.mProgPct":("0%")}) %>" data-theme-live="page.mProgPct">0%</span>
           </div>
           <div class="m-prog-track"><div class="m-prog-fill" id="mProgBar"></div></div>
           <div class="m-log" id="mLog"></div>
@@ -529,14 +529,14 @@
           </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span class="s-name">${esc(a.name)}</span>
+              <span class="s-name" data-theme-text="{{addon.name}}" data-theme-bindings="${JSON.stringify({"addon.name":(esc(a.name))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(a.name)}</span>
               ${inst ? '<span class="s-badge s-badge-installed">Installed</span>' : ''}
               <span class="${badgeClass(a.status)}" style="margin-left:auto;">${esc(a.status||'working')}</span>
             </div>
-            <p class="s-meta">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
+            <p class="s-meta" data-theme-text="by {{addon.author}} · {{addon.version}}" data-theme-bindings="${JSON.stringify({"addon.author":(esc(a.author||'Unknown')),"addon.version":(esc(a.version||''))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
           </div>
         </div>
-        <p class="s-desc">${esc(a.description)}</p>
+        <p class="s-desc" data-theme-text="{{addon.description}}" data-theme-bindings="${JSON.stringify({"addon.description":(esc(a.description))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(a.description)}</p>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>
           ${count > 0 ? `<span class="s-count"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-count-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>${count}</span>` : ''}

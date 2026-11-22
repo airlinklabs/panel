@@ -24,7 +24,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0 mt-0.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
-        <p class="text-xs text-red-600 dark:text-red-400"><%= errorMessage.message %></p>
+        <p class="text-xs text-red-600 dark:text-red-400" data-theme-text="{{error.message}}" data-theme-bindings="<%= JSON.stringify({"error.message":(errorMessage.message)}) %>"><%= errorMessage.message %></p>
       </div>
     <% } %>
 
@@ -32,22 +32,22 @@
     <div class="grid grid-cols-2 gap-3 mb-5">
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Players</p>
-        <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{page.totalPlayers}}" data-theme-bindings="<%= JSON.stringify({"page.totalPlayers":("0")}) %>" data-theme-live="page.totalPlayers">0</p>
         <p class="text-xs text-neutral-500 mt-1">Across all servers</p>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Capacity</p>
-        <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{page.maxCapacity}}" data-theme-bindings="<%= JSON.stringify({"page.maxCapacity":("0")}) %>" data-theme-live="page.maxCapacity">0</p>
         <p class="text-xs text-neutral-500 mt-1">Max slots</p>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online Servers</p>
-        <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{page.onlineServers}}" data-theme-bindings="<%= JSON.stringify({"page.onlineServers":("0")}) %>" data-theme-live="page.onlineServers">0</p>
         <p class="text-xs text-neutral-500 mt-1">Currently up</p>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Utilization</p>
-        <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white">0%</p>
+        <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{page.utilization}}" data-theme-bindings="<%= JSON.stringify({"page.utilization":("0%")}) %>" data-theme-live="page.utilization">0%</p>
         <p class="text-xs text-neutral-500 mt-1">Capacity used</p>
       </div>
     </div>
@@ -131,10 +131,10 @@
           div.innerHTML = `
             <div class="w-2 h-2 rounded-full shrink-0 ${server.online ? 'bg-emerald-500' : 'bg-neutral-400'}"></div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate">${server.serverName || 'Unknown'}</p>
-              <p class="text-xs text-neutral-500">${server.version || 'Unknown version'}</p>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{server.name}}" data-theme-bindings="${JSON.stringify({"server.name":(server.serverName || 'Unknown')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${server.serverName || 'Unknown'}</p>
+              <p class="text-xs text-neutral-500" data-theme-text="{{server.version}}" data-theme-bindings="${JSON.stringify({"server.version":(server.version || 'Unknown version')}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${server.version || 'Unknown version'}</p>
             </div>
-            <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300 shrink-0">${server.playerCount ?? 0}/${server.maxPlayers ?? 0}</p>
+            <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300 shrink-0" data-theme-text="{{server.players.online}}/{{server.players.limit}}" data-theme-bindings="${JSON.stringify({"server.players.online":(server.playerCount ?? 0),"server.players.limit":(server.maxPlayers ?? 0)}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${server.playerCount ?? 0}/${server.maxPlayers ?? 0}</p>
           `;
           list.appendChild(div);
         });

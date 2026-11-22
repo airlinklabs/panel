@@ -1,6 +1,6 @@
 <div class="sm:flex-auto">
   <div class="flex items-center">
-    <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
+    <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.name}}" data-theme-bindings="<%= JSON.stringify({"server.name":(server.name.charAt(0).toUpperCase() + server.name.slice(1))}) %>">
       <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
     </h1>
 
@@ -14,9 +14,9 @@
             </span>
             <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
               <% if (typeof serverStatus.uptime !== 'undefined') { %>
-                Uptime: <span id="uptime-display"><%= formatUptime(serverStatus.uptime) %></span>
+                Uptime: <span id="uptime-display" data-theme-text="{{server.uptimeFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.uptimeFormatted":(formatUptime(serverStatus.uptime))}) %>" data-theme-live="server.uptimeFormatted"><%= formatUptime(serverStatus.uptime) %></span>
                 <% if (typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
-                  <span id="server-started-at" class="hidden"><%= serverStatus.startedAt %></span>
+                  <span id="server-started-at" class="hidden" data-theme-text="{{server.startedAt}}" data-theme-bindings="<%= JSON.stringify({"server.startedAt":(serverStatus.startedAt)}) %>" data-theme-live="server.startedAt"><%= serverStatus.startedAt %></span>
                 <% } %>
               <% } else { %>
                 Online
@@ -34,7 +34,7 @@
   </div>
 
   <div class="flex items-center mt-1">
-    <p class="tracking-tight text-sm text-neutral-500 dark:text-neutral-400">
+    <p class="tracking-tight text-sm text-neutral-500 dark:text-neutral-400" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.description}}" data-theme-bindings="<%= JSON.stringify({"server.description":(server.description)}) %>">
       <%= server.description %>
     </p>
 
@@ -43,14 +43,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
+        <span data-server-started-time data-theme-text="Started: {{server.startedAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.startedAtFormatted":(new Date(serverStatus.startedAt).toLocaleString())}) %>">Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
       </div>
     <% } else { %>
       <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 hidden items-center" data-server-started-container>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span data-server-started-time><%= req.translations.startedUnknown || 'Started: Unknown' %></span>
+        <span data-server-started-time data-theme-i18n="startedUnknown"><%= req.translations.startedUnknown || 'Started: Unknown' %></span>
       </div>
     <% } %>
   </div>
@@ -253,7 +253,7 @@ function formatUptime(seconds) {
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                   </span>
                   <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                    Uptime: <span id="uptime-display">${formatUptime(data.uptime)}</span>
+                    Uptime: <span id="uptime-display" data-theme-text="{{server.uptimeFormatted}}" data-theme-bindings="${JSON.stringify({"server.uptimeFormatted":(formatUptime(data.uptime))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${formatUptime(data.uptime)}</span>
                   </span>
                 </div>
               `;
@@ -639,7 +639,7 @@ function formatUptime(seconds) {
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                 </span>
                 <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                  Uptime: <span id="uptime-display">${formatUptime(newUptime)}</span>
+                  Uptime: <span id="uptime-display" data-theme-text="{{server.uptimeFormatted}}" data-theme-bindings="${JSON.stringify({"server.uptimeFormatted":(formatUptime(newUptime))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${formatUptime(newUptime)}</span>
                 </span>
               </div>
             `;

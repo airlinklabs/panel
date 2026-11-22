@@ -83,7 +83,7 @@
                 <% apiEndpoints.forEach(category=> { %>
                   <div>
                     <h3
-                      class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4">
+                      class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4" data-theme-text="{{category.name}} Endpoints" data-theme-bindings="<%= JSON.stringify({"category.name":(category.category)}) %>">
                       <%= category.category %> Endpoints
                     </h3>
 
@@ -101,15 +101,15 @@
                             <% } else if (endpoint.method === 'DELETE') { %>
                               bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 ring-red-600/20 dark:ring-red-500/30
                             <% } %>
-                            px-2 py-1 text-xs font-medium ring-1 ring-inset mr-2">
+                            px-2 py-1 text-xs font-medium ring-1 ring-inset mr-2" data-theme-text="{{endpoint.method}}" data-theme-bindings="<%= JSON.stringify({"endpoint.method":(endpoint.method)}) %>">
                               <%= endpoint.method %>
                             </span>
-                            <code class="text-sm font-mono"><%= endpoint.path %></code>
-                            <span class="ml-auto text-xs text-neutral-500">Permission: <%= endpoint.permission %></span>
+                            <code class="text-sm font-mono" data-theme-text="{{endpoint.path}}" data-theme-bindings="<%= JSON.stringify({"endpoint.path":(endpoint.path)}) %>"><%= endpoint.path %></code>
+                            <span class="ml-auto text-xs text-neutral-500" data-theme-text="Permission: {{endpoint.permission}}" data-theme-bindings="<%= JSON.stringify({"endpoint.permission":(endpoint.permission)}) %>">Permission: <%= endpoint.permission %></span>
                           </div>
 
                           <div class="px-4 py-3">
-                            <p class="text-sm text-neutral-600 dark:text-neutral-300">
+                            <p class="text-sm text-neutral-600 dark:text-neutral-300" data-theme-text="{{endpoint.description}}" data-theme-bindings="<%= JSON.stringify({"endpoint.description":(endpoint.description)}) %>">
                               <%= endpoint.description %>
                             </p>
 
@@ -118,7 +118,7 @@
                                 <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request
                                   Body:</h4>
                                 <pre
-                                  class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
+                                  class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code data-theme-text="{{endpoint.requestExample}}" data-theme-bindings="<%= JSON.stringify({"endpoint.requestExample":(endpoint.requestExample)}) %>"><%= endpoint.requestExample %></code></pre>
                               </div>
                               <% } %>
 
@@ -126,7 +126,7 @@
                                   <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Response:
                                   </h4>
                                   <pre
-                                    class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
+                                    class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code data-theme-text="{{endpoint.responseExample}}" data-theme-bindings="<%= JSON.stringify({"endpoint.responseExample":(endpoint.responseExample)}) %>"><%= endpoint.responseExample %></code></pre>
                                 </div>
 
                                 <!-- Test Endpoint Section -->
@@ -143,8 +143,7 @@
                                             type="text" 
                                             data-param-name="<%= paramName %>"
                                             class="inline-block w-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white text-xs px-2 py-1 shadow-sm focus:border-neutral-500 focus:ring-neutral-500"
-                                            placeholder="<%= paramName %>"
-                                          />
+                                            placeholder="<%= paramName %>" data-theme-text="{{page.paramName}}" data-theme-bindings="<%= JSON.stringify({"page.paramName":(paramName)}) %>" />
                                         <% }); %>
                                     
                                         <button type="button"

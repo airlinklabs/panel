@@ -59,7 +59,7 @@
     <div id="groupBar" class="flex gap-1.5 mb-3 overflow-x-auto pb-1"></div>
 
     <div class="flex items-center gap-2 mb-3 min-h-[20px]">
-      <span id="statusText" class="text-xs text-neutral-400">Loading catalogue…</span>
+      <span id="statusText" class="text-xs text-neutral-400" data-theme-text="{{page.statusText}}" data-theme-bindings="<%= JSON.stringify({"page.statusText":("Loading catalogue…")}) %>" data-theme-live="page.statusText">Loading catalogue…</span>
       <span id="loadingDot" class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></span>
     </div>
 
@@ -86,14 +86,14 @@
 
 <div id="installModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end">
   <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
-    <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
-    <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
+    <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle" data-theme-text="{{page.modalTitle}}" data-theme-bindings="<%= JSON.stringify({"page.modalTitle":("Install image")}) %>" data-theme-live="page.modalTitle">Install image</h2>
+    <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle" data-theme-text="{{page.modalSubtitle}}" data-theme-bindings="<%= JSON.stringify({"page.modalSubtitle":("Add this image to your panel.")}) %>" data-theme-live="page.modalSubtitle">Add this image to your panel.</p>
     <div id="modalError" class="hidden mb-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
-      <p class="text-xs text-red-600 dark:text-red-400" id="modalErrorText"></p>
+      <p class="text-xs text-red-600 dark:text-red-400" id="modalErrorText" data-theme-text="{{page.modalErrorText}}" data-theme-bindings="<%= JSON.stringify({"page.modalErrorText":("")}) %>" data-theme-live="page.modalErrorText"></p>
     </div>
     <div class="flex gap-3">
       <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white text-sm font-medium transition">Cancel</button>
-      <button id="confirmBtn" onclick="confirmInstall()" class="flex-1 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium transition">Install</button>
+      <button id="confirmBtn" onclick="confirmInstall()" class="flex-1 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium transition" data-theme-text="{{page.confirmBtn}}" data-theme-bindings="<%= JSON.stringify({"page.confirmBtn":("Install")}) %>" data-theme-live="page.confirmBtn">Install</button>
     </div>
   </div>
 </div>
@@ -187,10 +187,10 @@ function buildCard(img) {
   el.className = 'rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 p-4 flex flex-col gap-2 transition hover:bg-neutral-50 dark:hover:bg-neutral-700/20';
   el.innerHTML = `
     <div class="flex items-start justify-between gap-2">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white leading-snug">${esc(img.name)}</p>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white leading-snug" data-theme-text="{{image.name}}" data-theme-bindings="${JSON.stringify({"image.name":(esc(img.name))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(img.name)}</p>
       <span class="store-badge ${color} shrink-0">${label}</span>
     </div>
-    ${img.subGroup&&img.subGroup!==img.group?`<p class="text-[10px] text-neutral-400 font-mono">${esc(img.subGroup)}</p>`:''}
+    ${img.subGroup&&img.subGroup!==img.group?`<p class="text-[10px] text-neutral-400 font-mono" data-theme-text="{{image.group}}" data-theme-bindings="${JSON.stringify({"image.group":(esc(img.subGroup))}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${esc(img.subGroup)}</p>`:''}
     ${short?`<p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">${esc(short)}</p>`:''}
     <button class="install-btn mt-1 w-full py-2 rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition">Install</button>`;
   el.querySelector('.install-btn').addEventListener('click',()=>openModal(img));

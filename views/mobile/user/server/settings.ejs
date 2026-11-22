@@ -16,11 +16,11 @@
 
       <!-- Settings form -->
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-        <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-1"><%= req.translations.serverSettings || 'Server Settings' %></h2>
-        <p class="text-xs text-neutral-500 mb-4"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
+        <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-1" data-theme-i18n="serverSettings"><%= req.translations.serverSettings || 'Server Settings' %></h2>
+        <p class="text-xs text-neutral-500 mb-4" data-theme-i18n="serverSettingsDesc"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
         <form id="serverSettingsForm" class="space-y-3">
           <div>
-            <label for="serverName" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.serverName || 'Server Name' %></label>
+            <label for="serverName" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5" data-theme-i18n="serverName"><%= req.translations.serverName || 'Server Name' %></label>
             <input type="text" id="serverName" name="name" value="<%= server.name %>"
               class="w-full rounded-xl text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
           </div>
@@ -29,57 +29,57 @@
             <input type="text" id="serverDescription" name="description" value="<%= server.description || '' %>"
               class="w-full rounded-xl text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
           </div>
-          <button type="submit" class="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-sm font-medium text-white transition"><%= req.translations.saveSettings || 'Save Settings' %></button>
+          <button type="submit" class="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-sm font-medium text-white transition" data-theme-i18n="saveSettings"><%= req.translations.saveSettings || 'Save Settings' %></button>
         </form>
       </div>
 
       <!-- Server info -->
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-        <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.serverInformation || 'Server Information' %></h2>
+        <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-3" data-theme-i18n="serverInformation"><%= req.translations.serverInformation || 'Server Information' %></h2>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-3">
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Node</dt>
-            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.node.name %></dd>
+            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.node.name}}" data-theme-bindings="<%= JSON.stringify({"server.node.name":(server.node.name)}) %>"><%= server.node.name %></dd>
           </div>
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Image</dt>
-            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.image.name || 'Unknown' %></dd>
+            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate" data-theme-text="{{server.image.name}}" data-theme-bindings="<%= JSON.stringify({"server.image.name":(server.image.name || 'Unknown')}) %>"><%= server.image.name || 'Unknown' %></dd>
           </div>
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Memory</dt>
-            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5"><%= server.Memory %> MB</dd>
+            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.ram.limit}} MB" data-theme-bindings="<%= JSON.stringify({"server.ram.limit":(server.Memory)}) %>"><%= server.Memory %> MB</dd>
           </div>
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">CPU</dt>
-            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5"><%= server.Cpu * 100 %>%</dd>
+            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5" data-theme-text="{{server.cpu.limit}}%" data-theme-bindings="<%= JSON.stringify({"server.cpu.limit":(server.Cpu * 100)}) %>"><%= server.Cpu * 100 %>%</dd>
           </div>
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Storage</dt>
-            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5"><%= server.Storage %> GB</dd>
+            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.disk.limit}} GB" data-theme-bindings="<%= JSON.stringify({"server.disk.limit":(server.Storage)}) %>"><%= server.Storage %> GB</dd>
           </div>
           <div>
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Status</dt>
             <dd class="mt-0.5">
               <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-                <%= server.Suspended ? 'bg-yellow-50 dark:bg-yellow-600/10 text-yellow-700 dark:text-yellow-400 ring-yellow-600/20' : 'bg-emerald-50 dark:bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' %>">
+                <%= server.Suspended ? 'bg-yellow-50 dark:bg-yellow-600/10 text-yellow-700 dark:text-yellow-400 ring-yellow-600/20' : 'bg-emerald-50 dark:bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' %>" data-theme-text="{{server.suspended.label}}" data-theme-bindings="<%= JSON.stringify({"server.suspended.label":(server.Suspended ? 'Suspended' : 'Active')}) %>">
                 <%= server.Suspended ? 'Suspended' : 'Active' %>
               </span>
             </dd>
           </div>
           <div class="col-span-2">
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Server ID</dt>
-            <dd class="text-xs text-neutral-500 dark:text-neutral-400 font-mono mt-0.5 truncate"><%= server.UUID %></dd>
+            <dd class="text-xs text-neutral-500 dark:text-neutral-400 font-mono mt-0.5 truncate" data-server-uuid="<%= server.UUID %>" data-theme-text="{{server.id}}" data-theme-bindings="<%= JSON.stringify({"server.id":(server.UUID)}) %>"><%= server.UUID %></dd>
           </div>
           <div class="col-span-2">
             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Created</dt>
-            <dd class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5"><%= new Date(server.createdAt).toLocaleString() %></dd>
+            <dd class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5" data-theme-text="{{server.createdAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"server.createdAtFormatted":(new Date(server.createdAt).toLocaleString())}) %>"><%= new Date(server.createdAt).toLocaleString() %></dd>
           </div>
         </dl>
       </div>
 
       <!-- Danger zone -->
       <div class="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/20 p-4">
-        <h2 class="text-sm font-medium text-red-700 dark:text-red-400 mb-3"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
+        <h2 class="text-sm font-medium text-red-700 dark:text-red-400 mb-3" data-theme-i18n="dangerZone"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
         <div class="space-y-3">
           <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
           <div class="flex items-center justify-between gap-3">

@@ -8,8 +8,8 @@
 
     <div class="flex items-start justify-between mb-5">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
-        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="adminNodesTitle"><%= req.translations.adminNodesTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5" data-theme-i18n="adminNodesText"><%= req.translations.adminNodesText %></p>
       </div>
       <button id="createButton" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
@@ -22,17 +22,17 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 gap-3 mb-5">
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
-        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalNodes || 'Total Nodes' %></p>
-        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodes.length %></p>
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1" data-theme-i18n="totalNodes"><%= req.translations.totalNodes || 'Total Nodes' %></p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{nodes.count}}" data-theme-bindings="<%= JSON.stringify({"nodes.count":(nodes.length)}) %>"><%= nodes.length %></p>
         <% if (nodes.length > 0) { %>
-          <p class="text-xs text-emerald-500 mt-1"><%= nodes.filter(n => n.status === 'Online').length %> online</p>
+          <p class="text-xs text-emerald-500 mt-1" data-theme-text="{{nodes.onlineCount}} online" data-theme-bindings="<%= JSON.stringify({"nodes.onlineCount":(nodes.filter(n => n.status === 'Online').length)}) %>"><%= nodes.filter(n => n.status === 'Online').length %> online</p>
         <% } else { %>
-          <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable %></p>
+          <p class="text-xs text-neutral-500 mt-1" data-theme-i18n="noNodesAvailable"><%= req.translations.noNodesAvailable %></p>
         <% } %>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Servers</p>
-        <p class="text-2xl font-semibold text-neutral-800 dark:text-white">
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white" data-theme-text="{{nodes.serverCount}}" data-theme-bindings="<%= JSON.stringify({"nodes.serverCount":(nodes.reduce((t, n) => t + (n.instances ? n.instances.length : 0), 0))}) %>">
           <%= nodes.reduce((t, n) => t + (n.instances ? n.instances.length : 0), 0) %>
         </p>
         <p class="text-xs text-neutral-500 mt-1">across all nodes</p>
@@ -44,7 +44,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
           <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
         </svg>
-        <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
+        <p class="text-sm text-emerald-700 dark:text-emerald-400" data-theme-i18n="actionCompleted"><%= req.translations.actionCompleted %></p>
       </div>
     <% } %>
 
@@ -81,15 +81,15 @@
               <% } %>
             </div>
             <div class="flex-1 min-w-0">
-              <a href="/admin/node/<%= node.id %>/stats" class="text-sm font-medium text-neutral-800 dark:text-white truncate block"><%= node.name %></a>
-              <p class="text-xs text-neutral-500 truncate font-mono"><%= node.address %>:<%= node.port %></p>
+              <a href="/admin/node/<%= node.id %>/stats" class="text-sm font-medium text-neutral-800 dark:text-white truncate block" data-theme-text="{{node.name}}" data-theme-bindings="<%= JSON.stringify({"node.name":(node.name)}) %>"><%= node.name %></a>
+              <p class="text-xs text-neutral-500 truncate font-mono" data-theme-text="{{node.address}}:{{node.port}}" data-theme-bindings="<%= JSON.stringify({"node.address":(node.address),"node.port":(node.port)}) %>"><%= node.address %>:<%= node.port %></p>
             </div>
-            <span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 <%= node.versionRelease ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 <%= node.versionRelease ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>" data-theme-text="{{node.version}}" data-theme-bindings="<%= JSON.stringify({"node.version":(node.versionRelease || 'unknown')}) %>">
               <%= node.versionRelease || 'unknown' %>
             </span>
           </div>
           <div class="flex items-center justify-between">
-            <p class="text-xs text-neutral-500"><%= node.instances ? node.instances.length : 0 %> instance<%= node.instances && node.instances.length !== 1 ? 's' : '' %></p>
+            <p class="text-xs text-neutral-500" data-theme-text="{{node.serverCount}} instance{{node.serversPlural}}" data-theme-bindings="<%= JSON.stringify({"node.serverCount":(node.instances ? node.instances.length : 0),"node.serversPlural":(node.instances && node.instances.length !== 1 ? 's' : '')}) %>"><%= node.instances ? node.instances.length : 0 %> instance<%= node.instances && node.instances.length !== 1 ? 's' : '' %></p>
             <div class="flex gap-2">
               <button onclick="configure('<%= node.id %>')" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Configure</button>
               <a href="/admin/node/<%= node.id %>">
@@ -99,7 +99,7 @@
             </div>
           </div>
           <% if (node.error && node.status === 'Offline') { %>
-            <p class="text-[11px] text-red-500 mt-2 font-mono truncate"><%= node.error %></p>
+            <p class="text-[11px] text-red-500 mt-2 font-mono truncate" data-theme-text="{{node.error}}" data-theme-bindings="<%= JSON.stringify({"node.error":(node.error)}) %>"><%= node.error %></p>
           <% } %>
         </div>
       <% }); %>

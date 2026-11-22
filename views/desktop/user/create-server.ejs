@@ -101,7 +101,7 @@
         <div class="flex items-center justify-between mb-7">
           <div>
             <h1 class="text-base font-semibold text-neutral-900 dark:text-white">Create a server</h1>
-            <p class="text-sm text-neutral-500 mt-0.5"><%= currentCount %> of <%= serverLimit %> servers used</p>
+            <p class="text-sm text-neutral-500 mt-0.5" data-theme-text="{{page.currentCount}} of {{page.serverLimit}} servers used" data-theme-bindings="<%= JSON.stringify({"page.currentCount":(currentCount),"page.serverLimit":(serverLimit)}) %>"><%= currentCount %> of <%= serverLimit %> servers used</p>
           </div>
           <a href="/" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 transition">Cancel</a>
         </div>
@@ -181,7 +181,7 @@
                   <input id="Memory" type="number" value="512" min="128" max="<%= resourceLimits.maxMemory %>" class="stepper-input">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Memory" data-step="128" data-max="<%= resourceLimits.maxMemory %>">+</button>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxMemory %> MB</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5" data-theme-text="Max {{limits.ram}} MB" data-theme-bindings="<%= JSON.stringify({"limits.ram":(resourceLimits.maxMemory)}) %>">Max <%= resourceLimits.maxMemory %> MB</p>
               </div>
               <div>
                 <label class="form-label">CPU <span class="text-neutral-400 font-normal">(%)</span></label>
@@ -190,7 +190,7 @@
                   <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>">+</button>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. Max <%= resourceLimits.maxCpu %>%</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5" data-theme-text="50% = half a core. Max {{limits.cpu}}%" data-theme-bindings="<%= JSON.stringify({"limits.cpu":(resourceLimits.maxCpu)}) %>">50% = half a core. Max <%= resourceLimits.maxCpu %>%</p>
               </div>
               <div>
                 <label class="form-label">Storage <span class="text-neutral-400 font-normal">(GB)</span></label>
@@ -199,14 +199,14 @@
                   <input id="Storage" type="number" value="5" min="1" max="<%= resourceLimits.maxStorage %>" class="stepper-input">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Storage" data-step="1" data-max="<%= resourceLimits.maxStorage %>">+</button>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxStorage %> GB</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5" data-theme-text="Max {{limits.disk}} GB" data-theme-bindings="<%= JSON.stringify({"limits.disk":(resourceLimits.maxStorage)}) %>">Max <%= resourceLimits.maxStorage %> GB</p>
               </div>
             </div>
           </div>
 
           <!-- Error -->
           <div id="errorMsg" class="hidden rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
-            <p class="text-sm text-red-600 dark:text-red-400" id="errorText"></p>
+            <p class="text-sm text-red-600 dark:text-red-400" id="errorText" data-theme-text="{{page.errorText}}" data-theme-bindings="<%= JSON.stringify({"page.errorText":("")}) %>" data-theme-live="page.errorText"></p>
           </div>
 
           <!-- Submit -->
@@ -227,8 +227,8 @@
 <!-- Custom confirm dialog -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
-    <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>
+    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle" data-theme-text="{{page.confirmTitle}}" data-theme-bindings="<%= JSON.stringify({"page.confirmTitle":("")}) %>" data-theme-live="page.confirmTitle"></p>
+    <p class="text-xs text-neutral-500 mb-4" id="confirmBody" data-theme-text="{{page.confirmBody}}" data-theme-bindings="<%= JSON.stringify({"page.confirmBody":("")}) %>" data-theme-live="page.confirmBody"></p>
     <div class="flex gap-2 justify-end">
       <button id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">Cancel</button>
       <button id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>

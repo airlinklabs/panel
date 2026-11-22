@@ -8,7 +8,7 @@
 
     <div class="flex items-start justify-between mb-5">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.navApiKeys || 'API Keys' %></h1>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white" data-theme-i18n="navApiKeys"><%= req.translations.navApiKeys || 'API Keys' %></h1>
         <p class="text-xs text-neutral-500 mt-0.5">Manage API keys and permissions</p>
       </div>
       <div class="flex gap-2 shrink-0">
@@ -39,19 +39,19 @@
             <div class="flex items-start gap-3 mb-3">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-0.5">
-                  <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= apiKey.name %></p>
-                  <span class="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-md <%= apiKey.active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white truncate" data-theme-text="{{apiKey.name}}" data-theme-bindings="<%= JSON.stringify({"apiKey.name":(apiKey.name)}) %>"><%= apiKey.name %></p>
+                  <span class="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-md <%= apiKey.active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>" data-theme-text="{{apiKey.status.label}}" data-theme-bindings="<%= JSON.stringify({"apiKey.status.label":(apiKey.active ? 'Active' : 'Inactive')}) %>">
                     <%= apiKey.active ? 'Active' : 'Inactive' %>
                   </span>
                 </div>
                 <% if (apiKey.description) { %>
-                  <p class="text-xs text-neutral-500 truncate"><%= apiKey.description %></p>
+                  <p class="text-xs text-neutral-500 truncate" data-theme-text="{{apiKey.description}}" data-theme-bindings="<%= JSON.stringify({"apiKey.description":(apiKey.description)}) %>"><%= apiKey.description %></p>
                 <% } %>
               </div>
             </div>
 
             <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
-              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>...</code>
+              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate" data-theme-text="{{apiKey.prefix}}..." data-theme-bindings="<%= JSON.stringify({"apiKey.prefix":(apiKey.key.substring(0, 8))}) %>"><%= apiKey.key.substring(0, 8) %>...</code>
               <button onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
@@ -60,7 +60,7 @@
             </div>
 
             <div class="flex items-center justify-between">
-              <p class="text-xs text-neutral-500">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
+              <p class="text-xs text-neutral-500" data-theme-text="By {{apiKey.owner}} · {{apiKey.createdAtFormatted}}" data-theme-bindings="<%= JSON.stringify({"apiKey.owner":(apiKey.user ? apiKey.user.username : 'System'),"apiKey.createdAtFormatted":(new Date(apiKey.createdAt).toLocaleDateString())}) %>">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
               <div class="flex gap-1.5">
                 <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
@@ -142,7 +142,7 @@
                 class="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 dark:bg-neutral-800 active:bg-neutral-100 dark:active:bg-neutral-700/60 transition-colors"
                 onclick="toggleCat(this)">
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
+                  <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize" data-theme-text="{{category.name}}" data-theme-bindings="<%= JSON.stringify({"category.name":(category)}) %>"><%= category %></span>
                   <span class="create-cat-count text-[10px] text-neutral-400 dark:text-neutral-500" data-category="<%= category %>"></span>
                 </div>
                 <svg class="category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -152,11 +152,11 @@
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
                   <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                    <label class="create-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
+                    <label class="create-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150" data-theme-text="{{permission.label}}" data-theme-bindings="<%= JSON.stringify({"permission.label":(permission.name.split(' - ')[1] || permission.name)}) %>">
                       <input type="checkbox" name="permissions" value="<%= permission.value %>"
                         class="permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
                         onchange="refreshLabels(this, 'create', '<%= category %>')">
-                      <span class="perm-text text-xs text-neutral-600 dark:text-neutral-300"><%= permission.name.split(' - ')[1] || permission.name %></span>
+                      <span class="perm-text text-xs text-neutral-600 dark:text-neutral-300" data-theme-text="{{permission.label}}" data-theme-bindings="<%= JSON.stringify({"permission.label":(permission.name.split(' - ')[1] || permission.name)}) %>"><%= permission.name.split(' - ')[1] || permission.name %></span>
                     </label>
                   <% }); %>
                 </div>
@@ -167,8 +167,8 @@
       </div>
 
       <div class="flex gap-2 pb-2">
-        <button type="button" onclick="hideCreateModal()" class="flex-1 py-2.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95 transition"><%= req.translations.cancel || 'Cancel' %></button>
-        <button type="submit" class="flex-1 py-2.5 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 active:scale-95 transition"><%= req.translations.create || 'Create' %></button>
+        <button type="button" onclick="hideCreateModal()" class="flex-1 py-2.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95 transition" data-theme-i18n="cancel"><%= req.translations.cancel || 'Cancel' %></button>
+        <button type="submit" class="flex-1 py-2.5 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 active:scale-95 transition" data-theme-i18n="create"><%= req.translations.create || 'Create' %></button>
       </div>
     </form>
   </div>
@@ -219,7 +219,7 @@
                 class="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 dark:bg-neutral-800 active:bg-neutral-100 dark:active:bg-neutral-700/60 transition-colors"
                 onclick="toggleCat(this)">
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
+                  <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize" data-theme-text="{{category.name}}" data-theme-bindings="<%= JSON.stringify({"category.name":(category)}) %>"><%= category %></span>
                   <span class="edit-cat-count text-[10px] text-neutral-400 dark:text-neutral-500" data-category="<%= category %>"></span>
                 </div>
                 <svg class="category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -229,7 +229,7 @@
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
                   <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                    <label class="edit-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
+                    <label class="edit-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150" data-theme-text="{{permission.label}}" data-theme-bindings="<%= JSON.stringify({"permission.label":(permission.name.split(' - ')[1] || permission.name)}) %>">
                       <input type="checkbox" name="permissions" value="<%= permission.value %>"
                         id="edit-permission-<%= permission.value %>"
                         class="edit-permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
@@ -237,7 +237,7 @@
                       <svg class="check-icon w-3.5 h-3.5 text-white opacity-0 shrink-0 transition-opacity duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                       </svg>
-                      <span class="perm-text text-xs text-neutral-600 dark:text-neutral-300"><%= permission.name.split(' - ')[1] || permission.name %></span>
+                      <span class="perm-text text-xs text-neutral-600 dark:text-neutral-300" data-theme-text="{{permission.label}}" data-theme-bindings="<%= JSON.stringify({"permission.label":(permission.name.split(' - ')[1] || permission.name)}) %>"><%= permission.name.split(' - ')[1] || permission.name %></span>
                     </label>
                   <% }); %>
                 </div>
@@ -248,7 +248,7 @@
       </div>
 
       <div class="flex gap-2 pb-2">
-        <button type="button" onclick="hideEditModal()" class="flex-1 py-2.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95 transition"><%= req.translations.cancel || 'Cancel' %></button>
+        <button type="button" onclick="hideEditModal()" class="flex-1 py-2.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95 transition" data-theme-i18n="cancel"><%= req.translations.cancel || 'Cancel' %></button>
         <button type="submit" class="flex-1 py-2.5 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 active:scale-95 transition">Update</button>
       </div>
     </form>
